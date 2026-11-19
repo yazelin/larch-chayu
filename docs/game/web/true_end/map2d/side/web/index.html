@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><title>朝霞丘小樣</title>
+<script>
+// 入口：?mode=flat（主做法：一整張長畫、所有層同速）、?mode=rooms（備案：一個畫面一張畫、轉身切換）、?mode=parallax（第一版六層視差，留著比較）
+const q = new URLSearchParams(location.search); const mode = q.get('mode') || 'flat'; q.delete('mode');
+location.replace({ flat: 'flat.html', rooms: 'scenes.html', parallax: 'parallax.html' }[mode] + (q.toString() ? '?' + q : ''));
+</script></head><body></body></html>

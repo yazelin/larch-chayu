@@ -1,0 +1,63 @@
+/* 工作室佈置：常駐位、寵物與植物、落地鏡換裝（studio_decor.mjs） */
+.decor-slot{position:absolute;z-index:3;display:block;padding:0;border:0;background:transparent;cursor:pointer;transform:translateX(-50%);touch-action:manipulation}
+.decor-slot:focus-visible{outline:3px solid #fff2a9;outline-offset:4px;border-radius:12px}
+.decor-slot img{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none;user-select:none;-webkit-user-drag:none}
+.decor-base{bottom:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(45,31,31,.18))}
+.decor-pet,.decor-plant{width:auto;filter:drop-shadow(0 1px 2px rgba(45,31,31,.22));transform-origin:50% 100%}
+.decor-pet.act-cat{animation:decor-breathe 3.4s ease-in-out infinite}
+.decor-pet.act-cat.strolling{animation:decor-stroll 5.2s ease-in-out}
+.decor-pet.act-hop{animation:decor-hop 4.6s ease-in-out infinite}
+.decor-pet.act-crawl{animation:decor-crawl 9s ease-in-out infinite}
+.decor-pet.act-swim{animation:decor-swim 7s ease-in-out infinite}
+.decor-pet.act-bird{animation:decor-bird 3.8s ease-in-out infinite}
+.decor-pet.act-flutter{animation:decor-flutter 2.6s ease-in-out infinite}
+.decor-pet.act-glow{animation:none}
+.is-night .decor-pet.act-glow{animation:decor-glow 2.2s ease-in-out infinite}
+.decor-pet.night-only{opacity:.25}
+.is-night .decor-pet.night-only{opacity:1}
+.decor-pet.petted{animation:decor-petted .5s ease-out}
+.decor-plant{animation:decor-sway 5s ease-in-out infinite}
+.decor-heart{position:absolute;left:50%;bottom:95%;color:#e8607c;font-size:22px;pointer-events:none;animation:decor-heart 1.1s ease-out forwards}
+@keyframes decor-breathe{0%,100%{transform:translateX(-50%) scale(1,1)}50%{transform:translateX(-50%) scale(1.02,.97)}}
+@keyframes decor-stroll{0%,100%{transform:translateX(-50%)}20%{transform:translateX(-170%)}45%{transform:translateX(-170%) scaleX(-1)}70%{transform:translateX(60%) scaleX(-1)}85%{transform:translateX(60%)}}
+@keyframes decor-hop{0%,62%,100%{transform:translateX(-50%)}68%{transform:translate(-62%,-16%)}74%{transform:translateX(-74%)}82%{transform:translate(-62%,-14%)}90%{transform:translateX(-50%)}}
+@keyframes decor-crawl{0%,100%{transform:translateX(-120%)}50%{transform:translateX(20%)}}
+@keyframes decor-swim{0%,100%{transform:translate(-110%,0)}50%{transform:translate(10%,-18%)}}
+@keyframes decor-bird{0%,70%,100%{transform:translateX(-50%) rotate(0)}76%{transform:translate(-50%,-10%) rotate(-6deg)}84%{transform:translateX(-50%) rotate(5deg)}}
+@keyframes decor-flutter{0%,100%{transform:translate(-50%,0) scaleX(1)}50%{transform:translate(-50%,-10%) scaleX(.7)}}
+@keyframes decor-glow{0%,100%{filter:drop-shadow(0 0 2px rgba(255,240,150,.4))}50%{filter:drop-shadow(0 0 9px rgba(255,240,150,.95))}}
+@keyframes decor-petted{0%{transform:translateX(-50%) scale(1)}40%{transform:translateX(-50%) scale(1.08,.92)}100%{transform:translateX(-50%) scale(1)}}
+@keyframes decor-sway{0%,100%{transform:translateX(-50%) rotate(-1deg)}50%{transform:translateX(-50%) rotate(1deg)}}
+@keyframes decor-heart{0%{opacity:0;transform:translate(-50%,0) scale(.6)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-34px) scale(1.2)}}
+/* 穿著走的她：畫布是整張 1024×1536，身體那一塊對回原本立繪（674×1439，位移 171、26）的框 */
+canvas.character-sprite.worn{position:absolute;left:-25.371%;top:-1.807%;width:151.929%;height:106.741%;max-width:none;object-fit:fill}
+#decor-toast{position:fixed;left:50%;top:14px;z-index:60;transform:translate(-50%,-8px);padding:8px 16px;border-radius:999px;background:rgba(255,250,242,.96);color:#3a2a2a;font-size:15px;font-weight:700;box-shadow:0 3px 14px rgba(26,18,18,.18);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+#decor-toast.on{opacity:1;transform:translate(-50%,0)}
+#decor-say{position:fixed;left:50%;bottom:18%;z-index:40;transform:translateX(-50%);max-width:min(560px,86vw);padding:12px 18px;border-radius:16px;background:rgba(255,250,242,.97);color:#3a2a2a;font-size:17px;line-height:1.6;box-shadow:0 4px 18px rgba(26,18,18,.2);opacity:0;pointer-events:none;transition:opacity .2s}
+#decor-say.on{opacity:1}
+#decor-say b{margin-right:.7em;color:#8a5a3c}
+#panel.decor-panel{width:min(1040px,94vw);max-height:92dvh;display:flex;flex-direction:column}
+#panel.decor-panel #panel-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:18px}
+.decor-h{margin:14px 0 8px;font-size:16px;color:#5a4038}
+.decor-note,.decor-empty{margin:12px 0 0;color:#7a655c;font-size:14px}
+.decor-empty{font-size:16px}
+.decor-now{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:#f6ecdd}
+.decor-action{min-height:40px;padding:6px 14px;border:1px solid #cbb39c;border-radius:999px;background:#fffaf2;color:#3a2a2a;font-size:14px;font-weight:700;cursor:pointer}
+.decor-action:disabled{opacity:.55;cursor:default}
+.decor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.decor-card{display:flex;flex-direction:column;align-items:stretch;gap:2px;min-height:44px;padding:8px;border:2px solid #dccbb8;border-radius:12px;background:#fffcf6;color:#3a2a2a;text-align:left;cursor:pointer}
+.decor-card.on{border-color:#c47a28;box-shadow:0 0 0 2px rgba(196,122,40,.25)}
+.decor-card:focus-visible{outline:3px solid #f0c060;outline-offset:2px}
+.decor-card-pic{display:flex;align-items:flex-end;justify-content:center;height:84px}
+.decor-card-pic img{max-width:100%;max-height:100%;object-fit:contain}
+.decor-card-pic.tall{height:150px;overflow:hidden;align-items:flex-start}
+.decor-card-pic.tall img{max-height:none;height:112%}
+.decor-card.locked{cursor:default;background:#f4eee4}
+.decor-card.locked img{filter:brightness(0) opacity(.28)}
+.decor-card-name{font-size:14px;font-weight:700}
+.decor-card-sub{font-size:12px;color:#7a655c}
+.mirror{display:grid;grid-template-columns:minmax(200px,300px) 1fr;gap:18px;align-items:start}
+.mirror-glass{position:sticky;top:0;padding:14px 10px 6px;border:10px solid #a5764f;border-radius:160px 160px 14px 14px;background:linear-gradient(160deg,#dfe8ee,#c9d6df)}
+.mirror-view{display:block;width:100%;height:auto}
+@media(max-width:700px){.mirror{grid-template-columns:1fr}.mirror-glass{position:static;max-width:210px;margin:0 auto}.decor-grid{grid-template-columns:repeat(auto-fill,minmax(98px,1fr))}.decor-card-pic.tall{height:120px}}
+@media(prefers-reduced-motion:reduce){.decor-pet,.decor-plant{animation:none!important}}

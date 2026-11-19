@@ -1,0 +1,102 @@
+/* 片尾網頁。開場紙卡、略過鈕照 birthday_mv.css；中間是一長條往上捲的名單與花絮圖。 */
+/* 芫荽體只帶這幾頁用到的字（新版/build/fonts.py 抽的，授權檔在字型旁邊）。預覽與嵌進遊戲都用這一份，不連 Google Fonts。 */
+@font-face { font-family: "Iansui"; src: url("media/fonts/iansui-mv.woff2") format("woff2"); font-display: block; }
+:root { color-scheme: dark; --bg: #1b1412; --ink: #fbf3e6; --soft: #cdbfae; --paper: #f3ecdf; --paper-ink: #3b2f2c; --dim: #6e5a52; --gold: #d2a24c;
+  --font: "Iansui", "LXGW WenKai TC", "Kaiti TC", "BiauKai", serif; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); overflow: hidden; font-family: var(--font);
+  -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+button:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+/* 捲動區：.roll 由 JS 設 translateY，位置＝配樂播到哪 */
+.stage { position: fixed; inset: 0; overflow: hidden; touch-action: none; cursor: grab;
+  background: radial-gradient(120% 80% at 50% 0%, #2a1f1b 0%, var(--bg) 60%); }
+.roll { position: absolute; left: 0; right: 0; top: 0; padding: 100vh 16px 0; will-change: transform; text-align: center; }
+.roll > * { width: min(880px, 100%); margin-left: auto; margin-right: auto; }
+.stage.drag { cursor: grabbing; }
+.veil { position: fixed; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, var(--bg) 0%, rgba(27,20,18,0) 14%, rgba(27,20,18,0) 86%, var(--bg) 100%); }
+
+.seg { display: inline-block; white-space: nowrap; }
+.head { padding-bottom: 22vh; }
+.head h1 { margin: 0; font-weight: 400; font-size: clamp(1.7rem, 4.4vw, 3rem); line-height: 1.5; letter-spacing: .16em; text-wrap: balance; }
+.head p { margin: 14px 0 0; font-size: clamp(1rem, 2vw, 1.3rem); letter-spacing: .3em; color: var(--soft); }
+
+.sec { padding: 9vh 0; }
+.sec h2 { margin: 0 0 14px; font-weight: 400; font-size: clamp(.95rem, 1.7vw, 1.1rem); letter-spacing: .5em; text-indent: .5em; color: var(--gold); }
+.sec .name { margin: 6px 0; font-size: clamp(1.3rem, 3vw, 2rem); line-height: 1.5; letter-spacing: .12em; text-wrap: balance; }
+.sec .note { margin: 12px auto 0; max-width: 30em; font-size: clamp(.95rem, 1.8vw, 1.1rem); line-height: 1.9; letter-spacing: .08em; color: var(--soft); text-wrap: pretty; }
+.sec .todo { display: inline-block; padding: 6px 18px; border: 2px dashed #e07a5f; border-radius: 8px; color: #f0a48f; font-size: clamp(1rem, 2.2vw, 1.3rem); letter-spacing: .1em; }
+
+.sec[hidden] { display: none; }
+/* 登場人物：圓形 Q 版頭像＋名字＋一句身分；電腦一排三個，手機一排一個 */
+.cast { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px 18px; margin: 22px auto 0; padding: 0; list-style: none; }
+.cast li { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 0; }
+.cast img { width: clamp(84px, 11vw, 124px); aspect-ratio: 1; border-radius: 50%; object-fit: contain; background: var(--paper); border: 3px solid var(--paper); box-shadow: 0 10px 20px -12px rgba(0,0,0,.8); }
+.cast li.plain { justify-content: center; }
+.cast b { display: block; font-weight: 400; font-size: clamp(1.15rem, 2.4vw, 1.6rem); letter-spacing: .14em; }
+.cast span { display: block; margin-top: 4px; font-size: clamp(.85rem, 1.5vw, 1rem); line-height: 1.6; letter-spacing: .06em; color: var(--soft); text-wrap: balance; }
+/* 逐項：左邊是項目、右邊是內容（歌曲、幕後、這一輪） */
+.row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.75fr); gap: 0 22px; align-items: baseline; margin: 10px auto; max-width: 48em; font-size: clamp(1rem, 2vw, 1.25rem); line-height: 1.6; letter-spacing: .08em; }
+.row .k { text-align: right; color: var(--soft); text-wrap: balance; }
+.row .v { text-align: left; text-wrap: balance; }
+
+/* 製作數字：電腦一排四個，手機一排兩個 */
+.nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 34px 12px; margin: 26px auto 0; padding: 0; list-style: none; }
+.nums li { min-width: 0; }
+.nums b { display: block; font-weight: 400; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.1; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+.nums b i { font-style: normal; font-size: .4em; margin-left: .25em; color: var(--soft); }
+.nums span { display: block; margin-top: 8px; font-size: clamp(.85rem, 1.6vw, 1rem); letter-spacing: .16em; color: var(--soft); text-wrap: balance; }
+
+/* 花絮：一張一張貼在紙上的照片，左右交錯、微微歪；圖還沒有時畫佔位框 */
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; padding: 5vh 0; }
+.shot { position: relative; margin: 0; padding: 10px 10px 12px; background: var(--paper); color: var(--paper-ink); border-radius: 3px;
+  box-shadow: 0 16px 30px -16px rgba(0,0,0,.8); transform: rotate(-1.6deg); }
+.pair .shot:nth-child(2) { transform: rotate(1.4deg); margin-top: 9vh; }
+.shot .pic { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #e2d6c3; }
+.shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.shot.empty .pic { display: grid; place-items: center; border: 2px dashed #b9a58c; background: repeating-linear-gradient(135deg, #e9dfcf 0 14px, #e2d6c3 14px 28px); }
+.shot.empty .pic b { font-weight: 400; font-size: clamp(2.4rem, 7vw, 4rem); letter-spacing: .06em; color: #a08c74; }
+.shot.empty .pic small { position: absolute; left: 0; right: 0; bottom: 8px; font-size: 12px; letter-spacing: .2em; color: #8a7662; }
+.shot figcaption { margin-top: 9px; font-size: clamp(.85rem, 1.5vw, 1rem); line-height: 1.5; letter-spacing: .08em; text-wrap: balance; }
+
+.tail { padding: 16vh 0 0; }
+.tail p { margin: 0; font-size: clamp(1.3rem, 3vw, 1.9rem); letter-spacing: .2em; text-wrap: balance; }
+
+.black { position: fixed; inset: 0; background: var(--bg); opacity: 0; pointer-events: none; transition: opacity 1.4s ease; z-index: 3; }
+.black.on { opacity: 1; }
+
+/* 開場紙卡（Larch 的框不能自動播音，按「播放」同時解鎖聲音） */
+.intro { position: fixed; inset: 0; display: grid; place-items: center; z-index: 5; transition: opacity .7s; background: rgba(27,20,18,.55); }
+.intro.gone { opacity: 0; pointer-events: none; }
+.card { position: relative; isolation: isolate; width: min(440px, calc(100vw - 32px)); padding: 26px 28px 22px; text-align: center; color: var(--paper-ink); }
+.card::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 8px; filter: url(#ragged); background: var(--paper);
+  box-shadow: inset 0 0 18px rgba(150,118,92,.45), inset 0 0 3px rgba(120,92,70,.55), 0 14px 26px -14px rgba(60,40,30,.55); }
+.card small { display: block; font-size: 13px; letter-spacing: .45em; text-indent: .45em; color: #b8862f; }
+.card h1 { margin: 10px 0 0; font-weight: 400; font-size: clamp(20px, 2.6vw, 26px); line-height: 1.6; letter-spacing: .14em; text-wrap: balance; }
+.card .rule { display: block; width: 60%; height: 1px; margin: 14px auto 14px; background: linear-gradient(90deg, transparent, #b8862f, transparent); }
+.card .quote { margin: 0 0 6px; font-size: 16px; line-height: 1.8; letter-spacing: .08em; color: var(--dim); }
+.go { position: relative; isolation: isolate; margin-top: 12px; padding: 10px 34px 10px 40px; font-size: 18px; letter-spacing: .4em; color: var(--paper-ink); transition: transform .15s; }
+.go::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 40%; filter: url(#ragged); background: rgba(233,207,154,.92); }
+.go:hover { filter: brightness(1.04); } .go:active { transform: scale(.97); }
+.card .msg { margin: 8px 0 0; min-height: 1.2em; font-size: 13px; color: #9b3b2f; letter-spacing: .08em; }
+
+.skip, .again { position: fixed; z-index: 6; padding: 9px 18px; border-radius: 14px; border: 1px solid rgba(243,236,223,.4); background: rgba(27,20,18,.6);
+  color: rgba(251,243,230,.9); font-size: 14px; letter-spacing: .2em; transition: opacity .3s; }
+.skip { right: 14px; bottom: 14px; opacity: .7; }
+.skip:hover { opacity: 1; }
+.again { left: 50%; bottom: 45vh; transform: translateX(-50%); font-size: 15px; padding: 10px 22px; }
+.skip[hidden], .again[hidden] { display: none; }
+
+@media (max-width: 640px) {
+  .cast { grid-template-columns: 1fr 1fr; }
+  .row { grid-template-columns: 1fr; gap: 0; margin: 14px auto; }
+  .row .k, .row .v { text-align: center; }
+  .pair { grid-template-columns: 1fr; gap: 6vh; }
+  .pair .shot:nth-child(2) { margin-top: 0; }
+  .nums { grid-template-columns: repeat(2, 1fr); }
+}
+.reduce .black, .reduce .intro { transition: none; }
+@media (prefers-reduced-motion: reduce) { .black, .intro { transition: none; } }

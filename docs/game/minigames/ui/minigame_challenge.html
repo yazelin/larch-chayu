@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- 小遊戲：挑戰頁敲鎖報名（第一章 01-2b／01-2c）。
+     手機直立：整個畫面就是她的手機；橫向或桌機：中央一台淡紫色手機，挑戰頁在手機裡。
+     點中央的鎖三下：前兩下鎖震一下、底下三顆點亮一顆；第三下鎖彈開、鐵鍊散成金色光點、一朵雲飄走，送 larch:complete。
+     圖片網址用 ASSET 佔位字，tools/larch_build.py 換成孤兒 tag 的 jsDelivr 網址。 -->
+
+<style>
+:root { --ink:#f4ecf2; --dim:#c9bdd2; --gold:#f2cf8a; --rose:#e8a3b4; --violet:#2a2147; --deep:#17132a;
+  --hand:"Iansui","LXGW WenKai TC",serif; --sans:"Noto Sans TC","PingFang TC",system-ui,sans-serif; }
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; }
+/* 作者 11-16（2558×1325 截圖）：下緣露出另一個底色。手機框模式整頁不捲動、html 鋪同色底；body 用 overflow: clip 把背光光暈的溢出裁掉，不算進文件高度。手機內容只在螢幕裡捲。直式手機全螢幕不受影響。 */
+@media (min-aspect-ratio: 4/5) { html { overflow: hidden; background: #120f19; } body { height: 100%; margin: 0; overflow: clip; } }
+body { background: radial-gradient(60vmax 50vmax at 30% 0%, rgba(255,190,120,.22), transparent 60%), #120f19; color: var(--ink); font: 15px/1.75 var(--sans);
+  display: grid; place-items: center; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+/* 手機外殼（只在橫向／寬螢幕出現） */
+.phone { --H: min(94vh, 900px); position: relative; height: var(--H); aspect-ratio: 1 / 2; border-radius: calc(var(--H) * .0802); padding: calc(var(--H) * .0179);
+  background: linear-gradient(90deg,#9a85a3 0,#d9c4e3 .8%,#f0ddf1 2.2%,#e7d4f0 6%,#e3cfee 50%,#e7d4f0 94%,#f0ddf1 97.8%,#d9c4e3 99.2%,#9a85a3 100%); box-shadow: 0 30px 80px -20px rgba(0,0,0,.7), inset 0 0 0 1.5px rgba(255,255,255,.5); }
+.screen { position: relative; width: 100%; height: 100%; border-radius: calc(var(--H) * .0623); overflow: hidden; background: var(--deep); }
+.island { position: absolute; top: 12px; left: 50%; translate: -50% 0; width: 32%; height: 26px; border-radius: 20px; background: #0b0810; z-index: 5; }
+/* 2026-11-19 作者：手機照定稿圖 canon/refs/prop_phone.jpg 統一（淡紫鋁框、細深色黑邊、側鍵） */
+.screen { box-shadow: 0 0 0 calc(var(--H) * .011) #2a2234; }  /* 機身高寬比 2.00（作者 2026-11-19 定，同草圖遊戲內手機），四邊黑邊等寬 */
+.phone::after { content: ""; position: absolute; left: -3px; right: -3px; top: 17%; height: 30%; pointer-events: none;
+  background: linear-gradient(#b9a3c6 0 9%, #0000 9% 26%, #b9a3c6 26% 49%, #0000 49% 58%, #b9a3c6 58% 81%, #0000 81%) left / 3px 100% no-repeat,
+    linear-gradient(#0000 0 32%, #b9a3c6 32% 66%, #0000 66%) right / 3px 100% no-repeat; }
+@media (max-aspect-ratio: 4/5) { .phone::after { display: none; } }
+
+/* 作者 11-16：「幫手機做一點小背光或小螢幕光」。外圍一圈取螢幕主色的柔光（大半徑模糊，跟著手機框 zoom 一起放大），
+   螢幕表面一層很淡的斜向玻璃反光與內緣細光；都不擋點擊。手機直式全螢幕時是玩家自己的手機，兩者都不顯示。 */
+.phone { --glow0: rgba(218,186,246,.70); --glow1: rgba(200,174,242,.52); --glow2: rgba(168,184,247,.26); --rim: rgba(220,190,246,.38); }
+.phone::before { content: ""; position: absolute; inset: -12% -55%; z-index: -1; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, var(--glow0) 0%, var(--glow0) 42%, var(--glow1) 58%, var(--glow2) 78%, transparent 100%); filter: blur(40px); opacity: 1;
+  animation: glow 11s ease-in-out infinite alternate; }
+/* 11-17 作者「背光可加強」：外圈擴到手機寬的約 55%，貼著機身再一圈柔邊亮光（box-shadow 不佔版面） */
+@media (min-aspect-ratio: 4/5) { .phone { box-shadow: 0 30px 80px -20px rgba(0,0,0,.7), 0 0 56px 6px var(--rim), inset 0 0 0 1.5px rgba(255,255,255,.5); } }
+@keyframes glow { to { opacity: 1; transform: scale(1.03); } }
+.screen::after { content: ""; position: absolute; inset: 0; z-index: 9; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(128deg, rgba(255,255,255,.075) 0%, rgba(255,255,255,.025) 22%, transparent 40%, transparent 78%, rgba(255,255,255,.03) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.07), inset 0 1px 1px rgba(255,255,255,.1); }
+@media (max-aspect-ratio: 4/5) { .phone::before, .screen::after { display: none; } }
+@media (prefers-reduced-motion: reduce) { .phone::before { animation: none; } }
+.scroll { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.scroll::-webkit-scrollbar { display: none; }
+.scroll { cursor: grab; } .scroll.grabbing, .scroll.grabbing * { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+@media (max-aspect-ratio: 4/5) { /* 手機直立：玩家手上的手機就是她的手機 */
+  body { display: block; }
+  .phone { height: 100%; width: 100%; aspect-ratio: auto; border-radius: 0; padding: 0; background: none; box-shadow: none; }
+  .screen { border-radius: 0; box-shadow: none; } .island { display: none; }
+}
+/* 頁面本身 */
+/* 頂列疊在大圖上：.bar 是高度 0 的 sticky 容器，.bar-in 從它溢出、畫在大圖上面，所以頂列多高都不會把大圖往下推（作者 11-16：上緣露出背景） */
+.bar { position: sticky; top: 0; z-index: 4; height: 0; }
+.bar-in { display: flex; justify-content: space-between; align-items: center; padding: 46px 18px 10px;
+  background: linear-gradient(rgba(23,19,42,.85), rgba(23,19,42,0)); font: 500 12.5px/1 var(--sans); letter-spacing: .14em; color: var(--dim); }
+@media (max-aspect-ratio: 4/5) { .bar-in { padding-top: max(14px, env(safe-area-inset-top)); } }
+.bar b { color: var(--ink); font-weight: 700; letter-spacing: .2em; }
+.hero { position: relative; aspect-ratio: 2 / 3; overflow: hidden; }
+.hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero .open { opacity: 0; transition: opacity 1.1s ease; }
+.done .hero .open { opacity: 1; }
+.hero::after { content: ""; position: absolute; inset: auto 0 0; height: 38%; background: linear-gradient(transparent, var(--deep)); pointer-events: none; }
+.title { position: absolute; top: 15%; inset-inline: 0; text-align: center; z-index: 2; pointer-events: none; }
+.title small { display: block; font: 500 13px/1 var(--sans); letter-spacing: .4em; color: var(--dim); margin-bottom: 10px; }
+.title h1 { font: 700 clamp(30px, 9vw, 40px)/1.2 var(--hand); letter-spacing: .3em; text-shadow: 0 2px 14px rgba(20,10,40,.6); }
+.slogan { position: absolute; bottom: 7%; inset-inline: 22px; z-index: 2; text-align: center; font: 600 17px/1.7 var(--hand); letter-spacing: .08em; text-shadow: 0 2px 10px rgba(20,10,40,.8); }
+/* 鎖：中央那顆可以點 */
+.lock { position: absolute; left: 50%; top: 46%; translate: -50% -50%; width: 30%; aspect-ratio: 1; border-radius: 50%; border: 0; background: none; cursor: pointer; z-index: 3; }
+.lock:focus-visible { outline: 2px dashed var(--gold); outline-offset: 4px; }
+.ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--gold); opacity: 0; pointer-events: none; }
+.ring.go { animation: ring .7s ease-out; }
+@keyframes ring { from { opacity: .9; scale: .6; } to { opacity: 0; scale: 1.6; } }
+.hero.knock .locked { animation: knock .32s ease; }
+@keyframes knock { 25% { translate: -4px 0; rotate: -.6deg; } 60% { translate: 3px 0; rotate: .4deg; } }
+.hint { position: absolute; top: calc(46% + 17%); inset-inline: 0; z-index: 3; display: grid; justify-items: center; gap: 8px; pointer-events: none; transition: opacity .5s; }
+.hint span { font: 500 13px/1 var(--sans); letter-spacing: .18em; color: var(--ink); background: rgba(23,19,42,.55); padding: 7px 14px; border-radius: 99px; }
+.dots { display: flex; gap: 8px; } .dots i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--gold); }
+.dots i.on { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+.done .hint { opacity: 0; }
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
+.flash { position: absolute; inset: 0; background: #fff6e6; opacity: 0; z-index: 6; pointer-events: none; }
+.done .flash { animation: flash .6s ease-out; }
+@keyframes flash { 0% { opacity: 0; } 15% { opacity: .85; } 100% { opacity: 0; } }
+.toast { position: absolute; left: 50%; top: 66%; translate: -50% 20px; z-index: 7; padding: 10px 20px; border-radius: 99px; background: rgba(242,207,138,.95); color: #3a2a18;
+  font: 700 14px/1 var(--sans); letter-spacing: .16em; opacity: 0; transition: .5s; white-space: nowrap; }
+.done .toast { opacity: 1; translate: -50% 0; transition-delay: 1s; }
+section { padding: 26px 22px; }
+h2 { font: 700 21px/1.5 var(--hand); letter-spacing: .12em; margin-bottom: 8px; }
+.eyebrow { font: 500 11.5px/1 var(--sans); letter-spacing: .3em; color: var(--rose); margin-bottom: 10px; }
+p { color: var(--dim); }
+.locks { display: grid; gap: 12px; margin-top: 14px; }
+.locks div { padding: 14px 16px; border-radius: 14px; background: rgba(255,255,255,.06); border: 1px solid rgba(242,207,138,.18); }
+.locks b { display: block; font: 700 16px/1.5 var(--hand); color: var(--ink); letter-spacing: .06em; }
+.locks em { font-style: normal; color: var(--gold); font-size: 12.5px; letter-spacing: .1em; }
+.dates { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin-top: 10px; color: var(--dim); }
+.dates dt { color: var(--ink); }
+footer { padding: 18px 22px 60px; font-size: 12px; color: #8d8299; letter-spacing: .1em; }
+.snd { font: 500 11.5px/1 var(--sans, system-ui); letter-spacing: .12em; padding: 6px 10px; border-radius: 99px; border: 1px solid rgba(242,207,138,.35); background: rgba(23,19,42,.45); color: inherit; cursor: pointer; white-space: nowrap; }
+.snd:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.bar .right { display: flex; align-items: center; gap: 10px; }
+@media (prefers-reduced-motion: reduce) { .ring.go, .hero.knock .locked, .done .flash { animation: none; } }
+</style></head>
+<body>
+<div class="phone"><div class="screen"><div class="island"></div>
+  <div class="scroll" id="page">
+    <div class="bar"><div class="bar-in"><b>創作者挑戰</b><span class="right"><span>報名中</span><button class="snd" id="snd" type="button" aria-pressed="false" aria-label="聲音開關">聲音 開</button></span></div></div>
+    <div class="hero" id="hero">
+      <img class="locked" src="https://yazelin.github.io/larch-chayu/game/img/ui/challenge/hero_locked.jpg" alt="雲海裡四朵雲被鐵鍊鎖住，中央掛著一把大鎖">
+      <img class="open" src="https://yazelin.github.io/larch-chayu/game/img/ui/challenge/hero_open.jpg" alt="鎖彈開了，鐵鍊散成金色光點，一朵雲飄走">
+      <canvas id="fx"></canvas>
+      <div class="title"><small>第三屆主題</small><h1>自由與限制</h1></div>
+      <button class="lock" id="lock" type="button" aria-label="敲中央的鎖（要敲三下）"><span class="ring" id="ring"></span></button>
+      <div class="hint"><span>敲三下中央的鎖報名</span><div class="dots" aria-hidden="true"><i></i><i></i><i></i></div></div>
+      <p class="slogan">如果雲也被鎖住了，<br>你會如何讓它自由？</p>
+      <div class="flash"></div>
+      <div class="toast" role="status" id="toast">報名完成</div>
+    </div>
+    <section>
+      <div class="eyebrow">主題說明</div>
+      <h2>讓「自由與限制」，成為遊戲的一部分</h2>
+      <p>一個主題，沒有唯一的答案。你可以拯救被囚禁的公主，也可以讓玩家重新思考：打開所有的鎖，就等於自由嗎？但記得——說一個好故事，比什麼都重要。</p>
+    </section>
+    <section>
+      <div class="eyebrow">三道鎖，三種故事</div>
+      <div class="locks">
+        <div><em>01 看得見的束縛</em><b>一道城牆</b><p>牢籠、城門、被封住的道路。玩家要找鑰匙、繞遠路，或乾脆把牆推倒。</p></div>
+        <div><em>02 看不見的束縛</em><b>一個承諾</b><p>誓言、責任、別人的期待。守住它或打破它，都要付出代價。</p></div>
+        <div><em>03 心裡的束縛</em><b>一份恐懼</b><p>怕失去、怕選錯、怕改變。也許最後要解開的那道鎖，在角色自己身上。</p></div>
+      </div>
+    </section>
+    <section>
+      <div class="eyebrow">時程</div>
+      <dl class="dates"><dt>創作期間</dt><dd>三週　10/4–10/24</dd><dt>評審期間</dt><dd>一週　10/25–10/31</dd><dt>作品長度</dt><dd>建議 5～10 分鐘</dd></dl>
+    </section>
+    <footer>主題是核心，故事最重要。</footer>
+  </div>
+</div></div>
+<script>
+/* 音效（2026-11-16 作者：四個小遊戲「四個都補」）。全部用 Web Audio 即時合成，不載音檔。
+   Larch 的 iframe 與手機都不准自動出聲：第一次點擊、觸控或按鍵時才開 AudioContext（環境允許自動播放時就直接響）。
+   還沒解鎖時自己跑的動畫（例如自動打字）不排聲音，免得解鎖那一刻全部擠在一起響。
+   總音量 LEVEL 壓在對白與配樂底下；減少動態（prefers-reduced-motion）不影響聲音。
+   window.__sndLog：測試看呼叫了哪些聲音。window.__sndRender(序列, 秒數)：用 OfflineAudioContext 算出同一段聲音，給錄音評分（新版/music/minigame_sfx.py）。 */
+var SND = (function () {
+  var LEVEL = .4, ac = null, master = null, muted = false, gestureAt = -1e9, S = {};
+  function ctx() {
+    if (!ac) { var C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
+      try { ac = new C(); } catch (e) { return null; }
+      master = ac.createGain(); master.gain.value = muted ? 0 : LEVEL; master.connect(ac.destination); }
+    if (ac.state === 'suspended' && ac.resume) { try { var p = ac.resume(); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    return ac; }
+  function gesture() { gestureAt = performance.now(); ctx(); }
+  ['pointerdown', 'touchend', 'keydown'].forEach(function (k) { addEventListener(k, gesture, true); });
+  function noise(a) { if (!a.__noise) { var n = a.sampleRate, b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0);
+    for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; a.__noise = b; } return a.__noise; }
+  // 單音：f 起，可滑到 o.f2；o.att 秒起音後指數衰減，dur 秒收完
+  function tone(a, out, t, f, dur, vol, o) { o = o || {}; var osc = a.createOscillator(), g = a.createGain(), att = o.att || .004;
+    osc.type = o.type || 'sine'; osc.frequency.setValueAtTime(f, t); if (o.f2) osc.frequency.exponentialRampToValueAtTime(o.f2, t + (o.glide || dur));
+    g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(vol, t + att); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    osc.connect(g); g.connect(out); osc.start(t); osc.stop(t + dur + .02); }
+  // 雜訊經濾波器（預設帶通）：短促的敲、喀、刷
+  function hiss(a, out, t, f, dur, vol, o) { o = o || {}; var s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(), att = o.att || .002;
+    s.buffer = noise(a); fl.type = o.type || 'bandpass'; fl.frequency.setValueAtTime(f, t); if (o.f2) fl.frequency.exponentialRampToValueAtTime(o.f2, t + dur); fl.Q.value = o.q || 1;
+    g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(vol, t + att); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(fl); fl.connect(g); g.connect(out); s.start(t, Math.random() * .5); s.stop(t + dur + .02); }
+  function play(name, arg) { (window.__sndLog = window.__sndLog || []).push(name);
+    if (muted || !S[name]) return; var a = ctx(); if (!a) return;
+    if (a.state !== 'running' && performance.now() - gestureAt > 1000) return;
+    try { S[name](a, master, a.currentTime + .01, arg); } catch (e) {} }
+  window.__sndRender = function (seq, sec) { var C = window.OfflineAudioContext || window.webkitOfflineAudioContext,
+    a = new C(1, Math.ceil(44100 * (sec || 2)), 44100), g = a.createGain(); g.gain.value = LEVEL; g.connect(a.destination);
+    seq.forEach(function (x) { S[x[0]](a, g, .05 + (x[2] || 0), x[1]); });
+    return a.startRendering().then(function (b) { return Array.prototype.slice.call(b.getChannelData(0)); }); };
+  // 「聲音 開／關」鈕：傳入按鈕元素
+  function bindMute(btn) { if (!btn) return; btn.addEventListener('click', function (e) { e.stopPropagation(); muted = !muted;
+    btn.setAttribute('aria-pressed', String(muted)); btn.textContent = muted ? '聲音 關' : '聲音 開';
+    if (master) master.gain.setTargetAtTime(muted ? 0 : LEVEL, ac.currentTime, .02); }); }
+  return { S: S, tone: tone, hiss: hiss, play: play, bindMute: bindMute };
+})();
+// 敲鎖：每敲一下是指節碰鐵鎖的「鏘」：一下短促的敲擊雜訊，激發幾個高 Q 共振（鐵的不協和分音）自己鳴響；三下音高一下比一下高。
+// 第三下之後鎖彈開：「喀」（鎖舌鬆開）、「嗒」（鎖環彈起），接幾顆鐵鍊散開的細響。共振都用雜訊經窄帶通做，不用正弦波疊，聽起來才像金屬不像鈴。
+(function (T, H) {
+  function ring(a, o, t, f, dur, vol) { H(a, o, t, f, dur, vol, { q: 45, att: .001 }); }
+  SND.S.knock = function (a, o, t, n) { var p = [1, 1.07, 1.14][Math.min(3, n || 1) - 1] * (.98 + Math.random() * .04);
+    H(a, o, t, 3400 * p, .025, .45, { q: 1.5 });
+    T(a, o, t, 150 * p, .06, .3, { f2: 110 * p });
+    [[1, 1, .5], [2.76, .55, .38], [5.4, .3, .26], [8.93, .16, .18]].forEach(function (q) { ring(a, o, t, 880 * p * q[0], q[2], 7 * q[1]); }); };
+  SND.S.unlock = function (a, o, t) {
+    H(a, o, t, 5000, .015, .45, { type: 'highpass', q: .7 }); ring(a, o, t, 3100, .12, 3); ring(a, o, t, 4700, .08, 2.2);
+    H(a, o, t + .09, 2200, .03, .55, { q: 1.3 }); T(a, o, t + .09, 300, .06, .3, { f2: 180 });
+    ring(a, o, t + .09, 1350, .28, 4.5); ring(a, o, t + .09, 2900, .2, 2.8);
+    for (var i = 0; i < 6; i++) { var d = .22 + i * .07 + Math.random() * .04; ring(a, o, t + d, 2500 + Math.random() * 2500, .1, 2.2 * (1 - i / 8)); } };
+})(SND.tone, SND.hiss);
+</script>
+<script>
+(function () {
+  var hero = document.getElementById('hero'), lock = document.getElementById('lock'), ring = document.getElementById('ring');
+  var dots = hero.querySelectorAll('.dots i'), cv = document.getElementById('fx'), cx = cv.getContext('2d'), n = 0, done = false;
+  var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function knock() {
+    if (done) return; n++;
+    dots[n - 1].classList.add('on');
+    ring.classList.remove('go'); void ring.offsetWidth; ring.classList.add('go');
+    hero.classList.remove('knock'); void hero.offsetWidth; hero.classList.add('knock');
+    if (navigator.vibrate) navigator.vibrate(n < 3 ? 18 : [30, 40, 60]);
+    SND.play('knock', n);
+    if (n === 3) { setTimeout(function () { SND.play('unlock'); }, 150); open(); }
+  }
+  function open() {
+    done = true; document.body.classList.add('done');
+    if (!still) burst();
+    setTimeout(function () { parent.postMessage({ type: 'larch:complete', result: 'unlocked', payload: {} }, '*'); }, 3200);
+  }
+  // 金色光點：從鎖的位置往四個角（四條鐵鍊的方向）散開，慢慢往上飄、淡掉
+  function burst() {
+    var r = hero.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+    cv.width = r.width * dpr; cv.height = r.height * dpr; cx.scale(dpr, dpr);
+    var ox = r.width * .5, oy = r.height * .46, ps = [];
+    for (var i = 0; i < 260; i++) {
+      var corner = i % 4, tx = corner % 2 ? r.width * .9 : r.width * .1, ty = corner < 2 ? r.height * .2 : r.height * .62;
+      var t = Math.random(), px = ox + (tx - ox) * t, py = oy + (ty - oy) * t;
+      ps.push({ x: px, y: py, vx: (Math.random() - .5) * .6, vy: -Math.random() * .7 - .15, s: Math.random() * 2.2 + .6, life: 0, max: 90 + Math.random() * 110, d: Math.random() * 30 });
+    }
+    (function step() {
+      cx.clearRect(0, 0, r.width, r.height); var alive = 0;
+      ps.forEach(function (p) {
+        if (p.d > 0) { p.d--; alive++; return; }
+        p.life++; if (p.life > p.max) return; alive++;
+        p.x += p.vx; p.y += p.vy; var a = Math.sin(Math.PI * p.life / p.max);
+        cx.beginPath(); cx.fillStyle = 'rgba(255,214,140,' + a + ')'; cx.shadowColor = '#ffd27a'; cx.shadowBlur = 8; cx.arc(p.x, p.y, p.s, 0, 7); cx.fill();
+      });
+      if (alive) requestAnimationFrame(step);
+    })();
+  }
+  lock.addEventListener('click', knock);
+  SND.bindMute(document.getElementById('snd'));
+  parent.postMessage({ type: 'larch:ready' }, '*');
+})();
+</script>
+<script>
+// 直接開這個檔預覽時（沒經過組裝），圖片網址還是 {{ASSET:路徑}} 佔位符：改指到 repo 裡的原圖。組裝時佔位符會被換成正式網址，這段不會動到。
+(function(){ var root = location.href.replace(/art\/ui\/[^\/]*$/, '');
+  document.querySelectorAll('img[src^="{{ASSET:"]').forEach(function(img){
+    img.src = root + img.getAttribute('src').replace(/^\{\{ASSET:/, '').replace(/\}\}$/, ''); }); })();
+</script>
+<script>
+/* 作者 11-16：「滑鼠的拉 也能和手機的拉一樣能夠拉動頁面」。只對滑鼠：在手機框裡按住上下拖就捲動，放開後帶慣性滑一小段；
+   拖超過 5px 才算拖，拖完那一下的 click 吃掉（不會誤敲鎖）；單純點一下照舊。觸控維持原生捲動，滾輪照舊。 */
+(function () {
+  var sc = document.getElementById('page'), down = null, dragging = false, swallow = false, v = 0, lastY = 0, lastT = 0, raf = 0;
+  function zoom() { var p = document.querySelector('.phone'); return parseFloat(p && p.style.zoom) || 1; }  // 手機框放大時，滑鼠位移要換回框內的像素
+  sc.addEventListener('dragstart', function (e) { e.preventDefault(); });
+  sc.addEventListener('pointerdown', function (e) {
+    if (e.pointerType !== 'mouse' || e.button !== 0 || e.target.closest('#snd')) return;
+    cancelAnimationFrame(raf); down = { y: e.clientY, top: sc.scrollTop, id: e.pointerId }; dragging = false; v = 0; lastY = e.clientY; lastT = performance.now(); });
+  addEventListener('pointermove', function (e) {
+    if (!down || e.pointerId !== down.id) return; var dy = e.clientY - down.y;
+    if (!dragging && Math.abs(dy) > 5) { dragging = true; sc.classList.add('grabbing'); try { getSelection().removeAllRanges(); } catch (_) {} }
+    if (!dragging) return;
+    e.preventDefault(); sc.scrollTop = down.top - dy / zoom();
+    var now = performance.now(), dt = Math.max(1, now - lastT); v = .7 * v + .3 * ((lastY - e.clientY) / dt); lastY = e.clientY; lastT = now; });
+  function up(e) {
+    if (!down || e.pointerId !== down.id) return; down = null; sc.classList.remove('grabbing');
+    if (!dragging) return; dragging = false; swallow = true; setTimeout(function () { swallow = false; }, 350);
+    if (performance.now() - lastT > 90) v = 0;   // 停住了才放開：不滑
+    var t0 = performance.now();
+    (function glide(now) { var dt = Math.min(40, now - t0); t0 = now; sc.scrollTop += v * dt / zoom(); v *= Math.pow(.94, dt / 16);
+      if (Math.abs(v) > .02) raf = requestAnimationFrame(glide); })(t0); }
+  addEventListener('pointerup', up); addEventListener('pointercancel', up);
+  sc.addEventListener('click', function (e) { if (swallow) { swallow = false; e.stopPropagation(); e.preventDefault(); } }, true);
+})();
+</script>
+<script>
+/* 作者 11-16：大螢幕上手機框只佔中間一小塊。手機框照設計稿 900px 高排版，螢幕比 900 高時整支等比例放大到 94vh（直式手機全螢幕時不放大）。 */
+(function () { function fit() { var p = document.querySelector('.phone'); if (!p) return;
+  var H = document.documentElement.clientHeight || innerHeight, z = matchMedia('(max-aspect-ratio: 4/5)').matches ? 1 : Math.max(1, H * 0.94 / 900); p.style.zoom = z;
+  if (z !== 1 || !matchMedia('(max-aspect-ratio: 4/5)').matches) { var r = p.getBoundingClientRect();   // 量實際大小：超出可用高度就按比例縮回（11-16 下緣露底）
+    if (r.height > H * 0.96) p.style.zoom = z * H * 0.94 / r.height; } }
+  addEventListener('resize', fit); fit(); })();
+</script>
+</body></html>

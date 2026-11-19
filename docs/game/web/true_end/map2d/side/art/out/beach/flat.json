@@ -1,0 +1,75 @@
+{
+ "name": "海灘舞台",
+ "width": 3072,
+ "height": 1024,
+ "center": 768,
+ "fg": false,
+ "feet_y": 0.525,
+ "hero_h": 0.186,
+ "walk": [
+  60,
+  2992
+ ],
+ "exit": "left",
+ "cg": "../art/out/beach/cg_412_placeholder.jpg",
+ "night": false,
+ "npcs": [
+  {
+   "id": "shi",
+   "img": "../../../sprites/shi_3h.png",
+   "x": 300,
+   "h": 0.21,
+   "face": 1
+  }
+ ],
+ "hot": [
+  {
+   "id": "exit",
+   "name": "回全島",
+   "x": 0,
+   "w": 110,
+   "y": 0.3,
+   "h": 0.3
+  }
+ ],
+ "chain": [
+  "beach_left",
+  "04",
+  "beach_right"
+ ],
+ "view": {
+  "top": 0.03,
+  "h": 0.66
+ },
+ "sun": {
+  "x": 1877,
+  "y": 126,
+  "r": 26,
+  "horizon": 154,
+  "band_bottom": 300
+ },
+ "cg_412": "../art/out/beach/cg_412_placeholder.jpg",
+ "open_patches": {
+  "crate": {
+   "img": "../art/out/beach/open_crate.png",
+   "x": 1983,
+   "y": 320,
+   "w": 171,
+   "h": 207
+  },
+  "barrel": {
+   "img": "../art/out/beach/open_barrel.png",
+   "x": 869,
+   "y": 360,
+   "w": 109,
+   "h": 148
+  }
+ },
+ "rock_fg": {
+  "img": "../art/out/beach/rock_fg.png",
+  "x": 2420,
+  "y": 414,
+  "w": 94,
+  "h": 64
+ }
+}

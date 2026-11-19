@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>繪本小島・全島大地圖</title>
+<style>
+:root{color-scheme:light;--ink:#5a4150;--dim:#8a7080;--paper:#fbf7ef;--sea:#203744;font-family:"LXGW WenKai TC","Iansui","Kaiti TC","Noto Sans TC",serif}
+*{box-sizing:border-box}html,body{width:100%;height:100%;height:100dvh;margin:0;overflow:hidden;background:var(--sea);color:var(--ink)}
+#stage{position:fixed;inset:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:var(--sea)}
+#world{position:absolute;inset:0;overflow:hidden;isolation:isolate;background:transparent}
+#map-area{--camera-x:0px;--camera-y:0px;position:absolute;left:50%;top:50%;width:max(100vw,150dvh);height:max(66.666667vw,100dvh);aspect-ratio:3/2;transform:translate(calc(-50% + var(--camera-x)),calc(-50% + var(--camera-y)));overflow:visible;isolation:isolate}
+#map-area.zooming{transition:width .9s ease-in-out,height .9s ease-in-out,transform .9s ease-in-out}
+/* 底圖是四周延伸畫好的整張（真結局/map2d/art/out/island_ext_*.jpg）；#map-area 仍是原圖 1536×1024 那一塊，入口、步道、路線座標都以它為 0～1，
+   #map 與雲層的 left/top/width/height 由 island_play.js 照 island_config.json 的 ext、cloudLayer.box 換算 */
+#paint{position:absolute;inset:0;pointer-events:none}
+#map,#clouds{position:absolute;max-width:none;pointer-events:none;-webkit-user-drag:none;user-select:none}
+/* 雲層蓋在紙片上面（紙片從雲底下經過）。雲層自己帶一份夕照罩層，用雲的透明度當遮罩，只罩在雲上，跟底圖被 #shade 罩過的雲一樣 */
+#cloudwrap{position:absolute;z-index:11;pointer-events:none;isolation:isolate;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+#clouds{left:0;top:0;width:100%;height:100%}
+#cloudwrap .shade{position:absolute;pointer-events:none}
+#shade{position:absolute;left:-120%;top:-120%;width:340%;height:340%;pointer-events:none;background:transparent;z-index:9}
+.shade i{position:absolute;inset:0;display:none;mix-blend-mode:soft-light}
+/* 第 1～4 階段黃昏：色彩矩陣由 island_s5.jpg 對 island_s5_dusk.jpg 逐像素擬合，再混入暖色對角矩陣保住淺海的飽和度；外圈紫藍天光與左上夕照用 soft-light 疊。漸層座標以 #shade（地圖每邊外擴 120%，蓋過整張延伸圖）為基準；雲層套同一個濾鏡，從雲下經過的紙片在 #shade 底下，一起罩上夕照。 */
+#map-area.dusk #paint,#map-area.dusk #clouds{filter:url(#dusk-grade) saturate(var(--dusk-saturate,1.1)) contrast(var(--dusk-contrast,1.08))}
+#map-area.dusk .shade i{display:block}
+#map-area.dusk .shade .sky{background:radial-gradient(18.24% 18.24% at 50.59% 50%,rgba(82,56,158,0) 55%,rgba(82,56,158,.75) 115%)}
+#map-area.dusk .shade .sun{background:radial-gradient(14.71% 13.24% at 35.88% 35.29%,rgba(255,158,51,.9) 0,rgba(255,158,51,.62) 25%,rgba(255,158,51,.36) 50%,rgba(255,158,51,.15) 75%,rgba(255,158,51,0) 100%)}
+#map-area.night .shade{background:rgba(35,47,91,.32)}
+#map-area.dawn .shade{background:rgba(88,111,148,.09)}
+/* 天黑（第七章評審週陪完回全島）：整張壓暗、偏藍。顏色是拿第 5 階段「天剛暗」那張圖對白天那張量的平均比例（紅 .50、綠 .45、藍 .71），用相乘疊上去 */
+#map-area.dark .shade{background:rgb(128,115,181);mix-blend-mode:multiply}
+#person,#vehicle,#whale,#memory,#zones{position:absolute;inset:0;pointer-events:none}
+#person{z-index:12}.paper-person{position:absolute;width:auto;max-width:none;height:10%;transform:translate(-50%,-100%);filter:drop-shadow(0 3px 3px #40324688);pointer-events:none;transition:left .08s linear,top .08s linear}
+#zones{z-index:14}.entrance{position:absolute;width:10%;height:15%;transform:translate(-50%,-50%);border:0;border-radius:50%;padding:0;background:transparent;color:transparent;cursor:pointer;pointer-events:auto;touch-action:manipulation}
+.entrance:focus-visible{outline:3px dashed #fff8d9}.entrance::after{content:attr(data-name);position:absolute;left:50%;bottom:100%;padding:.35em 1em .42em;border:1px solid #fff9;border-radius:3px;background:#fff1ddef;color:var(--ink);font:700 clamp(12px,1.7vw,18px)/1.2 var(--hand);letter-spacing:.1em;white-space:nowrap;opacity:0;transform:translate(-50%,8px) rotate(-2deg);transition:opacity .2s,transform .2s;filter:drop-shadow(0 3px 3px #41394c66)}
+.entrance.nearby::after,.entrance.passing::after,.entrance:hover::after,.entrance:focus-visible::after{opacity:1;transform:translate(-50%,0) rotate(-2deg)}
+.entrance.nearby,.entrance.passing{box-shadow:0 0 0 3px #fff4a8aa,0 0 26px 12px #fff8a688;animation:zoneglow 1.2s ease-in-out infinite alternate}
+@keyframes zoneglow{to{box-shadow:0 0 0 8px #fff4a866,0 0 38px 20px #fff8a6bb}}
+#memory{z-index:13}.memory{position:absolute;width:5.7%;height:auto;transform:translate(-50%,-75%);pointer-events:auto;cursor:pointer;filter:drop-shadow(0 3px 4px #44314f88);animation:memfloat 2s ease-in-out infinite}.memory.nearby{filter:drop-shadow(0 0 10px #fff3aacc) drop-shadow(0 4px 5px #44314f99);scale:1.16}
+@keyframes memfloat{50%{translate:0 -5px;rotate:3deg}}
+/* 紙片在夕照罩層（z 9）上面、雲層（z 11）底下：從雲下面經過時被雲蓋住 */
+#vehicle{z-index:10;display:none;transform:translate(-50%,-55%);overflow:visible;pointer-events:none;filter:drop-shadow(0 5px 4px #243d4c88)}
+#vehicle.on{display:block}.vehicle-art{position:absolute;inset:0;width:100%;height:100%;animation:bob 1.6s ease-in-out infinite alternate}
+@keyframes bob{from{translate:0 -2px;rotate:-1.5deg}to{translate:0 3px;rotate:1.5deg}}
+#whale{z-index:10;display:none;inset:auto;overflow:visible;filter:drop-shadow(0 3px 4px #20374666)}#whale.on{display:block}
+#whale img{position:absolute;bottom:0;left:50%;translate:-50% 0;height:auto;opacity:0;transition:opacity .25s}#whale img.on{opacity:1}
+#label,#hint,#progress{position:fixed;z-index:12;padding:.5em 1.2em .55em;border:1px solid #ffffffbb;border-radius:3px;background:#fff3e8ed;color:var(--ink);box-shadow:0 4px 12px #221e2d44;backdrop-filter:blur(5px);letter-spacing:.1em;pointer-events:none}
+#label{top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));font-weight:700}#hint{top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);font-size:14px;color:var(--dim);white-space:nowrap}#progress{top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));font-size:14px}
+#actions{position:fixed;z-index:13;top:max(66px,calc(env(safe-area-inset-top) + 50px));right:max(12px,env(safe-area-inset-right));display:flex;gap:8px;flex-direction:column;align-items:flex-end}
+.action,.move{border:1px solid #fff9;border-radius:4px;background:#fff0e2ed;color:var(--ink);font:700 15px/1.25 var(--hand);letter-spacing:.08em;box-shadow:0 4px 12px #221e2d44;cursor:pointer;touch-action:manipulation}.action{padding:.55em 1em}.action[hidden]{display:none}.action:active,.move:active{transform:translateY(2px)}
+#move{position:fixed;z-index:14;left:max(12px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));display:flex;gap:10px}
+.move{width:62px;height:58px;font-size:28px;background:#fff0e2d9;touch-action:none}
+#dialog{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:#1c233bb0;cursor:pointer}#dialog.on{display:grid}
+#dialog .paper{width:min(760px,calc(100vw - 36px));padding:clamp(28px,6vw,64px);background:repeating-linear-gradient(0deg,#fffaf1,#fffaf1 2px,#f7f0e6 3px,#fffaf1 5px);border:2px solid #fff8e8;border-radius:8px;box-shadow:0 12px 42px #130e1c99;transform:rotate(-1deg);animation:unroll .35s ease-out}
+@keyframes unroll{from{transform:rotate(-1deg) translateY(14px);opacity:0}}
+#dialog b{display:block;margin-bottom:.6em;color:var(--dim);font-size:17px;letter-spacing:.12em}#dialog p{margin:0;font-size:clamp(20px,4vw,28px);line-height:1.7;letter-spacing:.04em}#dialog small{display:block;margin-top:1em;text-align:right;color:var(--dim)}
+.toast{position:fixed;z-index:18;left:50%;bottom:max(92px,calc(env(safe-area-inset-bottom) + 78px));transform:translate(-50%,14px);padding:.55em 1.2em;background:#fff3e8ed;border:1px solid #fff9;border-radius:4px;box-shadow:0 4px 12px #221e2d44;color:var(--ink);font-weight:700;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap}.toast.on{opacity:1;transform:translate(-50%,0)}
+body.debug #world{outline:2px dashed #fff}body.debug .entrance{background:#f00a;border:1px solid #fff}body.debug #person::after{content:"";position:absolute;left:0;top:0;width:100%;height:100%;background:linear-gradient(90deg,transparent 49.9%,#fff5 50%,transparent 50.1%);pointer-events:none}
+body.orbiting #move,body.orbiting #actions,body.orbiting #label,body.orbiting #progress{display:none}body.orbiting #hint{padding:.3em .9em;font-size:12px;top:max(8px,env(safe-area-inset-top));bottom:auto}body.orbiting .toast{top:max(54px,calc(env(safe-area-inset-top) + 44px));bottom:auto}
+@media(max-width:700px){#hint{top:auto;bottom:max(86px,calc(env(safe-area-inset-bottom) + 82px));font-size:12px}#progress{top:auto;bottom:max(148px,calc(env(safe-area-inset-bottom) + 142px));right:10px;font-size:12px}#actions{top:auto;bottom:max(154px,calc(env(safe-area-inset-bottom) + 148px));right:10px}.action{font-size:13px}.entrance{width:14%;height:24%}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="dusk-grade" color-interpolation-filters="sRGB"><feColorMatrix id="dusk-matrix" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"/></filter></svg>
+<main id="stage" aria-label="全島大地圖">
+  <div id="world">
+  <div id="map-area">
+    <div id="paint"><img id="map" alt="繪本小島全景" draggable="false"></div>
+    <div id="shade" class="shade"><i class="sky"></i><i class="sun"></i></div>
+    <div id="cloudwrap" aria-hidden="true"><img id="clouds" alt="" draggable="false"><div class="shade"><i class="sky"></i><i class="sun"></i></div></div>
+    <div id="whale" aria-label="遠海鯨魚"></div>
+    <div id="vehicle" aria-label="出海紙片交通工具"></div>
+    <div id="memory"></div>
+    <div id="zones"></div>
+    <div id="person" aria-label="茶語的小紙人"></div>
+  </div>
+  </div>
+</main>
+<div id="label">繪本小島</div><div id="hint">方向鍵移動，點地走近；靠近入口後按互動</div><div id="progress"></div>
+<div id="actions"><button id="zukan" class="action" type="button">圖鑑 0／13</button><button id="plants" class="action" type="button">植物 0／11</button><button id="plant-tree" class="action" type="button" hidden>一起種小樹</button><button id="dolphin" class="action" type="button" hidden>騎海豚繞島</button><button id="boat" class="action" type="button" hidden>坐船繞島看鯨魚</button><button id="dive" class="action" type="button" hidden>下潛</button></div>
+<div id="move" aria-label="手機方向操作"><button class="move" data-dir="-1" type="button" aria-label="向左移動">←</button><button class="move" data-dir="1" type="button" aria-label="向右移動">→</button></div>
+<div id="dialog" role="button" tabindex="0" aria-label="收起回憶，點一下或按 Enter"><div class="paper"><b id="dialog-title"></b><p id="dialog-text"></p><small>點一下收起</small></div></div>
+<script src="island_bridge.js"></script>
+<script src="../../../studio_web/studio_storage.js"></script>
+<script type="module" src="./island_play.js"></script>
+</body>
+</html>

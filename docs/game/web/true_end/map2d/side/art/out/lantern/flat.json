@@ -1,0 +1,201 @@
+{
+ "name": "家門前・天燈",
+ "width": 1536,
+ "height": 2975,
+ "vertical": true,
+ "chain": [
+  "lt_f1",
+  "lt_f2",
+  "lt_f3",
+  "lt_f4",
+  "lt_f5"
+ ],
+ "stitch": [
+  {
+   "key": "lt_f2",
+   "scale": 1.0,
+   "dx": 1.0,
+   "dy": 1536.0,
+   "match": 0.926,
+   "color_shift": 8.7,
+   "seam_y": [
+    2140,
+    2213
+   ]
+  },
+  {
+   "key": "lt_f3",
+   "scale": 1.0,
+   "dx": 1.0,
+   "dy": 1072.0,
+   "match": 0.969,
+   "color_shift": 6.8,
+   "seam_y": [
+    1694,
+    1871
+   ]
+  },
+  {
+   "key": "lt_f4",
+   "scale": 1.0,
+   "dx": 1.0,
+   "dy": 561.0,
+   "match": 0.836,
+   "color_shift": 7.8,
+   "seam_y": [
+    1197,
+    1336
+   ]
+  },
+  {
+   "key": "lt_f5",
+   "scale": 1.0,
+   "dx": 1.0,
+   "dy": 97.0,
+   "match": 0.798,
+   "color_shift": 13.3,
+   "seam_y": [
+    830,
+    929
+   ]
+  }
+ ],
+ "crop_top": 97,
+ "people": [
+  {
+   "id": "ming",
+   "img": "../art/sprites/lt_ming.png",
+   "x": 1055,
+   "feet_y": 2781,
+   "h": 455
+  },
+  {
+   "id": "chen",
+   "img": "../art/sprites/lt_chen.png",
+   "x": 765,
+   "feet_y": 2811,
+   "h": 460
+  },
+  {
+   "id": "shi",
+   "img": "../art/sprites/lt_shi.png",
+   "x": 1195,
+   "feet_y": 2811,
+   "h": 455
+  },
+  {
+   "id": "tea",
+   "img": "../art/sprites/lt_tea.png",
+   "x": 925,
+   "feet_y": 2811,
+   "h": 404
+  }
+ ],
+ "lanterns": {
+  "order": [
+   "chen",
+   "tea",
+   "ming",
+   "shi"
+  ],
+  "imgs": {
+   "chen": "../art/sprites/lt_lantern_chen.png",
+   "tea": "../art/sprites/lt_lantern_tea.png",
+   "ming": "../art/sprites/lt_lantern_ming.png",
+   "shi": "../art/sprites/lt_lantern_shi.png"
+  },
+  "keys": [
+   {
+    "t": 0.0,
+    "pos": [
+     [
+      765,
+      2298
+     ],
+     [
+      925,
+      2288
+     ],
+     [
+      1055,
+      2253
+     ],
+     [
+      1195,
+      2293
+     ]
+    ],
+    "h": 110
+   },
+   {
+    "t": 0.3,
+    "pos": [
+     [
+      522,
+      2053
+     ],
+     [
+      722,
+      2023
+     ],
+     [
+      968,
+      2013
+     ],
+     [
+      1213,
+      2053
+     ]
+    ],
+    "h": 100
+   },
+   {
+    "t": 0.65,
+    "pos": [
+     [
+      560,
+      1003
+     ],
+     [
+      700,
+      963
+     ],
+     [
+      860,
+      983
+     ],
+     [
+      1000,
+      1013
+     ]
+    ],
+    "h": 52
+   },
+   {
+    "t": 1.0,
+    "pos": [
+     [
+      640,
+      203
+     ],
+     [
+      710,
+      173
+     ],
+     [
+      800,
+      193
+     ],
+     [
+      880,
+      213
+     ]
+    ],
+    "h": 24
+   }
+  ],
+  "duration_s": 20,
+  "note": "pos 是各盞中心（長畫 px），左到右＝order；t 是 0～1 的時間比例，緩入緩出；升過屋頂（t 0.3）對真-02-7"
+ },
+ "view_start_y": 2111
+}

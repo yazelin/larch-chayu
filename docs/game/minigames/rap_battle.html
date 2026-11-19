@@ -1,0 +1,565 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>音之國．說唱對決</title>
+<!-- 新版第四章〈音之國（預演）〉小遊戲：說唱對決。對應 新版/劇本/第四章.md 第五節的【小遊戲 說唱對決】、設計.md 第四章定稿第 7 條。
+     背景用已定稿的音之國舞台圖；說唱大魔王（詩）與勇者疊在舞台上。
+     只玩兩回合（2026-11-16 作者試玩後改）。開始後打拍子（90 BPM，大鼓、小鼓、hi-hat；接對一次多一層貝斯、再一次多一層和弦）。魔王那句隨拍子逐字亮起，接著跳出三張句子卡，
+     玩家挑句尾押同一個韻的那句（點、或鍵盤 1／2／3、方向鍵＋Enter）。接對：句子隨拍子亮、韻腳字發金光並標出三句的韻。
+     第一回合接對：照劇本「帽子歪一點」，換成帽子歪到一邊、一臉錯愕的站姿立繪 img/shi_hattilt.png（同一個框），順勢震一下。第二回合接對的那一下：魔王換成完敗立繪
+     （img/shi_defeat.png：跌坐、帽子掉在地上、麥克風脫手滾到旁邊），落下並震一下，停一拍後拍子淡出、送 larch:complete。
+     錯的句子句首都是「……」，句尾不押韻（也不押上一回合的韻）；正解的位置每次出卡都重新打亂。
+     接錯：那張卡搖一下變暗、標出它的韻，魔王押韻吐槽一句，再挑，不會失敗。
+     最後一回合（魔王唱「最後一回合別逞強……」、她沒有接）不在小遊戲裡，交給劇本小遊戲之後的對話卡。
+     協定：送 larch:ready → 收 larch:init（只存起來，本遊戲不讀變數）→ 完成時 larch:set → larch:complete。
+     miniGameReadVars：（無）
+     miniGameWriteVars：ch4RapDone（true）
+     result：rapped，payload：{ misses }（接錯的次數）
+     直接開這個檔（不在 Larch 裡）也能玩；?still=1 模擬 prefers-reduced-motion；?fast=1 拍子加快一倍（自動測試用）。 -->
+
+<style>
+:root { color-scheme: dark; --ink:#f4eee6; --dim:rgba(244,238,230,.7); --gold:#e9cf9a; --gold-dim:rgba(233,207,154,.42);
+  --c:#c8d45a; --m:#4f6fd8; --s:#b03a52; --s-hi:#e07a8c; --cape:#b9a3e0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+body { color: var(--ink); font-family: "Iansui", "LXGW WenKai TC", "Kaiti TC", "BiauKai", serif; background: transparent; }
+/* 收到設定前不鋪底（透明卡不閃灰）；boot 之後才把夜色補上 */
+body.on { background: radial-gradient(60vmax 40vmax at 12% 0%, rgba(200,212,90,.15), transparent 70%),
+  radial-gradient(70vmax 45vmax at 50% -12%, rgba(79,111,216,.22), transparent 70%),
+  radial-gradient(60vmax 40vmax at 92% 4%, rgba(176,58,82,.18), transparent 70%),
+  linear-gradient(180deg, #0c0e22 0%, #141433 55%, #1d1838 100%); }
+body.on::before { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .65;
+  background-image: radial-gradient(1px 1px at 12% 18%, #fff8, transparent), radial-gradient(1px 1px at 33% 7%, #fff6, transparent),
+    radial-gradient(1.5px 1.5px at 71% 12%, #fff9, transparent), radial-gradient(1px 1px at 86% 31%, #fff5, transparent),
+    radial-gradient(1px 1px at 52% 4%, #fff6, transparent), radial-gradient(1.5px 1.5px at 4% 52%, #fff4, transparent),
+    radial-gradient(1px 1px at 96% 66%, #fff5, transparent), radial-gradient(1px 1px at 92% 8%, #fff7, transparent); }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+.app { position: fixed; inset: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto auto; padding: max(2vh, 10px) max(1.5vw, 10px) max(1.5vh, 10px); gap: 10px; opacity: 0; transition: opacity .6s; }
+body.on .app { opacity: 1; }
+.bar { display: flex; align-items: center; gap: 12px; }
+.kicker { margin: 0; font-size: clamp(12px, 1vw, 14px); letter-spacing: .5em; color: var(--gold); white-space: nowrap; }
+.bar .rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold-dim), transparent); }
+.count { font-size: clamp(14px, 1.2vw, 17px); letter-spacing: .18em; white-space: nowrap; }
+.count b { font-weight: 400; color: var(--gold); font-variant-numeric: tabular-nums; }
+.mute { padding: 3px 12px; border-radius: 14px; background: none; border: 1px solid var(--gold-dim); color: var(--dim); font-size: 13px; letter-spacing: .15em; }
+.mute:hover { border-color: var(--gold); color: var(--ink); }
+.hint { margin: 0; min-height: 1.8em; text-align: center; text-wrap: balance; font-size: clamp(14px, 1.25vw, 18px); letter-spacing: .14em; line-height: 1.7; color: var(--ink); transition: opacity .4s; }
+.hint.fade { opacity: 0; }
+
+/* 舞台畫面 */
+.stage { position: relative; min-height: 0; display: grid; place-items: center; }
+.frame { position: relative; width: 100%; height: 100%; border-radius: 10px; overflow: hidden;
+  box-shadow: 0 0 0 1px var(--gold-dim), 0 0 0 5px rgba(12,12,28,.7), 0 0 0 6px rgba(233,207,154,.16), 0 24px 60px -20px rgba(0,0,0,.8);
+  background: linear-gradient(180deg, #3c4a6e 0%, #5a6b8e 48%, #7b88a3 70%, #5d6680 100%); }
+.frame svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible; }
+.banner { position: absolute; left: 0; right: 0; top: 50%; margin-top: -1em; text-align: center; font-size: clamp(30px, 4.4vw, 56px); letter-spacing: .5em; text-indent: .5em;
+  color: var(--gold); text-shadow: 0 0 18px rgba(233,207,154,.6), 0 2px 0 #1a1530; opacity: 0; transform: scale(.92); transition: opacity .35s, transform .5s; pointer-events: none; }
+.banner.on { opacity: 1; transform: none; }
+.pulse { transition: transform .09s ease-out; transform-origin: 50% 80%; }
+.pulse.kick { transform: scale(1.012); }
+.reduce .pulse.kick { transform: none; }
+.lights { mix-blend-mode: screen; }
+.cone { transform-box: view-box; animation: sweep 5.4s ease-in-out infinite; }
+.cone.b { animation-duration: 6.6s; animation-direction: reverse; }
+@keyframes sweep { 0%,100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+.flag { transform-box: fill-box; transform-origin: 0 50%; animation: flag 1.9s ease-in-out infinite; }
+@keyframes flag { 50% { transform: skewY(9deg) scaleX(.92); } }
+.water { fill: none; stroke-linecap: round; stroke-dasharray: 6 10; animation: water 1.2s linear infinite; }
+@keyframes water { to { stroke-dashoffset: -32; } }
+#hat { transform-box: view-box; transition: transform 1s cubic-bezier(.3,1.6,.5,1); }
+/* 魔王被押到：第一回合往後一震；第二回合換完敗立繪，從上面落下、彈一下、左右震 */
+#bossStand { transform-box: view-box; transition: opacity .12s; }
+#bossStand.jolt, #bossTilt.jolt { animation: jolt .55s ease-out; }
+@keyframes jolt { 0% { transform: none; } 18% { transform: translate(7px, 3px) scale(.97, 1.02); } 38% { transform: translate(-5px, 0); } 58% { transform: translate(3px, 0); } 78% { transform: translate(-1.5px, 0); } 100% { transform: none; } }
+.defeat { opacity: 0; transform-box: view-box; }
+.defeat.on { opacity: 1; animation: slump .95s cubic-bezier(.3,.7,.4,1) both; }
+@keyframes slump { 0% { opacity: 0; transform: translateY(-46px); } 14% { opacity: 1; } 34% { transform: translateY(0); } 44% { transform: translateY(-9px); } 54% { transform: translate(-6px, 0); } 64% { transform: translate(6px, 0); } 74% { transform: translate(-4px, 0); } 84% { transform: translate(2px, 0); } 100% { opacity: 1; transform: none; } }
+.reduce #bossStand.jolt, .reduce #bossTilt.jolt, .reduce .defeat.on { animation: none; }
+.heroPose, .bossPose { opacity: 0; transition: opacity .28s ease; }
+.heroPose.on, .bossPose.on { opacity: 1; }
+.reduce .heroPose, .reduce .bossPose { transition: none; }
+.ring { fill: none; stroke: var(--gold); pointer-events: none; }
+.note { pointer-events: none; }
+.hush .lights { opacity: 0; transition: opacity 2.4s; }
+.hush .frame { filter: saturate(.55) brightness(.85); transition: filter 2.6s; }
+.reduce .cone, .reduce .flag, .reduce .water { animation: none !important; }
+.reduce #hat { transition: none; }
+
+/* 歌詞：魔王一行、勇者一行 */
+.lyrics { display: grid; gap: 6px; min-height: 0; }
+.line { display: flex; align-items: baseline; gap: 12px; min-height: 2.1em; padding: 4px 14px; border-radius: 8px; background: rgba(14,14,34,.55); border: 1px solid rgba(233,207,154,.14); transition: opacity .3s; }
+.line .who { flex: none; font-size: 13px; letter-spacing: .3em; padding: 1px 8px 1px 10px; border-radius: 10px; }
+.line.boss .who { background: rgba(176,58,82,.85); color: #fff2f2; }
+.line.me .who { background: rgba(185,163,224,.85); color: #1d1838; }
+.line .txt { font-size: clamp(17px, 1.9vw, 25px); letter-spacing: .12em; line-height: 1.5; }
+.ch { color: rgba(244,238,230,.26); transition: color .12s, text-shadow .2s; position: relative; }
+.ch.lit { color: var(--ink); }
+.boss .ch.lit { color: #ffe3e7; }
+.ch.rhyme.lit { color: var(--gold); text-shadow: 0 0 12px rgba(233,207,154,.85); }
+.ch .yun, .opt .yun { position: absolute; left: 50%; top: -1.05em; transform: translateX(-50%); font-size: .52em; letter-spacing: 0; color: var(--gold); opacity: 0; transition: opacity .3s; white-space: nowrap; }
+.ch.rhyme.lit .yun { opacity: 1; }
+
+/* 句子卡 */
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; min-height: 64px; }
+.opt { position: relative; min-height: 60px; padding: 12px 14px; border-radius: 12px; text-align: center; font-size: clamp(17px, 1.6vw, 22px); letter-spacing: .1em; line-height: 1.45;
+  background: rgba(14,14,34,.82); border: 1px solid var(--gold-dim); box-shadow: inset 0 0 0 3px rgba(12,12,28,.6), inset 0 0 0 4px rgba(233,207,154,.1);
+  opacity: 0; transform: translateY(14px); transition: opacity .35s, transform .35s, border-color .2s, background .2s; }
+.opt.in { opacity: 1; transform: none; }
+.opt .k { position: absolute; left: 10px; top: 7px; font-size: 12px; color: var(--gold-dim); letter-spacing: 0; }
+.opt:hover:not([disabled]), .opt:focus-visible { border-color: var(--gold); background: rgba(30,28,60,.9); }
+.opt[disabled] { cursor: default; }
+.opt.wrong { opacity: .38; }
+.opt.right { border-color: var(--gold); background: rgba(80,62,30,.6); box-shadow: 0 0 24px -4px rgba(233,207,154,.7), inset 0 0 0 3px rgba(12,12,28,.4); }
+.opt.other { opacity: .45; }
+.opt .tail { position: relative; display: inline-block; }
+.opt .tail .yun { opacity: 0; }
+.opt.tagged .tail .yun { opacity: 1; color: var(--dim); }
+.opt.right .tail { color: var(--gold); }
+.opt.right .tail .yun { color: var(--gold); }
+.opt.shake { animation: shake .42s; }
+@keyframes shake { 20% { transform: translateX(-7px); } 45% { transform: translateX(6px); } 70% { transform: translateX(-4px); } 100% { transform: none; } }
+.reduce .opt { transition: opacity .2s; transform: none; }
+.reduce .opt.shake { animation: none; }
+
+@media (orientation: portrait) {
+  .app { grid-template-rows: auto minmax(0, 1fr) auto auto auto; gap: 8px; }
+  .kicker { letter-spacing: .3em; }
+  .cards { grid-template-columns: 1fr; gap: 8px; }
+  .opt { min-height: 54px; padding: 10px 14px; font-size: 18px; }
+  .line { padding: 4px 10px; gap: 8px; }
+  .line .txt { font-size: 18px; letter-spacing: .06em; }
+  .line .who { font-size: 12px; letter-spacing: .15em; }
+}
+
+/* 開場卡：說明＋開始鈕（同時解鎖 Web Audio） */
+.intro { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(8,8,22,.62); backdrop-filter: blur(2px); transition: opacity .5s; z-index: 5; }
+.intro.gone { opacity: 0; pointer-events: none; }
+.card { width: min(460px, 88vw); padding: 26px 28px 24px; border-radius: 12px; text-align: center; background: rgba(14,14,34,.9);
+  border: 1px solid var(--gold-dim); box-shadow: inset 0 0 0 3px rgba(12,12,28,.6), inset 0 0 0 4px rgba(233,207,154,.12), 0 30px 60px -20px #000; }
+.card small { display: block; font-size: 13px; letter-spacing: .55em; color: var(--gold); }
+.card h1 { margin: 8px 0 0; font-weight: 400; font-size: clamp(24px, 2.6vw, 32px); letter-spacing: .4em; text-indent: .4em; }
+.card .rule { width: 60%; height: 1px; margin: 14px auto 16px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+.card p { margin: 0 0 8px; font-size: 15px; line-height: 1.8; letter-spacing: .08em; color: var(--dim); text-align: left; }
+.go { margin-top: 12px; padding: 10px 34px 10px 40px; border-radius: 22px; font-size: 18px; letter-spacing: .4em; background: rgba(233,207,154,.14); border: 1px solid var(--gold); color: var(--ink); transition: background .2s, transform .15s; }
+.go:hover { background: rgba(233,207,154,.26); } .go:active { transform: scale(.97); }
+
+/* 水彩紙介面（外框、紙卡與字體沿用 art/ui/minigame_link.html） */
+:root { color-scheme: light; --ink:#3b2f2c; --dim:#6e5a52; --gold:#b8862f; --gold-dim:rgba(184,134,47,.38); --paper:#f3ecdf;
+  --c:#a9b844; --m:#7f97df; --s:#c35366; --s-hi:#a84558; --cape:#b59ad8; }
+body { color:var(--ink); background:radial-gradient(70vmax 45vmax at 18% 6%, rgba(255,214,150,.55), transparent 60%),
+  radial-gradient(120vmax 80vmax at 50% 55%, #e9dfcc, #cbbda6 70%, #9c8f80); }
+body.on { background:radial-gradient(70vmax 45vmax at 18% 6%, rgba(255,214,150,.55), transparent 60%),
+  radial-gradient(120vmax 80vmax at 50% 55%, #e9dfcc, #cbbda6 70%, #9c8f80); }
+body.on::before { content:""; position:fixed; inset:0; pointer-events:none; mix-blend-mode:multiply; opacity:.55; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .44 0 0 0 0 .36 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23n)'/%3E%3C/svg%3E"); }
+body.on::after { content:""; position:fixed; inset:0; pointer-events:none; background:radial-gradient(120vmax 80vmax at 50% 45%, transparent 55%, rgba(40,30,40,.42)); opacity:1; }
+.frame { isolation:isolate; padding:6px; border-radius:8px; background:var(--paper); box-shadow:none; }
+.frame { width:auto; height:auto; }
+.frame::before { content:""; position:absolute; inset:0; z-index:-1; border-radius:6px; filter:url(#ragged); background:var(--paper);
+  box-shadow:inset 0 0 16px rgba(150,118,92,.45), inset 0 0 3px rgba(120,92,70,.55), 0 10px 22px -12px rgba(60,40,30,.5); }
+.frame svg { inset:6px; width:calc(100% - 12px); height:calc(100% - 12px); }
+.intro { background:rgba(233,223,208,.38); backdrop-filter:blur(1px); }
+.card { position:relative; isolation:isolate; background:none; border:0; border-radius:0; box-shadow:none; }
+.card::before { content:""; position:absolute; inset:0; z-index:-1; border-radius:6px; filter:url(#ragged); background:var(--paper);
+  box-shadow:inset 0 0 16px rgba(150,118,92,.45), inset 0 0 3px rgba(120,92,70,.55), 0 10px 22px -12px rgba(60,40,30,.5); }
+.go { position:relative; isolation:isolate; background:none; border:0; color:var(--ink); }
+.go::before { content:""; position:absolute; inset:0; z-index:-1; border-radius:40%; filter:url(#ragged); background:rgba(233,207,154,.92); }
+.go:hover { background:none; filter:brightness(1.04); }
+.mute { position:relative; isolation:isolate; border:0; border-radius:0; color:var(--ink); background:none; }
+.mute::before { content:""; position:absolute; inset:-1px; z-index:-1; border-radius:40%; filter:url(#ragged); background:var(--paper);
+  box-shadow:inset 0 0 10px rgba(150,118,92,.32), 0 6px 14px -10px rgba(60,40,30,.45); }
+.mute:hover { border:0; color:var(--ink); filter:brightness(1.04); }
+.line { position:relative; isolation:isolate; background:none; border:0; border-radius:0; color:var(--ink); }
+.line::before { content:""; position:absolute; inset:0; z-index:-1; border-radius:5px; filter:url(#ragged); background:rgba(243,236,223,.9);
+  box-shadow:inset 0 0 14px rgba(150,118,92,.3), 0 8px 18px -12px rgba(60,40,30,.45); }
+.line.boss .who { background:rgba(195,83,102,.2); color:#703944; }
+.line.me .who { background:rgba(181,154,216,.32); color:#4b3d5b; }
+.ch { color:rgba(59,47,44,.34); }
+.boss .ch.lit { color:#7b3844; }
+.ch.rhyme.lit, .opt.right .tail { color:#a56d20; text-shadow:none; }
+.cards { gap:14px; }
+.opt { isolation:isolate; border:0; border-radius:0; color:var(--ink); background:none; box-shadow:none; }
+.opt::before { content:""; position:absolute; inset:0; z-index:-1; border-radius:5px; filter:url(#ragged); background:rgba(243,236,223,.94);
+  box-shadow:inset 0 0 16px rgba(150,118,92,.38), inset 0 0 3px rgba(120,92,70,.4), 0 10px 22px -12px rgba(60,40,30,.5); }
+.opt:hover:not([disabled]), .opt:focus-visible { border:0; background:none; filter:brightness(1.04); }
+.opt .k { color:#8d7864; }
+.opt.right { border:0; background:none; box-shadow:none; }
+.opt.right::before { background:rgba(233,207,154,.96); }
+.banner { color:#8c642b; text-shadow:0 1px 0 rgba(243,236,223,.9); }
+@media (orientation:portrait) { .frame { width:100%; } }
+</style></head>
+<body>
+<div class="app" id="app">
+  <div class="bar"><p class="kicker">第四章．音之國</p><i class="rule"></i><span class="count">回合 <b id="n">1</b>／<b>2</b></span><button class="mute" id="mute" aria-pressed="false">聲音 開</button></div>
+  <div class="stage"><div class="frame" id="frame"><svg id="svg" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMax meet" role="img" aria-label="安靜的城中間，一座木頭舞台，說唱大魔王站在台上" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="banner" id="banner"></div></div></div>
+  <div class="lyrics" aria-live="polite">
+    <div class="line boss" id="lb"><span class="who">魔王</span><span class="txt" id="tb"></span></div>
+    <div class="line me" id="lm"><span class="who">勇者</span><span class="txt" id="tm"></span></div>
+  </div>
+  <div class="cards" id="cards" role="group" aria-label="挑一句接上去"></div>
+  <p class="hint" id="hint">聽拍子。魔王唱完，挑一句接上去。</p>
+</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="ragged" x="-5%" y="-10%" width="110%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".03 .07" numOctaves="3" seed="7"/><feDisplacementMap in="SourceGraphic" scale="9"/></filter>
+</defs></svg>
+<div class="intro" id="intro"><div class="card">
+  <small>音之國（預演）</small><h1>說唱對決</h1><i class="rule"></i>
+  <p>這座城沒有聲音，只有台上的說唱大魔王在唱。</p>
+  <p>他唱一句，畫面跳出三句。挑句尾跟他押同一個韻的那句接上去。接錯了就再挑一次。</p>
+  <button class="go" id="go">上台</button></div></div>
+
+<script>
+/* ===== 素材（之後換正式圖只改這裡）=====
+   每一項空字串＝用下面程式畫的暫時素材（SVG）。換成圖片網址（建置時可寫 {{ASSET:檔名}}）就改用圖。
+   城與舞台都畫在 1000×520 的座標裡（地面在 y=430 附近，舞台台面中間 x=500、y=330）。
+   city：安靜的城（整張背景，1000×520，可以更寬，會從中間對齊）。stage：木頭舞台（透明 PNG，約 520×200，貼在台面位置）。
+   boss：說唱大魔王（詩）站姿，不含帽子（腳底在圖下緣中間，約 200×230）；hat：帽子另一張（會照回合歪，旋轉中心在圖下緣中間，約 180×90）。
+   hero：勇者背影或側身（腳底在圖下緣中間，約 70×110）。
+   defeat：魔王完敗立繪（跌坐、帽子與麥克風在地上；底邊是鞋底，約 230×152）。 */
+var ASSETS = { city: './img/sound_city.webp', stage: '', boss: './img/shi_king.png', hat: '', hero: './img/hero.png', defeat: './img/shi_defeat.png', tilt: '' };
+/* 隨進度換的姿勢（作者 11-17：勇者與魔王都要自然、隨進度換）。每組圖排在同一畫布（900×1150、站直身高 1100、兩腳中心在下緣中間，canon_new/outfits/poses/normalize.py），
+   同一個框疊放、交叉淡入，腳底不跳位；身高與腳底對齊原本的 hero.png、shi_king.png。帽子歪掉那一下改用 shi_stunned（取代 shi_hattilt）。 */
+var POSES = { hero: { box: [288, 113.6, 184, 235.1], keys: ['nervous', 'groove', 'point', 'oops', 'win'], src: './img/hero_rap_' },
+              boss: { box: [403.5, 88.8, 189.9, 242.7], keys: ['smug', 'groove', 'stunned', 'pressed'], src: './img/shi_' } };
+var pose = { hero: 'nervous', boss: 'smug' }, oopsT = 0;
+function setPose(who, k) { if (!k || pose[who] === k) return; pose[who] = k; [].forEach.call(document.querySelectorAll('.' + who + 'Pose'), function (im) { im.classList.toggle('on', im.dataset.k === k); }); }
+function poseImages(who, g) { var P = POSES[who]; P.keys.forEach(function (k) { var im = el('image', { href: P.src + k + '.webp', x: P.box[0], y: P.box[1], width: P.box[2], height: P.box[3], preserveAspectRatio: 'xMidYMax meet', class: who + 'Pose' + (k === pose[who] ? ' on' : '') }, g); im.dataset.k = k; }); }
+
+// ===== Larch 協定 =====
+var LARCH = { v: {}, inited: false,
+  set: function (n, v) { try { parent.postMessage({ type: 'larch:set', name: n, value: v }, '*'); } catch (e) {} },
+  done: function (r, p) { window.__done = { result: r, payload: p || {} }; try { parent.postMessage({ type: 'larch:complete', result: r, payload: p || {} }, '*'); } catch (e) {} } };
+addEventListener('message', function (e) { var d = e.data || {}; if (d.type === 'larch:init') { LARCH.v = d.variables || {}; LARCH.inited = true; boot(); } });
+try { parent.postMessage({ type: 'larch:ready' }, '*'); } catch (e) {}
+setTimeout(boot, parent === window ? 0 : 2000);   // 編輯器預覽不送 init：2 秒後自己開
+
+var Q = location.search, still = matchMedia('(prefers-reduced-motion: reduce)').matches || /[?&]still=1/.test(Q), FAST = /[?&]fast=1/.test(Q);
+var BPM = FAST ? 180 : 90, SPB = 60 / BPM;
+
+// ===== 聲音（Web Audio 合成，不用音檔）=====
+var SND = (function () {
+  var ac = null, master = null, bus = null, wet = null, muted = false, perf0 = performance.now();
+  function ctx() {
+    if (!ac) { var C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
+      ac = new C(); master = ac.createGain(); master.gain.value = muted ? 0 : .8; master.connect(ac.destination);
+      bus = ac.createGain(); bus.gain.value = 1; bus.connect(master);   // 拍子走這條，結束時淡出
+      var d = ac.createDelay(1); d.delayTime.value = SPB * .75; var fb = ac.createGain(); fb.gain.value = .25; var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2400;
+      wet = ac.createGain(); wet.gain.value = .3; wet.connect(d); d.connect(lp); lp.connect(fb); fb.connect(d); lp.connect(master); }
+    if (ac.state === 'suspended') ac.resume(); return ac; }
+  function tone(f, t, dur, type, vol, f2, out, send) { var a = ctx(); if (!a) return;
+    var o = a.createOscillator(), g = a.createGain(); o.type = type || 'sine'; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol || .2, t + .008); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+    o.connect(g); g.connect(out || master); if (send) g.connect(wet); o.start(t); o.stop(t + dur + .05); return o; }
+  var nbuf = null;
+  function noise(t, dur, vol, freq, q, type, out) { var a = ctx(); if (!a) return;
+    if (!nbuf) { nbuf = a.createBuffer(1, a.sampleRate, a.sampleRate); var ch = nbuf.getChannelData(0); for (var i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1; }
+    var s = a.createBufferSource(); s.buffer = nbuf; var fl = a.createBiquadFilter(); fl.type = type || 'bandpass'; fl.frequency.value = freq || 1800; fl.Q.value = q || 1;
+    var g = a.createGain(); g.gain.setValueAtTime(vol || .1, t); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+    s.connect(fl); fl.connect(g); g.connect(out || master); s.start(t, Math.random() * .5); s.stop(t + dur + .02); }
+  return {
+    unlock: ctx,
+    time: function () { return ac ? ac.currentTime : (performance.now() - perf0) / 1000; },
+    real: function () { return !!ac; },
+    setMute: function (m) { muted = m; if (master) master.gain.value = m ? 0 : .8; },
+    kick: function (t) { tone(150, t, .32, 'sine', .9, 42, bus); },
+    snare: function (t) { noise(t, .18, .32, 1800, .7, 'bandpass', bus); tone(190, t, .1, 'triangle', .14, 150, bus); },
+    hat: function (t, v) { noise(t, .045, v || .07, 8000, .8, 'highpass', bus); },
+    bass: function (t, f, d) { var a = ctx(); if (!a) return; var o = a.createOscillator(), fl = a.createBiquadFilter(), g = a.createGain(); o.type = 'sawtooth'; o.frequency.value = f;
+      fl.type = 'lowpass'; fl.frequency.setValueAtTime(520, t); fl.frequency.exponentialRampToValueAtTime(160, t + d); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.22, t + .01); g.gain.exponentialRampToValueAtTime(.001, t + d);
+      o.connect(fl); fl.connect(g); g.connect(bus); o.start(t); o.stop(t + d + .05); },
+    chord: function (t, fs, d) { fs.forEach(function (f) { tone(f, t, d, 'triangle', .045, null, bus, true); tone(f * 2.003, t, d * .6, 'sine', .018, null, bus, true); }); },
+    clap: function (t) { [0, .012, .026].forEach(function (o) { noise(t + o, .09, .14, 1300, 1.2, 'bandpass', bus); }); },
+    voice: function (t, f) { tone(f, t, .09, 'square', .025, f * .97, bus); },          // 唱字的小聲點（像嘴型的提示音）
+    wrong: function () { var t = SND.time(); tone(330, t, .16, 'triangle', .12, 300); tone(311, t + .14, .26, 'triangle', .12, 260); },
+    cheer: function () { var t = SND.time(); [523.3, 659.3, 784, 1046.5].forEach(function (f, i) { tone(f, t + i * .06, .5, 'triangle', .1, null, master, true); }); noise(t, .6, .05, 3000, .4, 'bandpass'); },
+    tap: function () { var t = SND.time(); tone(880, t, .08, 'sine', .05); },
+    thud: function () { var t = SND.time(); tone(120, t, .5, 'sine', .5, 40); noise(t, .25, .12, 500, .8, 'lowpass'); tone(330, t + .12, .5, 'triangle', .06, 165); },
+    fade: function (sec) { if (!ac) return; var t = ac.currentTime; bus.gain.cancelScheduledValues(t); bus.gain.setValueAtTime(bus.gain.value, t); bus.gain.linearRampToValueAtTime(0, t + sec); }
+  };
+})();
+
+// ===== 拍子 =====
+// 16 分音符一格；layer 0：鼓組，1：加貝斯，2：加和弦與拍手。四小節一輪（Am－F－C－G）。
+var ROOTS = [55, 43.65, 65.41, 49], CHORDS = [[220, 261.6, 329.6], [174.6, 220, 261.6], [196, 261.6, 329.6], [196, 246.9, 293.7]];
+var t0 = 0, step = 0, layer = 0, beating = false, timer = null;
+function stepTime(n) { return t0 + n * SPB / 4; }
+function beatTime(b) { return t0 + b * SPB; }
+function curBeat() { return (SND.time() - t0) / SPB; }
+function nextBar() { return Math.ceil((curBeat() + .25) / 4) * 4; }
+function nextBeat() { return Math.ceil(curBeat() + .15); }
+function at(time, fn) { return setTimeout(fn, Math.max(0, (time - SND.time()) * 1000)); }
+function waitBeat(b) { return new Promise(function (ok) { at(beatTime(b), ok); }); }
+function startBeat() { SND.unlock(); t0 = SND.time() + .15; step = 0; beating = true;
+  timer = setInterval(function () { var ahead = SND.time() + .12;
+    while (beating && stepTime(step) < ahead) { var t = stepTime(step), s = step % 16, bar = Math.floor(step / 16) % 4;
+      if (SND.real()) {
+        if (s === 0 || s === 8 || s === 10 || (s === 14 && bar % 2)) SND.kick(t);
+        if (s === 4 || s === 12) { SND.snare(t); if (layer >= 2) SND.clap(t); }
+        if (s % 2 === 0) SND.hat(t, s % 4 === 2 ? .09 : .05); else if (layer >= 2 && s % 4 === 3) SND.hat(t, .03);
+        if (layer >= 1 && (s === 0 || s === 3 || s === 8 || s === 11 || s === 14)) SND.bass(t, ROOTS[bar] * (s === 14 ? 1.5 : 1), SPB * .45);
+        if (layer >= 2 && s === 0) SND.chord(t, CHORDS[bar], SPB * 3.5); }
+      if (s % 4 === 0) { (function (b) { at(t, function () { onBeat(b); }); })(step / 4); }
+      step++; } }, 25); }
+var pulse = null;
+function onBeat(b) { if (!pulse) return; if (b % 2 === 0) { pulse.classList.add('kick'); setTimeout(function () { pulse.classList.remove('kick'); }, 110); }
+  ring(b % 4 === 0 ? 1 : .6); }
+
+// ===== 歌詞資料 =====
+// 每句：文字、韻腳字（句尾那個字）、韻（注音的韻母）。韻腳字出現在句子最後一個非標點字。
+var ROUNDS = [
+  { boss: ['勇者大人別慌張', '這座城裡沒聲響', '想要聲音就來搶。'], yun: 'ㄤ',
+    opts: [{ t: '我拿著劍站在台上。', y: 'ㄤ', ok: true }, { t: '……我今天有點想睡。', y: 'ㄟ' }, { t: '……你帽子好大一頂。', y: 'ㄥ' }],
+    oops: ['沒押到韻別緊張', '再挑一句接著唱。'] },
+  { boss: ['這座舞台我最會', '麥克風前沒人配', '勇者妳要排第幾位？'], yun: 'ㄟ',
+    opts: [{ t: '我排第一不後退。', y: 'ㄟ', ok: true }, { t: '……我先回去吃個飯。', y: 'ㄢ' }, { t: '……今天天氣滿好的。', y: 'ㄜ' }],
+    oops: ['押錯了啦別後悔', '再挑一句換一回。'] }
+];
+var PUNCT = /[，。？！、…—]/;
+
+var $ = function (id) { return document.getElementById(id); };
+var NS = 'http://www.w3.org/2000/svg', svg = $('svg'), frameBox = $('frame');
+var R = 0, phase = 'intro', misses = 0, booted = false, started = false, finished = false, hits = 0, defeated = false, singTok = { b: 0, m: 0 };
+function el(tag, attrs, parent) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function hint(t) { var h = $('hint'); if (h.textContent === t) return; h.classList.add('fade'); setTimeout(function () { h.textContent = t; h.classList.remove('fade'); }, still ? 0 : 220); }
+
+// 把一句排成一個字一個 span；韻腳（每段最後一個非標點字）標上韻
+function layout(box, phrases, yun, rhymeAll) {
+  box.textContent = ''; var chars = [];
+  phrases.forEach(function (p, pi) { var arr = Array.from(p), last = -1; arr.forEach(function (c, i) { if (!PUNCT.test(c)) last = i; });
+    arr.forEach(function (c, i) { var s = document.createElement('span'); s.className = 'ch'; s.textContent = c;
+      if (i === last && (rhymeAll || pi === phrases.length - 1) && yun) { s.classList.add('rhyme'); var y = document.createElement('i'); y.className = 'yun'; y.textContent = yun; s.appendChild(y); }
+      box.appendChild(s); chars.push({ s: s, p: PUNCT.test(c), phrase: pi }); });
+    if (pi < phrases.length - 1) { var cm = document.createElement('span'); cm.className = 'ch'; cm.textContent = '，'; box.appendChild(cm); chars.push({ s: cm, p: true, phrase: pi }); } });
+  return chars; }
+// 隨拍子逐字亮：每段 4 拍，字平均分在前 3.5 拍
+function sing(who, phrases, yun, startBeat, rhymeAll) {
+  var tok = ++singTok[who], box = who === 'b' ? $('tb') : $('tm'), chars = layout(box, phrases, yun, rhymeAll);
+  phrases.forEach(function (p, pi) { var cs = chars.filter(function (c) { return c.phrase === pi; }), real = cs.filter(function (c) { return !c.p; });
+    real.forEach(function (c, i) { var bt = beatTime(startBeat + pi * 4 + i * (3.5 / real.length));
+      at(bt, function () { if (singTok[who] !== tok) return; c.s.classList.add('lit'); if (SND.real()) SND.voice(SND.time(), who === 'b' ? 392 + (i % 3) * 49 : 523 + (i % 3) * 66); });
+      if (i === real.length - 1) at(bt, function () { if (singTok[who] !== tok) return; cs.forEach(function (x) { x.s.classList.add('lit'); }); }); }); });
+  return startBeat + phrases.length * 4; }
+
+// ===== 畫面（SVG 暫時素材）=====
+var hatG = null, standG = null, tiltG = null, defeatG = null, mic = { x: 0, y: 0 }, fx = null;
+function drawScene() {
+  svg.textContent = '';
+  var defs = el('defs', {}, svg);
+  defs.innerHTML = '<radialGradient id="spot" cx=".5" cy="0" r="1"><stop offset="0" stop-color="#fff1c8" stop-opacity=".55"/><stop offset="1" stop-color="#fff1c8" stop-opacity="0"/></radialGradient>' +
+    '<linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a7774c"/><stop offset="1" stop-color="#6e4a30"/></linearGradient>' +
+    '<radialGradient id="pool" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffe9b0" stop-opacity=".55"/><stop offset="1" stop-color="#ffe9b0" stop-opacity="0"/></radialGradient>' +
+    '<filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>';
+  pulse = el('g', { class: 'pulse' }, svg);
+  if (ASSETS.city) el('image', { href: ASSETS.city, x: 0, y: -70, width: 1000, height: 667, preserveAspectRatio: 'none' }, pulse);
+  else if (!ASSETS.city) {
+    // 遠處的城：灰藍剪影（左右畫寬一點，寬螢幕兩邊也有城）
+    var far = 'M-900,300'; for (var x = -900; x <= 1900; x += 46) { var h = 70 + ((x * 37) % 90 + 90) % 90; far += ' L' + x + ',' + (300 - h) + ' L' + (x + 30) + ',' + (300 - h) + ((x / 46) % 5 === 0 ? ' L' + (x + 15) + ',' + (300 - h - 30) : '') + ' L' + (x + 30) + ',' + (300 - h); }
+    el('path', { d: far + ' L1900,520 L-900,520 Z', fill: '#47557a', opacity: .75 }, pulse);
+    // 近處兩排房子
+    [[-900, 0], [660, 1]].forEach(function (blk) { for (var i = 0; i < 9; i++) { var bx = blk[0] + i * 130 + (blk[1] ? 120 : -40), bw = 110, bh = 120 + (i * 53) % 70, by = 430 - bh;
+      if (bx > 300 && bx < 600) continue;
+      el('rect', { x: bx, y: by, width: bw, height: bh, fill: i % 2 ? '#6d7898' : '#7a84a2', stroke: '#2a2a3e', 'stroke-width': 3 }, pulse);
+      el('path', { d: 'M' + (bx - 8) + ',' + by + ' L' + (bx + bw / 2) + ',' + (by - 44) + ' L' + (bx + bw + 8) + ',' + by + ' Z', fill: '#4b5677', stroke: '#2a2a3e', 'stroke-width': 3, 'stroke-linejoin': 'round' }, pulse);
+      for (var w = 0; w < 2; w++) el('rect', { x: bx + 18 + w * 46, y: by + 26, width: 26, height: 30, rx: 3, fill: '#c9cfdf', stroke: '#2a2a3e', 'stroke-width': 2 }, pulse);
+      // 旗子：在飄，但沒有聲音
+      if (i % 3 === 1) { el('line', { x1: bx + bw / 2, x2: bx + bw / 2, y1: by - 44, y2: by - 96, stroke: '#2a2a3e', 'stroke-width': 3 }, pulse);
+        el('path', { class: 'flag', d: 'M' + (bx + bw / 2) + ',' + (by - 96) + ' q24,-6 46,4 q-22,8 -46,16 Z', fill: ['#8f6f86', '#6f86a6', '#9a8f6a'][i % 3], stroke: '#2a2a3e', 'stroke-width': 2 }, pulse); } } });
+    // 地面與石板
+    el('rect', { x: -900, y: 430, width: 2800, height: 120, fill: '#5a6480' }, pulse);
+    for (var yy = 440; yy < 520; yy += 20) for (var xx = -900 + (yy % 40 ? 0 : 20); xx < 1900; xx += 42) el('rect', { x: xx, y: yy, width: 34, height: 13, rx: 5, fill: 'none', stroke: '#48506a', 'stroke-width': 1.3 }, pulse);
+    // 噴水池：在噴，也沒有聲音
+    var fxx = 130, fyy = 420;
+    el('ellipse', { cx: fxx, cy: fyy, rx: 74, ry: 18, fill: '#7d88a2', stroke: '#2a2a3e', 'stroke-width': 3 }, pulse);
+    el('ellipse', { cx: fxx, cy: fyy - 3, rx: 60, ry: 11, fill: '#9fb5d6' }, pulse);
+    el('rect', { x: fxx - 7, y: fyy - 58, width: 14, height: 56, fill: '#8f99b2', stroke: '#2a2a3e', 'stroke-width': 2.5 }, pulse);
+    [-1, 1].forEach(function (s) { el('path', { class: 'water', d: 'M' + fxx + ',' + (fyy - 62) + ' Q' + (fxx + s * 32) + ',' + (fyy - 100) + ' ' + (fxx + s * 52) + ',' + (fyy - 6), stroke: '#d3e2f5', 'stroke-width': 4 }, pulse); });
+  }
+  // 舞台燈（金色、會掃）
+  var lights = el('g', { class: 'lights' }, pulse);
+  el('path', { class: 'cone', d: 'M330,-20 L420,330 L620,330 Z', fill: 'url(#spot)', style: 'transform-origin: 330px -20px' }, lights);
+  el('path', { class: 'cone b', d: 'M670,-20 L380,330 L580,330 Z', fill: 'url(#spot)', style: 'transform-origin: 670px -20px' }, lights);
+  el('ellipse', { cx: 500, cy: 330, rx: 150, ry: 22, fill: 'url(#pool)' }, lights);
+  // 木頭舞台
+  if (ASSETS.stage) el('image', { href: ASSETS.stage, x: 240, y: 230, width: 520, height: 200 }, pulse);
+  else if (!ASSETS.city) {
+    el('path', { d: 'M282,232 V330 M718,232 V330', stroke: '#5b3b26', 'stroke-width': 10, 'stroke-linecap': 'round' }, pulse);
+    el('path', { d: 'M270,236 Q500,196 730,236', stroke: '#6e4a30', 'stroke-width': 9, fill: 'none', 'stroke-linecap': 'round' }, pulse);
+    // 三角旗串：晨黃綠、明深藍、詩酒紅
+    for (var k = 0; k < 11; k++) { var px = 300 + k * 40, py = 230 - Math.sin(k / 10 * Math.PI) * 26;
+      el('path', { d: 'M' + px + ',' + py + ' l18,0 l-9,20 Z', fill: ['#c8d45a', '#4f6fd8', '#b03a52'][k % 3], stroke: '#2a1a1e', 'stroke-width': 1.5, opacity: .92 }, pulse); }
+    el('rect', { x: 250, y: 330, width: 500, height: 18, rx: 3, fill: '#c08a58', stroke: '#2a1a1e', 'stroke-width': 3 }, pulse);
+    el('rect', { x: 262, y: 348, width: 476, height: 82, fill: 'url(#wood)', stroke: '#2a1a1e', 'stroke-width': 3 }, pulse);
+    for (var pl = 0; pl < 12; pl++) el('line', { x1: 262 + pl * 40, x2: 262 + pl * 40, y1: 350, y2: 428, stroke: '#4d3221', 'stroke-width': 1.6, opacity: .7 }, pulse);
+    el('rect', { x: 456, y: 412, width: 88, height: 18, fill: '#a7774c', stroke: '#2a1a1e', 'stroke-width': 2.5 }, pulse);
+    el('rect', { x: 446, y: 428, width: 108, height: 14, fill: '#946640', stroke: '#2a1a1e', 'stroke-width': 2.5 }, pulse);
+    // 腳邊兩個音箱
+    [300, 660].forEach(function (sx) { el('rect', { x: sx, y: 276, width: 46, height: 56, rx: 4, fill: '#2b2b3d', stroke: '#14141f', 'stroke-width': 3 }, pulse);
+      el('circle', { cx: sx + 23, cy: 312, r: 13, fill: '#454560', stroke: '#e9cf9a', 'stroke-width': 1.5 }, pulse); el('circle', { cx: sx + 23, cy: 288, r: 5, fill: '#454560', stroke: '#e9cf9a', 'stroke-width': 1 }, pulse); });
+  }
+  drawBoss(pulse);
+  drawHero(pulse);
+  fx = el('g', {}, svg);
+}
+function drawBoss(g) {
+  var X = 500, Y = 340; mic = { x: X + 34, y: Y - 136 };
+  if (ASSETS.boss) {
+    standG = el('g', { id: 'bossStand', style: 'transform-origin: ' + X + 'px ' + Y + 'px' }, g);
+    if (POSES.boss) poseImages('boss', standG); else el('image', { href: ASSETS.boss, x: X - 48, y: Y - 252, width: 96, height: 252, preserveAspectRatio: 'xMidYMax meet' }, standG);
+    if (ASSETS.tilt) { // 帽子歪掉的站姿立繪：先藏著，第一回合接對時換上（同樣高 252；圖是 377×960，帽子往旁邊歪出去所以框寬一點）
+      tiltG = el('g', { id: 'bossTilt', style: 'opacity:0; transform-origin: ' + X + 'px ' + Y + 'px' }, g);
+      el('image', { href: ASSETS.tilt, x: X - 50, y: Y - 252, width: 100, height: 252, preserveAspectRatio: 'xMidYMax meet' }, tiltG); }
+    if (ASSETS.defeat) { // 完敗立繪：先藏著，第二回合接對時換上
+      defeatG = el('g', { id: 'bossDefeat', class: 'defeat' }, g);
+      el('image', { href: ASSETS.defeat, x: X + 6 - 115, y: Y + 14 - 152, width: 230, height: 152, preserveAspectRatio: 'xMidYMax meet' }, defeatG); }
+    return;
+  }
+  else {
+    el('ellipse', { cx: X, cy: Y, rx: 44, ry: 8, fill: '#000', opacity: .3 }, g);
+    // 酒紅色斗篷
+    el('path', { d: 'M' + (X - 40) + ',' + Y + ' Q' + (X - 56) + ',' + (Y - 90) + ' ' + (X - 26) + ',' + (Y - 150) + ' H' + (X + 26) + ' Q' + (X + 56) + ',' + (Y - 90) + ' ' + (X + 40) + ',' + Y + ' Z', fill: '#b03a52', stroke: '#2a1a1e', 'stroke-width': 3 }, g);
+    el('path', { d: 'M' + (X - 40) + ',' + Y + ' Q' + (X - 56) + ',' + (Y - 90) + ' ' + (X - 26) + ',' + (Y - 150), stroke: '#e9cf9a', 'stroke-width': 3, fill: 'none', opacity: .8 }, g);
+    el('path', { d: 'M' + (X + 40) + ',' + Y + ' Q' + (X + 56) + ',' + (Y - 90) + ' ' + (X + 26) + ',' + (Y - 150), stroke: '#e9cf9a', 'stroke-width': 3, fill: 'none', opacity: .8 }, g);
+    // 身體（黑上衣）、腿
+    el('rect', { x: X - 22, y: Y - 148, width: 44, height: 92, rx: 10, fill: '#2a2638', stroke: '#14111c', 'stroke-width': 3 }, g);
+    el('path', { d: 'M' + (X - 12) + ',' + (Y - 58) + ' V' + (Y - 2) + ' M' + (X + 12) + ',' + (Y - 58) + ' V' + (Y - 2), stroke: '#1c1a28', 'stroke-width': 13, 'stroke-linecap': 'round' }, g);
+    // 粗金鍊子
+    var ch = 'M' + (X - 18) + ',' + (Y - 140); for (var i = 0; i <= 8; i++) { var a = Math.PI * i / 8; ch += ' L' + (X - 18 * Math.cos(a)).toFixed(1) + ',' + (Y - 140 + 34 * Math.sin(a)).toFixed(1); }
+    el('path', { d: ch, stroke: '#e3b545', 'stroke-width': 6, fill: 'none', 'stroke-dasharray': '6 2', 'stroke-linecap': 'round' }, g);
+    el('circle', { cx: X, cy: Y - 104, r: 8, fill: '#f0c95a', stroke: '#8a6418', 'stroke-width': 2 }, g);
+    // 拿麥克風的手
+    el('path', { d: 'M' + (X + 20) + ',' + (Y - 130) + ' Q' + (X + 44) + ',' + (Y - 120) + ' ' + (X + 42) + ',' + (Y - 146), stroke: '#2a2638', 'stroke-width': 12, fill: 'none', 'stroke-linecap': 'round' }, g);
+    el('circle', { cx: X + 42, cy: Y - 146, r: 7, fill: '#f1d6c0', stroke: '#2a1a1e', 'stroke-width': 2 }, g);
+    el('path', { d: 'M' + (X + 42) + ',' + (Y - 144) + ' L' + (X + 46) + ',' + (Y - 160), stroke: '#3c3c4a', 'stroke-width': 5, 'stroke-linecap': 'round' }, g);
+    el('circle', { cx: X + 47, cy: Y - 164, r: 7, fill: '#9aa0b0', stroke: '#2a1a1e', 'stroke-width': 2 }, g);
+    // 頭、頭髮、掛著的耳機（鑲金邊）
+    el('circle', { cx: X, cy: Y - 176, r: 26, fill: '#f1d6c0', stroke: '#2a1a1e', 'stroke-width': 3 }, g);
+    el('path', { d: 'M' + (X - 26) + ',' + (Y - 178) + ' Q' + (X - 24) + ',' + (Y - 198) + ' ' + X + ',' + (Y - 198) + ' Q' + (X + 26) + ',' + (Y - 198) + ' ' + (X + 26) + ',' + (Y - 176) + ' Q' + (X + 10) + ',' + (Y - 188) + ' ' + (X - 26) + ',' + (Y - 178) + ' Z', fill: '#2b1f2e', stroke: '#2a1a1e', 'stroke-width': 2 }, g);
+    el('path', { d: 'M' + (X - 9) + ',' + (Y - 172) + ' q3,-3 6,0 M' + (X + 4) + ',' + (Y - 172) + ' q3,-3 6,0', stroke: '#2a1a1e', 'stroke-width': 2, fill: 'none' }, g);
+    el('path', { d: 'M' + (X - 6) + ',' + (Y - 161) + ' q6,5 12,0', stroke: '#2a1a1e', 'stroke-width': 2, fill: 'none' }, g);
+    el('path', { d: 'M' + (X - 22) + ',' + (Y - 152) + ' Q' + X + ',' + (Y - 136) + ' ' + (X + 22) + ',' + (Y - 152), stroke: '#2b2b3d', 'stroke-width': 5, fill: 'none' }, g);
+    [-1, 1].forEach(function (s) { el('rect', { x: X + s * 24 - 8, y: Y - 160, width: 16, height: 20, rx: 6, fill: '#2b2b3d', stroke: '#e3b545', 'stroke-width': 2.5 }, g); });
+  }
+  // 帽子：繞頭頂旋轉，回合越後面越歪
+  hatG = el('g', { id: 'hat', style: 'transform-origin: ' + X + 'px ' + (Y - 196) + 'px' }, g);
+  if (ASSETS.hat) el('image', { href: ASSETS.hat, x: X - 90, y: Y - 286, width: 180, height: 90 }, hatG);
+  else {
+    el('ellipse', { cx: X, cy: Y - 196, rx: 70, ry: 13, fill: '#7d2338', stroke: '#2a1a1e', 'stroke-width': 3 }, hatG);
+    el('path', { d: 'M' + (X - 38) + ',' + (Y - 198) + ' Q' + (X - 40) + ',' + (Y - 254) + ' ' + X + ',' + (Y - 258) + ' Q' + (X + 40) + ',' + (Y - 254) + ' ' + (X + 38) + ',' + (Y - 198) + ' Z', fill: '#b03a52', stroke: '#2a1a1e', 'stroke-width': 3 }, hatG);
+    el('path', { d: 'M' + (X - 38) + ',' + (Y - 212) + ' Q' + X + ',' + (Y - 202) + ' ' + (X + 38) + ',' + (Y - 212) + ' L' + (X + 38) + ',' + (Y - 200) + ' Q' + X + ',' + (Y - 190) + ' ' + (X - 38) + ',' + (Y - 200) + ' Z', fill: '#e3b545', stroke: '#2a1a1e', 'stroke-width': 2 }, hatG);
+    el('circle', { cx: X + 22, cy: Y - 206, r: 5, fill: '#fff0c0', stroke: '#8a6418', 'stroke-width': 1.5 }, hatG);
+  }
+  standG = hatG;
+}
+function drawHero(g) {
+  var X = 380, Y = 360;
+  if (POSES.hero) { poseImages('hero', g); return; }
+  if (ASSETS.hero) { el('image', { href: ASSETS.hero, x: X - 46, y: Y - 242, width: 92, height: 242, preserveAspectRatio: 'xMidYMax meet' }, g); return; }
+  el('ellipse', { cx: X, cy: Y, rx: 26, ry: 6, fill: '#000', opacity: .3 }, g);
+  // 背影：淡紫披風蓋住身體，深紫頭髮，劍放在身側
+  el('path', { d: 'M' + (X + 22) + ',' + (Y - 36) + ' L' + (X + 44) + ',' + (Y - 80), stroke: '#dfe4ee', 'stroke-width': 5, 'stroke-linecap': 'round' }, g);
+  el('path', { d: 'M' + (X + 17) + ',' + (Y - 32) + ' L' + (X + 27) + ',' + (Y - 40), stroke: '#c9a24a', 'stroke-width': 4, 'stroke-linecap': 'round' }, g);
+  el('path', { d: 'M' + (X - 8) + ',' + (Y - 8) + ' V' + Y + ' M' + (X + 8) + ',' + (Y - 8) + ' V' + Y, stroke: '#3a2a3a', 'stroke-width': 7, 'stroke-linecap': 'round' }, g);
+  el('path', { d: 'M' + (X - 14) + ',' + (Y - 68) + ' Q' + (X - 34) + ',' + (Y - 30) + ' ' + (X - 28) + ',' + (Y - 4) + ' Q' + X + ',' + (Y + 4) + ' ' + (X + 28) + ',' + (Y - 4) + ' Q' + (X + 34) + ',' + (Y - 30) + ' ' + (X + 14) + ',' + (Y - 68) + ' Z', fill: 'var(--cape)', stroke: '#2a1a1e', 'stroke-width': 3 }, g);
+  el('circle', { cx: X, cy: Y - 82, r: 19, fill: '#4a2f63', stroke: '#2a1a1e', 'stroke-width': 3 }, g);
+  el('path', { d: 'M' + (X - 18) + ',' + (Y - 80) + ' Q' + (X - 22) + ',' + (Y - 58) + ' ' + (X - 12) + ',' + (Y - 58) + ' M' + (X + 18) + ',' + (Y - 80) + ' Q' + (X + 22) + ',' + (Y - 58) + ' ' + (X + 12) + ',' + (Y - 58), stroke: '#4a2f63', 'stroke-width': 7, fill: 'none', 'stroke-linecap': 'round' }, g);
+}
+// 麥克風發出的聲波圈、接對時飄上去的音符
+function ring(k) { if (still || !fx || finished || defeated) return; var r = el('circle', { class: 'ring', cx: mic.x, cy: mic.y, r: 10, 'stroke-width': 2, opacity: .7 * k }, fx), t = performance.now();
+  (function s(n) { var p = Math.min(1, (n - t) / 900); r.setAttribute('r', 10 + 70 * p); r.setAttribute('opacity', (.7 * k * (1 - p)).toFixed(3)); if (p < 1) requestAnimationFrame(s); else r.remove(); })(t); }
+function notes() { if (still) return; for (var i = 0; i < 7; i++) (function (i) {
+  var g = el('g', { class: 'note' }, fx), x0 = mic.x - 60 + Math.random() * 120, col = ['#c8d45a', '#8aa2ea', '#e07a8c', '#e9cf9a'][i % 4];
+  el('ellipse', { cx: 0, cy: 0, rx: 7, ry: 5, fill: col, transform: 'rotate(-20)' }, g); el('path', { d: 'M6,-2 V-24 q8,4 10,10', stroke: col, 'stroke-width': 2.5, fill: 'none' }, g);
+  var t = performance.now() + i * 90;
+  (function s(n) { var p = Math.max(0, Math.min(1, (n - t) / 1500)); g.setAttribute('transform', 'translate(' + (x0 + Math.sin(p * 6 + i) * 14) + ',' + (mic.y + 10 - 140 * p) + ')'); g.setAttribute('opacity', p === 0 ? 0 : 1 - p);
+    if (p < 1) requestAnimationFrame(s); else g.remove(); })(performance.now()); })(i); }
+
+// ===== 回合 =====
+var cardsBox = $('cards'), resolveChoice = null;
+function banner(t, on) { var b = $('banner'); b.textContent = t; b.classList.toggle('on', on); }
+function showCards(rd) {
+  cardsBox.textContent = '';
+  var order = shuffle([0, 1, 2]);
+  order.forEach(function (oi, pos) { var b = document.createElement('button'); b.className = 'opt'; b.type = 'button';
+    var k = document.createElement('span'); k.className = 'k'; k.textContent = pos + 1; b.appendChild(k);
+    { var o = rd.opts[oi], arr = Array.from(o.t), last = -1; arr.forEach(function (c, i) { if (!PUNCT.test(c)) last = i; });
+      b.appendChild(document.createTextNode(arr.slice(0, last).join('')));
+      var tail = document.createElement('span'); tail.className = 'tail'; tail.textContent = arr[last]; var y = document.createElement('i'); y.className = 'yun'; y.textContent = o.y; tail.appendChild(y); b.appendChild(tail);
+      b.appendChild(document.createTextNode(arr.slice(last + 1).join(''))); b.dataset.i = oi; if (o.ok) b.dataset.ok = '1'; }
+    b.addEventListener('click', function () { pick(b); }); cardsBox.appendChild(b);
+    setTimeout(function () { b.classList.add('in'); }, still ? 0 : 60 + pos * 110); }); }
+function shuffle(a) { // 每次出卡都重新打亂，對的那句位置不固定
+  for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a; }
+function pick(b) {
+  if (!started || finished || b.disabled) return;
+  if (phase !== 'choose') return;
+  var rd = ROUNDS[R];
+  if (!b.dataset.ok) { misses++; b.disabled = true; b.classList.add('wrong', 'tagged'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); SND.wrong();
+    hint('「' + b.querySelector('.tail').firstChild.textContent + '」是' + b.querySelector('.yun').textContent + '，魔王押的是' + rd.yun + '。再挑一句。');
+    clearTimeout(oopsT); setPose('hero', 'oops'); setPose('boss', R === 0 ? 'groove' : 'pressed'); oopsT = setTimeout(function () { if (phase === 'choose') { setPose('hero', 'groove'); setPose('boss', R === 0 ? 'smug' : 'pressed'); } }, 1500);
+    sing('b', rd.oops, rd.yun, nextBeat(), true); return; }
+  phase = 'answer'; SND.tap(); clearTimeout(oopsT); setPose('hero', 'point');
+  [].forEach.call(cardsBox.children, function (c) { c.disabled = true; c.classList.add('tagged'); if (c !== b) c.classList.add('other'); });
+  b.classList.add('right');
+  if (resolveChoice) resolveChoice(b); }
+// 第一回合接對：劇本「魔王的帽子歪一點」，換成帽子歪掉、一臉錯愕的立繪，順勢震一下
+function jolt() { hits++; var g = standG; setPose('boss', 'stunned');
+  if (tiltG && standG) { standG.style.opacity = 0; tiltG.style.opacity = 1; g = tiltG; }
+  if (!g || still) return; g.classList.remove('jolt'); void g.getBoundingClientRect(); g.classList.add('jolt'); }
+// 第二回合接對：換成完敗立繪，落下來、震一下
+function collapse() { hits++; defeated = true;
+  if (!defeatG) { if (standG) standG.style.transform = 'translateY(60px) scaleY(.6)'; return; }
+  standG.style.opacity = 0; if (tiltG) tiltG.style.opacity = 0; defeatG.classList.add('on'); SND.thud(); setPose('hero', 'win'); }
+
+async function play() {
+  for (R = 0; R < ROUNDS.length; R++) {
+    var rd = ROUNDS[R]; $('n').textContent = R + 1;
+    var b0 = nextBar(); await waitBeat(b0);
+    banner(['第一回合', '第二回合'][R], true); phase = 'banner'; setPose('hero', 'nervous');
+    $('tm').textContent = ''; $('lm').style.opacity = .5; cardsBox.textContent = '';
+    $('lb').style.opacity = 1;
+    await waitBeat(b0 + 4); banner('', false); phase = 'boss'; setPose('boss', R === 0 ? 'groove' : 'pressed');
+    hint('聽魔王唱。注意句尾那個字。');
+    var bEnd = sing('b', rd.boss, rd.yun, b0 + 4, true);
+    await waitBeat(bEnd - 1);
+    showCards(rd); phase = 'choose'; $('lm').style.opacity = 1; setPose('hero', 'groove'); setPose('boss', R === 0 ? 'smug' : 'pressed');
+    hint(R === 0 ? '挑一句，句尾跟魔王押同一個韻，接上去。' : '再接一句。這次押的是不同的韻。');
+    var chosen = await new Promise(function (ok) { resolveChoice = ok; }); resolveChoice = null;
+    var o = rd.opts[+chosen.dataset.i], sb = nextBeat();
+    singTok.b++; layout($('tb'), rd.boss, rd.yun, true).forEach(function (c) { c.s.classList.add('lit'); });   // 魔王那句整句留著，方便對韻
+    var mEnd = sing('m', [o.t], o.y, sb, false);
+    await waitBeat(mEnd - .5);
+    layer = Math.min(2, layer + 1); SND.cheer(); notes();
+    if (R === 0) { jolt(); hint('押上了。魔王的帽子被押歪了。'); await waitBeat(mEnd + 3); }
+    else { collapse(); hint('又押上了。說唱大魔王整個垮掉了。'); phase = 'defeat';
+      await new Promise(function (ok) { setTimeout(ok, still ? 900 : 1500); });   // 停一拍讓人看清楚
+      return end(); }
+  } }
+function end() {
+  finished = true; phase = 'end'; SND.fade(still ? 1.2 : 2.6); setPose('hero', 'win');
+  [].forEach.call(cardsBox.children, function (c) { c.disabled = true; });
+  setTimeout(function () { $('app').classList.add('hush'); hint(''); $('lb').style.opacity = .3; $('lm').style.opacity = .3; }, still ? 0 : 600);
+  setTimeout(function () { beating = false; clearInterval(timer); }, 3200);
+  LARCH.set('ch4RapDone', true);
+  setTimeout(function () { LARCH.done('rapped', { misses: misses }); }, still ? 1800 : 3600); }
+
+// 鍵盤：1／2／3 直接挑；左右（上下）方向鍵移動焦點、Enter 確定（按鈕本身就吃 Enter）
+addEventListener('keydown', function (ev) { if (!started) return; var cs = [].slice.call(cardsBox.children); if (!cs.length) return;
+  var n = { '1': 0, '2': 1, '3': 2 }[ev.key]; if (n != null && cs[n]) { ev.preventDefault(); cs[n].focus(); pick(cs[n]); return; }
+  var d = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 }[ev.key]; if (!d) return; ev.preventDefault();
+  var i = cs.indexOf(document.activeElement); i = i < 0 ? 0 : (i + d + cs.length) % cs.length; cs[i].focus(); });
+
+function fitView() { var tall = innerWidth < innerHeight, box = document.querySelector('.stage').getBoundingClientRect(), aspect = tall ? 540 / 480 : 1000 / 520;
+  svg.setAttribute('viewBox', tall ? '230 40 540 480' : '0 0 1000 520');
+  var w = Math.min(box.width, box.height * aspect), h = w / aspect; frameBox.style.width = Math.floor(w) + 'px'; frameBox.style.height = Math.floor(h) + 'px'; }
+function boot() { if (booted) return; booted = true;
+  if (still) document.documentElement.classList.add('reduce');
+  document.body.classList.add('on'); drawScene(); fitView(); addEventListener('resize', fitView); $('go').focus(); }
+$('go').addEventListener('click', function () { if (started) return; SND.unlock(); started = true; $('intro').classList.add('gone'); startBeat(); play(); });
+$('mute').addEventListener('click', function () { var m = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', m); this.textContent = m ? '聲音 關' : '聲音 開'; SND.setMute(m); });
+// 測試用：目前狀態（自動化試玩用，不影響遊戲）
+window.__state = function () { return { heroPose: pose.hero, bossPose: pose.boss, round: R + 1, rounds: ROUNDS.length, phase: phase, misses: misses, layer: layer, hits: hits, defeated: defeated,
+  standOpacity: standG ? +getComputedStyle(standG).opacity : null, tiltOpacity: tiltG ? +getComputedStyle(tiltG).opacity : null, defeatOpacity: defeatG ? +getComputedStyle(defeatG).opacity : null, finished: finished, fast: FAST,
+  cards: [].map.call(cardsBox.children, function (c) { return { text: c.textContent, ok: !!c.dataset.ok, disabled: c.disabled }; }) }; };
+</script>
+</body></html>

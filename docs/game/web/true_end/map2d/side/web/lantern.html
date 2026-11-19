@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>家門前・天燈</title>
+<link rel="icon" href="data:,">
+<!-- 真結局「直向天燈長畫」（劇本 新版/劇本/真結局.md 225～233 行；畫與座標 art/out/lantern/flat.json；計畫 lantern_plan.md）
+     接 CG 真-02-6：四盞點亮的紙片天燈剛離手、停在頭頂上方一點點，接著一起慢慢上升；畫面跟著往上捲（屋頂、鐘塔尖、整片夜空），約二十秒；
+     點天燈它會晃一下、仍繼續往上；捲到只剩夜空與四個光點時淡出，回報完成，接 CG 真-02-7。沒有對話泡泡。
+     Larch 外嵌卡協定照 新版/minigames/README.md：送 larch:ready → 收 larch:init → 完成時 larch:set、larch:complete。
+     不在 Larch 裡（或編輯器預覽沒送 init）2 秒後自己開始。網址參數：?still=1 模擬系統減少動態；?fast=1 上升縮成 6 秒（只給測試用）。 -->
+<style>
+html,body{width:100%;height:100%;height:100dvh;margin:0;overflow:hidden;background:#0b0f2c}
+#stage{position:fixed;inset:0;overflow:hidden;background:#0b0f2c;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;cursor:default}
+#art{position:absolute;left:0;top:0;width:1536px;height:2975px;transform-origin:0 0;will-change:transform}
+#bg{position:absolute;left:0;top:0;width:1536px;height:2975px;display:block;pointer-events:none;-webkit-user-drag:none}
+.person{position:absolute;pointer-events:none}
+.person img.sheet{position:absolute;left:0;top:0;width:100%;height:100%;display:block;-webkit-user-drag:none;
+  filter:brightness(.9) saturate(.95) drop-shadow(-6px 7px 5px rgba(20,14,40,.45))}
+.person img.shadow{position:absolute;left:0;width:100%;opacity:.55;pointer-events:none}
+.lantern{position:absolute;left:0;top:0;pointer-events:none;will-change:transform,opacity}
+.lantern img.glow{position:absolute;left:0;top:0;pointer-events:none;mix-blend-mode:screen;will-change:transform,opacity}
+.lantern img.paper{position:absolute;left:0;top:0;pointer-events:none;-webkit-user-drag:none;transform-origin:50% 30%;will-change:transform;
+  filter:drop-shadow(0 0 6px rgba(255,190,110,.55))}
+#hint{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:5;padding:.35em 1em;
+  color:rgba(255,240,220,.85);font:15px/1.4 "LXGW WenKai TC","Iansui","Kaiti TC","Noto Sans TC",serif;letter-spacing:.12em;white-space:nowrap;
+  background:rgba(20,16,40,.35);border-radius:999px;opacity:0;transition:opacity 1s ease;pointer-events:none}
+#hint.on{opacity:1}
+#fade{position:fixed;inset:0;z-index:9;background:#000;opacity:1;pointer-events:none;transition:opacity .9s ease}
+#fade.out{transition:opacity 1.4s ease}
+</style>
+</head>
+<body data-state="loading">
+<div id="stage">
+  <div id="art"><img id="bg" alt="" src="../art/out/lantern/flat.jpg"></div>
+</div>
+<div id="hint">點天燈，它會晃一下</div>
+<div id="fade"></div>
+<script type="module" src="lantern_play.js"></script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>好感三角</title>
+<style>
+
+:root { color-scheme: light; --paper:#f6efe2; --ink:#2f2a3a; --c:#d8e46a; --m:#a9c2ff; --s:#ffb0c4; --t:#c7a6ef; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #26243a; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+body { color: var(--paper); font-family: "Iansui", "LXGW WenKai TC", "Kaiti TC", "BiauKai", serif; }
+#sv { position: fixed; inset: 0; display: block; width: 100%; height: 100%; }
+.edge { fill: none; stroke: #fff4d6; stroke-linecap: round; stroke-linejoin: round; mix-blend-mode: screen; pointer-events: none; }
+.glow, .back, .shade { pointer-events: none; }
+.glow { mix-blend-mode: screen; opacity: 0; transition: opacity 1.2s ease; }
+.p.on .glow { opacity: .85; animation: breathe 4.2s ease-in-out infinite; }
+.p.on:hover .glow, .p.on:focus-visible .glow { opacity: 1; animation: none; }
+@keyframes breathe { 50% { opacity: .6; } }
+.back { mix-blend-mode: screen; opacity: 0; transition: opacity 1.2s ease; }
+.p.on .back { opacity: .7; animation: breatheBack 4.2s ease-in-out infinite; }
+.p.on.hov .back { opacity: 1; animation: none; }
+/* 人物：站姿與被看著時的反應兩張疊在一起，hover 或選定時交叉淡入 */
+.pp image { transition: opacity .25s ease; }
+.pp .react { opacity: 0; }
+.pp.hov .react, .picked .pp.chosen .react { opacity: 1; }
+.pp.hov .stand, .picked .pp.chosen .stand { opacity: 0; }
+.p.on.hov .glow { opacity: 1; animation: none; }
+@keyframes breatheBack { 50% { opacity: .5; } }
+.shade { mix-blend-mode: multiply; opacity: 0; transition: opacity 1.2s ease; }
+.p.off .shade, .picked .p:not(.chosen) .shade { opacity: 1; }
+.picked .p:not(.chosen) .glow, .picked .p:not(.chosen) .back { opacity: 0; animation: none; }
+.name { font-family: inherit; font-weight: 700; text-anchor: middle; letter-spacing: .12em; paint-order: stroke; stroke-linejoin: round; transition: opacity 1s; pointer-events: none; }
+.u.off .name, .picked .u:not(.chosen) .name { opacity: .4; }
+.hit { fill: transparent; }
+.u.on .hit { cursor: pointer; }
+.u.off { pointer-events: none; }
+.u:focus { outline: none; }
+.ring { fill: none; stroke: var(--paper); stroke-width: 3; stroke-dasharray: 3 9; stroke-linecap: round; opacity: 0; transition: opacity .3s; }
+.u.on:focus-visible .ring { opacity: .9; }
+.say { position: fixed; left: 0; right: 0; text-align: center; pointer-events: none; padding: 0 16px; }
+#title { top: max(5vh, 18px); left: max(3.2vw, 16px); right: auto; padding: 0; writing-mode: vertical-rl; }
+#title p { margin: 0; font-size: clamp(28px, 5.4vmin, 56px); letter-spacing: .32em; line-height: 1.25; text-shadow: 0 0 2px rgba(30,24,50,.9), 0 0 14px rgba(30,24,50,.75), 0 0 34px rgba(30,24,50,.55); }
+#hint { bottom: max(3.6vh, 16px); }
+#confirmp { font-size: clamp(13px, 1.7vmin, 16px) !important; opacity: .92; min-height: 0; }
+#confirmp:empty { display: none; }
+.snd { position: fixed; top: max(10px, env(safe-area-inset-top)); right: 12px; z-index: 6; font: 500 12px/1 "Noto Sans TC", system-ui, sans-serif; letter-spacing: .12em; padding: 6px 11px; border-radius: 99px; border: 1px solid rgba(246,239,226,.45); background: rgba(47,42,58,.45); color: var(--paper); cursor: pointer; }
+.snd:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
+#hint p { margin: 0; font-size: clamp(14px, 2vmin, 19px); letter-spacing: .16em; line-height: 1.7; text-shadow: 0 0 2px rgba(30,24,50,.95), 0 0 10px rgba(30,24,50,.8), 0 0 24px rgba(30,24,50,.6); transition: opacity .6s; }
+@media (max-aspect-ratio: 1/1) {
+  #title { writing-mode: horizontal-tb; left: 0; right: 0; top: max(4vh, 18px); }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition-duration: .01s !important; } }
+</style>
+</head>
+<body>
+<svg id="sv" aria-label="王城廣場上，三個守護者站成三角形" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="bleed" x="-40%" y="-40%" width="180%" height="180%"><feTurbulence type="fractalNoise" baseFrequency=".012" numOctaves="3" seed="5"/><feDisplacementMap in="SourceGraphic" scale="70"/><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="brush" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="9"/><feDisplacementMap in="SourceGraphic" scale="5"/><feGaussianBlur stdDeviation=".6"/></filter>
+    <filter id="haze" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="36"/><feColorMatrix type="matrix" values=".72 0 0 0 0  0 .72 0 0 0  0 0 .8 0 0  0 0 0 1 0"/></filter>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="26"/></filter>
+    <linearGradient id="fadeg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".07" stop-color="#fff"/><stop offset=".93" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <mask id="fade" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#fadeg)"/></mask>
+    <linearGradient id="fadehg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".05" stop-color="#fff"/><stop offset=".95" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <mask id="fadeh" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#fadehg)"/></mask>
+  </defs>
+  <image id="bgblur" preserveAspectRatio="xMidYMid slice" filter="url(#haze)"/>
+  <image id="art" x="0" y="0"/>
+  <g id="edges"></g>
+  <g id="effects"></g>
+  <g id="people"></g>
+  <g id="ui"></g>
+</svg>
+<button class="snd" id="snd" type="button" aria-pressed="false" aria-label="聲音開關">聲音 開</button>
+<div class="say" id="title"><p>她看向……</p></div>
+<div class="say" id="hint" aria-live="polite"><p id="confirmp"></p><p id="hintp">讀取好感……</p></div>
+<script>
+/* 音效（2026-11-16 作者：四個小遊戲「四個都補」）。全部用 Web Audio 即時合成，不載音檔。
+   Larch 的 iframe 與手機都不准自動出聲：第一次點擊、觸控或按鍵時才開 AudioContext（環境允許自動播放時就直接響）。
+   還沒解鎖時自己跑的動畫（例如自動打字）不排聲音，免得解鎖那一刻全部擠在一起響。
+   總音量 LEVEL 壓在對白與配樂底下；減少動態（prefers-reduced-motion）不影響聲音。
+   window.__sndLog：測試看呼叫了哪些聲音。window.__sndRender(序列, 秒數)：用 OfflineAudioContext 算出同一段聲音，給錄音評分（新版/music/minigame_sfx.py）。 */
+var SND = (function () {
+  var LEVEL = .4, ac = null, master = null, muted = false, gestureAt = -1e9, S = {};
+  function ctx() {
+    if (!ac) { var C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
+      try { ac = new C(); } catch (e) { return null; }
+      master = ac.createGain(); master.gain.value = muted ? 0 : LEVEL; master.connect(ac.destination); }
+    if (ac.state === 'suspended' && ac.resume) { try { var p = ac.resume(); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+    return ac; }
+  function gesture() { gestureAt = performance.now(); ctx(); }
+  ['pointerdown', 'touchend', 'keydown'].forEach(function (k) { addEventListener(k, gesture, true); });
+  function noise(a) { if (!a.__noise) { var n = a.sampleRate, b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0);
+    for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; a.__noise = b; } return a.__noise; }
+  // 單音：f 起，可滑到 o.f2；o.att 秒起音後指數衰減，dur 秒收完
+  function tone(a, out, t, f, dur, vol, o) { o = o || {}; var osc = a.createOscillator(), g = a.createGain(), att = o.att || .004;
+    osc.type = o.type || 'sine'; osc.frequency.setValueAtTime(f, t); if (o.f2) osc.frequency.exponentialRampToValueAtTime(o.f2, t + (o.glide || dur));
+    g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(vol, t + att); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    osc.connect(g); g.connect(out); osc.start(t); osc.stop(t + dur + .02); }
+  // 雜訊經濾波器（預設帶通）：短促的敲、喀、刷
+  function hiss(a, out, t, f, dur, vol, o) { o = o || {}; var s = a.createBufferSource(), fl = a.createBiquadFilter(), g = a.createGain(), att = o.att || .002;
+    s.buffer = noise(a); fl.type = o.type || 'bandpass'; fl.frequency.setValueAtTime(f, t); if (o.f2) fl.frequency.exponentialRampToValueAtTime(o.f2, t + dur); fl.Q.value = o.q || 1;
+    g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(vol, t + att); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(fl); fl.connect(g); g.connect(out); s.start(t, Math.random() * .5); s.stop(t + dur + .02); }
+  function play(name, arg) { (window.__sndLog = window.__sndLog || []).push(name);
+    if (muted || !S[name]) return; var a = ctx(); if (!a) return;
+    if (a.state !== 'running' && performance.now() - gestureAt > 1000) return;
+    try { S[name](a, master, a.currentTime + .01, arg); } catch (e) {} }
+  window.__sndRender = function (seq, sec) { var C = window.OfflineAudioContext || window.webkitOfflineAudioContext,
+    a = new C(1, Math.ceil(44100 * (sec || 2)), 44100), g = a.createGain(); g.gain.value = LEVEL; g.connect(a.destination);
+    seq.forEach(function (x) { S[x[0]](a, g, .05 + (x[2] || 0), x[1]); });
+    return a.startRendering().then(function (b) { return Array.prototype.slice.call(b.getChannelData(0)); }); };
+  // 「聲音 開／關」鈕：傳入按鈕元素
+  function bindMute(btn) { if (!btn) return; btn.addEventListener('click', function (e) { e.stopPropagation(); muted = !muted;
+    btn.setAttribute('aria-pressed', String(muted)); btn.textContent = muted ? '聲音 關' : '聲音 開';
+    if (master) master.gain.setTargetAtTime(muted ? 0 : LEVEL, ac.currentTime, .02); }); }
+  return { S: S, tone: tone, hiss: hiss, play: play, bindMute: bindMute };
+})();
+// 好感三角：三個人各一個音（明 E5、晨 G5、詩 C6，合起來是一個大三和弦）。指到人（滑鼠移上去、鍵盤聚焦、手機第一次點）是輕的鈴聲；
+// 選定是較亮、較長的鈴；「三個人一起」指到時三個音依序滑過，選定時三音同時響成和弦。
+(function (T) {
+  var NOTE = { M: 659.25, C: 783.99, S: 1046.5 };
+  function bell(a, o, t, f, vol, dur, bright) { T(a, o, t, f, dur, vol, { att: bright ? .012 : .03 }); T(a, o, t, f * 2, dur * .6, vol * (bright ? .35 : .18), { att: .012 });
+    T(a, o, t, f * 3.01, dur * .35, vol * (bright ? .18 : .06), { att: .01 }); if (bright) T(a, o, t, f * 4.2, dur * .25, vol * .08, { att: .006 }); }
+  SND.S.hover = function (a, o, t, keys) { keys = keys || ['C']; keys.forEach(function (k, i) { bell(a, o, t + i * .07, NOTE[k], keys.length > 1 ? .1 : .15, 1.1, false); }); };
+  SND.S.pick = function (a, o, t, keys) { keys = keys || ['C']; keys.forEach(function (k) { bell(a, o, t, NOTE[k], keys.length > 1 ? .13 : .2, 1.6, true); });
+    bell(a, o, t + .09, NOTE[keys[keys.length - 1]] * 2, .05, 1, false); };
+})(SND.tone);
+</script>
+<script>
+(function () {
+// B3：場景背景（無人、放大兩倍）→ 光影與暗部 → 三人各自重畫的高解析立繪（站姿＋被看著時的反應）→ 名字與點選熱區。效果不會疊在人身上。
+// 座標系維持插畫原尺寸（橫 1536×1024、直 1024×1536），高解析圖檔只是像素較多。
+var ART = {
+  wide: { src: './img/triangle/B3_wide.webp', w: 1536, h: 1024, fy: .5, keep: [236, 1000],
+    cut: {
+      C: { src: './img/triangle/cut/B3_C.webp', x: 217.6, y: 319.0, w: 245.4, h: 598.0,
+        react: { src: './img/triangle/cut/B3_C_react.webp', x: 221.7, y: 319.0, w: 240.5, h: 598.0 } },
+      M: { src: './img/triangle/cut/B3_M.webp', x: 705.1, y: 311.0, w: 109.3, h: 364.0,
+        react: { src: './img/triangle/cut/B3_M_react.webp', x: 696.9, y: 311.0, w: 117.6, h: 364.0 } },
+      S: { src: './img/triangle/cut/B3_S.webp', x: 1056.2, y: 313.0, w: 242.1, h: 607.0,
+        react: { src: './img/triangle/cut/B3_S_react.webp', x: 1043.7, y: 313.0, w: 257.0, h: 607.0 } }
+    },
+    P: {
+      C: { g: [348, 900], r: 120, box: [335, 615, 125, 305], n: [335, 282] },
+      M: { g: [757, 668], r: 80, box: [757, 490, 62, 188], n: [757, 272] },
+      S: { g: [1168, 900], r: 120, box: [1175, 615, 130, 308], n: [1175, 280] }
+    }
+  },
+  tall: { src: './img/triangle/B3_tall.webp', w: 1024, h: 1536, fy: .5, keep: [360, 1260],
+    cut: {
+      C: { src: './img/triangle/cut/B3_C.webp', x: 59.4, y: 498.0, w: 292.6, h: 713.0,
+        react: { src: './img/triangle/cut/B3_C_react.webp', x: 64.3, y: 498.0, w: 286.8, h: 713.0 } },
+      M: { src: './img/triangle/cut/B3_M.webp', x: 439.2, y: 436.0, w: 145.0, h: 483.0,
+        react: { src: './img/triangle/cut/B3_M_react.webp', x: 428.2, y: 436.0, w: 156.1, h: 483.0 } },
+      S: { src: './img/triangle/cut/B3_S.webp', x: 671.0, y: 530.0, w: 270.0, h: 677.0,
+        react: { src: './img/triangle/cut/B3_S_react.webp', x: 657.1, y: 530.0, w: 286.6, h: 677.0 } }
+    },
+    P: {
+      C: { g: [228, 1192], r: 100, box: [225, 855, 140, 355], n: [225, 468] },
+      M: { g: [511, 908], r: 72, box: [512, 678, 75, 245], n: [512, 405] },
+      S: { g: [803, 1192], r: 100, box: [810, 870, 140, 345], n: [810, 500] }
+    }
+  }
+};
+var NAME = { C: '晨', M: '明', S: '詩', ALL: '三個人一起' };
+var COL = { C: '#d8e46a', M: '#a9c2ff', S: '#ffb0c4', ALL: '#c7a6ef' };
+var STROKE = { C: '#4b5a12', M: '#1d2c5e', S: '#5e1424', ALL: '#3a2c55' };
+var NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parentEl) {
+  var node = document.createElementNS(NS, tag);
+  Object.keys(attrs).forEach(function (key) { node.setAttribute(key, attrs[key]); });
+  if (parentEl) parentEl.appendChild(node);
+  return node;
+}
+var LARCH = { v: {}, on: false,
+  set: function (name, value) { parent.postMessage({ type: 'larch:set', name: name, value: value }, '*'); },
+  done: function (result, payload) { parent.postMessage({ type: 'larch:complete', result: result, payload: payload || {} }, '*'); window.__done = { result: result, payload: payload || {} }; },
+  num: function (key, fallback) { var q = new URLSearchParams(location.search).get(key); var value = q != null ? q : LARCH.v[key]; value = +value; return isFinite(value) ? value : fallback; },
+  param: function (key, fallback) { var q = new URLSearchParams(location.search).get(key); return q != null ? q : (LARCH.v[key] != null ? LARCH.v[key] : fallback); }
+};
+addEventListener('message', function (event) {
+  var data = event.data || {};
+  if (data.type === 'larch:init') { LARCH.v = data.variables || {}; boot(); }
+});
+parent.postMessage({ type: 'larch:ready' }, '*');
+setTimeout(boot, parent === window ? 150 : 1500);
+function boot() { if (LARCH.on) return; LARCH.on = true; start(); }
+
+SND.bindMute(document.getElementById('snd'));
+var state = { lit: {}, picked: null, layout: '', best: 'C', hover: null, pending: null, pointer: '' }, currentFormat = '';
+function start() {
+  var affection = { C: LARCH.num('affC', 0), M: LARCH.num('affM', 0), S: LARCH.num('affS', 0) };
+  var highest = Math.max(affection.C, affection.M, affection.S);
+  var lowest = Math.min(affection.C, affection.M, affection.S);
+  var allLit = highest - lowest <= 2;
+  ['C', 'M', 'S'].forEach(function (key) { state.lit[key] = allLit || affection[key] === highest; });
+  state.lit.ALL = true;
+  var leaders = ['C', 'M', 'S'].filter(function (key) { return affection[key] === highest; });
+  var last = String(LARCH.param('lastAff', 'C')).toUpperCase();
+  window.__bestAffRoute = leaders.indexOf(last) >= 0 ? last : leaders[0];
+  state.best = window.__bestAffRoute;
+  state.hint = allLit ? '三人都在等妳。點一個人，或點中間的「三個人一起」。' : '亮著的人可以選；中間的「三個人一起」也可以。';
+  render();
+  addEventListener('resize', render);
+  // 觸控待確認時點空白處取消；按鍵盤就回到鍵盤模式
+  document.getElementById('sv').addEventListener('click', function () { if (state.pending && !state.picked) { state.pending = null; applyReact(); } });
+  addEventListener('keydown', function () { state.pointer = 'keyboard'; });
+}
+function render() {
+  var format = innerWidth / innerHeight < 1 ? 'tall' : 'wide';
+  var art = ART[format], points = art.P, svg = document.getElementById('sv');
+  var aspect = innerWidth / innerHeight, viewBox;
+  if (aspect > art.w / art.h) {
+    // 比插畫寬的螢幕：先裁天空與最下緣的地磚，但 keep 範圍（名字到提示字下方的地面）一定完整；
+    // 再寬就不裁了，左右延伸到模糊背景，插畫左右邊緣淡出。
+    var keep = art.keep, visibleHeight = art.w / aspect;
+    if (visibleHeight >= keep[1] - keep[0]) {
+      var top = Math.min(keep[0], Math.max(keep[1] - visibleHeight, (art.h - visibleHeight) * art.fy));
+      viewBox = [0, top, art.w, visibleHeight];
+    } else {
+      var keepHeight = keep[1] - keep[0], keepWidth = keepHeight * aspect;
+      viewBox = [(art.w - keepWidth) / 2, keep[0], keepWidth, keepHeight];
+    }
+  } else if (format === 'tall') {
+    var extendedHeight = art.w / aspect;
+    viewBox = [0, (art.h - extendedHeight) * art.fy, art.w, extendedHeight];
+  } else {
+    var visibleWidth = art.h * aspect;
+    viewBox = [(art.w - visibleWidth) * .5, 0, visibleWidth, art.h];
+  }
+  var blur = document.getElementById('bgblur');
+  blur.setAttribute('href', art.src);
+  ['x', 'y', 'width', 'height'].forEach(function (key, index) { blur.setAttribute(key, viewBox[index] + (index < 2 ? -60 : 120)); });
+  var image = document.getElementById('art');
+  image.setAttribute('mask', viewBox[1] < 0 ? 'url(#fade)' : viewBox[0] < 0 ? 'url(#fadeh)' : '');
+  svg.setAttribute('viewBox', viewBox.join(' '));
+  state.layout = format;
+  if (format === currentFormat && document.getElementById('people').childNodes.length) return;
+  currentFormat = format;
+  image.setAttribute('href', art.src); image.setAttribute('width', art.w); image.setAttribute('height', art.h);
+  var edges = document.getElementById('edges'), effects = document.getElementById('effects');
+  var people = document.getElementById('people'), ui = document.getElementById('ui');
+  edges.textContent = ''; effects.textContent = ''; people.textContent = ''; ui.textContent = '';
+  drawScene(art, points, edges, effects, people, ui);
+}
+function drawScene(art, points, edges, effects, people, ui) {
+  var all = { g: [
+    (points.C.g[0] + points.M.g[0] + points.S.g[0]) / 3,
+    (points.C.g[1] + points.M.g[1] + points.S.g[1]) / 3
+  ], r: (points.C.r + points.S.r) / 2 };
+  var scale = art.h / 1024;
+  [['C', 'M'], ['M', 'S'], ['S', 'C']].forEach(function (pair) {
+    var bothLit = state.lit[pair[0]] && state.lit[pair[1]];
+    el('line', { class: 'edge', x1: points[pair[0]].g[0], y1: points[pair[0]].g[1], x2: points[pair[1]].g[0], y2: points[pair[1]].g[1],
+      'stroke-width': 2.6 * scale, 'stroke-dasharray': (1.5 * scale) + ' ' + (11 * scale), opacity: bothLit ? .8 : .35, filter: 'url(#brush)' }, edges);
+  });
+  ['M', 'C', 'S', 'ALL'].forEach(function (key) {
+    var point = key === 'ALL' ? all : points[key];
+    var lit = state.lit[key];
+    var effectGroup = el('g', { class: 'p ' + (lit ? 'on' : 'off'), 'data-k': key, id: 'fx' + key }, effects);
+    var hitGroup = el('g', { class: 'u ' + (lit ? 'on' : 'off'), 'data-k': key, id: 'd' + key }, ui);
+    if (key === 'ALL') {
+      el('ellipse', { class: 'glow', cx: point.g[0], cy: point.g[1], rx: point.r * .95, ry: point.r * .3, fill: COL.ALL, filter: 'url(#bleed)' }, effectGroup);
+      el('ellipse', { class: 'glow', cx: point.g[0], cy: point.g[1], rx: point.r * .4, ry: point.r * .12, fill: '#fffaf0', filter: 'url(#soft)' }, effectGroup);
+      el('ellipse', { class: 'ring', cx: point.g[0], cy: point.g[1], rx: point.r, ry: point.r * .34 }, hitGroup);
+      el('ellipse', { class: 'hit', cx: point.g[0], cy: point.g[1], rx: point.r * 1.1, ry: point.r * .45 }, hitGroup);
+    } else {
+      var box = point.box, cut = art.cut[key];
+      el('ellipse', { class: 'shade', cx: box[0], cy: box[1], rx: box[2] * 1.3, ry: box[3] * .98, fill: '#2a2c55', 'fill-opacity': .42, filter: 'url(#soft)' }, effectGroup);
+      el('ellipse', { class: 'back', cx: box[0], cy: box[1] - box[3] * .1, rx: box[2] * 1.12, ry: box[3] * .92, fill: COL[key], filter: 'url(#bleed)' }, effectGroup);
+      el('ellipse', { class: 'glow', cx: point.g[0], cy: point.g[1], rx: point.r, ry: point.r * .3, fill: COL[key], filter: 'url(#bleed)' }, effectGroup);
+      el('ellipse', { class: 'glow', cx: point.g[0], cy: point.g[1], rx: point.r * .45, ry: point.r * .13, fill: '#fff8e8', filter: 'url(#soft)' }, effectGroup);
+      el('ellipse', { class: 'ring', cx: box[0], cy: box[1], rx: box[2], ry: box[3] }, hitGroup);
+      el('ellipse', { class: 'hit', cx: box[0], cy: box[1], rx: box[2], ry: box[3] }, hitGroup);
+      var personGroup = el('g', { class: 'pp', 'data-k': key, id: 'pp' + key, style: 'pointer-events:none' }, people);
+      el('image', { class: 'stand', href: cut.src, x: cut.x, y: cut.y, width: cut.w, height: cut.h, 'data-k': key }, personGroup);
+      var react = cut.react;
+      if (react && lit) el('image', { class: 'react', href: react.src, x: react.x, y: react.y, width: react.w, height: react.h, 'data-k': key }, personGroup);
+    }
+    var fontSize = (key === 'ALL' ? 28 : 38) * scale;
+    var namePoint = point.n || [point.g[0], point.g[1] + fontSize * .35];
+    el('text', { class: 'name', x: namePoint[0], y: namePoint[1], fill: lit ? '#fff8ec' : '#d9d2e2', stroke: STROKE[key], 'stroke-width': 6 * scale, 'font-size': fontSize }, hitGroup).textContent = NAME[key];
+    if (lit) {
+      hitGroup.setAttribute('role', 'button'); hitGroup.setAttribute('tabindex', '0'); hitGroup.setAttribute('aria-label', NAME[key]);
+      // 滑鼠、鍵盤：點一下就選。觸控（手機沒有 hover）：第一次點＝播反應、待確認，第二次點同一個才選；點別人就換成別人的反應。
+      hitGroup.addEventListener('pointerdown', function (event) { state.pointer = event.pointerType; });
+      hitGroup.addEventListener('click', function (event) {
+        event.stopPropagation();
+        if (state.pointer === 'touch' && state.pending !== key) { state.pending = key; applyReact(); return; }
+        go(key);
+      });
+      hitGroup.addEventListener('keydown', function (event) { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); go(key); } });
+      // 滑鼠移上去或鍵盤聚焦：背後的光變亮、人換成被看著時的反應（「三個人一起」＝三位可選的人一起）；移開換回。
+      hitGroup.addEventListener('pointerenter', function (event) { if (event.pointerType === 'mouse' || event.pointerType === 'pen') { state.hover = key; applyReact(); } });
+      hitGroup.addEventListener('pointerleave', function () { if (state.hover === key) { state.hover = null; applyReact(); } });
+      hitGroup.addEventListener('focus', function () { if (state.pointer === 'touch') return; state.hover = key; applyReact(); });
+      hitGroup.addEventListener('blur', function () { if (state.hover === key) { state.hover = null; applyReact(); } });
+    } else hitGroup.setAttribute('aria-disabled', 'true');
+    if (state.picked) { effectGroup.classList.toggle('chosen', state.picked === key); hitGroup.classList.toggle('chosen', state.picked === key); }
+  });
+  document.getElementById('hintp').textContent = state.picked ? '她看向' + NAME[state.picked] + '。' : state.hint;
+  applyReact();
+}
+// 誰顯示被看著時的反應：觸控待確認的優先，否則是滑鼠或鍵盤正指著的；「三個人一起」帶動三位可選的人。
+function reactKeys(key) {
+  if (!key) return [];
+  return key === 'ALL' ? ['C', 'M', 'S'].filter(function (k) { return state.lit[k]; }) : [key];
+}
+var lastSnd = null;
+function applyReact() {
+  var active = state.picked ? null : (state.pending || state.hover);
+  var keys = reactKeys(active);
+  if (active && active !== lastSnd) SND.play('hover', keys.length ? keys : [active]);
+  lastSnd = active;
+  ['C', 'M', 'S', 'ALL'].forEach(function (k) {
+    var on = keys.indexOf(k) >= 0 || active === k;
+    var fx = document.getElementById('fx' + k), person = document.getElementById('pp' + k);
+    if (fx) fx.classList.toggle('hov', on);
+    if (person) person.classList.toggle('hov', on);
+  });
+  var confirm = document.getElementById('confirmp');
+  confirm.textContent = state.pending && !state.picked ? '再點一次「' + NAME[state.pending] + '」確定' : '';
+}
+function go(key) {
+  if (state.picked || !state.lit[key]) return;
+  state.picked = key; state.pending = null;
+  SND.play('pick', key === 'ALL' ? reactKeys(key) : [key]);
+  document.getElementById('sv').classList.add('picked');
+  var chosen = reactKeys(key).concat(key);  // 選「三個人一起」時三位可選的人也一起維持反應
+  document.querySelectorAll('.p, .u, .pp').forEach(function (group) { group.classList.toggle('chosen', chosen.indexOf(group.dataset.k) >= 0); });
+  applyReact();
+  document.getElementById('hintp').textContent = '她看向' + NAME[key] + '。';
+  var best = window.__bestAffRoute || 'C';
+  LARCH.set('ch7Route', key); LARCH.set('bestAffRoute', best); LARCH.set('awardRoute', best);
+  setTimeout(function () { LARCH.done(key, { ch7Route: key, bestAffRoute: best, awardRoute: best }); }, 1600);
+}
+window.__state = function () {
+  var images = Array.prototype.slice.call(document.querySelectorAll('#art, #people image.stand'));
+  var reacts = Array.prototype.slice.call(document.querySelectorAll('#people image.react'));
+  var shown = {};
+  document.querySelectorAll('#people .pp').forEach(function (group) {
+    var react = group.querySelector('.react');
+    shown[group.dataset.k] = react && getComputedStyle(react).opacity > .5 ? 'react' : 'stand';
+  });
+  return { booted: LARCH.on, inited: Object.keys(LARCH.v).length > 0, lit: Object.assign({}, state.lit), picked: state.picked,
+    layout: state.layout, bestAffRoute: state.best, images: images.map(function (image) { return image.getAttribute('href'); }),
+    reacts: reacts.map(function (image) { return image.getAttribute('href'); }), shown: shown, pending: state.pending,
+    confirm: document.getElementById('confirmp').textContent,
+    viewBox: document.getElementById('sv').getAttribute('viewBox').split(' ').map(Number) };
+};
+window.__screenPoint = function (key) {
+  var node = document.querySelector('#d' + key + ' .hit');
+  var box = node.getBBox(), point = document.getElementById('sv').createSVGPoint();
+  point.x = box.x + box.width / 2; point.y = box.y + box.height / 2;
+  var screen = point.matrixTransform(node.getScreenCTM());
+  return { x: screen.x, y: screen.y };
+};
+})();
+</script>
+</body>
+</html>

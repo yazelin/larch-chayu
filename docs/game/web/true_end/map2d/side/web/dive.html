@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>海灘・下潛</title>
+<link rel="icon" href="data:,">
+<!-- 海灘「下潛」的直向海底長畫（真結局/設計.md「3D 玩法的繪本版演法」第 3 項；劇本 新版/劇本/第四章.md 691、694 行、真結局.md 156 行；計畫 dive_plan.md）
+     由上到下：水面與透下來的黃昏光、小魚群／轉藍的中層，水母、海龜／海底沙地、珊瑚、貝殼，回憶捲軸（第 6 張）。
+     按住往下潛（滑鼠、手指、空白鍵或 ↓），放開慢慢浮回水面；← → 或按住時往左右拖，可小幅左右游。沒有氧氣條、不會失敗。
+     第四章（?chapter=4）只到有水母的中層；真結局潛到最底，海龜、灰珊瑚、捲軸在那裡。浮回水面後回到進來的地方（?back=…）。
+     捲動跟天燈長畫共用 vscroll.js。Larch 外嵌卡協定照 新版/minigames/README.md：送 larch:ready → 收 larch:init → 過程中 larch:set、浮上來時 larch:complete。
+     網址參數：?chapter=4｜true、?back=回去的網址、?reset=1 清掉本機紀錄、?still=1 模擬系統減少動態、?fast=1 浮沉加快（只給測試用）。 -->
+<style>
+:root{--ink:#4a3a4c;--dim:#7a6a80;--hand:"LXGW WenKai TC","Iansui","Kaiti TC","Noto Sans TC",serif}
+html,body{width:100%;height:100%;height:100dvh;margin:0;overflow:hidden;background:#0d4f7a}
+#stage{position:fixed;inset:0;overflow:hidden;background:#0d4f7a;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;cursor:default}
+#art{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#bg{position:absolute;left:0;top:0;display:block;pointer-events:none;-webkit-user-drag:none}
+#rays{position:absolute;left:0;top:0;pointer-events:none;mix-blend-mode:screen}
+.sp{position:absolute;left:0;top:0;pointer-events:none;will-change:transform}
+.sp img{display:block;width:100%;height:100%;-webkit-user-drag:none;filter:var(--tint,none) drop-shadow(-3px 5px 4px rgba(10,40,70,.35))}
+.sp.fish img{filter:var(--tint,none) drop-shadow(-2px 3px 2px rgba(10,40,70,.3))}
+.sp.jelly .halo,.sp.scroll .halo{position:absolute;left:50%;top:45%;width:240%;height:200%;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;mix-blend-mode:screen;opacity:0;transition:opacity .5s ease;
+  background:radial-gradient(closest-side,rgba(255,214,246,.85),rgba(255,180,230,.35) 45%,rgba(255,170,220,0) 100%)}
+.sp.jelly.glow .halo{opacity:1}
+.sp.jelly.glow img{filter:var(--tint,none) brightness(1.35) saturate(1.15) drop-shadow(0 0 14px rgba(255,210,245,.95))}
+.sp.scroll .halo{opacity:.75;background:radial-gradient(closest-side,rgba(255,244,196,.85),rgba(255,230,160,.3) 50%,rgba(255,230,160,0) 100%);animation:sglow 2.2s ease-in-out infinite}
+@keyframes sglow{50%{opacity:.35}}
+.sp.coral .color{position:absolute;inset:0;width:100%;height:100%;-webkit-mask-image:radial-gradient(circle at var(--mx,50%) var(--my,80%),#000 calc(var(--r,0%) - 18%),transparent var(--r,0%));mask-image:radial-gradient(circle at var(--mx,50%) var(--my,80%),#000 calc(var(--r,0%) - 18%),transparent var(--r,0%))}
+.sp.coral img.gray{filter:var(--tint,none) grayscale(1) brightness(1.02) contrast(.92) drop-shadow(-3px 5px 4px rgba(10,40,70,.35))}
+.sp.tea img{filter:var(--tint,none) drop-shadow(-4px 6px 5px rgba(10,40,70,.38))}
+.bub{position:absolute;border-radius:50%;pointer-events:none;border:2px solid rgba(235,252,255,.75);background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.75) 0 18%,rgba(220,250,255,.12) 40%,rgba(220,250,255,.05));animation:bub var(--t,2.2s) ease-out forwards}
+@keyframes bub{from{transform:translate(0,0) scale(.6);opacity:.95}to{transform:translate(var(--dx,0px),var(--dy,-160px)) scale(1);opacity:0}}
+.note{position:absolute;pointer-events:none;width:44px;height:auto;animation:note 1.9s ease-out forwards}
+@keyframes note{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}15%{opacity:1}100%{transform:translate(calc(-50% + var(--dx,0px)),calc(-50% - 110px)) scale(1);opacity:0}}
+/* 熱區名牌（靠近捲軸、灰珊瑚時出現；點名牌或 Enter 互動） */
+.tag{position:absolute;transform:translate(-50%,-100%);padding:.32em .95em .38em;border:1px solid #fff9;border-radius:3px;background:#fff1ddef;color:var(--ink);font:700 26px/1.2 var(--hand);letter-spacing:.1em;white-space:nowrap;cursor:pointer;pointer-events:auto;rotate:-2deg;filter:drop-shadow(0 3px 3px #1d304a66)}
+.tag[hidden]{display:none}
+/* 介面：紙條 */
+.ui{position:fixed;z-index:6;padding:.5em 1.15em .55em;border:1px solid #ffffffbb;border-radius:3px;background:#fff3e8ed;color:var(--ink);box-shadow:0 4px 12px #0a1e3044;font:clamp(14px,1.05vw,19px)/1.35 var(--hand);letter-spacing:.1em;pointer-events:none}
+#label{top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));font-weight:700;font-size:clamp(16px,1.2vw,21px)}
+#hint{left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);white-space:nowrap;color:var(--dim);transition:opacity .6s}
+#hint.off{opacity:0}
+.btn{position:fixed;z-index:7;padding:.6em 1.4em .65em;border:1px solid #fff9;border-radius:4px;background:#fff0e2ed;color:var(--ink);font:700 clamp(18px,1.25vw,23px)/1.25 var(--hand);letter-spacing:.14em;box-shadow:0 4px 12px #0a1e3055;cursor:pointer;touch-action:manipulation;rotate:-2deg}
+.btn:active{transform:translateY(2px)}.btn[hidden]{display:none}
+#call{right:max(16px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom))}
+#up{right:max(16px,env(safe-area-inset-right));top:max(62px,calc(env(safe-area-inset-top) + 50px))}
+#toast{position:fixed;z-index:8;left:50%;top:max(64px,calc(env(safe-area-inset-top) + 52px));transform:translate(-50%,-8px);padding:.5em 1.2em;background:#fff3e8ef;border:1px solid #fff9;border-radius:4px;color:var(--ink);font:700 clamp(15px,1.15vw,21px)/1.3 var(--hand);letter-spacing:.08em;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#dialog{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:#0b1f36b0;cursor:pointer}#dialog.on{display:grid}
+#dialog .paper{width:min(760px,calc(100vw - 36px));padding:clamp(28px,6vw,64px);background:repeating-linear-gradient(0deg,#fffaf1,#fffaf1 2px,#f7f0e6 3px,#fffaf1 5px);border:2px solid #fff8e8;border-radius:8px;box-shadow:0 12px 42px #06101c99;transform:rotate(-1deg);animation:unroll .35s ease-out;font-family:var(--hand);color:var(--ink)}
+@keyframes unroll{from{transform:rotate(-1deg) translateY(14px);opacity:0}}
+#dialog b{display:block;margin-bottom:.6em;color:var(--dim);font-size:17px;letter-spacing:.12em}#dialog p{margin:0;font-size:clamp(20px,4vw,28px);line-height:1.7;letter-spacing:.04em}#dialog small{display:block;margin-top:1em;text-align:right;color:var(--dim)}
+#fade{position:fixed;inset:0;z-index:30;background:#06243c;opacity:1;pointer-events:none;transition:opacity .9s ease}
+@media(max-width:700px){.ui{font-size:12px}#label{font-size:13px}.btn{font-size:15px}#hint{bottom:max(84px,calc(env(safe-area-inset-bottom) + 76px));white-space:normal;width:max-content;max-width:calc(100vw - 32px);text-align:center}}
+@media(prefers-reduced-motion:reduce){.bub,.note{animation-duration:.01ms!important}}
+</style>
+</head>
+<body data-state="loading">
+<div id="stage" aria-label="海底長畫：按住往下潛，放開浮上來">
+  <div id="art"><img id="bg" alt="" src="../art/out/dive/flat.jpg" draggable="false"><canvas id="rays"></canvas></div>
+</div>
+<div id="label" class="ui">海底</div>
+<div id="hint" class="ui">按住往下潛，放開慢慢浮上來；← → 左右游</div>
+<button id="call" class="btn" type="button">呼喚</button>
+<button id="up" class="btn" type="button" hidden>上岸</button>
+<div id="toast"></div>
+<div id="dialog" role="button" tabindex="0" aria-label="收起回憶，點一下或按 Enter"><div class="paper"><b id="dialog-title"></b><p id="dialog-text"></p><small>點一下收起</small></div></div>
+<div id="fade"></div>
+<script src="island_bridge.js"></script>
+<script src="../../../studio_web/studio_storage.js"></script>
+<script type="module" src="dive_play.js"></script>
+</body>
+</html>

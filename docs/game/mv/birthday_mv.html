@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>生日歌</title>
+<link rel="icon" href="data:,">
+<!-- 第六章〈生日〉詩的生日歌 MV。對應 新版/劇本/第六章.md「〔手機裡傳出吉他聲。詩唱了起來。〕」到「〔吉他聲停了。〕」。
+     由 新版/mv/build_birthday_mv.py 從 birthday_storyboard.json 與 media/birthday.lrc 產生，不要手改這個檔。
+     一句歌詞一張定稿 CG，字幕一次一句；整首唱完（最後一句「明年　我再唱給妳聽」配詩的畫面），吉他收尾後畫面與字幕停一下，淡出後送 larch:complete。
+     協定：載入送 larch:ready → 收 larch:init（只存起來，不讀變數）→ 播完送 larch:complete。
+     miniGameReadVars：（無）　miniGameWriteVars：（無）　result：birthdaySong，payload：{}
+     Larch 的框不能自動播音，開場紙卡的「播放」鈕同時解鎖聲音。網址加 embed=1：沒有任何連結，播放中右下有「略過」。 -->
+<link rel="stylesheet" href="birthday_mv.css">
+</head>
+<body>
+<div class="film" aria-hidden="true"><i id="fA"></i><i id="fB"></i></div>
+<div class="shade" aria-hidden="true"></div>
+<div class="lyric" aria-live="off"><p id="lA"></p><p id="lB"></p></div>
+<div class="black" id="black" aria-hidden="true"></div>
+<div class="intro" id="intro"><div class="card">
+  <small>第六章．第 20 天</small><h1>生日歌</h1><i class="rule"></i>
+  <p class="quote">「生日歌我寫好了。不准哭喔。」</p>
+  <button type="button" class="go" id="go">播放</button>
+  <p class="msg" id="msg"></p>
+</div></div>
+<button type="button" id="skip" class="skip" hidden>略過</button>
+<button type="button" id="again" class="again" hidden>再看一次</button>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="ragged" x="-10%" y="-20%" width="120%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".03 .07" numOctaves="3" seed="7"/><feDisplacementMap in="SourceGraphic" scale="9"/></filter>
+</defs></svg>
+<script>
+const MV = {"title": "生日歌", "audio": "media/birthday.mp3", "dur": 27.92, "hold": 2.0, "fade": 1.4, "result": "birthdaySong", "shots": [{"t0": 0.0, "cg": "1-16", "img": "media/cg_1-16.webp", "move": "in", "focus": [86, 55], "zoom": 1.0, "blank": false, "sec": "第一句", "t1": 4.2}, {"t0": 4.2, "cg": "5-02", "img": "media/cg_5-02.webp", "move": "in", "focus": [43, 40], "zoom": 1.7, "blank": false, "sec": "第二句", "t1": 7.4}, {"t0": 7.4, "cg": "3-23", "img": "media/cg_3-23.webp", "move": "out", "focus": [30, 42], "zoom": 1.05, "blank": false, "sec": "第三句", "t1": 10.9}, {"t0": 10.9, "cg": "插2-2", "img": "media/cg_i2-2.webp", "move": "in", "focus": [22, 38], "zoom": 1.05, "blank": false, "sec": "第四句", "t1": 13.45}, {"t0": 13.45, "cg": "6-19", "img": "media/cg_6-19.webp", "move": "left", "focus": [36, 55], "zoom": 1.1, "blank": false, "sec": "第五句", "t1": 16.4}, {"t0": 16.4, "cg": "6-19", "img": "media/cg_6-19.webp", "move": "in", "focus": [73, 44], "zoom": 1.9, "blank": false, "sec": "第六句", "t1": 19.9}, {"t0": 19.9, "cg": "插3-05c-1", "img": "media/cg_i3-05c-1.webp", "move": "in", "focus": [68, 34], "zoom": 1.0, "blank": false, "sec": "第七句（唱完）", "t1": 27.92}], "lines": [{"t": 0.7, "text": "桌上一杯冰紅茶"}, {"t": 4.2, "text": "妳咬著筆發呆"}, {"t": 7.4, "text": "說好早點睡　又熬到兩點"}, {"t": 10.9, "text": "唸妳一句　妳就抗議啦"}, {"t": 13.45, "text": "沒有蛋糕　便當也好"}, {"t": 16.4, "text": "生日快樂　生日快樂"}, {"t": 19.9, "text": "明年　我再唱給妳聽"}]};
+</script>
+<script src="birthday_mv.js"></script>
+</body>
+</html>

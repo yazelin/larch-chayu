@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>朝霞丘（一整張長畫）</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&display=swap");
+/* 紙感介面（作者 2026-11-13，照《轉生成寶箱怪的我》的水彩紙卡做法；素材 art/ui/：洋紅幕生成、去背、border-image 九宮格四邊毛邊照原比例只拉中間） */
+:root{--ink:#5a4150;--dim:#8a7080;--hand:"LXGW WenKai TC","Iansui","Kaiti TC","Noto Sans TC",serif;
+  --panel:url("../art/ui/ui_panel.webp");--tag:url("../art/ui/ui_tag.webp");--btn:url("../art/ui/ui_btn.webp");--frame:url("../art/ui/ui_frame.webp");
+  --panel-slice:0 0 0 0;--panel-width:0;--tag-slice:0 0;--tag-width:0;--btn-slice:0 0;--btn-width:0;--frame-slice:0;--frame-width:0}
+html,body{width:100%;height:100%;height:100dvh;margin:0;overflow:hidden;background:#28232a;color:var(--ink);font-family:var(--hand)}
+#stage{position:fixed;inset:0;overflow:hidden;background:#28232a;touch-action:none;user-select:none;-webkit-user-select:none}
+#art{position:absolute;top:0;left:0;height:100%;will-change:transform}
+#art img.layer{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;-webkit-user-drag:none}
+#fg{z-index:3}
+.person{position:absolute;z-index:2;transform:translate(-50%,calc(-100% + var(--pad,0%)));pointer-events:none}
+.person .sheet{display:block;height:100%;width:auto;position:relative;z-index:1;transform-origin:50% 100%;
+  transform:translateY(var(--bob,0%)) rotate(var(--rock,0deg)) scaleX(var(--facing,1));filter:sepia(.08) saturate(.98) drop-shadow(-7px 8px 5px rgba(80,50,60,.40));-webkit-user-drag:none}
+.person .shadow{position:absolute;left:50%;bottom:calc(var(--pad,0%) - 2%);height:5%;width:70%;transform:translateX(-50%);opacity:.5;pointer-events:none}
+/* 熱區：平常看不見；靠近時名牌（紙片）從上面落下來 */
+.hotspot{position:absolute;z-index:4;display:block;padding:0;border:0;outline:0;background:transparent;box-shadow:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.hotspot:focus,.hotspot:focus-visible{outline:0}
+.hotspot[hidden]{display:none!important}
+.hotspot::after{content:attr(data-name);position:absolute;z-index:8;left:50%;bottom:calc(100% + 6px);padding:.45em 1.1em .5em;color:#fff;font:700 15px/1.3 var(--hand);letter-spacing:.1em;white-space:nowrap;pointer-events:none;
+  border-style:solid;border-width:0;border-image:var(--tag) var(--tag-slice) fill / var(--tag-width) stretch;text-shadow:0 0 .3em rgba(150,60,60,.45);filter:drop-shadow(0 3px 3px rgba(90,50,60,.28));
+  opacity:0;visibility:hidden;transform:translate(-50%,-14px) rotate(-6deg);transition:opacity .18s,transform .22s cubic-bezier(.3,1.4,.5,1),visibility .18s}
+.hotspot.nearby::after,.hotspot:hover::after{opacity:1;visibility:visible;transform:translate(-50%,0) rotate(-2deg)}
+/* 地名、操作說明：淡色紙條 */
+#label,#hint{position:fixed;z-index:10;padding:.5em 1.3em .55em;color:var(--ink);font:700 15px/1.3 var(--hand);letter-spacing:.12em;white-space:nowrap;pointer-events:none;
+  border-style:solid;border-width:0;border-image:var(--btn) var(--btn-slice) fill / var(--btn-width) stretch;filter:drop-shadow(0 3px 4px rgba(90,50,60,.22))}
+#label{top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));rotate:-1.5deg}
+#hint{left:50%;top:max(12px,env(safe-area-inset-top));transform:translateX(-50%) rotate(.6deg);font-weight:400;font-size:14px;color:var(--dim)}
+/* 對話框：放畫面下方的水彩紙卡（不擋人），出現時像紙片飄下來；名牌在左上角，一句一句推進，選項是紙感按鈕 */
+#scrim{position:fixed;inset:0;z-index:20;background:transparent;opacity:0;pointer-events:none}
+#panel{position:fixed;z-index:21;left:50%;bottom:max(18px,env(safe-area-inset-bottom));width:min(1180px,calc(100vw - 48px));min-height:150px;padding:40px 60px 30px 86px;color:var(--ink);cursor:pointer;
+  border-style:solid;border-width:0;border-image:var(--panel) var(--panel-slice) fill / var(--panel-width) stretch;filter:drop-shadow(0 10px 16px rgba(90,50,80,.26));
+  transform:translate(-50%,40px) rotate(2deg);opacity:0;pointer-events:none;transition:transform .32s cubic-bezier(.25,1.35,.45,1),opacity .2s}
+#panel.on,#scrim.on{opacity:1;pointer-events:auto}#panel.on{transform:translate(-50%,0) rotate(-.6deg)}
+#panel h2{position:absolute;left:84px;top:-14px;margin:0;padding:.35em 1.1em .4em;color:#fff;font:700 17px/1.3 var(--hand);letter-spacing:.14em;rotate:-3deg;
+  border-style:solid;border-width:0;border-image:var(--tag) var(--tag-slice) fill / var(--tag-width) stretch;text-shadow:0 0 .3em rgba(150,60,60,.45)}
+#panel h2:empty{display:none}
+#panel p{margin:0;min-height:2.6em;font-size:22px;line-height:1.7;letter-spacing:.05em}#panel.narration p{color:var(--dim)}
+#panel .next{position:absolute;right:34px;bottom:26px;width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-top:12px solid #d98a7a;animation:bob 1.3s ease-in-out infinite}
+#panel.choosing .next{display:none}
+@keyframes bob{50%{transform:translateY(-4px)}}
+#choices{display:none;gap:14px 18px;flex-wrap:wrap;margin-top:12px}#panel.choosing #choices{display:flex}
+#choices button,#panel-close{display:inline-block;padding:.5em 1.5em .55em;color:var(--ink);font:700 18px/1.3 var(--hand);letter-spacing:.12em;cursor:pointer;background:none;
+  border-style:solid;border-width:0;border-image:var(--btn) var(--btn-slice) fill / var(--btn-width) stretch;rotate:-1deg;transition:transform .15s;animation:drop .35s cubic-bezier(.25,1.35,.45,1) both}
+#choices button:nth-child(2){rotate:1.2deg;animation-delay:.08s}
+#choices button:hover,#choices button:focus-visible{transform:translateY(-3px) rotate(-1deg);outline:0}
+#panel-close{display:none}
+@keyframes drop{from{transform:translateY(-18px) rotate(-5deg);opacity:0}}
+/* 觀景 CG：紙相框，翻開時像從桌上掀起 */
+#cg{position:fixed;inset:0;z-index:30;display:none;background:rgba(30,20,28,.72);cursor:pointer;opacity:0;transition:opacity .6s ease}#cg.on{opacity:1}#cg:not(.on){pointer-events:none}
+#cg .mat{position:absolute;left:50%;top:50%;width:min(calc(94vw - var(--frame-bx,151px)),calc((100vh - var(--frame-by,125px) - 64px) * var(--cg-ar,1.5)));aspect-ratio:var(--cg-ar,1.5);transform:translate(-50%,-50%) rotate(-1deg);
+  padding:var(--frame-width);min-height:0;filter:drop-shadow(0 14px 22px rgba(0,0,0,.4));animation:cg-open .5s cubic-bezier(.25,1.3,.45,1)}   /* 內容區＝紙框的透明開口（九宮格切在開口邊上），寬度算的是開口，加上紙邊後整個不超出畫面；min-height:0：圖比開口大一圈，不讓它把開口撐高（撐高了比例就跑掉、下緣會露底） */
+#cg .mat::after{content:"";position:absolute;inset:0;border-style:solid;border-width:var(--frame-width);border-image:var(--frame) var(--frame-slice) / var(--frame-width) stretch;pointer-events:none}   /* 紙框疊在圖上面，開口邊的金線緊貼著圖 */
+/* 圖要露出來的那一塊＝開口四邊各多伸 --frame-over 到紙邊底下；圖檔自己的留白（--cg-trim-*，佔圖寬高的比例）再往外推，整圈藏在紙邊底下。全部用比例算，換比例、換視窗都成立 */
+#cg .mat img{display:block;max-width:none;object-fit:cover;--ov:var(--frame-over,4px);
+  width:calc((100% + 2 * var(--ov)) / (1 - var(--cg-trim-l,0) - var(--cg-trim-r,0)));height:calc((100% + 2 * var(--ov)) / (1 - var(--cg-trim-t,0) - var(--cg-trim-b,0)));
+  transform:translate(calc(var(--cg-trim-l,0) * -100% - var(--ov)),calc(var(--cg-trim-t,0) * -100% - var(--ov)))}
+#cg span{position:absolute;left:50%;bottom:22px;transform:translateX(-50%) rotate(1deg);padding:.45em 1.3em .5em;color:var(--ink);font:700 15px/1.3 var(--hand);letter-spacing:.12em;
+  border-style:solid;border-width:0;border-image:var(--btn) var(--btn-slice) fill / var(--btn-width) stretch;filter:drop-shadow(0 3px 4px rgba(0,0,0,.3))}
+@keyframes cg-open{from{transform:translate(-50%,-44%) rotate(-7deg) scale(.92);opacity:0}}
+/* 互動用：小紙片、花瓣、閃光、小物件動效、捲軸卡、小提示 */
+.thing{position:absolute;z-index:2;transform:translate(-50%,calc(-100% + var(--pad,0%)));pointer-events:none;transition:left 1.4s cubic-bezier(.3,.9,.4,1)}
+.thing .sheet{display:block;height:100%;width:auto;position:relative;z-index:1;transform-origin:50% 100%;transform:translateY(var(--bob,0%)) scaleX(var(--facing,1));filter:drop-shadow(-4px 5px 3px rgba(80,50,60,.38));-webkit-user-drag:none}
+.thing .shadow{position:absolute;left:50%;bottom:calc(var(--pad,0%) - 2%);height:5%;width:70%;transform:translateX(-50%);opacity:.45}
+.thing.pot .sheet{transform:scale(var(--grow,1));transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.thing.rabbit.idle .sheet{animation:ridle 3.4s ease-in-out infinite}@keyframes ridle{0%,80%,100%{transform:translateY(var(--bob,0%)) scaleX(var(--facing,1))}88%{transform:translateY(calc(var(--bob,0%) - 5%)) scaleY(1.04) scaleX(var(--facing,1))}}
+.thing.rabbit.hopx .sheet{animation:rhop .55s cubic-bezier(.3,.9,.4,1.2)!important}@keyframes rhop{40%{transform:translateY(-36%) rotate(-5deg) scaleX(var(--facing,1))}100%{transform:translateY(0) scaleX(var(--facing,1))}}
+.thing.rabbit.look .sheet{animation:none;transition:transform .25s}
+.thing.rabbit.eartwitch .sheet{animation:eartw .5s ease-in-out 2!important;transform-origin:50% 90%}@keyframes eartw{30%{transform:rotate(-4deg) scaleY(1.04) scaleX(var(--facing,1))}70%{transform:rotate(3deg) scaleX(var(--facing,1))}}
+.thing.rabbit.wiggle .sheet{animation:rwig .6s ease-in-out!important}@keyframes rwig{25%{transform:rotate(-6deg) scaleX(var(--facing,1))}60%{transform:rotate(5deg) scaleX(var(--facing,1))}}
+.person.tea.pouring .sheet{animation:pouring .95s ease-in-out}@keyframes pouring{30%,70%{transform:rotate(-7deg) translateY(2%) scaleX(var(--facing,1))}}
+.person.chen.paintstroke .sheet{animation:pstroke .38s ease-in-out}@keyframes pstroke{50%{transform:translateX(6px) rotate(2deg) scaleX(var(--facing,1))}}
+.thing.sit{transition:transform .5s cubic-bezier(.3,1.3,.5,1)}.thing.sit.sink .sheet{animation:sink .55s cubic-bezier(.3,1.4,.5,1)}@keyframes sink{0%{transform:translateY(-14%);opacity:0}60%{transform:translateY(2%)}100%{transform:translateY(0);opacity:1}}
+.thing.sit.rise .sheet{animation:rise .4s ease-in forwards}@keyframes rise{to{transform:translateY(-10%);opacity:0}}
+.thing.sit.bench{z-index:2}.thing.sit.bench .shadow{opacity:0}   /* 人和長凳同一張紙片，蓋在原畫長凳上；原畫已經有長凳的影子 */
+.fx{position:absolute;z-index:6;width:var(--sz,24px);height:auto;pointer-events:none;transform:translate(-50%,-50%);-webkit-user-drag:none}
+.fx.star,.fx.dot{animation:fxburst 1.3s ease-out forwards}@keyframes fxburst{0%{transform:translate(-50%,-50%) rotate(var(--a)) translateX(0) scale(.3);opacity:0}15%{opacity:1}100%{transform:translate(-50%,-50%) rotate(var(--a)) translateX(var(--d)) scale(.9) rotate(180deg);opacity:0}}
+.fx.heart.float{animation:fxheart 1.6s ease-out forwards}@keyframes fxheart{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}20%{opacity:1;transform:translate(-50%,-70%) scale(1.1)}100%{transform:translate(calc(-50% + var(--dx)),-180%) scale(.9);opacity:0}}
+.fx.drop.falling{animation:fxdrop .9s ease-in forwards}@keyframes fxdrop{0%{transform:translate(-50%,-50%);opacity:0}20%{opacity:.95}100%{transform:translate(-50%,var(--dy));opacity:0}}
+#quest,#c7note{position:fixed;z-index:10;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));padding:.5em 1.3em .55em;color:var(--ink);font:700 15px/1.3 var(--hand);letter-spacing:.12em;white-space:nowrap;pointer-events:none;rotate:1.2deg;
+  border-style:solid;border-width:0;border-image:var(--tag) var(--tag-slice) fill / var(--tag-width) stretch;color:#fff;text-shadow:0 0 .3em rgba(150,60,60,.45);filter:drop-shadow(0 3px 4px rgba(90,50,60,.22))}
+#quest[hidden]{display:none}
+/* 第七章跟著走的三個人：彎腰撿東西、蹲下來量 */
+.person.follower.bend .sheet{animation:fbend .7s ease-in-out}@keyframes fbend{45%{transform:translateY(4%) rotate(9deg) scaleX(var(--facing,1))}}
+.thing.c7flower.pop .sheet{animation:c7pop .45s cubic-bezier(.3,1.5,.5,1)}@keyframes c7pop{0%{transform:scale(.2);opacity:0}100%{transform:scale(1);opacity:1}}
+.thing.c7soil{z-index:1}.thing.c7soil .shadow{opacity:0}
+#palette{position:fixed;z-index:10;top:max(54px,calc(env(safe-area-inset-top) + 42px));right:max(12px,env(safe-area-inset-right));display:flex;gap:8px;padding:.5em 1.1em;rotate:-1deg;pointer-events:none;
+  border-style:solid;border-width:0;border-image:var(--btn) var(--btn-slice) fill / var(--btn-width) stretch;filter:drop-shadow(0 3px 4px rgba(90,50,60,.22))}
+#palette[hidden]{display:none}
+#palette i{width:18px;height:18px;border-radius:50% 46% 52% 48%;background:#cfc6c0;opacity:.45;box-shadow:inset 0 0 0 1px rgba(90,60,70,.25);transition:background .4s,opacity .4s,transform .3s}
+#palette i.got{background:var(--c);opacity:1;transform:scale(1.12)}#palette i.done{box-shadow:inset 0 0 0 2px #fff,0 0 0 1.5px rgba(90,60,70,.4)}
+.easelpatch{position:absolute;z-index:1;pointer-events:none;display:block;max-width:none;transition:opacity .4s ease}   /* 畫架上的畫：局部重畫貼回來的補丁，疊在原畫同位置 */
+.note.out{animation:noteout .35s ease-in forwards}@keyframes noteout{to{transform:translateY(-14px) rotate(4deg);opacity:0}}
+#cg.under{z-index:19;background:rgba(30,20,28,.6)}
+body.locked .hotspot{pointer-events:none}body.locked .hotspot::after{opacity:0!important;visibility:hidden!important}
+.thing.hop .sheet{animation:none}
+.thing.butterfly:not(.landed) .sheet{animation:wingbeat .35s ease-in-out infinite alternate}@keyframes wingbeat{from{transform:scaleX(var(--facing,1))}to{transform:scaleX(calc(var(--facing,1) * .55))}}
+.thing.bird .sheet{transform:scale(var(--size,1)) scaleX(var(--facing,1));transition:transform .15s}
+.thing.bird.hopstep .sheet{animation:hopstep .42s ease-out}@keyframes hopstep{40%{transform:translate(6px,-22%) scale(var(--size,1)) scaleX(var(--facing,1))}100%{transform:translate(0,0) scale(var(--size,1)) scaleX(var(--facing,1))}}
+.thing.bird.ruffle .sheet{animation:ruffle .5s ease-in-out}@keyframes ruffle{25%{transform:rotate(-6deg) scale(1.06) scaleX(var(--facing,1))}50%{transform:rotate(5deg) scaleX(var(--facing,1))}75%{transform:rotate(-3deg) scaleX(var(--facing,1))}}
+.thing.bird.peckonce .sheet{animation:peckonce .6s ease-in-out}@keyframes peckonce{35%,70%{transform:rotate(16deg) translateY(8%) scaleX(var(--facing,1))}50%{transform:rotate(4deg) scaleX(var(--facing,1))}}
+.thing.bird.crouch .sheet{transform:scaleY(.78) translateY(10%) scaleX(var(--facing,1))!important}
+.thing.bird.flying .sheet{transform:scale(var(--size,1)) scaleX(var(--facing,1)) rotate(-8deg);transition:none}
+.thing.bird.flying{transition:none}   /* 飛行每幀自己算位置：.thing 的 left 1.4s 過場會讓牠落後，落地後還橫著滑一秒多，熱區已經開了卻點不到 */
+.thing.bird.flying .shadow{opacity:0}
+.thing.butterfly .sheet{transform:scaleX(var(--facing,1))}.thing.butterfly.landed .sheet{animation:none;transform:scaleX(calc(var(--facing,1) * .22))!important;transition:transform .4s}
+.thing.bloom .sheet{animation:bloom 3s ease-in-out infinite}@keyframes bloom{50%{transform:rotate(3deg) scale(1.03)}}
+.thing.fade .sheet{transition:opacity .35s;opacity:0}.thing.pop .sheet{animation:pop .5s cubic-bezier(.3,1.6,.5,1)}@keyframes pop{0%{transform:scale(.6)}}
+.thing.picked{transition:transform .5s,opacity .5s;transform:translate(-50%,calc(-120% + var(--pad,0%)));opacity:0}
+.petal{position:absolute;z-index:5;width:20px;height:14px;border:1.5px solid rgba(255,255,255,.9);box-shadow:0 1px 3px rgba(120,60,80,.35);border-radius:60% 60% 60% 60%/80% 80% 40% 40%;pointer-events:none;animation:fall 3s ease-in forwards;opacity:.95}
+.petal.drop{width:7px;height:11px;border-radius:50% 50% 50% 50%/40% 40% 60% 60%;animation-duration:.9s!important}
+@keyframes fall{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
+.spark{position:absolute;z-index:6;width:26px;height:26px;border-radius:50%;background:radial-gradient(#fff,#ffd66a 55%,rgba(255,200,120,0) 72%);box-shadow:0 0 14px 4px rgba(255,214,110,.75);pointer-events:none;animation:spark 1.2s ease-out forwards}
+@keyframes spark{to{transform:rotate(var(--a)) translateX(var(--d)) scale(.2);opacity:0}}
+.sway{position:absolute;z-index:3;pointer-events:none;animation:swayk .9s ease-in-out;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}@keyframes swayk{25%{transform:skewX(4deg)}75%{transform:skewX(-3deg)}}
+.hotspot.shake{animation:shakek .7s ease-in-out}@keyframes shakek{20%{transform:translateX(-6px) rotate(-1deg)}60%{transform:translateX(6px) rotate(1deg)}}
+.note{position:absolute;z-index:7;display:flex;gap:.6em;padding:.5em 1.1em;color:var(--ink);font:700 16px/1.3 var(--hand);letter-spacing:.14em;border-style:solid;border-width:0;border-image:var(--btn) var(--btn-slice) fill / var(--btn-width) stretch;filter:drop-shadow(0 4px 5px rgba(90,50,60,.3));animation:drop .4s cubic-bezier(.25,1.35,.45,1);cursor:pointer;rotate:-2deg}
+.can{position:absolute;z-index:6;width:46px;height:34px;border-radius:6px 6px 10px 10px;background:#8fb3d6;pointer-events:none;animation:pour .9s ease-in-out forwards;transform-origin:80% 80%}
+.can::after{content:"";position:absolute;right:-18px;top:6px;width:24px;height:8px;border-radius:4px;background:#8fb3d6;transform:rotate(-25deg)}
+@keyframes pour{0%{transform:rotate(0);opacity:0}30%{opacity:1}60%{transform:rotate(-35deg)}100%{transform:rotate(0);opacity:0}}
+.person.sitting{top:var(--sit-y)!important}.person.sitting .sheet{transform:rotate(-3deg) scaleX(var(--facing,1))!important}.person.sitting .shadow{opacity:0}
+.windline{position:absolute;inset:0;z-index:4;pointer-events:none;background:repeating-linear-gradient(100deg,transparent 0 120px,rgba(255,255,255,.07) 120px 124px);animation:windk 2.4s linear infinite}@keyframes windk{to{background-position:400px 0}}
+#scroll{position:fixed;inset:0;z-index:31;display:none;background:rgba(30,20,28,.5);cursor:pointer}
+#scroll .card{position:absolute;left:50%;top:50%;width:min(760px,calc(100vw - 48px));padding:46px 60px 40px 86px;color:var(--ink);transform:translate(-50%,-50%) rotate(-1.5deg);
+  border-style:solid;border-width:0;border-image:var(--panel) var(--panel-slice) fill / var(--panel-width) stretch;filter:drop-shadow(0 12px 18px rgba(0,0,0,.35))}
+#scroll.open .card{animation:unroll .6s cubic-bezier(.25,1.2,.45,1)}@keyframes unroll{0%{transform:translate(-50%,-50%) rotate(-1.5deg) scaleX(.04)}}
+#scroll .card b{display:block;margin-bottom:.4em;font-size:17px;letter-spacing:.14em;color:var(--dim)}#scroll .card p{margin:0;font-size:24px;line-height:1.7;letter-spacing:.06em}
+#scroll .card small{display:block;margin-top:1em;font-size:14px;color:var(--dim)}
+.toast{position:fixed;z-index:25;pointer-events:none;left:50%;bottom:max(150px,env(safe-area-inset-bottom));transform:translate(-50%,16px);padding:.45em 1.3em .5em;color:var(--ink);font:700 16px/1.3 var(--hand);letter-spacing:.12em;opacity:0;transition:transform .3s,opacity .3s;
+  border-style:solid;border-width:0;border-image:var(--btn) var(--btn-slice) fill / var(--btn-width) stretch;filter:drop-shadow(0 3px 4px rgba(90,50,60,.25));rotate:1deg}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+body.nohud #label,body.nohud #hint,body.nohud #quest,body.nohud #c7note{display:none!important}
+body.flatpaper .person .sheet{filter:none}body.flatpaper .person .shadow{display:none}
+body.sitting .hotspot::after,body.panel-open .hotspot::after{opacity:0!important;visibility:hidden!important}
+@media(prefers-reduced-motion:reduce){#panel,.hotspot::after,#scrim{transition-duration:0s}#cg .mat{animation:none}}
+</style>
+</head>
+<body>
+<main id="stage" aria-label="朝霞丘"><div id="art"></div></main>
+<div id="label">朝霞丘</div>
+<div id="quest" hidden></div>
+<div id="palette" hidden></div>
+<div id="hint">方向鍵或 A、D 移動・點地面走過去・手機按住左右半邊</div>
+<div id="scrim"></div>
+<div id="panel" role="dialog"><h2 id="panel-title"></h2><p id="panel-text"></p><div id="choices"></div><span class="next" aria-hidden="true"></span><button id="panel-close" type="button" hidden>關閉</button></div>
+<div id="scroll"><div class="card"><b></b><p></p><small>回憶　第 3 張</small></div></div>
+<div id="cg"><div class="mat"><img id="cg-img" alt="觀景"></div><span>點一下回到山丘</span></div>
+<script src="island_bridge.js"></script>
+<script src="../../../studio_web/studio_storage.js"></script>
+<script type="module" src="flat_engine.js"></script>
+</body>
+</html>

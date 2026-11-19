@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>朝霞丘（工作室模式：一個畫面一張畫）</title>
+<style>
+html,body{width:100%;height:100%;height:100dvh;margin:0;overflow:hidden;background:#28232a;color:#382c2b;font-family:"Noto Sans TC","Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif}
+#stage{position:fixed;inset:0;overflow:hidden;background:#28232a;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+/* 畫面切換：照 studio_web 轉身版的 .wall-layer */
+.scene-layer{position:absolute;inset:0;overflow:hidden;opacity:1;transform:translateX(0);transition:transform .4s cubic-bezier(.2,.72,.22,1),opacity .4s ease;will-change:transform,opacity}
+.scene-layer.entering{opacity:.4;transform:translateX(var(--enter-from))}
+.scene-layer.entering.arrived{opacity:1;transform:translateX(0)}
+.scene-layer.leaving.to-left{opacity:.3;transform:translateX(-100%)}
+.scene-layer.leaving.to-right{opacity:.3;transform:translateX(100%)}
+.art{position:absolute;overflow:hidden;background:#eadfda}   /* 整張畫等比縮放置中（fitArt），不重複鋪 */
+.art-image,.fg-image{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;user-select:none;-webkit-user-drag:none}
+.fg-image{z-index:3}
+.person{position:absolute;z-index:2;transform:translate(-50%,-100%);pointer-events:none}
+.person img{display:block;height:100%;width:auto;transform:scaleX(var(--facing,1));filter:drop-shadow(0 2px 2px rgba(50,32,25,.18));-webkit-user-drag:none}
+.person.walking img{animation:step .18s ease-in-out infinite alternate}
+.person:not(.walking) img{animation:idle 3.2s ease-in-out infinite}
+@keyframes step{from{transform:translateY(0) scaleX(var(--facing,1))}to{transform:translateY(-2.5%) scaleX(var(--facing,1))}}
+@keyframes idle{0%,100%{transform:translateY(0) scaleX(var(--facing,1))}50%{transform:translateY(-.3%) scaleX(var(--facing,1))}}
+.hotspot{position:absolute;z-index:4;display:block;padding:0;border:1px solid transparent;border-radius:8px;background:transparent;cursor:pointer;touch-action:manipulation}
+.hotspot::after{content:attr(data-name);position:absolute;z-index:8;left:50%;bottom:calc(100% + 7px);padding:5px 9px;border:1px solid rgba(255,250,242,.94);border-radius:999px;background:rgba(40,32,35,.88);color:#fffaf2;font:700 12px/1.3 "Noto Sans TC",sans-serif;white-space:nowrap;pointer-events:none;opacity:0;visibility:hidden;transform:translate(-50%,4px);transition:opacity .16s,transform .16s,visibility .16s}
+.hotspot.nearby{border-color:rgba(255,247,205,.5);background:rgba(255,232,165,.1);box-shadow:0 0 12px rgba(255,230,162,.35)}
+.hotspot.nearby::after,.hotspot:hover::after,.hotspot:focus-visible::after{opacity:1;visibility:visible;transform:translate(-50%,0)}
+#label{position:fixed;z-index:10;top:max(14px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));padding:8px 14px;border:1px solid rgba(255,250,242,.85);border-radius:999px;background:rgba(255,250,242,.9);font-size:14px;font-weight:700;letter-spacing:.08em;box-shadow:0 3px 14px rgba(26,18,18,.16);pointer-events:none}
+#hint{position:fixed;z-index:8;left:50%;top:max(62px,calc(env(safe-area-inset-top) + 56px));transform:translateX(-50%);padding:7px 13px;border:1px solid rgba(255,250,242,.76);border-radius:999px;background:rgba(40,32,35,.54);color:#fffaf2;font-size:13px;white-space:nowrap;pointer-events:none;backdrop-filter:blur(4px)}
+.turn{position:fixed;z-index:9;top:50%;display:grid;place-items:center;width:48px;height:64px;margin-top:-32px;border:1px solid rgba(255,250,242,.8);border-radius:16px;background:rgba(40,32,35,.45);color:#fffaf2;font-size:34px;line-height:1;cursor:pointer;backdrop-filter:blur(4px)}
+.turn[hidden]{display:none}#turn-left{left:max(10px,env(safe-area-inset-left))}#turn-right{right:max(10px,env(safe-area-inset-right))}
+#scrim{position:fixed;inset:0;z-index:20;background:rgba(20,14,16,.55);opacity:0;pointer-events:none;transition:opacity .2s}
+#panel{position:fixed;z-index:21;left:50%;top:50%;width:min(460px,calc(100vw - 32px));transform:translate(-50%,-47%) scale(.98);opacity:0;pointer-events:none;border:2px solid #c6a987;border-radius:16px;background:#fbf4e8;box-shadow:0 16px 50px rgba(0,0,0,.3);transition:transform .22s,opacity .22s;padding:18px 20px}
+#panel.on,#scrim.on{opacity:1;pointer-events:auto}#panel.on{transform:translate(-50%,-50%) scale(1)}
+#panel h2{margin:0 0 8px;font-size:18px}#panel p{margin:0 0 10px;line-height:1.6}#panel button{min-height:40px;padding:7px 16px;border:1px solid #c6a987;border-radius:999px;background:#fff;font-weight:700;cursor:pointer}
+#cg{position:fixed;inset:0;z-index:30;display:none;background:#1c1418;cursor:pointer}#cg img{width:100%;height:100%;object-fit:contain}
+#cg span{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);padding:8px 16px;border-radius:999px;background:rgba(40,32,35,.7);color:#fffaf2;font-size:14px}
+body.nohud #label,body.nohud #hint,body.nohud .turn{display:none!important}
+@media(prefers-reduced-motion:reduce){.scene-layer,#scrim,#panel{transition-duration:0s}}
+</style>
+</head>
+<body>
+<main id="stage" aria-label="朝霞丘"></main>
+<div id="label">朝霞丘</div>
+<div id="hint">方向鍵或 A、D 移動　點地面走過去　走到邊緣換畫面</div>
+<button class="turn" id="turn-left" type="button" aria-label="往左一個畫面">‹</button>
+<button class="turn" id="turn-right" type="button" aria-label="往右一個畫面">›</button>
+<div id="scrim"></div>
+<div id="panel" role="dialog"><h2 id="panel-title"></h2><div id="panel-body"></div><button id="panel-close" type="button">關閉</button></div>
+<div id="cg"><img id="cg-img" alt="朝霞丘的日出"><span>點一下回到山丘</span></div>
+<script src="../../../studio_web/studio_storage.js"></script>
+<script type="module" src="scene_engine.js"></script>
+</body>
+</html>

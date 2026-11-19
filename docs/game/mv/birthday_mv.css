@@ -1,0 +1,60 @@
+/* 第六章生日歌 MV。畫面與字幕照《餘燼》site/mv.css；開場卡照 新版/minigames 的水彩紙介面（coloring.html 的 .intro .card .go）。 */
+/* 芫荽體只帶這幾頁用到的字（新版/build/fonts.py 抽的，授權檔在字型旁邊）。預覽與嵌進遊戲都用這一份，不連 Google Fonts。 */
+@font-face { font-family: "Iansui"; src: url("media/fonts/iansui-mv.woff2") format("woff2"); font-display: block; }
+:root { color-scheme: dark; --bg: #1b1412; --ink: #fbf3e6; --paper: #f3ecdf; --paper-ink: #3b2f2c; --dim: #6e5a52; --gold: #b8862f;
+  --font: "Iansui", "LXGW WenKai TC", "Kaiti TC", "BiauKai", serif; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); overflow: hidden; font-family: var(--font);
+  -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+button:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+/* 畫面：兩層交叉淡化；background-position 與 transform-origin 由 JS 設成這一鏡的重點 */
+.film { position: fixed; inset: 0; overflow: hidden; background: var(--bg); }
+.film i { position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat;
+  opacity: 0; transition: opacity 1.4s ease; will-change: opacity, transform; }
+.film i.on { opacity: 1; }
+.shade { position: fixed; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(27,20,18,.18) 0%, rgba(27,20,18,0) 26%, rgba(27,20,18,0) 58%, rgba(27,20,18,.7) 100%); }
+
+/* 字幕：一次一句，放在下緣 */
+.lyric { position: fixed; left: 16px; right: 16px; bottom: max(8vh, 56px); height: 3.4em; pointer-events: none; text-align: center; }
+.lyric p { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; font-size: clamp(1.25rem, 2.7vw, 2.1rem); line-height: 1.5; letter-spacing: .14em;
+  text-wrap: balance; text-shadow: 0 0 16px rgba(0,0,0,.85), 0 1px 3px rgba(0,0,0,.9); opacity: 0; transform: translateY(8px);
+  transition: opacity .9s ease, transform .9s ease; }
+.lyric p.on { opacity: 1; transform: none; }
+
+.black { position: fixed; inset: 0; background: var(--bg); opacity: 0; pointer-events: none; transition: opacity 1.4s ease; }
+.black.on { opacity: 1; }
+
+/* 開場紙卡（Larch 的框不能自動播音，按「播放」同時解鎖聲音） */
+.intro { position: fixed; inset: 0; display: grid; place-items: center; z-index: 5; transition: opacity .7s;
+  background: rgba(233,223,208,.30); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+.intro.gone { opacity: 0; pointer-events: none; }
+.card { position: relative; isolation: isolate; width: min(420px, calc(100vw - 32px)); padding: 26px 28px 22px; text-align: center; color: var(--paper-ink); }
+.card::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 8px; filter: url(#ragged); background: var(--paper);
+  box-shadow: inset 0 0 18px rgba(150,118,92,.45), inset 0 0 3px rgba(120,92,70,.55), 0 14px 26px -14px rgba(60,40,30,.55); }
+.card small { display: block; font-size: 13px; letter-spacing: .45em; color: var(--gold); }
+.card h1 { margin: 8px 0 0; font-weight: 400; font-size: clamp(26px, 3vw, 34px); letter-spacing: .4em; text-indent: .4em; }
+.card .rule { display: block; width: 60%; height: 1px; margin: 14px auto 14px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+.card .quote { margin: 0 0 6px; font-size: 16px; line-height: 1.8; letter-spacing: .08em; color: var(--dim); }
+.go { position: relative; isolation: isolate; margin-top: 12px; padding: 10px 34px 10px 40px; font-size: 18px; letter-spacing: .4em; color: var(--paper-ink); transition: transform .15s; }
+.go::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 40%; filter: url(#ragged); background: rgba(233,207,154,.92); }
+.go:hover { filter: brightness(1.04); } .go:active { transform: scale(.97); }
+.card .msg { margin: 8px 0 0; min-height: 1.2em; font-size: 13px; color: #9b3b2f; letter-spacing: .08em; }
+
+.skip, .again { position: fixed; z-index: 4; padding: 7px 16px; border-radius: 14px; border: 1px solid rgba(243,236,223,.4); background: rgba(27,20,18,.45);
+  color: rgba(251,243,230,.82); font-size: 13px; letter-spacing: .2em; transition: opacity .3s; }
+.skip { right: 14px; bottom: 14px; opacity: .55; }
+.skip:hover { opacity: 1; }
+.again { left: 50%; bottom: 45vh; transform: translateX(-50%); font-size: 15px; padding: 10px 22px; }
+.skip[hidden], .again[hidden] { display: none; }
+
+@media (orientation: portrait) {
+  .lyric { bottom: max(10vh, 64px); }
+  .lyric p { font-size: clamp(1.15rem, 5vw, 1.5rem); letter-spacing: .1em; }
+}
+.reduce .film i, .reduce .lyric p, .reduce .black { transition: none; }
+.reduce .lyric p { transform: none; }
+@media (prefers-reduced-motion: reduce) { .film i, .lyric p, .black { transition: none; } .lyric p { transform: none; } }

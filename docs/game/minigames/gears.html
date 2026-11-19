@@ -1,0 +1,790 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>時之國．齒輪</title>
+<!-- 新版第五章〈時之國（預演）〉小遊戲：齒輪。對應 新版/劇本/第五章.md 的【小遊戲 齒輪】（最新版沒有計時器；城裡村民一直重複同一句是她做的，不在這張卡裡）。
+     背景使用定稿的時之國街景（約 9 秒一輪）：噴水池的水噴上去又掉下來、一隻鳥從同一個屋頂飛過去、一片葉子從樹枝掉下來又回到樹枝上；
+     城裡每一個鐘都指著 4:47 不動。城中間是晨畫的鐘塔，鐘面裡空了五格；時間大魔王（明）站在鐘塔底下低頭看懷錶。
+     五個齒輪：兩個躺在路上；三個只在這一分鐘的某一下出現（水柱噴到最高、鳥飛過屋頂、葉子離開樹枝），要趁那時候點。錯過了，下一輪又會出現。
+     撿到的齒輪進齒輪袋。點鐘面上空著的軸（或把袋裡的齒輪拖過去）放上去；放上去的角度是錯的，點一下轉四分之一齒、或按住拖著轉，轉到咬住旁邊那一個就「喀」一聲鎖住。
+     鍵盤：Tab 選袋裡的齒輪或鐘面的軸，Enter 放上／轉，方向鍵左右轉。
+     五個都咬住：鐘塔響一聲、指針往前走一格，整座城往前走（水落地、鳥飛出城、葉子停在路上、每一個鐘開始走，這些是明多做的），約 3.6 秒後送 larch:complete。不會失敗。
+     協定：送 larch:ready → 收 larch:init（只存起來，本遊戲不讀變數）→ 完成時 larch:set → larch:complete。
+     miniGameReadVars：（無）
+     miniGameWriteVars：ch5GearsDone（true）
+     result：ticking，payload：{}
+     直接開這個檔（不在 Larch 裡）也能玩；?still=1 模擬 prefers-reduced-motion；?fast=1 把一分鐘縮短（測試用）。 -->
+
+<style>
+:root { color-scheme: dark; --ink:#f4eee6; --dim:rgba(244,238,230,.7); --gold:#e9cf9a; --gold-dim:rgba(233,207,154,.42);
+  --c:#c8d45a; --m:#4f6fd8; --s:#b03a52; --cape:#b9a3e0; --brass:#d9b25e; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+body { color: var(--ink); font-family: "Iansui", "LXGW WenKai TC", "Kaiti TC", "BiauKai", serif; background: transparent; }
+body.on { background: radial-gradient(60vmax 40vmax at 12% 0%, rgba(200,212,90,.13), transparent 70%),
+  radial-gradient(70vmax 45vmax at 50% -12%, rgba(79,111,216,.26), transparent 70%),
+  radial-gradient(60vmax 40vmax at 92% 4%, rgba(176,58,82,.16), transparent 70%),
+  linear-gradient(180deg, #0c0e22 0%, #141433 55%, #1d1838 100%); }
+body.on::before { content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .65;
+  background-image: radial-gradient(1px 1px at 12% 18%, #fff8, transparent), radial-gradient(1px 1px at 33% 7%, #fff6, transparent),
+    radial-gradient(1.5px 1.5px at 71% 12%, #fff9, transparent), radial-gradient(1px 1px at 86% 31%, #fff5, transparent),
+    radial-gradient(1px 1px at 52% 4%, #fff6, transparent), radial-gradient(1.5px 1.5px at 4% 52%, #fff4, transparent),
+    radial-gradient(1px 1px at 96% 66%, #fff5, transparent), radial-gradient(1px 1px at 92% 8%, #fff7, transparent); }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+/* 作者 11-17：滑鼠點齒輪時瀏覽器預設的方形焦點框不要出現；只有鍵盤操作（focus-visible）才顯示 */
+:focus:not(:focus-visible) { outline: none; }
+svg g[tabindex]:focus { outline: none; }
+svg g.pick:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+.app { position: fixed; inset: 0; display: grid; grid-template-rows: auto 1fr auto; padding: max(2vh, 10px) max(1.5vw, 10px) max(1.5vh, 10px); gap: 10px; opacity: 0; transition: opacity .6s; }
+body.on .app { opacity: 1; }
+.bar { display: flex; align-items: center; gap: 12px; }
+.kicker { margin: 0; font-size: clamp(12px, 1vw, 14px); letter-spacing: .5em; color: var(--gold); white-space: nowrap; }
+.bar .rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold-dim), transparent); }
+.count { font-size: clamp(14px, 1.2vw, 17px); letter-spacing: .18em; white-space: nowrap; }
+.count b { font-weight: 400; color: var(--gold); font-variant-numeric: tabular-nums; }
+.mute { padding: 3px 12px; border-radius: 14px; background: none; border: 1px solid var(--gold-dim); color: var(--dim); font-size: 13px; letter-spacing: .15em; }
+.mute:hover { border-color: var(--gold); color: var(--ink); }
+.stage { position: relative; min-height: 0; display: flex; align-items: center; justify-content: center; gap: 16px; }
+.stage.tall { flex-direction: column; gap: 10px; }
+.frame { position: relative; flex: none; border-radius: 10px; box-shadow: 0 0 0 1px var(--gold-dim), 0 0 0 5px rgba(12,12,28,.7), 0 0 0 6px rgba(233,207,154,.16), 0 24px 60px -20px rgba(0,0,0,.8); overflow: hidden; }
+.frame svg { display: block; width: 100%; height: 100%; touch-action: none; }
+.side { flex: none; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.face { border-radius: 50%; overflow: visible; box-shadow: none; }
+.face svg { overflow: visible; }
+.bag { display: flex; gap: 8px; padding: 6px 12px; border-radius: 30px; background: rgba(14,14,34,.78); border: 1px solid var(--gold-dim); box-shadow: inset 0 0 0 3px rgba(12,12,28,.6); }
+.bag span { flex: none; font-size: 13px; letter-spacing: .3em; color: var(--gold); align-self: center; margin-right: 2px; writing-mode: horizontal-tb; }
+.pocket { position: relative; width: 46px; height: 46px; border-radius: 50%; border: 1px dashed rgba(233,207,154,.32); background: rgba(0,0,0,.2); padding: 0; display: grid; place-items: center; touch-action: none; }
+.pocket svg { width: 38px; height: 38px; display: none; }
+.pocket.full { border-style: solid; border-color: var(--gold-dim); cursor: grab; }
+.pocket.full svg { display: block; animation: pin .5s ease-out; }
+.pocket.sel { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(233,207,154,.25), 0 0 14px rgba(233,207,154,.5); }
+.pocket.sel svg { animation: spinSlow 4s linear infinite; }
+.pocket:disabled { cursor: default; }
+@keyframes pin { 0% { transform: scale(.3); } 70% { transform: scale(1.15); } }
+@keyframes spinSlow { to { transform: rotate(360deg); } }
+.hint { margin: 0; min-height: 1.8em; text-align: center; text-wrap: balance; font-size: clamp(14px, 1.25vw, 18px); letter-spacing: .14em; line-height: 1.7; transition: opacity .4s; }
+.hint.fade { opacity: 0; }
+.fly { position: fixed; left: 0; top: 0; width: 40px; height: 40px; margin: -20px 0 0 -20px; pointer-events: none; z-index: 4; transition: transform .7s cubic-bezier(.4,-.3,.4,1), opacity .3s; }
+.ghost { position: fixed; left: 0; top: 0; width: 54px; height: 54px; margin: -27px 0 0 -27px; pointer-events: none; z-index: 4; filter: drop-shadow(0 6px 10px #000a); }
+
+.intro { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(8,8,22,.62); backdrop-filter: blur(2px); transition: opacity .5s; z-index: 5; }
+.intro.gone { opacity: 0; pointer-events: none; }
+.card { width: min(460px, 88vw); padding: 26px 28px 24px; border-radius: 12px; text-align: center; background: rgba(14,14,34,.9);
+  border: 1px solid var(--gold-dim); box-shadow: inset 0 0 0 3px rgba(12,12,28,.6), inset 0 0 0 4px rgba(233,207,154,.12), 0 30px 60px -20px #000; }
+.card small { display: block; font-size: 13px; letter-spacing: .55em; color: var(--gold); }
+.card h1 { margin: 8px 0 0; font-weight: 400; font-size: clamp(24px, 2.6vw, 32px); letter-spacing: .4em; text-indent: .4em; }
+.card .rule { display: block; width: 60%; height: 1px; margin: 14px auto 16px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+.card p { margin: 0 0 8px; font-size: 15px; line-height: 1.8; letter-spacing: .08em; color: var(--dim); text-align: left; }
+.go { margin-top: 12px; padding: 10px 34px 10px 40px; border-radius: 22px; font-size: 18px; letter-spacing: .4em; background: rgba(233,207,154,.14); border: 1px solid var(--gold); color: var(--ink); transition: background .2s, transform .15s; }
+.go:hover { background: rgba(233,207,154,.26); } .go:active { transform: scale(.97); }
+
+/* 城（SVG） */
+.pick { cursor: pointer; }
+.pick .gearI { transform-box: fill-box; transform-origin: center; }
+.pick.road .gearI { animation: spinSlow 9s linear infinite; }
+.timed { opacity: 0; pointer-events: none; transition: opacity .18s; }
+.timed.on { opacity: 1; pointer-events: auto; }
+.timed.on .gearI { animation: pop .35s ease-out, spinSlow 3s linear infinite .35s; }
+@keyframes pop { 0% { transform: scale(.2); } 70% { transform: scale(1.25); } 100% { transform: scale(1); } }
+.got { display: none; }
+.glint { opacity: 0; pointer-events: none; }
+.glint.on { animation: glint .6s ease-out; }
+@keyframes glint { 0% { opacity: 0; transform: scale(.3) rotate(0); } 50% { opacity: 1; } 100% { opacity: 0; transform: scale(1.3) rotate(45deg); } }
+.glint { transform-box: fill-box; transform-origin: center; }
+.nudge { fill: none; stroke: var(--gold); stroke-width: 3; opacity: 0; pointer-events: none; }
+.nudge.on { animation: halo 1.6s ease-in-out infinite; }
+@keyframes halo { 0%,100% { opacity: .1; } 50% { opacity: .8; } }
+#hero { transition: transform .6s ease-in-out; }
+.heroPose, .bossPose { opacity: 0; transition: opacity .2s ease; }
+.heroPose.on, .bossPose.on { opacity: 1; }
+.reduce .heroPose, .reduce .bossPose { transition: none; }
+#hero .bob { animation: bob 1.8s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+#hero .capeA { animation: cape 1.3s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 0%; }
+@keyframes bob { 50% { transform: translateY(-2.5px); } }
+@keyframes cape { 50% { transform: skewX(-7deg) scaleY(1.03); } }
+.wing { transform-box: fill-box; transform-origin: 50% 100%; animation: flap .22s ease-in-out infinite alternate; }
+@keyframes flap { to { transform: scaleY(-.6); } }
+.hand { transform-box: view-box; }
+.rewind { opacity: 0; pointer-events: none; }
+.pulse { opacity: 0; pointer-events: none; transform-box: fill-box; transform-origin: center; }
+.pulse.on { animation: pulse 1.7s ease-out 2; }
+@keyframes pulse { 0% { opacity: .95; transform: scale(1); } 100% { opacity: 0; transform: scale(4); } }
+.face { transition: box-shadow 1.2s; }
+.face.running { box-shadow: 0 0 0 1px var(--gold), 0 0 40px 6px rgba(233,207,154,.35), 0 24px 60px -20px rgba(0,0,0,.8); }
+.reduce .pulse.on { animation: none; opacity: .5; }
+.rewind.on { animation: rewind .7s ease-out; }
+@keyframes rewind { 0% { opacity: .35; } 100% { opacity: 0; } }
+/* 鐘面 */
+.slot { cursor: pointer; outline: none; }
+.slot .ghostRing { fill: rgba(233,207,154,.05); stroke: rgba(233,207,154,.55); stroke-width: 2; stroke-dasharray: 5 6; transition: opacity .6s ease; }
+/* 11-17 作者「裝完虛線是可以拿掉」：齒輪咬住後，那個槽位的虛線圈淡出；沒裝或還沒咬住的照舊 */
+.slot.locked .ghostRing { opacity: 0; }
+/* 噴水池上層水盤溢流到底層水池的水幕：細水紋往下流 */
+#water .stream { animation: flow .8s linear infinite; } @keyframes flow { to { stroke-dashoffset: -12; } }
+.reduce #water .stream { animation: none; }
+.slot.want .ghostRing { animation: halo 1.4s ease-in-out infinite; stroke: var(--gold); }
+.slot:focus-visible .ghostRing, .slot:focus-visible .focusRing { stroke: #fff; opacity: 1; }
+.slot .focusRing { fill: none; stroke: transparent; stroke-width: 2; }
+.slot .rot { transition: transform .22s cubic-bezier(.3,1.6,.5,1); }
+.slot.dragging .rot { transition: none; }
+.slot.locked { cursor: default; }
+.slot .lockGlow { opacity: 0; fill: none; stroke: var(--gold); stroke-width: 4; }
+.slot.locked .lockGlow { animation: lockG .9s ease-out; }
+@keyframes lockG { 0% { opacity: .9; } 100% { opacity: 0; } }
+.reduce .pick.road .gearI, .reduce .timed.on .gearI, .reduce .pocket.sel svg, .reduce #hero, .reduce #hero .bob, .reduce #hero .capeA, .reduce .wing, .reduce .nudge.on, .reduce .slot.want .ghostRing, .reduce .slot .rot { animation: none !important; transition: none !important; }
+.reduce .nudge.on { opacity: .7; }
+
+/* 水彩紙介面（外框、紙卡與字體沿用 art/ui/minigame_link.html） */
+:root { color-scheme:light; --ink:#3b2f2c; --dim:#6e5a52; --gold:#b8862f; --gold-dim:rgba(184,134,47,.38); --paper:#f3ecdf; --brass:#b8862f;
+  --c:#a9b844; --m:#7f97df; --s:#c35366; --cape:#b59ad8; }
+body { color:var(--ink); background:radial-gradient(70vmax 45vmax at 18% 6%, rgba(255,214,150,.55), transparent 60%),
+  radial-gradient(120vmax 80vmax at 50% 55%, #e9dfcc, #cbbda6 70%, #9c8f80); }
+body.on { background:radial-gradient(70vmax 45vmax at 18% 6%, rgba(255,214,150,.55), transparent 60%),
+  radial-gradient(120vmax 80vmax at 50% 55%, #e9dfcc, #cbbda6 70%, #9c8f80); }
+body.on::before { content:""; position:fixed; inset:0; pointer-events:none; mix-blend-mode:multiply; opacity:.55; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .44 0 0 0 0 .36 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23n)'/%3E%3C/svg%3E"); }
+body.on::after { content:""; position:fixed; inset:0; pointer-events:none; background:radial-gradient(120vmax 80vmax at 50% 45%, transparent 55%, rgba(40,30,40,.42)); opacity:1; }
+.frame { isolation:isolate; padding:6px; border-radius:8px; background:var(--paper); box-shadow:none; }
+.frame::before { content:""; position:absolute; inset:0; z-index:-1; border-radius:6px; filter:url(#ragged); background:var(--paper);
+  box-shadow:inset 0 0 16px rgba(150,118,92,.45), inset 0 0 3px rgba(120,92,70,.55), 0 10px 22px -12px rgba(60,40,30,.5); }
+.frame svg { width:100%; height:100%; }
+.face { isolation:isolate; border-radius:50%; padding:6px; background:var(--paper); box-shadow:0 8px 18px -12px rgba(60,40,30,.5); }
+.face::before { border-radius:50%; }
+.bag { position:relative; isolation:isolate; background:none; border:0; border-radius:0; box-shadow:none; }
+.bag::before { content:""; position:absolute; inset:0; z-index:-1; border-radius:5px; filter:url(#ragged); background:var(--paper);
+  box-shadow:inset 0 0 14px rgba(150,118,92,.35), 0 8px 18px -12px rgba(60,40,30,.45); }
+.bag span { color:var(--gold); }
+.pocket { border:1px dashed rgba(110,90,82,.45); background:rgba(243,236,223,.62); }
+.pocket.full { border-color:var(--gold); background:rgba(243,236,223,.96); }
+.pocket.sel { border-color:var(--gold); box-shadow:0 0 0 3px rgba(184,134,47,.18), 0 0 14px rgba(184,134,47,.25); }
+.face.running { box-shadow:0 0 0 1px var(--gold), 0 0 32px 4px rgba(184,134,47,.28), 0 14px 26px -14px rgba(60,40,30,.5); }
+.slot .ghostRing { fill:rgba(233,207,154,.12); stroke:rgba(110,90,82,.55); }
+.slot.want .ghostRing { stroke:var(--gold); }
+.slot .lockGlow { stroke:var(--gold); }
+.pick .gearI { filter:none; }
+.intro { background:rgba(233,223,208,.38); backdrop-filter:blur(1px); }
+.card { position:relative; isolation:isolate; background:none; border:0; border-radius:0; box-shadow:none; }
+.card::before { content:""; position:absolute; inset:0; z-index:-1; border-radius:6px; filter:url(#ragged); background:var(--paper);
+  box-shadow:inset 0 0 16px rgba(150,118,92,.45), inset 0 0 3px rgba(120,92,70,.55), 0 10px 22px -12px rgba(60,40,30,.5); }
+.go { position:relative; isolation:isolate; background:none; border:0; color:var(--ink); }
+.go::before { content:""; position:absolute; inset:0; z-index:-1; border-radius:40%; filter:url(#ragged); background:rgba(233,207,154,.92); }
+.go:hover { background:none; filter:brightness(1.04); }
+.mute { position:relative; isolation:isolate; border:0; border-radius:0; color:var(--ink); background:none; }
+.mute::before { content:""; position:absolute; inset:-1px; z-index:-1; border-radius:40%; filter:url(#ragged); background:var(--paper);
+  box-shadow:inset 0 0 10px rgba(150,118,92,.32), 0 6px 14px -10px rgba(60,40,30,.45); }
+.mute:hover { border:0; color:var(--ink); filter:brightness(1.04); }
+.hint { color:var(--ink); }
+@media (orientation:portrait) { .frame { max-width:100%; } }
+</style></head>
+<body>
+<div class="app">
+  <div class="bar"><p class="kicker">第五章．時之國</p><i class="rule"></i><span class="count">齒輪 <b id="n">0</b>／<b>5</b></span><button class="mute" id="mute" aria-pressed="false">聲音 開</button></div>
+  <div class="stage" id="stage">
+    <div class="frame" id="cityF"><svg id="city" viewBox="0 0 800 560" role="img" aria-label="同一分鐘一直重來的石頭城" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="side" id="side">
+      <div class="frame face" id="faceF"><svg id="face" viewBox="-200 -200 400 400" role="group" aria-label="鐘塔的鐘面，五個空著的軸" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      <div class="bag" id="bag" role="group" aria-label="齒輪袋"><span>齒輪袋</span></div>
+    </div>
+  </div>
+  <p class="hint" id="hint">路上有兩個齒輪。其他的，只在這一分鐘的某一下出現。</p>
+</div>
+<div class="intro" id="intro"><div class="card">
+  <small>時之國（預演）</small><h1>齒輪</h1><i class="rule"></i>
+  <p>這座城停在同一分鐘，一直重來。鐘塔的鐘面裡，少了五個齒輪。</p>
+  <p>有的齒輪躺在路上；有的只在這一分鐘的某一下出現，要趁那時候點。錯過了也沒關係，下一輪又會出現。</p>
+  <p>撿到的齒輪放到鐘面空著的軸上，轉到咬住旁邊那一個，時鐘就會走。</p>
+  <button class="go" id="go">開始</button></div></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="ragged" x="-5%" y="-10%" width="110%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".03 .07" numOctaves="3" seed="7"/><feDisplacementMap in="SourceGraphic" scale="9"/></filter>
+  <filter id="ink" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".08" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.5"/><feGaussianBlur stdDeviation=".3"/></filter>
+</defs></svg>
+
+<script>
+/* ===== 素材（之後換正式圖只改這裡）=====
+   每一項空字串＝用下面程式畫的暫時素材（SVG）。換成圖片網址（建置時可寫 {{ASSET:檔名}}）就改用圖。
+   cityBg：整座城的背景（800×560，不含會動的水、鳥、葉子、鐘的指針與齒輪；鐘面圓心位置見 CLOCKS）。
+   boss：時間大魔王（明）站姿，腳底在圖下緣中間，約 90×130。hero：勇者站姿，約 60×78。
+   bird：鳥（約 40×24，朝右飛）。leaf：葉子（約 20×14）。gear：一個齒輪的透明 PNG（正方形，路上與齒輪袋共用；鐘面上的齒輪仍用程式畫，才能算咬合）。 */
+var ASSETS = { cityBg: './img/time_city_v3.webp', boss: './img/ming_king.png', hero: './img/hero.png', bird: './img/bird_', leaf: './img/leaf_1.webp', gear: './img/gear_12.webp' };
+/* 隨進度換的姿勢（作者 11-17：勇者要自然、隨進度換；明也要有反應，像上色的晨那樣）。每組圖排在同一畫布（900×1300，舉齒輪過頭所以比其他遊戲的 1150 高；站直身高 1100、兩腳中心在下緣中間，
+   canon_new/outfits/poses/normalize.py CANVAS_H=1300），同一個框疊放、交叉淡入，腳底不跳位；身高與腳底對齊原本的 hero.png、ming_king.png（明 188：茶語 157）。
+   勇者：閒逛（預設）→ 走路兩張交替（移動中）→ 蹲下撿齒輪 → 把齒輪舉高放上鐘 → 看鐘走起來；明：抱臂看懷錶（預設）→ 她撿到齒輪挑眉 → 咬住時動容看鐘塔 → 那一分鐘重來時按住懷錶 → 時間走起來淡淡地笑。 */
+var POSES = { hero: { box: [-80.6, -242.7, 161.2, 232.8], keys: ['idle', 'walk_a', 'walk_b', 'pick', 'raise', 'watch'], src: './img/hero_gears_', base: 'idle' },
+              boss: { box: [-101.9, -306.4, 205.9, 297.5], keys: ['calm', 'brow', 'moved', 'hold', 'smile'], src: './img/ming_', base: 'calm' } };
+var pose = { hero: 'idle', boss: 'calm' }, poseT = { hero: 0, boss: 0 }, walkT = 0;
+function setPose(who, k, ms) { clearTimeout(poseT[who]); poseT[who] = 0; if (pose[who] !== k) { pose[who] = k; [].forEach.call(document.querySelectorAll('.' + who + 'Pose'), function (im) { im.classList.toggle('on', im.dataset.k === k); }); }
+  if (ms) poseT[who] = setTimeout(function () { poseT[who] = 0; if (!finished) setPose(who, POSES[who].base); }, ms); }
+function poseImages(who, g) { var P = POSES[who]; P.keys.forEach(function (k) { var im = el('image', { href: P.src + k + '.webp', x: P.box[0], y: P.box[1], width: P.box[2], height: P.box[3], preserveAspectRatio: 'xMidYMax meet', class: who + 'Pose' + (k === pose[who] ? ' on' : '') }, g); im.dataset.k = k; }); }
+// 2026-11-16 作者：「噴泉的部份位置不正確偏移了」「噴泉的水、葉子落下的葉子也沒質感，鳥也是」；齒輪也換成 AI 畫的。
+// cityBg：從 TIME-1 定稿一次改出「指針與噴水池的水都拿掉」的 time_city_v3（_gen/c16/time_nowater_r2）。
+// 水、鳥、葉子、齒輪都是 AI 畫的水彩紙片（_gen/c16/ 的素材表去背切開）。
+// 水柱：WATER 的每一格是原素材表的像素大小 w×h、ax,ay＝出水口（或落點、水面中心）在圖裡的位置；k＝縮放。
+// 出水口：time_city_v3（1024×683）裡噴水池頂端的尖飾在 x 631、y 324～347（最上面的小碟在 347），尖飾上半很淡，
+// 水從 y 338 冒出來看起來才是從頂端出來的。背景以 slice 放進 800×560：倍率 560/683＝0.8199、左右各切 19.8，換成 (497.6, 277.1)。
+var SPOUT = { x: 631 * 0.81991 - 19.8, y: 338 * 0.81991 };   // (497.6, 277.1)
+var BOWL_Y = 389 * 0.81991, BASIN_Y = 445 * 0.81991;            // 上層水盆盆緣、下層水池水面
+var BOWL_HW = 29 * 0.81991, BASIN_HW = 72 * 0.81991;            // 11-17 從 time_city_v3 量：上層水盤半寬 29 px（602～660）、底層水池半寬 72 px（563～707）
+var WATER = [ { f: 1, w: 102, h: 175, ax: 51, ay: 144 }, { f: 2, w: 111, h: 395, ax: 56, ay: 364 }, { f: 3, w: 273, h: 490, ax: 137, ay: 459 },
+  { f: 4, w: 313, h: 404, ax: 155, ay: 373, at: 'bowl' }, { f: 5, w: 304, h: 167, ax: 151, ay: 110, at: 'basin' } ];
+var WATER_K = 0.256;   // 最高那格（第 3 格）出水口以上 429 px → 約 110 單位
+// 鳥：四張拍翅＋一張停著，同一個縮放，對齊眼睛（ex,ey 是眼睛在各張圖裡的位置）
+var BIRD = [ { n: '1', w: 289, h: 267, ex: 234, ey: 133 }, { n: '2', w: 314, h: 162, ex: 225, ey: 33 }, { n: '3', w: 300, h: 218, ex: 221, ey: 31 },
+  { n: '4', w: 300, h: 126, ex: 240, ey: 35 }, { n: 'perch', w: 272, h: 202, ex: 208, ey: 37 } ];
+var BIRD_K = 0.13;
+// 鐘面上的齒輪：gear_<N>.webp 是置中的正方形（旋轉中心＝圖正中）；outer、root 是齒頂、齒根半徑佔邊長的比例，phase 是第 0 齒的角度（從 _gen/c16/gears_prep.py 量的）
+// 11-17 作者「齒輪好像都卡不到正確位置、偏了幾度」：原本的 phase 是量測腳本算錯正負號的值（諧波相位求出來是 −齒峰角度），
+// 19 齒差 9.47°（剛好半齒，主齒輪的齒正對從動輪的齒）、11 齒差 15.9°；12、10 齒的相位剛好在 0° 與半齒，正負號反過來一樣，所以只有正下方看起來對。
+// 現在的 phase 是直接從 img/gear_<N>.webp 量的（各齒中心角對齒數的圓形平均），tests/gears_mesh.mjs 會重量一次比對。
+var GEAR_IMG = { 19: { outer: .4909, root: .4304, phase: 4.78 }, 12: { outer: .4882, root: .4071, phase: .02 }, 11: { outer: .4878, root: .4009, phase: 8.02 }, 10: { outer: .4871, root: .4003, phase: -17.89 } };
+
+// ===== Larch 協定 =====
+var LARCH = { v: {}, inited: false,
+  set: function (n, v) { try { parent.postMessage({ type: 'larch:set', name: n, value: v }, '*'); } catch (e) {} },
+  done: function (r, p) { window.__done = { result: r, payload: p || {} }; try { parent.postMessage({ type: 'larch:complete', result: r, payload: p || {} }, '*'); } catch (e) {} } };
+addEventListener('message', function (e) { var d = e.data || {}; if (d.type === 'larch:init') { LARCH.v = d.variables || {}; LARCH.inited = true; boot(); } });
+try { parent.postMessage({ type: 'larch:ready' }, '*'); } catch (e) {}
+setTimeout(boot, parent === window ? 0 : 2000);
+
+// ===== 聲音（Web Audio 合成，不用音檔）=====
+// 音效：全部 Web Audio 即時合成。2026-11-17 作者：「裝上齒輪和開動卡入的時候缺音效，現在只有撿起來有音效」。
+// 原本的放上去、卡入是 150～220 Hz 的低音加小喀聲，筆電喇叭幾乎聽不到；改成金屬共振（雜訊激發高 Q 帶通，跟敲鎖同一套），
+// 補上開動的機械運轉聲、持續的滴答、拖出去沒放進槽位的退回聲、選口袋的輕點。window.__sndLog 給測試看；window.__sndRender 給錄音評分。
+var SND = (function () {
+  var ac = null, master = null, wet = null, muted = false, T0 = 0, run = null, LEVEL = .8;
+  function ctx() {
+    if (!ac) { var C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
+      ac = new C(); master = ac.createGain(); master.gain.value = muted ? 0 : LEVEL; master.connect(ac.destination); fx(ac); }
+    if (ac.state === 'suspended' && !ac.startRendering) { try { var pr = ac.resume(); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {} } return ac; }
+  function fx(a) { var d = a.createDelay(1); d.delayTime.value = .27; var fb = a.createGain(); fb.gain.value = .38; var lp = a.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2200;
+    wet = a.createGain(); wet.gain.value = .35; wet.connect(d); d.connect(lp); lp.connect(fb); fb.connect(d); lp.connect(master); }
+  function tone(f, at, dur, type, vol, f2, send) { var a = ctx(); if (!a) return; var t = a.currentTime + T0 + (at || 0);
+    var o = a.createOscillator(), g = a.createGain(); o.type = type || 'sine'; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol || .2, t + .006); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+    o.connect(g); g.connect(master); if (send !== false) g.connect(wet); o.start(t); o.stop(t + dur + .05); }
+  function noise(at, dur, vol, freq, q, type, f2, send) { var a = ctx(); if (!a) return; var t = a.currentTime + T0 + (at || 0), n = Math.max(1, Math.floor(a.sampleRate * dur));
+    var b = a.createBuffer(1, n, a.sampleRate), ch = b.getChannelData(0); for (var i = 0; i < n; i++) ch[i] = Math.random() * 2 - 1;
+    var sr = a.createBufferSource(); sr.buffer = b; var fl = a.createBiquadFilter(); fl.type = type || 'bandpass'; fl.frequency.setValueAtTime(freq || 1800, t); if (f2) fl.frequency.exponentialRampToValueAtTime(f2, t + dur); fl.Q.value = q || 1;
+    var g = a.createGain(); g.gain.setValueAtTime(vol || .1, t); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
+    sr.connect(fl); fl.connect(g); g.connect(master); if (send) g.connect(wet); sr.start(t); }
+  function click(at, vol, f) { noise(at, .025, vol || .12, f || 3200, 3, 'bandpass'); tone((f || 3200) / 2.3, at, .04, 'square', (vol || .12) * .25, null, false); }
+  function ring(at, f, dur, vol, echo) { noise(at, dur, vol, f, 45, 'bandpass', null, echo); }   // 金屬自己鳴響：短雜訊激發窄帶通（平常不送回音：送了會聽成敲兩下；第五顆卡入才送）
+  // 開動後一直轉的齒輪組：雜訊經帶通（460 Hz），每秒 9 下三角波起伏（齒一格一格咬過去；每秒 6 下的正弦起伏會被聽成心跳）；1.6 秒淡入、5 秒退到很輕
+  function runStart(a, t) { var n = a.sampleRate * 2, b = a.createBuffer(1, n, a.sampleRate), ch = b.getChannelData(0); for (var i = 0; i < n; i++) ch[i] = Math.random() * 2 - 1;
+    var sr = a.createBufferSource(); sr.buffer = b; sr.loop = true; var bp = a.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 460; bp.Q.value = 2;
+    var am = a.createGain(); am.gain.value = .5; var lfo = a.createOscillator(); lfo.type = 'triangle'; lfo.frequency.value = 9; var lg = a.createGain(); lg.gain.value = .5; lfo.connect(lg); lg.connect(am.gain);
+    var g = a.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.07, t + 1.6); g.gain.linearRampToValueAtTime(.025, t + 5);   // 淡入，再退到很輕、一直轉
+    sr.connect(bp); bp.connect(am); am.connect(g); g.connect(master); sr.start(t); lfo.start(t); return { sr: sr, lfo: lfo, g: g }; }
+  var S = {
+    unlock: ctx,
+    setMute: function (m) { muted = m; if (master) master.gain.value = m ? 0 : LEVEL; },
+    pick: function () { [1, 2.76, 5.4].forEach(function (k, i) { tone(1320 * k, 0, .9 - i * .25, 'sine', .09 / (i + 1)); }); tone(1980, .06, .5, 'sine', .04); },
+    // 放進槽位：齒輪擱上軸的金屬「叩」
+    place: function () { noise(0, .03, .19, 2400, 1.4); tone(190, 0, .09, 'sine', .15, 120, false); ring(0, 760, .28, 5.4); ring(0, 1980, .2, 3); ring(0, 3350, .12, 1.8); },
+    ratchet: function () { click(0, .1, 3600); click(.05, .07, 3000); },
+    // 咬合卡入：清脆的「喀、嚓」兩下，五個槽位音高各不同；第五顆多一聲低沉的「咚」與兩個上行的亮音
+    lock: function (k, last) { var p = [1, 1.06, 1.12, 1.19, 1.26][(k || 0) % 5];
+      noise(0, .014, .22, 4200 * p, .8, 'highpass'); ring(0, 2600 * p, .12, 3, last);
+      noise(.045, .03, .25, 1700 * p, 1.2); ring(.045, 1250 * p, .22, 4, last); ring(.045, 3100 * p, .14, 2, last);
+      if (last) { tone(110, .05, .35, 'sine', .16, 72, false); tone(1568, .12, .7, 'sine', .04); tone(2093, .2, .8, 'sine', .035); } },
+    appear: function () { tone(2093, 0, .4, 'sine', .025); tone(2637, .06, .35, 'sine', .02); },
+    rewind: function () { noise(0, .45, .025, 400, 2, 'bandpass', 2600); },
+    bell: function () { var f = 98; [[.5, .3, 6], [1, .28, 5], [1.19, .16, 3.5], [1.5, .12, 3], [2, .1, 2.6], [2.52, .06, 2], [3, .05, 1.6], [4.07, .03, 1.2]].forEach(function (q) { tone(f * q[0], 0, q[2], 'sine', q[1] * .5); });   // 11-17：柔和一點（原本的一半）
+      noise(0, .08, .12, 600, 1, 'lowpass'); },
+    // 時間走起來：齒輪組運轉聲淡入（之後一直輕輕轉）
+    start: function () { var a = ctx(); if (!a || run) return; run = runStart(a, a.currentTime + T0); },
+    // 滴答：「滴」高一點、「答」低一點，很輕
+    tick: function (k) { var hi = k % 2; noise(0, .012, .14, hi ? 4200 : 3000, 2); ring(0, hi ? 2900 : 2100, .07, 3.2); },
+    splash: function () { noise(0, .7, .12, 1400, .7, 'bandpass', 500); noise(.05, .3, .06, 4000, .8, 'highpass'); },
+    // 齒輪從袋子拖出去、沒放進槽位，或點了槽位但袋裡沒有齒輪：輕的往下兩音「退回」
+    back: function () { tone(520, 0, .09, 'triangle', .12, 440, false); tone(392, .08, .14, 'triangle', .12, 330, false); },
+    // 選口袋裡的齒輪：一下很輕的金屬點
+    select: function () { noise(0, .012, .16, 3600, 2); ring(0, 2400, .08, 3); }
+  };
+  var out = {};
+  Object.keys(S).forEach(function (k) { out[k] = k === 'unlock' || k === 'setMute' ? S[k] : function () { (window.__sndLog = window.__sndLog || []).push(k);
+    if (muted) return; return S[k].apply(null, arguments); }; });
+  // 錄音評分用：在 OfflineAudioContext 跑同一段程式；序列每項 [名稱, 參數陣列, 起點秒]
+  window.__sndRender = function (seq, sec) { var C = window.OfflineAudioContext || window.webkitOfflineAudioContext, off = new C(1, Math.ceil(44100 * (sec || 2)), 44100);
+    var keep = [ac, master, wet, run, muted]; ac = off; master = off.createGain(); master.gain.value = LEVEL; master.connect(off.destination); fx(off); run = null; muted = false;
+    seq.forEach(function (x) { T0 = .05 + (x[2] || 0); S[x[0]].apply(null, x[1] || []); }); T0 = 0;
+    ac = keep[0]; master = keep[1]; wet = keep[2]; run = keep[3]; muted = keep[4];
+    return off.startRendering().then(function (b) { return Array.prototype.slice.call(b.getChannelData(0)); }); };
+  return out;
+})();
+
+var $ = function (id) { return document.getElementById(id); };
+var NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+var Q = new URLSearchParams(location.search);
+var still = matchMedia('(prefers-reduced-motion: reduce)').matches || Q.get('still') === '1';
+var PERIOD = Q.get('fast') === '1' ? 4500 : (still ? 11000 : 9000);   // 「這一分鐘」一輪多長（毫秒）
+var started = false, booted = false, finished = false;
+
+// ===== 齒輪的形狀 =====
+// N 齒、節圓半徑 R（一齒 7 個單位），第 0 齒朝向 +x。
+var MOD = 3.5;
+function gearPath(N, R) { var p = 2 * Math.PI / N, ro = R + 5.5, rr = R - 6, d = '';
+  for (var i = 0; i < N; i++) { var c = i * p;
+    [[rr, c - p * .32], [ro, c - p * .17], [ro, c + p * .17], [rr, c + p * .32]].forEach(function (q, j) {
+      d += (i === 0 && j === 0 ? 'M' : 'L') + (q[0] * Math.cos(q[1])).toFixed(2) + ',' + (q[0] * Math.sin(q[1])).toFixed(2) + ' '; }); }
+  return d + 'Z'; }
+function drawGear(g, N, R, fill, dark) {
+  var gi = GEAR_IMG[N];
+  if (gi) { var side = R / ((gi.outer + gi.root) / 2), im = el('image', { href: './img/gear_' + N + '.webp', x: -side / 2, y: -side / 2, width: side, height: side, class: 'gearImg' }, g);
+    im.setAttribute('transform', 'rotate(' + (-gi.phase) + ')'); return; }
+  el('path', { d: gearPath(N, R), fill: fill, stroke: '#2a1c10', 'stroke-width': 2.2, 'stroke-linejoin': 'round' }, g);
+  el('circle', { r: R - 11, fill: 'none', stroke: 'rgba(42,28,16,.55)', 'stroke-width': 2 }, g);
+  var holes = N >= 14 ? 6 : 4, hr = Math.max(5, (R - 11) * .3);
+  for (var i = 0; i < holes; i++) { var a = i / holes * Math.PI * 2 + Math.PI / holes, rr = (R - 11) * .58;
+    el('circle', { cx: rr * Math.cos(a), cy: rr * Math.sin(a), r: hr, fill: dark || '#141530', stroke: 'rgba(42,28,16,.7)', 'stroke-width': 1.5 }, g); }
+  el('circle', { r: Math.max(6, R * .2), fill: '#f3dc9a', stroke: '#2a1c10', 'stroke-width': 2 }, g);
+  el('circle', { r: 2.6, fill: '#2a1c10' }, g);
+  el('path', { d: 'M' + (-(R - 14)) + ',' + (-(R * .2)) + ' A' + (R - 14) + ',' + (R - 14) + ' 0 0 1 ' + (-(R * .2)) + ',' + (-(R - 14)), fill: 'none', stroke: 'rgba(255,250,220,.5)', 'stroke-width': 2.5, 'stroke-linecap': 'round' }, g); }
+function iconGear(svgEl) { // 齒輪袋、飛行中的小齒輪
+  if (ASSETS.gear) { el('image', { href: ASSETS.gear, x: -24, y: -24, width: 48, height: 48 }, svgEl); return; }
+  drawGear(svgEl, 10, 17, 'url(#brassI)', '#f3ecdf'); }
+
+// ===== 城 =====
+// 城裡的鐘全部停在 4:47（秒針停在 12 秒）。最後一格 tower 是鐘塔。
+// 背景用鐘面沒有指針的 TIME-1_nohands；x、y 是每個鐘面中心軸在 800×560 座標裡的位置，r 是鐘面（框內）半徑，指針長度照 r。
+// 2026-11-16 從 TIME-1_nohands.png 量：霍夫圓找鐘面、中心軸取鐘面中間的軸點。
+var CLOCKS = [{ id: 'wall', x: 79.1, y: 197.9, r: 16.4 }, { id: 'lamp', x: 161.7, y: 232.9, r: 13.1 }, { id: 'bracket', x: 567.3, y: 217, r: 19.7 },
+  { id: 'door', x: 663.5, y: 260.2, r: 13.7 }, { id: 'post', x: 586.9, y: 290.8, r: 18.6 }, { id: 'tower', x: 335.5, y: 138.8, r: 31.7 }];
+var TIME = { h: 4, m: 47, s: 12 };
+// 齒輪：兩個在路上，三個只在一分鐘的某一下出現（t 是這一分鐘裡的位置 0～1）
+var PICKS = [
+  { id: 'road1', x: 300, y: 505, road: true },
+  { id: 'road2', x: 582, y: 510, road: true },
+  { id: 'water', x: 498, y: 170, win: [.165, .335], hint: '噴水池的水噴到最高的那一下，看看水柱頂端。' },
+  { id: 'roof', x: 603, y: 154, win: [.55, .76], hint: '鳥飛過屋頂的那一下，看看屋頂。' },
+  { id: 'branch', x: 675, y: 145, win: [.75, .96], hint: '葉子離開樹枝的那一下，看看樹枝。' } ];
+if (still) PICKS.forEach(function (p) { if (p.win) p.win = [p.win[0] - .03, Math.min(.99, p.win[1] + .04)]; });
+var city = $('city'), C = {};
+function hand(g, cx, cy, len, w, col, ang, cls) { var h = el('line', { x1: cx, y1: cy + len * .18, x2: cx, y2: cy - len, stroke: col, 'stroke-width': w, 'stroke-linecap': 'round', class: 'hand ' + (cls || '') }, g);
+  h.style.transformOrigin = cx + 'px ' + cy + 'px'; h.style.transform = 'rotate(' + ang + 'deg)'; return h; }
+function clockFace(g, c) { var r = c.r;
+  if (ASSETS.cityBg) {
+    // 場景裡的鐘塔只疊指針；裝齒輪只在右邊的大鐘面特寫（2026-11-16 作者）
+    var hc = c.id === 'tower' ? '#f1d27e' : '#6e5a52';   // 鐘塔是深藍鏤空鐘面，指針用金色才看得到
+    c.hh = hand(g, c.x, c.y, r * .5, Math.max(2, r * .09), hc, (TIME.h + TIME.m / 60) * 30);
+    c.mh = hand(g, c.x, c.y, r * .78, Math.max(1.8, r * .06), hc, TIME.m * 6);
+    if (c.id === 'tower') [c.hh, c.mh].forEach(function (h) { h.style.filter = 'drop-shadow(0 0 1px #2a1c10)'; });
+    c.sh = hand(g, c.x, c.y, r * .82, 1.1, '#b03a52', TIME.s * 6); return;
+  }
+  el('circle', { cx: c.x, cy: c.y, r: r + 4, fill: '#b9924a', stroke: '#2a1c10', 'stroke-width': 2.5 }, g);
+  el('circle', { cx: c.x, cy: c.y, r: r, fill: c.id === 'tower' ? '#e9e1cc' : '#f2ead6', stroke: '#2a1c10', 'stroke-width': 1.5 }, g);
+  for (var i = 0; i < 12; i++) { var a = i / 12 * Math.PI * 2, r1 = r * (i % 3 ? .84 : .76);
+    el('line', { x1: c.x + Math.sin(a) * r1, y1: c.y - Math.cos(a) * r1, x2: c.x + Math.sin(a) * r * .93, y2: c.y - Math.cos(a) * r * .93, stroke: '#3a2a20', 'stroke-width': i % 3 ? 1.2 : 2.4 }, g); }
+  if (c.id === 'tower') { // 鐘塔鐘面裡空著的五格（裝上一個就亮一格）
+    C.towerHoles = [];
+    for (var k = 0; k < 5; k++) { var a2 = (-90 + 36 + 72 * k) * Math.PI / 180;
+      C.towerHoles.push(el('circle', { cx: c.x + Math.cos(a2) * r * .5, cy: c.y + Math.sin(a2) * r * .5, r: r * .17, fill: '#2b2438', stroke: '#2a1c10', 'stroke-width': 1.5 }, g)); }
+    el('circle', { cx: c.x, cy: c.y, r: r * .2, fill: '#6d5a3a', stroke: '#2a1c10', 'stroke-width': 1.5 }, g); }
+  c.hh = hand(g, c.x, c.y, r * .5, Math.max(2.5, r * .09), '#2a1c10', (TIME.h + TIME.m / 60) * 30);
+  c.mh = hand(g, c.x, c.y, r * .78, Math.max(2, r * .06), '#2a1c10', TIME.m * 6);
+  c.sh = hand(g, c.x, c.y, r * .82, 1.2, '#b03a52', TIME.s * 6);
+  el('circle', { cx: c.x, cy: c.y, r: Math.max(2, r * .07), fill: '#2a1c10' }, g); }
+function stones(g, x, y, w, h, col, seed) { var s = seed;
+  el('rect', { x: x, y: y, width: w, height: h, fill: col, stroke: '#1d1a2a', 'stroke-width': 3 }, g);
+  for (var yy = y + 16, row = 0; yy < y + h; yy += 16, row++) { el('line', { x1: x + 2, x2: x + w - 2, y1: yy, y2: yy, stroke: 'rgba(30,28,48,.35)', 'stroke-width': 1.2 }, g);
+    for (var xx = x + (row % 2 ? 10 : 24); xx < x + w - 6; xx += 28 + (s = (s * 7 + 3) % 11)) el('line', { x1: xx, x2: xx, y1: yy - 16, y2: yy, stroke: 'rgba(30,28,48,.3)', 'stroke-width': 1.2 }, g); } }
+function win(g, x, y, w, h) { el('path', { d: 'M' + x + ',' + (y + h) + ' V' + (y + w / 2) + ' A' + w / 2 + ',' + w / 2 + ' 0 0 1 ' + (x + w) + ',' + (y + w / 2) + ' V' + (y + h) + ' Z', fill: '#f7d98f', stroke: '#1d1a2a', 'stroke-width': 2.5 }, g);
+  el('path', { d: 'M' + (x + w / 2) + ',' + y + ' V' + (y + h) + ' M' + x + ',' + (y + h * .55) + ' H' + (x + w), stroke: '#1d1a2a', 'stroke-width': 2 }, g); }
+function drawHero(g) {
+  if (POSES.hero) { C.heroFlip = el('g', { class: 'heroFlip' }, g); poseImages('hero', C.heroFlip); return; }
+  if (ASSETS.hero) { el('image', { href: ASSETS.hero, x: -42, y: -212, width: 84, height: 212, preserveAspectRatio: 'xMidYMax meet' }, g); return; }
+  var b = el('g', { class: 'bob' }, g);
+  el('ellipse', { cx: 0, cy: 0, rx: 17, ry: 4.5, fill: '#000', opacity: .28 }, g);
+  el('path', { class: 'capeA', d: 'M-9,-44 Q-24,-22 -19,-2 Q0,4 19,-2 Q24,-22 9,-44 Z', fill: 'var(--cape)', stroke: '#2a1a1e', 'stroke-width': 2.5 }, b);
+  el('rect', { x: -9, y: -42, width: 18, height: 36, rx: 5, fill: '#f1ece2', stroke: '#2a1a1e', 'stroke-width': 2.2 }, b);
+  el('rect', { x: -9, y: -24, width: 18, height: 4, fill: '#7a5a3a' }, b);
+  el('path', { d: 'M-5,-6 V0 M5,-6 V0', stroke: '#3a2a3a', 'stroke-width': 4, 'stroke-linecap': 'round' }, b);
+  el('path', { d: 'M12,-30 L24,-52', stroke: '#dfe4ee', 'stroke-width': 3.5, 'stroke-linecap': 'round' }, b);
+  el('path', { d: 'M9,-27 L15,-33', stroke: '#c9a24a', 'stroke-width': 3, 'stroke-linecap': 'round' }, b);
+  el('circle', { cx: 0, cy: -56, r: 13, fill: '#f3dcc8', stroke: '#2a1a1e', 'stroke-width': 2.2 }, b);
+  el('path', { d: 'M-14,-54 Q-15,-73 0,-71 Q15,-73 14,-54 Q12,-44 15,-38 Q8,-44 8,-58 Q0,-62 -8,-58 Q-8,-44 -15,-38 Q-12,-44 -14,-54 Z', fill: '#4a2f63', stroke: '#2a1a1e', 'stroke-width': 1.8 }, b);
+  el('circle', { cx: -4.5, cy: -54, r: 1.6, fill: '#2a1a1e' }, b); el('circle', { cx: 4.5, cy: -54, r: 1.6, fill: '#2a1a1e' }, b);
+  el('path', { d: 'M-8,-50 q2,1.5 4,0 M4,-50 q2,1.5 4,0', stroke: '#e89a9a', 'stroke-width': 1.6, fill: 'none', opacity: .7 }, b); }
+function drawBoss(g) {
+  if (POSES.boss) { poseImages('boss', g); return; }
+  if (ASSETS.boss) { el('image', { href: ASSETS.boss, x: -44, y: -273, width: 88, height: 273, preserveAspectRatio: 'xMidYMax meet' }, g); return; }  // 明 188 cm、茶語 157 cm（cast.json lineup）：人物高 212×188/157≈254，立繪人物佔圖高 93% → 框高 273
+  // 時間大魔王（明）：黑色長大衣、高領、胸前懷錶（低頭在看）、衣襬繡著齒輪
+  el('ellipse', { cx: 0, cy: 0, rx: 30, ry: 6, fill: '#000', opacity: .3 }, g);
+  el('path', { d: 'M-16,-88 Q-30,-40 -32,-2 Q0,5 32,-2 Q30,-40 16,-88 Z', fill: '#1b1a24', stroke: '#06060c', 'stroke-width': 2.5 }, g);
+  el('path', { d: 'M0,-86 V-2', stroke: '#33324a', 'stroke-width': 2 }, g);
+  [[-20, -12], [-6, -8], [9, -9], [22, -13]].forEach(function (p, i) { var gg = el('g', { transform: 'translate(' + p[0] + ',' + p[1] + ')' }, g);
+    el('path', { d: gearPath(8, 4.2), fill: 'none', stroke: '#c9a24a', 'stroke-width': 1.1 }, gg); });
+  el('path', { d: 'M-17,-90 L-12,-104 H12 L17,-90 L0,-80 Z', fill: '#24233a', stroke: '#06060c', 'stroke-width': 2 }, g);   // 高領
+  el('path', { d: 'M-15,-82 Q-6,-60 -2,-56 M15,-82 Q8,-62 4,-56', stroke: '#06060c', 'stroke-width': 4.5, 'stroke-linecap': 'round', fill: 'none' }, g); // 兩手
+  el('path', { d: 'M-8,-74 Q-4,-66 1,-58', stroke: '#c9a24a', 'stroke-width': 1.5, fill: 'none' }, g);   // 錶鍊
+  el('circle', { cx: 1, cy: -55, r: 7, fill: '#e9cf9a', stroke: '#6a4a1e', 'stroke-width': 2 }, g);  // 懷錶
+  el('circle', { cx: 1, cy: -55, r: 4, fill: '#f8f1dc' }, g);
+  el('circle', { cx: 0, cy: -114, r: 15, fill: '#f0d8c4', stroke: '#1d1a2a', 'stroke-width': 2.2 }, g);
+  el('path', { d: 'M-16,-112 Q-17,-134 0,-132 Q17,-134 16,-112 Q8,-124 -2,-120 Q-10,-122 -16,-112 Z', fill: '#1f2a55', stroke: '#06060c', 'stroke-width': 1.8 }, g);
+  el('path', { d: 'M-7,-108 q3,2 6,0 M3,-108 q3,2 6,0', stroke: '#1d1a2a', 'stroke-width': 1.6, fill: 'none' }, g);   // 低頭看錶：眼睛往下
+}
+function gearIcon(g, x, y, s) { var gg = el('g', { transform: 'translate(' + x + ',' + y + ') scale(' + (s || 1) + ')' }, g), inner = el('g', { class: 'gearI' }, gg);
+  if (ASSETS.gear) el('image', { href: ASSETS.gear, x: -20, y: -20, width: 40, height: 40 }, inner); else drawGear(inner, 10, 15, 'url(#brassI)', '#3a3550'); return gg; }
+
+function buildCity() {
+  var g = city;
+  g.innerHTML = '<defs>' +
+    '<linearGradient id="skyT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2552"/><stop offset=".55" stop-color="#3f5490"/><stop offset="1" stop-color="#a99cc6"/></linearGradient>' +
+    '<radialGradient id="brassI" cx=".35" cy=".3"><stop offset="0" stop-color="#ffe9a8"/><stop offset=".55" stop-color="#d9a94e"/><stop offset="1" stop-color="#8f6426"/></radialGradient>' +
+    '<radialGradient id="glintG"><stop offset="0" stop-color="#fff8d8"/><stop offset=".4" stop-color="#ffe08a" stop-opacity=".7"/><stop offset="1" stop-color="#ffe08a" stop-opacity="0"/></radialGradient>' +
+    '<linearGradient id="waterG" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#9fd6f5"/><stop offset="1" stop-color="#e6f6ff"/></linearGradient>' +
+    '<radialGradient id="leafy" cx=".4" cy=".35"><stop offset="0" stop-color="#7fae63"/><stop offset="1" stop-color="#3d6a3a"/></radialGradient>' +
+    '</defs>';
+  var art = el('g', { id: 'cityArt' }, g);
+  if (ASSETS.cityBg) el('image', { href: ASSETS.cityBg, x: 0, y: 0, width: 800, height: 560, preserveAspectRatio: 'xMidYMid slice' }, art);
+  else {
+    el('rect', { width: 800, height: 560, fill: 'url(#skyT)' }, art);
+    for (var i = 0; i < 26; i++) el('circle', { cx: (i * 137) % 800, cy: (i * 53) % 170 + 8, r: i % 5 ? .9 : 1.6, fill: '#fff', opacity: .55 }, art);
+    var far = 'M0,250'; for (var x = 0; x <= 800; x += 40) far += ' L' + x + ',' + (200 + ((x * 7) % 50)) + ' L' + (x + 26) + ',' + (200 + ((x * 7) % 50)) + (x % 160 === 80 ? ' L' + (x + 13) + ',' + (170 + ((x * 7) % 50)) : '') + ' L' + (x + 26) + ',' + (250);
+    el('path', { d: far + ' L800,560 L0,560 Z', fill: '#4a4a74', opacity: .8 }, art);
+    // 左邊的房子（牆上的鐘、窗）
+    stones(art, 24, 236, 196, 248, '#8d90aa', 3);
+    el('path', { d: 'M12,240 L122,170 L232,240 Z', fill: '#3d3a5e', stroke: '#1d1a2a', 'stroke-width': 3, 'stroke-linejoin': 'round' }, art);
+    win(art, 140, 280, 46, 66); win(art, 40, 360, 40, 58); win(art, 140, 380, 46, 64);
+    el('rect', { x: 84, y: 410, width: 40, height: 74, rx: 3, fill: '#4a3a3a', stroke: '#1d1a2a', 'stroke-width': 2.5 }, art);
+    // 右邊的房子（屋頂讓鳥飛過、窗邊的鐘）
+    stones(art, 560, 270, 220, 214, '#9497af', 7);
+    el('path', { d: 'M546,274 L572,214 L792,214 L800,274 Z', fill: '#4b4570', stroke: '#1d1a2a', 'stroke-width': 3, 'stroke-linejoin': 'round' }, art);
+    for (var k = 1; k < 4; k++) el('line', { x1: 548 + k * 6, x2: 798, y1: 274 - k * 15, y2: 274 - k * 15, stroke: '#625c8a', 'stroke-width': 1.5 }, art);
+    win(art, 584, 316, 44, 64); win(art, 706, 316, 44, 64);
+    el('rect', { x: 612, y: 340, width: 58, height: 46, rx: 4, fill: '#d9c9a6', stroke: '#1d1a2a', 'stroke-width': 2.5 }, art); // 窗台上的鐘的座子
+    // 鐘塔（晨畫的：高、鐘面很大）
+    stones(art, 336, 82, 128, 404, '#a4a3bb', 5);
+    el('path', { d: 'M326,86 L400,14 L474,86 Z', fill: '#3a3660', stroke: '#1d1a2a', 'stroke-width': 3, 'stroke-linejoin': 'round' }, art);
+    el('rect', { x: 326, y: 82, width: 148, height: 12, fill: '#6d6890', stroke: '#1d1a2a', 'stroke-width': 2.5 }, art);
+    win(art, 384, 240, 32, 50); win(art, 384, 320, 32, 50);
+    el('path', { d: 'M374,486 V430 A26,26 0 0 1 426,430 V486 Z', fill: '#3a2e34', stroke: '#1d1a2a', 'stroke-width': 2.5 }, art);
+    // 路燈（上面有鐘）
+    el('path', { d: 'M262,500 V352', stroke: '#2d2a40', 'stroke-width': 6, 'stroke-linecap': 'round' }, art);
+    el('rect', { x: 252, y: 492, width: 20, height: 10, rx: 2, fill: '#2d2a40' }, art);
+    // 地面
+    el('rect', { x: 0, y: 484, width: 800, height: 76, fill: '#7c7a96' }, art);
+    for (var yy = 492, r2 = 0; yy < 560; yy += 18, r2++) for (var xx = (r2 % 2) * 16 - 12; xx < 800; xx += 34) el('rect', { x: xx, y: yy, width: 28, height: 13, rx: 5, fill: '#918fab', stroke: '#5b5a76', 'stroke-width': 1.1 }, art);
+    // 噴水池
+    el('ellipse', { cx: 170, cy: 494, rx: 74, ry: 18, fill: '#a7a9c0', stroke: '#1d1a2a', 'stroke-width': 3 }, art);
+    el('ellipse', { cx: 170, cy: 490, rx: 62, ry: 11, fill: '#7fb6d8' }, art);
+    el('rect', { x: 162, y: 452, width: 16, height: 38, fill: '#b9bacd', stroke: '#1d1a2a', 'stroke-width': 2.5 }, art);
+    el('ellipse', { cx: 170, cy: 452, rx: 24, ry: 6, fill: '#b9bacd', stroke: '#1d1a2a', 'stroke-width': 2.5 }, art);
+    // 樹（右前方）
+    el('path', { d: 'M736,486 Q730,420 738,360 M734,388 Q706,372 676,352', stroke: '#4a3426', 'stroke-width': 9, 'stroke-linecap': 'round', fill: 'none' }, art);
+    [[740, 312, 46], [700, 322, 34], [770, 336, 30], [728, 276, 32]].forEach(function (c) { el('circle', { cx: c[0], cy: c[1], r: c[2], fill: 'url(#leafy)', stroke: '#1d2a1a', 'stroke-width': 2.5 }, art); });
+    // 城門
+    el('path', { d: 'M0,486 V300 H34 V486 Z', fill: '#76738f', stroke: '#1d1a2a', 'stroke-width': 2.5 }, art);
+  }
+  // 鐘（全部停在同一個時間）
+  var clocks = el('g', {}, g); CLOCKS.forEach(function (c) { clockFace(clocks, c); });
+  // 會動的：水、鳥、葉子
+  // 水柱：五格輪流（噴上去、更高、最高、落下、濺開），每格對準出水口／上層盆緣／下層水面
+  C.water = el('g', { id: 'water' }, g); C.wf = [];
+  // 11-17 作者「噴水池應該是要一直噴包含到底端吧」：上層水盤前緣溢流到底層水池的水幕（素材沒有這一層，用 SVG 畫成半透明水彩，細水紋往下流）
+  C.sheet = el('g', { class: 'sheet', opacity: 0 }, C.water);
+  (function () { var cx = SPOUT.x, top = BOWL_Y + .5, bot = BASIN_Y - .5, hw = BOWL_HW - 1, h = bot - top;
+    // 一條條水從水盤前緣往外溢出、再往下落進底層水池：不填色（填色看起來像玻璃罩），只畫往下流的細水流，兩側較粗較亮
+    for (var i = -6; i <= 6; i++) { var f = i / 6, x0 = cx + f * hw, y0 = top + (1 - f * f) * 3.2, x1 = cx + f * (hw + 4), edge = Math.abs(i) >= 5;
+      var d = 'M' + x0.toFixed(1) + ',' + y0.toFixed(1) + ' C' + (x0 + f * 4).toFixed(1) + ',' + (y0 + 3).toFixed(1) + ' ' + x1.toFixed(1) + ',' + (y0 + 8).toFixed(1) + ' ' + x1.toFixed(1) + ',' + (bot - (1 - f * f) * 1.5).toFixed(1);
+      el('path', { d: d, fill: 'none', stroke: '#dff2fb', 'stroke-width': edge ? 2.6 : 1.6, 'stroke-linecap': 'round', opacity: edge ? .38 : .22 }, C.sheet);   // 水流本體（淡）
+      el('path', { class: 'stream', d: d, fill: 'none', stroke: '#f7fcff', 'stroke-width': edge ? 1.3 : .8, 'stroke-linecap': 'round', 'stroke-dasharray': (4 + Math.abs(i) % 3) + ' ' + (5 + (i + 6) % 4), opacity: edge ? .9 : .65 }, C.sheet); }   // 往下流的亮紋
+  })();
+  WATER.forEach(function (fr) { var k = WATER_K, ay = fr.at === 'bowl' ? BOWL_Y : fr.at === 'basin' ? BASIN_Y : SPOUT.y;
+    var im = el('image', { href: './img/water_' + fr.f + '.webp', x: (SPOUT.x - fr.ax * k).toFixed(2), y: (ay - fr.ay * k).toFixed(2), width: (fr.w * k).toFixed(2), height: (fr.h * k).toFixed(2), opacity: 0, 'data-f': fr.f }, C.water);
+    fr.el = im; fr.anchor = { x: SPOUT.x, y: ay }; C.wf.push(im); });
+  C.bird = el('g', { id: 'bird' }, g); C.bf = [];
+  if (ASSETS.bird) BIRD.forEach(function (b, i) { C.bf.push(el('image', { href: ASSETS.bird + b.n + '.webp', x: (-b.ex * BIRD_K).toFixed(2), y: (-b.ey * BIRD_K).toFixed(2), width: (b.w * BIRD_K).toFixed(2), height: (b.h * BIRD_K).toFixed(2), opacity: i === 4 ? 1 : 0 }, C.bird)); });
+  else { el('ellipse', { cx: 0, cy: 0, rx: 12, ry: 6.5, fill: '#e9e6f2', stroke: '#1d1a2a', 'stroke-width': 2 }, C.bird);
+    el('circle', { cx: 11, cy: -4, r: 5, fill: '#e9e6f2', stroke: '#1d1a2a', 'stroke-width': 2 }, C.bird);
+    el('path', { d: 'M16,-4 l6,1.5 l-6,1.5 Z', fill: '#e9b04a' }, C.bird); el('circle', { cx: 12, cy: -5, r: 1.2, fill: '#1d1a2a' }, C.bird);
+    el('path', { class: 'wing', d: 'M-6,-3 Q2,-20 8,-3 Z', fill: '#cfcbe0', stroke: '#1d1a2a', 'stroke-width': 1.6 }, C.bird);
+    el('path', { d: 'M-12,0 l-8,-4 l1,8 Z', fill: '#cfcbe0', stroke: '#1d1a2a', 'stroke-width': 1.4 }, C.bird); }
+  C.leaf = el('g', { class:'leaf' }, g);
+  if (ASSETS.leaf) el('image', { href: ASSETS.leaf, x: -12, y: -11, width: 24, height: 22.4 }, C.leaf);   // leaf_1 是 278×259
+  else { el('path', { d: 'M-10,0 Q0,-9 10,0 Q0,9 -10,0 Z', fill: '#c8d45a', stroke: '#2a3a1a', 'stroke-width': 1.6 }, C.leaf); el('path', { d: 'M-10,0 H10', stroke: '#2a3a1a', 'stroke-width': 1 }, C.leaf); }
+  // 魔王與勇者
+  C.boss = el('g', { transform: 'translate(414,518)' }, g); drawBoss(C.boss);
+  C.hero = el('g', { id: 'hero' }, g); drawHero(C.hero); heroTo(354);
+  // 時間重來的那一下：淡淡一層光
+  C.pulse = el('circle', { cx: 332, cy: 128, r: 42, class: 'pulse', fill: 'none', stroke: '#ffe9a8', 'stroke-width': 5 }, g);
+  C.rewind = el('rect', { width: 800, height: 560, fill: '#b9c7ff', class: 'rewind' }, g);
+  // 齒輪
+  C.picks = {};
+  PICKS.forEach(function (p) {
+    var gg = el('g', { class: 'pick ' + (p.road ? 'road' : 'timed'), role: 'button', tabindex: p.road ? 0 : -1, 'aria-label': p.road ? '路上的齒輪' : '剛出現的齒輪', 'data-id': p.id }, g);
+    if (!p.road) { var gl = el('g', { class: 'glint' }, g); gl.setAttribute('transform', 'translate(' + p.x + ',' + p.y + ')');
+      var gli = el('g', {}, gl); el('circle', { r: 22, fill: 'url(#glintG)' }, gli); el('path', { d: 'M0,-18 L3,-3 L18,0 L3,3 L0,18 L-3,3 L-18,0 L-3,-3 Z', fill: '#fff8d8' }, gli); p.glint = gli; }
+    el('circle', { cx: p.x, cy: p.y, r: 50, fill: 'transparent' }, gg);    // 點擊範圍（手機上也有 44px 以上）
+    if (p.road) el('ellipse', { cx: p.x, cy: p.y + 12, rx: 18, ry: 4, fill: '#725c47', opacity: .2 }, gg);
+    else el('circle', { cx: p.x, cy: p.y, r: 24, fill: 'url(#glintG)', opacity: .7 }, gg);
+    gearIcon(gg, p.x, p.y, p.road ? 1 : 1.05);
+    p.ring = el('circle', { cx: p.x, cy: p.y, r: 30, class: 'nudge' }, g);
+    gg.addEventListener('click', function () { pickUp(p); });
+    gg.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); pickUp(p); } });
+    p.el = gg; C.picks[p.id] = p; });
+  // 停太久時，提示要看的地方
+  C.spots = { water: el('ellipse', { cx: 498, cy: 215, rx: 40, ry: 70, class: 'nudge' }, g), roof: el('rect', { x: 570, y: 132, width: 120, height: 38, rx: 20, class: 'nudge' }, g), branch: el('circle', { cx: 675, cy: 145, r: 34, class: 'nudge' }, g) };
+}
+function heroTo(x, then, ms) { var dx = x - (C.heroX == null ? x : C.heroX); C.heroX = x; C.hero.style.transform = 'translate(' + x + 'px,525px)';
+  // 移動時走路兩張交替（約 0.6 秒，跟位移的 transition 一樣長），往左走時整組左右翻；到了再換成要做的動作
+  clearInterval(walkT); walkT = 0;
+  if (Math.abs(dx) > 4 && !still && C.heroFlip) { C.heroFlip.setAttribute('transform', dx < 0 ? 'scale(-1,1)' : ''); var n = 0; setPose('hero', 'walk_a');
+    walkT = setInterval(function () { n++; if (n < 4) setPose('hero', n % 2 ? 'walk_b' : 'walk_a'); else { clearInterval(walkT); walkT = 0; if (C.heroFlip) C.heroFlip.removeAttribute('transform'); setPose('hero', then || POSES.hero.base, then ? ms : 0); } }, 150); }
+  else if (then) setPose('hero', then, ms); }
+
+// ===== 這一分鐘（循環）=====
+var t0 = 0, lastLoop = -1, stopped = false, endT = 0;
+function phase(now) { return ((now - t0) % PERIOD) / PERIOD; }
+function waterH(t) { return t < .5 ? 150 * Math.sin(Math.PI * t / .5) : 4 + 3 * Math.sin(t * 60); }
+// 這一分鐘裡水柱的格：噴上去 → 更高 → 最高（水柱頂端那個齒輪的時機）→ 落下 → 濺開 → 停
+function waterFrame(t) { return t < .07 ? 1 : t < .165 ? 2 : t < .34 ? 3 : t < .44 ? 4 : t < .54 ? 5 : 0; }
+function showWater(f) { C.waterF = f; C.wf.forEach(function (im, i) { im.setAttribute('opacity', i + 1 === f ? 1 : 0); }); }
+// 11-17 作者：「噴水池的水我覺得應該要一直噴比較好看」「應該是要一直噴包含到底端吧」。原本只有一條細水柱浮在出水口上，跟下面的水盤、水池斷開。
+// 現在整條水一直連著：出水口往上噴（第 3 格水冠，平常縮小、橫向加粗，冠頂落下的水剛好在上層水盤裡）→ 兩道落水（第 4 格）落進上層水盤
+// → 水盤前緣溢流的水幕（C.sheet）→ 底層水池的漣漪（第 5 格）。到「最高的那一下」水柱湧到原本的高度（水柱頂端齒輪的位置不變），再落回平常大小。
+// 時間走起來之後照樣噴。沒做「時間停止時水凍住」：這一章的時間停止是同一分鐘一直重來，不是畫面凍住，劇情與玩法都沒用到水停住。
+var FALL_SX = BOWL_HW / (135 * WATER_K);   // 第 4 格兩道落水的落點離中心約 135 px
+var JET_K = .125;   // 平常的水柱：出水口到頂 459 px×k ≈ 57 單位（約噴水池本身的高度），水冠半寬 ≈ 水盤半寬
+function surgeAt(t) { var u = t < .12 ? 0 : t < .165 ? (t - .12) / .045 : t < .34 ? 1 : t < .42 ? 1 - (t - .34) / .08 : 0; return u * u * (3 - 2 * u); }
+function waterMix(t) { var u = surgeAt(t); return { 3: 1, 4: 1, 5: .8 + .2 * u, sheet: 1, surge: u }; }
+function showWaterMix(mix, now) { var u = mix.surge || 0, w = still ? 0 : Math.sin(now / 170) * .035 + Math.sin(now / 67) * .015;
+  var jy = (JET_K + (WATER_K - JET_K) * u) / WATER_K * (1 + w), jx = jy * (1.5 - .45 * u);   // 水柱：平常矮而粗，湧起時回到原尺寸
+  var SCALE = { 3: [jx, jy], 4: [Math.min(jy * 1.25, FALL_SX), jy * 1.02], 5: [.92 + .08 * u, .8 + .2 * u] };   // 落水寬度上限：兩道水落在上層水盤裡
+  C.waterF = u > .5 ? 3 : 2; C.waterMix = mix; C.sheet.setAttribute('opacity', mix.sheet || 0);
+  WATER.forEach(function (fr, i) { var o = mix[fr.f] || 0, sc = SCALE[fr.f] || [1, 1], a = fr.anchor; C.wf[i].setAttribute('opacity', o);
+    C.wf[i].setAttribute('transform', 'translate(' + a.x + ',' + a.y + ') scale(' + sc[0].toFixed(3) + ',' + sc[1].toFixed(3) + ') translate(' + (-a.x) + ',' + (-a.y) + ')'); }); }
+var birdFlap = 0;
+function showBird(fly, now) { if (!C.bf.length) return; var f = fly ? Math.floor(now / (still ? 260 : 85)) % 4 : 4; if (fly && f === 3 && !still) f = 1; birdFlap = f; C.bf.forEach(function (im, i) { im.setAttribute('opacity', i === f ? 1 : 0); }); }
+function birdAt(t) { if (t < .4) return { x: 534, y: 164, show: 1, fly: 0 };
+  var k = Math.min(1, (t - .4) / .38); return { x: 534 + k * 248, y: 160 - Math.sin(k * Math.PI) * 20, show: k < 1 ? 1 : 0, fly: 1 }; }
+function leafAt(t) { if (t < .72) return { x: 675, y: 145, r: -20 };
+  var k = Math.min(1, (t - .72) / .25); return { x: 675 - 45 * k + Math.sin(k * 9) * 14, y: 145 + 365 * k * k * (3 - 2 * k), r: -20 + Math.sin(k * 9) * 50 + k * 90 }; }
+function frame(now) {
+  requestAnimationFrame(frame);
+  if (!booted) return;
+  if (stopped) { endAnim(now); return; }
+  var t = phase(now), loop = Math.floor((now - t0) / PERIOD);
+  if (loop !== lastLoop) { if (lastLoop >= 0 && started) { SND.rewind(); if (!finished && !poseT.boss) setPose('boss', 'hold', 1300); if (!still) { C.rewind.classList.remove('on'); C.rewind.getBoundingClientRect(); C.rewind.classList.add('on'); } } lastLoop = loop; PICKS.forEach(function (p) { p.cued = p.shown = false; }); }
+  showWaterMix(waterMix(t), now);
+  var b = birdAt(t);
+  if (still) { var mid = t >= .4 && t < .78; C.bird.setAttribute('transform', 'translate(' + (mid ? 690 : 534) + ',' + (mid ? 144 : 164) + ')'); C.bird.setAttribute('opacity', t < .4 || mid ? 1 : 0); }
+  else { C.bird.setAttribute('transform', 'translate(' + b.x.toFixed(1) + ',' + b.y.toFixed(1) + ')'); C.bird.setAttribute('opacity', b.show); }
+  showBird(still ? (t >= .4 && t < .78) : b.fly && b.show, now);
+  var l = leafAt(t); if (still) l = t < .72 ? leafAt(0) : (t < .97 ? { x: 642, y: 426, r: 40 } : leafAt(.99));
+  C.leaf.setAttribute('transform', 'translate(' + l.x.toFixed(1) + ',' + l.y.toFixed(1) + ') rotate(' + l.r.toFixed(1) + ')');
+  // 限時的齒輪：出現前一下先閃
+  PICKS.forEach(function (p) { if (!p.win || p.got) return;
+    var on = t >= p.win[0] && t <= p.win[1];
+    if (!p.cued && t >= p.win[0] - .06 && t < p.win[0]) { p.cued = true; if (!still) { p.glint.parentNode.classList.remove('on'); p.glint.parentNode.getBoundingClientRect(); p.glint.parentNode.classList.add('on'); } }
+    if (on && !p.shown) { p.shown = true; if (started) SND.appear(); }
+    p.el.classList.toggle('on', on); p.el.setAttribute('tabindex', on ? 0 : -1); });
+}
+
+// ===== 撿齒輪 =====
+var bag = [], placed = 0, locked = 0;
+function hint(t) { var h = $('hint'); if (h.textContent === t) return; h.classList.add('fade'); setTimeout(function () { h.textContent = t; h.classList.remove('fade'); }, still ? 0 : 220); }
+function pickUp(p) { if (!started || finished || p.got) return; if (p.win && !p.el.classList.contains('on')) return;
+  SND.unlock(); p.got = true; SND.pick(); p.el.classList.add('got'); p.el.classList.remove('on'); p.ring.classList.remove('on');
+  heroTo(Math.max(60, Math.min(760, p.x - 34)), 'pick', 1000); setPose('boss', 'brow', 1600);
+  var pocket = POCKETS.filter(function (q) { return !q.classList.contains('full') && !q.dataset.used; })[0];
+  bag.push(pocket);
+  var r = p.el.querySelector('.gearI').getBoundingClientRect(), to = pocket.getBoundingClientRect();
+  if (still) { fill(pocket); }
+  else { var f = document.createElement('div'); f.className = 'fly'; f.innerHTML = '<svg viewBox="-24 -24 48 48" width="40" height="40"></svg>'; iconGear(f.firstChild);
+    f.style.transform = 'translate(' + (r.left + r.width / 2) + 'px,' + (r.top + r.height / 2) + 'px) scale(1.2)'; document.body.appendChild(f); f.getBoundingClientRect();
+    f.style.transform = 'translate(' + (to.left + to.width / 2) + 'px,' + (to.top + to.height / 2) + 'px) scale(1)';
+    setTimeout(function () { f.remove(); fill(pocket); }, 720); }
+  pocket.dataset.used = '1';
+  idleReset();
+  var got = PICKS.filter(function (q) { return q.got; }).length;
+  if (placed === 0 && got === 1) hint('點鐘面上空著的軸，把齒輪放上去。');
+  else if (got === 5) hint('五個齒輪都撿到了。');
+}
+function fill(pocket) { pocket.classList.add('full'); pocket.disabled = false; pocket.setAttribute('aria-label', '袋裡的齒輪'); if (!selPocket()) select(pocket); wantSlots(); }
+function selPocket() { return POCKETS.filter(function (q) { return q.classList.contains('sel'); })[0]; }
+function select(q) { POCKETS.forEach(function (x) { x.classList.toggle('sel', x === q); x.setAttribute('aria-pressed', x === q); }); wantSlots(); }
+function wantSlots() { var has = POCKETS.some(function (q) { return q.classList.contains('full'); }); SLOTS.forEach(function (s) { s.g.classList.toggle('want', has && !s.placed); }); }
+var POCKETS = [];
+function buildBag() { var b = $('bag');
+  for (var i = 0; i < 5; i++) { var q = document.createElement('button'); q.className = 'pocket'; q.disabled = true; q.setAttribute('aria-label', '空的口袋');
+    q.innerHTML = '<svg viewBox="-24 -24 48 48"></svg>'; iconGear(q.firstChild); b.appendChild(q); POCKETS.push(q);
+    (function (q) {
+      q.addEventListener('pointerdown', function (ev) { if (!q.classList.contains('full') || finished) return; ev.preventDefault(); SND.unlock(); bagDrag(q, ev); });
+      q.addEventListener('keydown', function (ev) { if ((ev.key === 'Enter' || ev.key === ' ') && q.classList.contains('full')) { ev.preventDefault(); select(q); SND.select(); var s = SLOTS.filter(function (s) { return !s.placed; })[0]; if (s) s.g.focus(); } });
+    })(q); } }
+function bagDrag(q, ev) { var sx = ev.clientX, sy = ev.clientY, moved = false, ghost = null, id = ev.pointerId;
+  try { q.setPointerCapture(id); } catch (e) {}
+  function mv(e) { if (Math.hypot(e.clientX - sx, e.clientY - sy) > 8 && !moved) { moved = true; ghost = document.createElement('div'); ghost.className = 'ghost';
+      ghost.innerHTML = '<svg viewBox="-24 -24 48 48" width="54" height="54"></svg>'; iconGear(ghost.firstChild); document.body.appendChild(ghost); select(q); }
+    if (ghost) { ghost.style.transform = 'translate(' + e.clientX + 'px,' + e.clientY + 'px)'; var s = slotAt(e.clientX, e.clientY); SLOTS.forEach(function (x) { x.g.classList.toggle('hover', x === s); }); } }
+  function upH(e) { q.removeEventListener('pointermove', mv); q.removeEventListener('pointerup', upH); q.removeEventListener('pointercancel', upH);
+    if (ghost) { ghost.remove(); var s = slotAt(e.clientX, e.clientY); if (s && !s.placed) place(s, q); else SND.back(); }
+    else { select(q); SND.select(); } }
+  q.addEventListener('pointermove', mv); q.addEventListener('pointerup', upH); q.addEventListener('pointercancel', upH); }
+
+// ===== 鐘面 =====
+var face = $('face'), F0 = { N: 19 }, SLOTS = [], theta0 = 0;   // 主齒輪是 AI 畫的 19 齒（gear_19.webp）
+F0.R = F0.N * MOD;
+// 11-17：正下方原本是 11 齒，但 gear_11.webp 是 AI 畫的、各齒間距最多差 5°，轉起來會跟主齒輪疊在一起（tests/gears_mesh.mjs 量到重疊 28 平方單位，其他 4～11），
+// 改用齒最均勻的 12 齒圖；要回到 11 齒得重產一張齒距均勻的 gear_11。外緣仍在錶圈刻度裡面（12 齒外緣到 156，刻度 160）。
+var SLOT_N = [12, 10, 12, 10, 12];
+var MESH_GAP = 2;   // 背隙：中心距比節圓半徑和多 2 單位。AI 畫的齒形不是漸開線、齒寬也不完全一樣，貼著節圓擺會在齒側疊到；齒高約 7～9，仍然明顯咬在一起
+function toFace(x, y) { var pt = face.createSVGPoint(); pt.x = x; pt.y = y; return pt.matrixTransform(face.getScreenCTM().inverse()); }
+function slotAt(x, y) { var p = toFace(x, y), best = null, bd = 1e9; SLOTS.forEach(function (s) { var d = Math.hypot(p.x - s.x, p.y - s.y); if (d < s.R + 26 && d < bd) { bd = d; best = s; } }); return best; }
+// 咬合：主齒輪轉到 θ0 時，這個齒輪要轉到幾度才會剛好咬住（齒對著齒縫）
+function correct(s, th0) { return s.phi + Math.PI + Math.PI / s.N - (F0.N / s.N) * ((th0 == null ? theta0 : th0) - s.phi); }
+function deg(r) { return r * 180 / Math.PI; }
+function buildFace() {
+  face.innerHTML = '<defs><radialGradient id="brassF" cx=".35" cy=".3"><stop offset="0" stop-color="#fff0bd"/><stop offset=".55" stop-color="#d9a94e"/><stop offset="1" stop-color="#9b7038"/></radialGradient>' +
+    '<radialGradient id="bronzeF" cx=".35" cy=".3"><stop offset="0" stop-color="#c9a77a"/><stop offset=".6" stop-color="#8a6a48"/><stop offset="1" stop-color="#4f3a28"/></radialGradient>' +
+    '<radialGradient id="brassI" cx=".35" cy=".3"><stop offset="0" stop-color="#ffe9a8"/><stop offset=".55" stop-color="#d9a94e"/><stop offset="1" stop-color="#8f6426"/></radialGradient>' +
+    '<radialGradient id="faceBg" cx=".5" cy=".45"><stop offset="0" stop-color="#f8f1e4"/><stop offset=".8" stop-color="#e3d6bf"/><stop offset="1" stop-color="#d0bea1"/></radialGradient></defs>';
+  el('circle', { r: 196, fill: '#c5a66c', stroke: '#6e5a52', 'stroke-width': 3 }, face);
+  el('circle', { r: 186, fill: 'url(#faceBg)', stroke: '#b8862f', 'stroke-width': 1.5 }, face);
+  // 錶圈：羅馬數字與刻度
+  var ring = el('g', {}, face), RN = ['XII', 'I', 'II', 'III', 'IIII', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
+  el('circle', { r: 160, fill: 'none', stroke: 'rgba(110,90,82,.38)', 'stroke-width': 1 }, ring);
+  for (var i = 0; i < 60; i++) { var a = i / 60 * Math.PI * 2; el('line', { x1: Math.sin(a) * (i % 5 ? 160 : 154), y1: -Math.cos(a) * (i % 5 ? 160 : 154), x2: Math.sin(a) * 166, y2: -Math.cos(a) * 166, stroke: '#8b6f50', 'stroke-width': i % 5 ? 1 : 2.2, opacity: .8 }, ring); }
+  RN.forEach(function (t, i) { var a = i / 12 * Math.PI * 2, tx = el('text', { x: Math.sin(a) * 176, y: -Math.cos(a) * 176 + 5, 'text-anchor': 'middle', 'font-size': 13, fill: '#5c4a40', 'font-family': 'Iansui, sans-serif', 'letter-spacing': '-.5' }, ring); tx.textContent = t; });
+  C.mech = el('g', {}, face);
+  // 主齒輪（已經在鐘裡）
+  F0.g = el('g', {}, C.mech); F0.rot = el('g', {}, F0.g); drawGear(F0.rot, F0.N, F0.R, 'url(#bronzeF)', '#f3ecdf');
+  // 五個空軸
+  SLOT_N.forEach(function (N, k) { var a = (-90 + 36 + 72 * k) * Math.PI / 180, R = N * MOD, d = F0.R + R + MESH_GAP;
+    var s = { k: k, N: N, R: R, phi: a, x: Math.cos(a) * d, y: Math.sin(a) * d, placed: false, locked: false, off: 0 };
+    s.g = el('g', { class: 'slot', transform: 'translate(' + s.x.toFixed(2) + ',' + s.y.toFixed(2) + ')', role: 'button', tabindex: 0, 'aria-label': '空著的軸 ' + (k + 1) }, C.mech);
+    el('circle', { r: R + 5, class: 'ghostRing' }, s.g);
+    el('circle', { r: R + 9, class: 'focusRing' }, s.g);
+    el('circle', { r: 5, fill: '#e9cf9a', stroke: '#2a1c10', 'stroke-width': 1.5 }, s.g);
+    s.rot = el('g', { class: 'rot', style: 'display:none' }, s.g);
+    el('circle', { r: R + 10, class: 'lockGlow' }, s.g);
+    el('circle', { r: Math.max(R + 8, 32), fill: 'transparent' }, s.g);   // 點擊範圍
+    s.g.addEventListener('pointerdown', function (ev) { slotDown(s, ev); });
+    s.g.addEventListener('keydown', function (ev) { slotKey(s, ev); });
+    SLOTS.push(s); });
+  // 指針（停在 4:47）
+  var hands = el('g', { 'pointer-events': 'none' }, face);
+  C.fh = hand(hands, 0, 0, 92, 9, '#f3e6c4', (TIME.h + TIME.m / 60) * 30); C.fh.setAttribute('stroke-opacity', .92);
+  C.fm = hand(hands, 0, 0, 148, 6, '#f3e6c4', TIME.m * 6); C.fm.setAttribute('stroke-opacity', .92);
+  C.fs = hand(hands, 0, 0, 150, 2, '#b03a52', TIME.s * 6);
+  [C.fh, C.fm].forEach(function (h) { h.style.filter = 'drop-shadow(0 2px 3px rgba(0,0,0,.6))'; });
+  el('circle', { r: 9, fill: '#e9cf9a', stroke: '#2a1c10', 'stroke-width': 2 }, hands);
+  drawMech(); }
+function drawMech() { F0.rot.style.transform = 'rotate(' + deg(theta0) + 'deg)';
+  SLOTS.forEach(function (s) { if (!s.placed) return; var a = s.locked ? correct(s) : correct(s, 0) + s.off; s.rot.style.transform = 'rotate(' + deg(a).toFixed(2) + 'deg)'; }); }
+function place(s, q) { if (s.placed || finished) return; q = q || selPocket() || POCKETS.filter(function (x) { return x.classList.contains('full'); })[0]; if (!q) { SND.back(); hint(placed + locked < 5 && PICKS.some(function (p) { return !p.got; }) ? '袋裡還沒有齒輪。先到城裡撿。' : '齒輪都裝上了。'); return; }
+  q.classList.remove('full', 'sel'); q.disabled = true; q.setAttribute('aria-label', '空的口袋'); bag.splice(bag.indexOf(q), 1);
+  var next = POCKETS.filter(function (x) { return x.classList.contains('full'); })[0]; if (next) select(next);
+  s.placed = true; placed++; s.off = (1 + (s.k * 2 + 1) % 3) * (2 * Math.PI / s.N) / 4;   // 放上去的角度是錯的：差 1～3 個四分之一齒
+  s.rot.innerHTML = ''; drawGear(s.rot, s.N, s.R, 'url(#brassF)', '#f3ecdf'); s.rot.style.display = '';
+  s.g.setAttribute('aria-label', '放上去的齒輪 ' + (s.k + 1) + '，還沒咬住；按 Enter 或方向鍵轉');
+  s.rot.style.transition = 'none'; s.rot.style.transform = 'rotate(' + deg(correct(s, 0) + s.off - .5) + 'deg) scale(.6)'; s.rot.getBoundingClientRect(); s.rot.style.transition = '';
+  drawMech(); SND.place(); wantSlots(); idleReset(); clearInterval(walkT); walkT = 0; if (C.heroFlip) C.heroFlip.removeAttribute('transform'); setPose('hero', 'raise', 1300);
+  if (placed === 1) hint('點一下齒輪轉一點，轉到咬住旁邊那一個。也可以按住拖著轉。'); }
+function turn(s, dir) { if (!s.placed || s.locked) return; var q = (2 * Math.PI / s.N) / 4; s.off = (Math.round(s.off / q) + (dir || 1)) * q; SND.ratchet(); drawMech(); check(s); idleReset(); }
+function check(s) { var p = 2 * Math.PI / s.N, m = ((s.off % p) + p) % p; if (Math.min(m, p - m) < p * .15) lock(s); }
+function lock(s) { if (s.locked) return; s.locked = true; s.off = 0; locked++; $('n').textContent = locked; s.g.classList.add('locked'); s.g.classList.remove('dragging');
+  s.g.setAttribute('aria-label', '齒輪 ' + (s.k + 1) + ' 咬住了'); s.g.setAttribute('tabindex', -1);
+  if (C.towerHoles) C.towerHoles[s.k].setAttribute('fill', '#e9cf9a');
+  SND.lock(s.k, locked === 5); drawMech(); if (locked < 5) setPose('boss', 'moved', 1900);
+  // 跟主齒輪一起轉一下（轉一整齒，轉完看起來跟原本一樣）
+  if (!still) { var a0 = performance.now(), D = 520; (function spin(now) { var k = Math.min(1, (now - a0) / D), e = 1 - Math.pow(1 - k, 3); theta0 = e * 2 * Math.PI / F0.N; drawMech();
+    if (k < 1) requestAnimationFrame(spin); else { theta0 = 0; drawMech(); } })(a0); }
+  if (locked === 5) finish(); else hint('咬住了。還有 ' + (5 - locked) + ' 個。'); }
+function slotDown(s, ev) { if (!started || finished) return; ev.preventDefault(); SND.unlock();
+  if (!s.placed) { place(s); return; }
+  if (s.locked) return;
+  var c = { x: s.x, y: s.y }, p0 = toFace(ev.clientX, ev.clientY), a0 = Math.atan2(p0.y - c.y, p0.x - c.x), off0 = s.off, moved = 0, lastQ = Math.round(s.off / ((2 * Math.PI / s.N) / 4)), id = ev.pointerId;
+  try { s.g.setPointerCapture(id); } catch (e) {}
+  s.g.classList.add('dragging');
+  function mv(e) { if (s.locked) return; var p = toFace(e.clientX, e.clientY), a = Math.atan2(p.y - c.y, p.x - c.x), da = Math.atan2(Math.sin(a - a0), Math.cos(a - a0));
+    moved = Math.max(moved, Math.hypot(p.x - p0.x, p.y - p0.y)); if (moved < 6) return;
+    a0 = a; s.off += da; var qn = Math.round(s.off / ((2 * Math.PI / s.N) / 4)); if (qn !== lastQ) { lastQ = qn; SND.ratchet(); }
+    drawMech(); check(s); }
+  function upH() { s.g.removeEventListener('pointermove', mv); s.g.removeEventListener('pointerup', upH); s.g.removeEventListener('pointercancel', upH); s.g.classList.remove('dragging');
+    if (s.locked) return;
+    if (moved < 6) turn(s, 1); else { var q = (2 * Math.PI / s.N) / 4; s.off = Math.round(s.off / q) * q; drawMech(); check(s); } idleReset(); }
+  s.g.addEventListener('pointermove', mv); s.g.addEventListener('pointerup', upH); s.g.addEventListener('pointercancel', upH); }
+function slotKey(s, ev) { if (!started || finished) return;
+  if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); SND.unlock(); if (!s.placed) place(s); else turn(s, 1); }
+  if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') { ev.preventDefault(); turn(s, 1); }
+  if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') { ev.preventDefault(); turn(s, -1); } }
+
+// ===== 停太久：提示下一步 =====
+var idleT = null;
+function idleReset() { clearTimeout(idleT); clearNudge(); idleT = setTimeout(nudge, 8000); }
+function clearNudge() { PICKS.forEach(function (p) { p.ring.classList.remove('on'); }); for (var k in C.spots) C.spots[k].classList.remove('on'); SLOTS.forEach(function (s) { s.g.classList.remove('want2'); }); }
+function nudge() { if (finished) return; clearNudge();
+  var unl = SLOTS.filter(function (s) { return s.placed && !s.locked; })[0];
+  if (unl) hint('放上去的齒輪還沒咬住。點它轉一點，轉到齒對著齒縫。');
+  else if (POCKETS.some(function (q) { return q.classList.contains('full'); })) { hint('袋裡有齒輪。點鐘面上空著的軸，放上去。'); wantSlots(); }
+  else { var road = PICKS.filter(function (p) { return p.road && !p.got; });
+    if (road.length) { road.forEach(function (p) { p.ring.classList.add('on'); }); hint('路上還有齒輪，點它撿起來。'); }
+    else { var tm = PICKS.filter(function (p) { return p.win && !p.got; })[0]; if (tm) { C.spots[tm.id].classList.add('on'); hint(tm.hint); } } }
+  idleT = setTimeout(nudge, 10000); }
+
+// ===== 全部咬住：時間走起來 =====
+var endStart = 0, endFrom = null, ticks = 0, tickT = null;
+function finish() { finished = true; clearTimeout(idleT); clearNudge(); clearInterval(walkT); walkT = 0; if (C.heroFlip) C.heroFlip.removeAttribute('transform'); setPose('hero', 'watch'); setPose('boss', 'smile'); PICKS.forEach(function (p) { p.el.classList.remove('on'); });
+  var t = phase(performance.now());
+  endFrom = { h: waterH(t), f: waterFrame(t), b: birdAt(t), l: leafAt(t) };
+  setTimeout(function () {
+    SND.bell(); SND.start(); hint('時間走起來了。'); C.pulse.classList.add('on'); $('faceF').classList.add('running');
+    stopped = true; endStart = performance.now();
+    // 指針往前走一格
+    // 指針往前走（時之國的時間重新往前）：鐘面特寫與城裡每一個鐘的分針都往前一格
+    [C.fm].concat(CLOCKS.map(function (c) { return c.mh; })).forEach(function (h) { h.style.transition = still ? 'none' : 'transform .45s cubic-bezier(.3,1.8,.5,1)'; h.style.transform = 'rotate(' + (TIME.m + 1) * 6 + 'deg)'; });
+    setTimeout(function () { if (!still) SND.splash(); }, 650);
+    var s = TIME.s; tickT = setInterval(function () { s++; ticks++; SND.tick(ticks);
+      CLOCKS.concat([{ sh: C.fs }]).forEach(function (c) { c.sh.style.transition = still ? 'none' : 'transform .18s cubic-bezier(.3,1.8,.5,1)'; c.sh.style.transform = 'rotate(' + s * 6 + 'deg)'; }); }, 1000);
+  }, still ? 200 : 500);
+  LARCH.set('ch5GearsDone', true);
+  setTimeout(function () { LARCH.done('ticking', {}); }, still ? 3200 : 4100); }
+function endAnim(now) {
+  var k = (now - endStart) / 1000;
+  // 主齒輪與五個齒輪一起轉
+  theta0 += (still ? 0 : .012); drawMech();
+  if (still) { // 減少動態：直接換成「往前走之後」的樣子，淡淡帶過
+    showWaterMix(waterMix(phase(now)), now);
+    C.bird.setAttribute('opacity', Math.max(0, 1 - k * 2));
+    C.leaf.setAttribute('transform', 'translate(530,526) rotate(80)');
+    return; }
+  showWaterMix(waterMix(phase(now)), now);   // 時間走起來之後水照樣一直噴
+  // 鳥飛過屋頂，飛到城外
+  var bk = Math.min(1, k / 2.4), b0 = endFrom.b, bx = b0.x + (900 - b0.x) * bk, by = b0.y - 150 * bk * bk + Math.sin(bk * Math.PI) * -20;
+  C.bird.setAttribute('opacity', bk < 1 ? 1 : 0); C.bird.setAttribute('transform', 'translate(' + bx.toFixed(1) + ',' + by.toFixed(1) + ') rotate(' + (-18 * bk) + ')');
+  showBird(true, now);
+  // 葉子掉到石板路上，停住
+  var lk = Math.min(1, k / 1.6), l0 = endFrom.l, lx = l0.x + (530 - l0.x) * lk + Math.sin(lk * 8) * 12 * (1 - lk), ly = l0.y + (526 - l0.y) * lk * lk, lr = l0.r + (80 - l0.r) * lk + Math.sin(lk * 8) * 30 * (1 - lk);
+  C.leaf.setAttribute('transform', 'translate(' + lx.toFixed(1) + ',' + ly.toFixed(1) + ') rotate(' + lr.toFixed(1) + ')');
+}
+
+// ===== 開始 =====
+function layout() { var st = $('stage'), a = st.getBoundingClientRect(), tall = a.width / Math.max(1, a.height) < 1.05; st.classList.toggle('tall', tall);
+  var cw, ch, fs, bagH = 62, gap = tall ? 10 : 16;
+  if (tall) { cw = Math.min(a.width, (a.height - bagH - gap * 2) * .55 / .7); ch = cw * .7; fs = Math.min(a.width - 20, a.height - ch - bagH - gap * 2); }
+  else { cw = Math.min((a.width - gap) * .6, a.height / .7); ch = cw * .7; fs = Math.min(a.width - cw - gap - 10, a.height - bagH - gap); cw = Math.min(cw, a.width - fs - gap - 10); ch = cw * .7; }
+  $('cityF').style.width = Math.floor(cw) + 'px'; $('cityF').style.height = Math.floor(ch) + 'px';
+  $('faceF').style.width = $('faceF').style.height = Math.floor(Math.max(180, fs)) + 'px'; }
+function boot() { if (booted) return; booted = true;
+  if (still) document.documentElement.classList.add('reduce');
+  document.body.classList.add('on'); buildCity(); buildFace(); buildBag(); layout(); addEventListener('resize', layout);
+  t0 = performance.now(); requestAnimationFrame(frame); $('go').focus(); }
+$('go').addEventListener('click', function () { SND.unlock(); started = true; $('intro').classList.add('gone'); idleReset(); SND.appear(); });
+$('mute').addEventListener('click', function () { var m = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', m); this.textContent = m ? '聲音 關' : '聲音 開'; SND.setMute(m); });
+// 測試用鉤子（不影響遊戲）
+function center(e) { var r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+window.__state = function () { var t = phase(performance.now()); var poses = { heroPose: pose.hero, bossPose: pose.boss };
+  return { heroPose: poses.heroPose, bossPose: poses.bossPose, phase: t, period: PERIOD, got: PICKS.filter(function (p) { return p.got; }).map(function (p) { return p.id; }),
+    visible: PICKS.filter(function (p) { return p.win && !p.got && t >= p.win[0] && t <= p.win[1]; }).map(function (p) { return p.id; }),
+    windows: PICKS.filter(function (p) { return p.win; }).map(function (p) { return [p.id, p.win[0], p.win[1]]; }),
+    bag: POCKETS.filter(function (q) { return q.classList.contains('full'); }).length, placed: placed, locked: locked, finished: finished,
+    slots: SLOTS.map(function (s) { return { k: s.k, placed: s.placed, locked: s.locked }; }) }; };
+window.__water = function () { return { spout: SPOUT, bowlY: BOWL_Y, basinY: BASIN_Y, bowlHW: BOWL_HW, basinHW: BASIN_HW, sheet: (function () { var r = C.sheet.getBBox(); return { x: r.x, y: r.y, width: r.width, height: r.height }; })(), frame: C.waterF, mix: C.waterMix, frames: WATER.map(function (fr) { var k = WATER_K; return { f: fr.f, at: fr.at || 'spout', x: +fr.el.getAttribute('x'), y: +fr.el.getAttribute('y'), w: +fr.el.getAttribute('width'), h: +fr.el.getAttribute('height'), anchorX: +fr.el.getAttribute('x') + fr.ax * k, anchorY: +fr.el.getAttribute('y') + fr.ay * k }; }) }; };
+window.__images = function () { return Array.prototype.map.call(document.querySelectorAll('image, img'), function (im) { var h = im.getAttribute('href') || im.getAttribute('src'); return h; }).filter(Boolean); };
+window.__pick = function (id) { var p = C.picks[id]; return center(p.el.querySelector('.gearI')); };
+window.__slot = function (k) { var s = SLOTS[k], pt = face.createSVGPoint(); pt.x = s.x; pt.y = s.y; var q = pt.matrixTransform(face.getScreenCTM()); return { x: q.x, y: q.y, r: s.R * face.getScreenCTM().a }; };
+window.__pocket = function (i) { var full = POCKETS.filter(function (q) { return q.classList.contains('full'); }); return full[i || 0] ? center(full[i || 0]) : null; };
+</script>
+</body></html>

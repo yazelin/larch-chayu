@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#28232a">
+<meta name="studio-chat-api-base" content="https://larch-studio-chat.yazelinj303.workers.dev">
+<title>夜後明月．晨前朝霞．慕詩客｜工作室</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="studio_features.css">
+<link rel="stylesheet" href="studio_decor.css">
+<script src="studio_storage.js"></script>
+<script src="studio_character_view.js"></script>
+<script>if(new URLSearchParams(location.search).get('mode')==='turn')document.documentElement.classList.add('turn-mode');</script>
+<style>
+:root{color-scheme:light;--ink:#382c2b;--paper:#fffaf2;--edge:#d8c4ab;--accent:#885d45;--shade:rgba(25,18,24,.56)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;height:100dvh;margin:0;overflow:hidden;background:#28232a;color:var(--ink);font-family:"Noto Sans TC","Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif}
+button{font:inherit}
+#stage{position:fixed;inset:0;overflow:hidden;background:#28232a;touch-action:manipulation}
+.wall-layer{position:absolute;inset:0;overflow:hidden;opacity:1;transform:translateX(0);transition:transform .4s cubic-bezier(.2,.72,.22,1),opacity .4s ease;will-change:transform,opacity}
+.wall-layer.entering{opacity:.4;transform:translateX(var(--enter-from))}
+.wall-layer.entering.arrived{opacity:1;transform:translateX(0)}
+.wall-layer.leaving.to-left{opacity:.3;transform:translateX(-100%)}
+.wall-layer.leaving.to-right{opacity:.3;transform:translateX(100%)}
+.art{position:absolute;overflow:hidden;background:#eadfda;isolation:isolate}
+.wall-art-image{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:fill;user-select:none;-webkit-user-drag:none}
+.fallback-night .wall-art-image{filter:brightness(.63) saturate(.8)}
+.fallback-night.south-night .wall-art-image{filter:brightness(.52) saturate(.72)}
+.night-veil{position:absolute;inset:0;z-index:1;pointer-events:none;background:rgba(24,35,78,.28);opacity:0;mix-blend-mode:multiply;transition:opacity .25s ease}
+.fallback-night .night-veil{opacity:.42}
+.fallback-night.south-night .night-veil{opacity:.5}
+.hotspots{position:absolute;inset:0;z-index:3}
+.hotspot{position:absolute;display:block;padding:0;border:1px solid transparent;border-radius:8px;background:transparent;color:#fff;cursor:pointer;touch-action:manipulation}
+.hotspot:focus-visible{outline:3px solid #fff2a9;outline-offset:2px;background:rgba(255,221,134,.2)}
+.player{position:absolute;z-index:2;left:var(--player-x);top:var(--player-feet);height:var(--player-height,55%);width:auto;transform:translate(-50%,-100%);pointer-events:none;user-select:none}
+.player-image{display:block;height:100%;width:auto;max-width:none;object-fit:contain;transform:scaleX(var(--facing,1));filter:drop-shadow(0 2px 2px rgba(50,32,25,.18));user-select:none;-webkit-user-drag:none}
+.player-image.walking{animation:step .18s ease-in-out infinite alternate}
+@keyframes step{to{translate:0 -1.2%}}
+#wall-label{position:fixed;z-index:10;top:max(14px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));padding:8px 14px;border:1px solid rgba(255,250,242,.85);border-radius:999px;background:rgba(255,250,242,.9);font-size:14px;font-weight:700;letter-spacing:.08em;box-shadow:0 3px 14px rgba(26,18,18,.16);pointer-events:none}
+#tools{position:fixed;z-index:10;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));display:flex;gap:8px}
+.tool-button{min-height:40px;padding:7px 13px;border:1px solid var(--edge);border-radius:999px;background:rgba(255,250,242,.94);color:var(--ink);font-size:14px;font-weight:700;box-shadow:0 3px 14px rgba(26,18,18,.14);cursor:pointer}
+.tool-button:hover{background:#fff}
+.turn{position:fixed;z-index:9;top:50%;display:grid;place-items:center;width:48px;height:64px;margin-top:-32px;border:1px solid rgba(255,250,242,.8);border-radius:16px;background:rgba(40,32,35,.45);color:#fffaf2;font-size:34px;line-height:1;cursor:pointer;backdrop-filter:blur(4px);touch-action:manipulation}
+.turn:hover,.turn:focus-visible{background:rgba(40,32,35,.72);outline:2px solid #fff2a9}
+#turn-left{left:max(10px,env(safe-area-inset-left))}
+#turn-right{right:max(10px,env(safe-area-inset-right))}
+#hint{position:fixed;z-index:8;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);max-width:calc(100vw - 130px);padding:7px 14px;border:1px solid rgba(255,250,242,.76);border-radius:999px;background:rgba(40,32,35,.54);color:#fffaf2;font-size:13px;text-align:center;white-space:nowrap;pointer-events:none;backdrop-filter:blur(4px)}
+#turn-mode{display:none;position:fixed;inset:0}
+html.turn-mode #turn-mode{display:block}
+#scroll-mode{display:block}
+html.turn-mode #scroll-mode{display:none}
+#scroll-stage{position:fixed;inset:0;overflow:hidden;background:#28232a;touch-action:none;user-select:none;-webkit-user-select:none}
+#ring-track{position:absolute;top:0;left:0;height:100%;will-change:transform}
+.wall-piece{position:absolute;top:0;height:100%;overflow:hidden;isolation:isolate}
+.ring-image{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:fill;user-select:none;-webkit-user-drag:none;transition:filter .25s ease}
+.night-window{position:absolute;z-index:1;pointer-events:none;background:rgba(45,91,192,.48);mix-blend-mode:multiply;opacity:0;transition:opacity .25s ease}
+.is-night .ring-image{filter:brightness(.62) saturate(.76)}
+.is-night .night-window{opacity:.82}
+.ring-hotspots{position:absolute;inset:0;z-index:3}
+.hotspot{position:absolute;display:block;padding:0;border:1px solid transparent;border-radius:8px;background:transparent;color:#fff;cursor:pointer;touch-action:manipulation}
+.hotspot:focus-visible{outline:3px solid #fff2a9;outline-offset:2px;background:rgba(255,221,134,.2)}
+.hotspot::after{content:attr(data-name);position:absolute;z-index:8;left:50%;bottom:calc(100% + 7px);padding:5px 9px;border:1px solid rgba(255,250,242,.94);border-radius:999px;background:rgba(40,32,35,.88);box-shadow:0 3px 12px rgba(25,18,24,.22);color:#fffaf2;font:700 12px/1.3 "Noto Sans TC","Noto Sans CJK TC",sans-serif;white-space:nowrap;pointer-events:none;opacity:0;visibility:hidden;transform:translate(-50%,4px);transition:opacity .16s ease,transform .16s ease,visibility .16s}
+.hotspot[data-label-placement="below"]::after{top:calc(100% + 7px);bottom:auto;transform:translate(-50%,-4px)}
+.hotspot:focus-visible{border-color:rgba(255,247,205,.62);background:rgba(255,232,165,.08);box-shadow:0 0 0 1px rgba(255,247,205,.3),0 0 17px rgba(255,230,162,.43)}
+.hotspot:focus-visible::after,.hotspot.nearby::after{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.hotspot[data-label-placement="below"]:focus-visible::after,.hotspot[data-label-placement="below"].nearby::after{transform:translate(-50%,0)}
+.hotspot.nearby{border-color:rgba(255,247,205,.4);background:rgba(255,232,165,.08);box-shadow:0 0 12px rgba(255,230,162,.32);animation:nearby-flash .72s ease-out 1}
+@keyframes nearby-flash{0%{box-shadow:0 0 0 0 rgba(255,230,162,0);filter:brightness(1)}32%{box-shadow:0 0 22px 7px rgba(255,230,162,.72);filter:brightness(1.24)}100%{box-shadow:0 0 12px rgba(255,230,162,.32);filter:brightness(1)}}
+.ring-player{position:absolute;z-index:2;display:block;pointer-events:none;user-select:none;-webkit-user-drag:none}
+.character-facing{position:absolute;inset:0;display:block;transform:scaleX(1);transform-origin:center bottom;transition:transform .15s cubic-bezier(.2,.72,.22,1)}
+.character-facing.facing-left{transform:scaleX(-1)}
+.character-motion{position:absolute;inset:0;display:block;transform-origin:center bottom;will-change:transform}
+.character-sprite{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 2px rgba(50,32,25,.18));user-select:none;-webkit-user-drag:none}
+.ring-player:not(.walking) .character-sprite{animation:idle-breathe 3.2s ease-in-out infinite}
+.ring-person{position:absolute;z-index:4;display:block;padding:0;border:0;background:transparent;cursor:pointer;touch-action:manipulation;transform:translateX(-50%);transform-origin:center bottom}
+.ring-person:focus-visible{outline:3px solid #fff2a9;outline-offset:3px;border-radius:12px}
+.ring-person-body{pointer-events:none}
+.ring-person-sprite{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none;-webkit-user-drag:none;filter:drop-shadow(0 2px 3px rgba(45,31,31,.2));animation:idle-breathe 3.2s ease-in-out infinite}
+@keyframes idle-breathe{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-.3%) scaleY(1.006)}}
+@keyframes idle-breathe-reduced{0%,100%{transform:translateY(0)}50%{transform:translateY(-.1%)}}
+.person-talk-icon{position:absolute;z-index:2;left:50%;top:-34px;display:flex;align-items:center;justify-content:center;gap:3px;width:34px;height:27px;border:1px solid rgba(255,250,242,.96);border-radius:11px;background:rgba(255,250,242,.96);box-shadow:0 3px 10px rgba(25,18,24,.2);opacity:0;visibility:hidden;transform:translate(-50%,5px) scale(.94);transition:opacity .16s ease,transform .16s ease,visibility .16s;pointer-events:none}
+.person-talk-icon::after{content:"";position:absolute;left:9px;bottom:-5px;width:8px;height:8px;border-right:1px solid rgba(255,250,242,.96);border-bottom:1px solid rgba(255,250,242,.96);background:#fffaf2;transform:skewY(35deg) rotate(35deg)}
+.person-talk-icon i{width:4px;height:4px;border-radius:50%;background:#885d45}
+.ring-person:focus-visible .person-talk-icon,.ring-person.nearby .person-talk-icon{opacity:1;visibility:visible;transform:translate(-50%,0) scale(1)}
+.ring-person.sprite-missing .ring-person-sprite{display:none}
+.person-silhouette{display:none;position:absolute;inset:3% 8% 0;border-radius:46% 46% 14% 14% / 26% 26% 12% 12%;background:rgba(58,47,53,.34);filter:drop-shadow(0 2px 3px rgba(45,31,31,.2));pointer-events:none}
+.person-silhouette::before{content:"";position:absolute;left:25%;top:1%;width:50%;aspect-ratio:1;border-radius:50%;background:rgba(58,47,53,.38)}
+.person-fallback-name{display:none;position:absolute;left:50%;top:52%;padding:3px 8px;border:1px solid rgba(255,250,242,.8);border-radius:999px;background:rgba(255,250,242,.72);color:#382c2b;font-size:12px;font-weight:700;white-space:nowrap;transform:translate(-50%,-50%);pointer-events:none}
+.ring-person.sprite-missing .person-silhouette,.ring-person.sprite-missing .person-fallback-name{display:block}
+#scroll-label{position:fixed;z-index:10;top:max(14px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));padding:8px 14px;border:1px solid rgba(255,250,242,.85);border-radius:999px;background:rgba(255,250,242,.9);font-size:14px;font-weight:700;letter-spacing:.08em;box-shadow:0 3px 14px rgba(26,18,18,.16);pointer-events:none}
+#scroll-controls{position:fixed;z-index:10;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));display:flex;gap:8px}
+.scroll-button{min-height:40px;padding:7px 13px;border:1px solid var(--edge);border-radius:999px;background:rgba(255,250,242,.94);color:var(--ink);font-size:14px;font-weight:700;box-shadow:0 3px 14px rgba(26,18,18,.14);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.scroll-button:hover{background:#fff}
+#scroll-hint{position:fixed;z-index:8;left:50%;top:max(62px,calc(env(safe-area-inset-top) + 56px));transform:translateX(-50%);max-width:calc(100vw - 32px);padding:7px 13px;border:1px solid rgba(255,250,242,.76);border-radius:999px;background:rgba(40,32,35,.54);color:#fffaf2;font-size:13px;text-align:center;white-space:nowrap;pointer-events:none;backdrop-filter:blur(4px)}
+#table-entry{position:fixed;z-index:10;left:max(18px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom));min-height:48px;padding:10px 18px;border:1px solid rgba(255,250,242,.9);border-radius:999px;background:rgba(255,250,242,.96);color:var(--ink);font-size:15px;font-weight:700;box-shadow:0 5px 18px rgba(26,18,18,.22);cursor:pointer}
+#table-entry:hover{background:#fff}
+#scrim{position:fixed;inset:0;z-index:20;background:var(--shade);opacity:0;pointer-events:none;transition:opacity .2s ease}
+#scrim.on{opacity:1;pointer-events:auto}
+#panel{position:fixed;z-index:21;left:50%;top:50%;width:min(460px,calc(100vw - 32px));max-height:min(72vh,600px);transform:translate(-50%,-47%) scale(.98);opacity:0;pointer-events:none;display:flex;flex-direction:column;overflow:hidden;border:2px solid var(--edge);border-radius:16px;background:var(--paper);box-shadow:0 16px 50px rgba(0,0,0,.3);transition:transform .22s ease,opacity .22s ease}
+#panel.on{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+.panel-head{display:flex;align-items:center;gap:10px;padding:11px 12px 11px 17px;border-bottom:1px solid var(--edge);background:#f3e8d8}
+#panel-title{flex:1;margin:0;font-size:17px;line-height:1.4}
+#panel-close{width:38px;height:38px;border:0;border-radius:9px;background:transparent;color:var(--ink);font-size:25px;cursor:pointer}
+#panel-close:hover{background:rgba(0,0,0,.07)}
+#panel-body{padding:16px 18px 19px;overflow:auto;font-size:15px;line-height:1.75}
+#panel-body p{margin:0 0 11px}
+.future-box{margin-top:11px;padding:10px 12px;border:1px dashed #c6a987;border-radius:11px;background:#f8efdf}
+.future-box strong{color:var(--accent)}
+.panel-note{color:#826f60;font-size:13px}
+body.debug .hotspot{border:2px dashed #05c9a2;border-radius:5px;background:rgba(0,184,143,.15)}
+body.debug .hotspot::before{content:attr(data-mark);position:absolute;top:2px;left:2px;min-width:22px;padding:2px 5px;border:1px solid rgba(255,255,255,.95);border-radius:7px;background:rgba(16,74,66,.92);color:#fff;font:700 11px/1.35 "Noto Sans TC","Noto Sans CJK TC",sans-serif;text-align:center;text-shadow:0 1px 2px #16332d;pointer-events:none}
+@media(max-width:600px){
+  #wall-label{top:max(10px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));padding:7px 10px;font-size:12px}
+  #tools{top:max(8px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));gap:5px}
+  .tool-button{min-height:38px;padding:6px 10px;font-size:12px}
+  .turn{width:40px;height:56px;margin-top:-28px;border-radius:13px;font-size:30px}
+  #hint{bottom:max(10px,env(safe-area-inset-bottom));max-width:calc(100vw - 104px);padding:6px 10px;font-size:11px}
+  #scroll-label{top:max(10px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));padding:7px 10px;font-size:12px}
+  #scroll-controls{top:max(8px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));gap:5px}
+  .scroll-button{min-height:38px;padding:6px 10px;font-size:12px}
+  #scroll-hint{top:max(52px,calc(env(safe-area-inset-top) + 48px));padding:6px 10px;font-size:11px}
+  #table-entry{left:max(12px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom));min-height:44px;padding:9px 15px;font-size:14px}
+  #panel{left:0;right:0;top:auto;bottom:0;width:100%;max-height:64vh;transform:translateY(100%);border-width:2px 0 0;border-radius:17px 17px 0 0;padding-bottom:env(safe-area-inset-bottom)}
+  #panel.on{transform:translateY(0)}
+}
+@media(hover:hover) and (pointer:fine){.hotspot:hover{border-color:rgba(255,247,205,.62);background:rgba(255,232,165,.08);box-shadow:0 0 0 1px rgba(255,247,205,.3),0 0 17px rgba(255,230,162,.43)}.hotspot:hover::after{opacity:1;visibility:visible;transform:translate(-50%,0)}.hotspot[data-label-placement="below"]:hover::after{transform:translate(-50%,0)}.ring-person:hover .person-talk-icon{opacity:1;visibility:visible;transform:translate(-50%,0) scale(1)}.ring-person:hover .ring-person-sprite{filter:brightness(1.07) drop-shadow(0 0 9px rgba(255,235,174,.62)) drop-shadow(0 2px 3px rgba(45,31,31,.2))}}
+.hotspot[data-id="15"]::after{left:12%;transform:translate(0,-4px)}
+.hotspot[data-id="15"]:focus-visible::after,.hotspot[data-id="15"].nearby::after{transform:translate(0,0)}
+@media(hover:hover) and (pointer:fine){.hotspot[data-id="15"]:hover::after{transform:translate(0,0)}}
+@media(prefers-reduced-motion:reduce){.wall-layer,#scrim,#panel,.night-veil,.hotspot::after,.person-talk-icon{transition-duration:0s}.player-image.walking,.ring-person-sprite,.ring-player .character-sprite{animation:idle-breathe-reduced 5s ease-in-out infinite}.character-facing{transition-duration:0s}.hotspot.nearby{border-color:transparent;background:transparent;box-shadow:none;filter:none}}
+</style>
+</head>
+<body>
+<section id="scroll-mode" aria-label="工作室連續捲軸">
+  <main id="scroll-stage" aria-label="工作室四面牆連續場景"><div id="ring-track"></div></main>
+  <div id="scroll-label" aria-live="polite">北牆</div>
+  <div id="scroll-controls">
+    <button class="scroll-button" id="scroll-time-toggle" type="button">切到夜晚</button>
+    <a class="scroll-button" id="turn-link" href="?mode=turn">轉身版</a>
+  </div>
+  <div id="scroll-hint">方向鍵或 A、D 移動　點地板走過去</div>
+  <button id="table-entry" type="button" aria-label="長桌，開啟四人群聊">長桌</button>
+</section>
+<div id="turn-mode">
+<main id="stage" aria-label="工作室場景"></main>
+<div id="wall-label" aria-live="polite">北牆</div>
+<div id="tools">
+  <button class="tool-button" id="time-toggle" type="button">切到夜晚</button>
+  <button class="tool-button" id="decor-toggle" type="button">佈置</button>
+</div>
+<button class="turn" id="turn-left" type="button" aria-label="轉身到左側相鄰牆面">‹</button>
+<button class="turn" id="turn-right" type="button" aria-label="轉身到右側相鄰牆面">›</button>
+<div id="hint">A、D 移動　點地面走過去　左右箭頭轉身</div>
+</div>
+<div id="scrim"></div>
+<section id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" aria-hidden="true">
+  <header class="panel-head"><h1 id="panel-title"></h1><button id="panel-close" type="button" aria-label="關閉視窗">×</button></header>
+  <div id="panel-body"></div>
+</section>
+<script>
+(function(){
+'use strict';
+
+// 定稿圖直接從新版空景讀取；網頁只縮放，不裁切、不重畫。
+var WALLS=[
+  {key:'north',name:'北牆',image:'../../新版/canon_new/studio/A.png',nightImage:'../../新版/canon_new/studio/A_night.png',feet:.94,realScale:.42,hotspots:[
+    {id:3,x:.006,y:.058,w:.093,h:.196},
+    {id:4,x:.78,y:.165,w:.12,h:.34},
+    {id:12,x:.105,y:.205,w:.285,h:.275},
+    {id:13,x:.052,y:.532,w:.895,h:.14},
+    {id:15,x:.125,y:.005,w:.775,h:.325}
+  ]},
+  {key:'east',name:'東牆',image:'../../新版/canon_new/studio/G.png',feet:.91,realScale:.58,hotspots:[
+    {id:5,x:.535,y:.60,w:.145,h:.23},
+    {id:6,x:.305,y:.435,w:.36,h:.39},
+    {id:7,x:.70,y:.285,w:.17,h:.565},
+    {id:16,x:.665,y:.275,w:.105,h:.16}
+  ]},
+  {key:'south',name:'南牆',image:'../../新版/canon_new/studio/I.png',feet:.93,realScale:.61,hotspots:[
+    {id:1,x:.025,y:.195,w:.17,h:.70},
+    {id:10,x:.64,y:.075,w:.225,h:.34},
+    {id:11,x:.28,y:.16,w:.29,h:.73}
+  ]},
+  {key:'west',name:'西牆',image:'../../新版/canon_new/studio/H.png',feet:.92,realScale:.60,hotspots:[
+    {id:8,x:.73,y:.16,w:.215,h:.76}
+  ]}
+];
+var INTERACTIONS={
+  1:{name:'落地鏡',text:'鏡前空間可以換上工作室裡的衣服與配件。',future:'換裝紙娃娃：挑選茶語的工作室服裝與配件。'},
+  2:{name:'照片牆',text:'牆上的相片將記下她們一路走來的日子。',future:'逐章拍立得回憶相簿：翻看每一章留下的照片。'},
+  3:{name:'明的軟木板',text:'明把工作室裡的重要提醒貼在這塊板上。',future:'逐章便利貼：查看三人留下的紙條與進度提醒。'},
+  4:{name:'望遠鏡',text:'從北窗望出去，可以看見島上的海與遠方。',future:'島嶼展望台：查看島的現況，以及三人所在的區域。'},
+  5:{name:'詩的唱片架',text:'唱片收藏會隨著故事慢慢增加。',future:'詩的專輯播放器：唱片旋轉、畫面隨音樂跳動，並顯示歌詞。'},
+  6:{name:'電子琴',text:'詩常在電子琴前試幾個音。',future:'試彈幾個音，讓詩接話或跟著旋律合奏。'},
+  7:{name:'吉他',text:'吉他放在音樂角，詩有時也會拿起來彈。',future:'撥弦小互動：聽音、試奏，讓詩接著回應。'},
+  8:{name:'晨的畫架',text:'晨把旅途中畫下的風景與回憶留在工作室。',future:'晨的展廳：收藏看過的 CG，附上晨寫的小卡。'},
+  9:{name:'晨的島地圖',text:'島地圖會隨著新的區域開放，一塊一塊補上。',future:'可放大查看目前開放的島嶼與已經走過的地方。'},
+  10:{name:'圓鐘',text:'鐘面記著大家等待的重要日子。',future:'倒數時鐘：配合劇情顯示時間與倒數。'},
+  11:{name:'圓拱門',text:'第三章第一次上島後，這扇門會通往島上。',future:'工作室與小島的出入口：依故事進度開放。'},
+  12:{name:'明的電腦',text:'明把進度、行事曆與備份整理在自己的桌面裡。',future:'作業系統「明」：進度表、月曆倒數、小遊戲重玩、備份與試用條款。'},
+  13:{name:'長桌',text:'大家可以在長桌邊一起喝茶、聊天。',future:'四人群聊：晨、明、詩輪流回應，也會彼此吐槽。'},
+  14:{name:'她的位子',text:'長桌北側西邊的紅椅，是她放素描本與冰紅茶的位置。',future:'翻看晨畫的素描本，也能看看桌上的冰紅茶。'},
+  15:{name:'北面大窗',text:'窗外是海、天空與小島的草地。',future:'看海：天空與海面會依故事進度改變。'},
+  16:{name:'詩的耳機',text:'詩把耳機掛在音樂角的書架上。',future:'專輯播放器：聽解鎖的歌曲、看歌詞與詩寫下的話。'}
+};
+var QUERY=new URLSearchParams(location.search);
+var TURN_MODE=QUERY.get('mode')==='turn';
+var FRAME={width:1536,height:1024};
+var larch={inFrame:window.parent!==window,variables:{}};
+var state={version:1,wall:'north',x:.34,night:false};
+var stage=document.getElementById('stage');
+var activeLayer=null;
+var playerNode=null;
+var targetX=null;
+var keyDirection=0;
+var pointerDirection=0;
+var transitionBusy=false;
+var animationTime=0;
+var debug=QUERY.get('debug')==='1';
+var hidePlayer=QUERY.get('people')==='0';
+var useRealScale=QUERY.get('scale')!=='fixed';   // 2026-11-11 作者選真實比例當預設；?scale=fixed 回到固定 55%
+var lastFocus=null;
+if(debug)document.body.classList.add('debug');
+
+function wallByKey(key){return WALLS.find(function(w){return w.key===key;})||WALLS[0];}
+function currentWall(){return wallByKey(state.wall);}
+function fitArt(){
+  var scale=Math.min(window.innerWidth/FRAME.width,window.innerHeight/FRAME.height);
+  var width=FRAME.width*scale,height=FRAME.height*scale;
+  var left=(window.innerWidth-width)/2,top=(window.innerHeight-height)/2;
+  stage.querySelectorAll('.art').forEach(function(art){
+    art.style.left=left+'px';art.style.top=top+'px';art.style.width=width+'px';art.style.height=height+'px';
+  });
+}
+function applyImageMode(layer,wall){
+  var image=layer.querySelector('.wall-art-image');
+  var veil=layer.querySelector('.night-veil');
+  var useNight=state.night;
+  var hasNight=useNight&&!!wall.nightImage;
+  image.src=hasNight?wall.nightImage:wall.image;
+  layer.classList.toggle('fallback-night',useNight&&!wall.nightImage);
+  layer.classList.toggle('south-night',useNight&&wall.key==='south');
+  veil.setAttribute('aria-hidden','true');
+}
+function buildLayer(wall){
+  var layer=document.createElement('div');
+  layer.className='wall-layer';layer.dataset.wall=wall.key;
+  var art=document.createElement('div');art.className='art';art.dataset.wall=wall.key;
+  var image=document.createElement('img');image.className='wall-art-image';image.alt=wall.name+'工作室定稿空景';image.draggable=false;
+  var veil=document.createElement('div');veil.className='night-veil';
+  var zones=document.createElement('div');zones.className='hotspots';
+  var player=document.createElement('div');player.className='player';player.setAttribute('aria-hidden','true');
+  var figure=document.createElement('img');figure.className='player-image';figure.src='tea_side.png';figure.alt='';figure.draggable=false;
+  player.appendChild(figure);
+  wall.hotspots.slice().sort(function(a,b){return(b.w*b.h)-(a.w*a.h);}).forEach(function(h){
+    var hit=document.createElement('button');hit.type='button';hit.className='hotspot';
+    hit.dataset.id=String(h.id);hit.dataset.mark='#'+h.id;hit.dataset.name=INTERACTIONS[h.id].name;
+    if(h.y<.12)hit.dataset.labelPlacement='below';
+    hit.setAttribute('aria-label',INTERACTIONS[h.id].name+'，開啟互動');
+    hit.style.left=(h.x*100)+'%';hit.style.top=(h.y*100)+'%';hit.style.width=(h.w*100)+'%';hit.style.height=(h.h*100)+'%';
+    hit.addEventListener('pointerdown',function(event){event.stopPropagation();});
+    hit.addEventListener('click',function(event){event.stopPropagation();openInteraction(h.id,hit);});
+    zones.appendChild(hit);
+  });
+  art.appendChild(image);art.appendChild(veil);art.appendChild(zones);art.appendChild(player);
+  layer.appendChild(art);
+  layer.addEventListener('click',function(event){
+    if(event.target.closest('.hotspot')||event.target.closest('button'))return;
+    var rect=art.getBoundingClientRect();
+    var x=(event.clientX-rect.left)/rect.width;
+    targetX=Math.max(.012,Math.min(.988,x));keyDirection=0;pointerDirection=0;
+  });
+  applyImageMode(layer,wall);
+  updatePlayer(player);
+  return layer;
+}
+function updatePlayer(node){
+  if(!node)return;
+  var wall=currentWall();
+  node.style.left=(state.x*100)+'%';node.style.top=(wall.feet*100)+'%';
+  node.style.setProperty('--player-height',((useRealScale?wall.realScale:.55)*100)+'%');
+  node.style.display=hidePlayer?'none':'';
+  var image=node.querySelector('.player-image');
+  image.style.setProperty('--facing',state.facing<0?'-1':'1');
+  image.classList.toggle('walking',!!(keyDirection||pointerDirection||targetX!==null));
+}
+function syncPlayer(){
+  if(!playerNode)return;
+  var wall=currentWall();
+  playerNode.style.left=(state.x*100)+'%';
+  playerNode.style.top=(wall.feet*100)+'%';
+  playerNode.style.setProperty('--player-height',((useRealScale?wall.realScale:.55)*100)+'%');
+  playerNode.style.display=hidePlayer?'none':'';
+  var image=playerNode.querySelector('.player-image');
+  image.style.setProperty('--facing',state.facing<0?'-1':'1');
+  image.classList.toggle('walking',!!(keyDirection||pointerDirection||targetX!==null));
+}
+function syncLabel(){
+  var wall=currentWall();
+  document.getElementById('wall-label').textContent=wall.name;
+  var button=document.getElementById('time-toggle');
+  button.textContent=state.night?'切到白天':'切到夜晚';
+  button.setAttribute('aria-label',state.night?'切換至白天':'切換至夜晚');
+}
+function refreshLayers(){
+  stage.querySelectorAll('.wall-layer').forEach(function(layer){
+    var wall=wallByKey(layer.dataset.wall);applyImageMode(layer,wall);
+  });
+  syncLabel();
+}
+function saveState(){
+  var value=JSON.stringify({version:1,wall:state.wall,x:state.x,night:state.night});
+  window.StudioDB.set('studioTurnState',JSON.parse(value)).catch(function(){});
+}
+function readSaved(raw){
+  if(QUERY.get('fresh')==='1')return null;
+  if(!raw)return null;
+  try{
+    var saved=typeof raw==='string'?JSON.parse(raw):raw;
+    if(!saved||saved.version!==1)return null;
+    return saved;
+  }catch(error){return null;}
+}
+function showPanel(title,text,future,focusBack){
+  lastFocus=focusBack||document.activeElement;
+  document.getElementById('panel-title').textContent=title;
+  var body=document.getElementById('panel-body');body.replaceChildren();
+  var description=document.createElement('p');description.textContent=text;body.appendChild(description);
+  var later=document.createElement('div');later.className='future-box';
+  later.append('之後會做成：');
+  var strong=document.createElement('strong');strong.textContent=future;later.appendChild(strong);body.appendChild(later);
+  var note=document.createElement('p');note.className='panel-note';note.textContent='這一版只提供互動佔位面板。';body.appendChild(note);
+  document.getElementById('panel').classList.add('on');
+  document.getElementById('panel').setAttribute('aria-hidden','false');
+  document.getElementById('scrim').classList.add('on');
+  document.getElementById('panel-close').focus({preventScroll:true});
+}
+function openInteraction(id,focusBack){
+  if(window.STUDIO_FEATURES&&window.STUDIO_FEATURES.handle(id,focusBack))return;
+  var item=INTERACTIONS[id];
+  showPanel(String(id).padStart(2,'0')+'｜'+item.name,item.text,item.future,focusBack);
+}
+function closePanel(){
+  document.getElementById('panel').classList.remove('on');
+  document.getElementById('panel').setAttribute('aria-hidden','true');
+  document.getElementById('scrim').classList.remove('on');
+  if(lastFocus&&lastFocus.focus)lastFocus.focus({preventScroll:true});
+}
+function indexFor(wallKey){return WALLS.findIndex(function(w){return w.key===wallKey;});}
+function renderCurrentWall(){
+  var layer=buildLayer(currentWall());
+  stage.replaceChildren(layer);activeLayer=layer;playerNode=layer.querySelector('.player');
+  fitArt();syncLabel();
+}
+function turn(direction){
+  if(transitionBusy||document.getElementById('panel').classList.contains('on'))return;
+  var old=activeLayer;
+  var nextIndex=(indexFor(state.wall)+direction+WALLS.length)%WALLS.length;
+  var next=wallByKey(WALLS[nextIndex].key);
+  state.wall=next.key;state.x=direction>0?.035:.965;state.facing=direction>0?1:-1;
+  targetX=null;keyDirection=0;pointerDirection=0;
+  var incoming=buildLayer(next);
+  incoming.classList.add('entering');incoming.style.setProperty('--enter-from',direction>0?'100%':'-100%');
+  stage.appendChild(incoming);fitArt();
+  activeLayer=incoming;playerNode=incoming.querySelector('.player');
+  syncLabel();transitionBusy=true;
+  if(old)old.classList.add('leaving',direction>0?'to-left':'to-right');
+  requestAnimationFrame(function(){incoming.classList.add('arrived');});
+  window.setTimeout(function(){
+    if(old&&old.parentNode)old.parentNode.removeChild(old);
+    incoming.classList.remove('entering','arrived');transitionBusy=false;saveState();
+  },400);
+}
+function moveStep(delta){
+  var movement=keyDirection||pointerDirection;
+  if(!movement&&targetX!==null){var difference=targetX-state.x;if(Math.abs(difference)<.006){state.x=targetX;targetX=null;}else movement=Math.sign(difference);}
+  if(movement){
+    state.facing=movement;
+    state.x+=movement*delta*.46;
+    if(targetX!==null&&((movement>0&&state.x>=targetX)||(movement<0&&state.x<=targetX))){state.x=targetX;targetX=null;}
+    if(state.x>=.985){turn(1);return;}
+    if(state.x<=.015){turn(-1);return;}
+  }
+  syncPlayer();
+}
+function frame(now){
+  if(!animationTime)animationTime=now;
+  var delta=Math.min((now-animationTime)/1000,.05);animationTime=now;
+  moveStep(delta);window.requestAnimationFrame(frame);
+}
+function setWall(wallKey){
+  var wall=wallByKey(wallKey);state.wall=wall.key;state.x=.5;state.facing=1;targetX=null;
+  renderCurrentWall();saveState();
+}
+function loadInitial(){
+  var requestedWall=QUERY.get('wall');
+  if(requestedWall&&WALLS.some(function(w){return w.key===requestedWall;})){state.wall=requestedWall;state.x=requestedWall==='north'?.34:.5;}
+  if(QUERY.has('night'))state.night=QUERY.get('night')==='1';
+  renderCurrentWall();
+  if(QUERY.get('fresh')!=='1')window.StudioDB.get('studioTurnState').then(function(saved){
+    if(!saved||saved.version!==1)return;
+    state.wall=wallByKey(saved.wall).key;state.x=Number.isFinite(saved.x)?Math.max(.015,Math.min(.985,saved.x)):.34;state.night=!!saved.night;
+    if(QUERY.has('wall')&&WALLS.some(function(w){return w.key===QUERY.get('wall');})){state.wall=QUERY.get('wall');state.x=state.wall==='north'?.34:.5;}
+    if(QUERY.has('night'))state.night=QUERY.get('night')==='1';
+    renderCurrentWall();
+  }).catch(function(){});
+}
+function startMove(direction){if(document.getElementById('panel').classList.contains('on'))return;targetX=null;keyDirection=direction;pointerDirection=0;}
+function stopMove(direction){if(keyDirection===direction)keyDirection=0;}
+
+if(!TURN_MODE)return;
+
+document.getElementById('turn-left').addEventListener('click',function(){turn(-1);});
+document.getElementById('turn-right').addEventListener('click',function(){turn(1);});
+document.getElementById('time-toggle').addEventListener('click',function(){state.night=!state.night;refreshLayers();saveState();});
+document.getElementById('decor-toggle').addEventListener('click',function(){
+  showPanel('自訂佈置','工作室之後可以依喜好換上不同的佈置。','壁紙、地板、窗簾、地毯與燈；20 件小物件和 6 件劇情禮物。',this);
+});
+document.getElementById('panel-close').addEventListener('click',closePanel);
+document.getElementById('scrim').addEventListener('click',closePanel);
+window.addEventListener('keydown',function(event){
+  if(event.key==='Escape'){closePanel();return;}
+  if(document.getElementById('panel').classList.contains('on'))return;
+  if(event.key==='ArrowLeft'){event.preventDefault();turn(-1);return;}
+  if(event.key==='ArrowRight'){event.preventDefault();turn(1);return;}
+  if(event.key==='a'||event.key==='A'){event.preventDefault();startMove(-1);}
+  if(event.key==='d'||event.key==='D'){event.preventDefault();startMove(1);}
+});
+window.addEventListener('keyup',function(event){
+  if(event.key==='a'||event.key==='A')stopMove(-1);
+  if(event.key==='d'||event.key==='D')stopMove(1);
+});
+window.addEventListener('blur',function(){keyDirection=0;pointerDirection=0;});
+window.addEventListener('resize',fitArt);
+window.addEventListener('pagehide',saveState);
+window.addEventListener('message',function(event){
+  if(event.source!==window.parent)return;
+  var data=event.data||{};
+  if(data.type==='larch:init'){
+    larch.variables=data.variables||{};
+    if(QUERY.has('wall')&&WALLS.some(function(w){return w.key===QUERY.get('wall');}))state.wall=QUERY.get('wall');
+    if(QUERY.has('night'))state.night=QUERY.get('night')==='1';
+    renderCurrentWall();refreshLayers();
+  }
+});
+window.parent.postMessage({type:'larch:ready'},'*');
+loadInitial();
+window.requestAnimationFrame(frame);
+
+// 提供本機驗收介面，正式操作仍使用畫面按鈕與鍵盤。
+window.__studio={
+  walls:WALLS.map(function(w){return w.key;}),
+  interactions:INTERACTIONS,
+  get state(){return{wall:state.wall,x:state.x,night:state.night};},
+  get transitioning(){return transitionBusy;},
+  get variables(){return larch.variables;},
+  turn:turn,
+  setWall:setWall,
+  toggleNight:function(){document.getElementById('time-toggle').click();},
+  teleport:function(x){state.x=Math.max(.015,Math.min(.985,x));targetX=null;syncPlayer();},
+  visibleHotspots:function(){return Array.from(activeLayer.querySelectorAll('.hotspot')).map(function(button){return Number(button.dataset.id);});}
+};
+})();
+</script>
+<script>
+(function(){
+'use strict';
+var QUERY=new URLSearchParams(location.search);
+if(QUERY.get('mode')==='turn')return;
+
+// 圖片與人物共用同一套公分比例；換高解析度圖時更新路徑與每公分像素值。
+var PX_PER_CM=1536/900;
+var WALL_HEIGHT_CM=315;
+var FLOOR_BAND_CM=33;
+var IMAGE_HEIGHT_CM=WALL_HEIGHT_CM+FLOOR_BAND_CM;
+var IMAGE_HEIGHT_PX=IMAGE_HEIGHT_CM*PX_PER_CM;
+var FURNITURE_SCALE=1.3;
+var HEIGHT_CM={tea:157,ming:188,chen:179,shi:177};
+var FLOOR_CONTACT_CM=WALL_HEIGHT_CM+FLOOR_BAND_CM*.72;
+var WALK_CM_PER_SECOND=340;
+var NEARBY_DISTANCE_CM=84;
+var PERSONS={
+  chen:{name:'晨',image:'../sprites/chen_3h.png',ratio:601/1403},
+  ming:{name:'明',image:'../sprites/ming_3h.png',ratio:505/1474},
+  shi:{name:'詩',image:'../sprites/shi_3h.png',ratio:568/1483}
+};
+// start=seat 的起點：北牆 520 公分（明站 405，兩人中間留約一個人寬）。
+var SEAT_START_CM=520;
+var PERSON_STATIONS={north:{character:'ming',xCm:405},east:{character:'shi',xCm:230},west:{character:'chen',xCm:424}};
+var WALLS=[
+  {key:'north',name:'北牆',cm:900,image:'../../新版/canon_new/studio/flat/N.png',zones:[
+    {id:15,x:.04,y:.04,w:.92,h:.80},
+    {id:12,x:.06,y:.32,w:.32,h:.65},
+    {id:4,x:.84,y:.46,w:.15,h:.51}
+  ]},
+  {key:'east',name:'東牆',cm:700,image:'../../新版/canon_new/studio/flat/E.png',zones:[
+    {id:6,x:.40,y:.56,w:.28,h:.37},
+    {id:16,x:.65,y:.33,w:.07,h:.18},
+    {id:5,x:.685,y:.70,w:.09,h:.23},
+    {id:7,x:.81,y:.44,w:.11,h:.52}
+  ]},
+  {key:'south',name:'南牆',cm:900,image:'../../新版/canon_new/studio/flat/S.png',zones:[
+    {id:2,x:.01,y:.37,w:.20,h:.20},
+    {id:1,x:.20,y:.24,w:.13,h:.69},
+    {id:11,x:.37,y:.10,w:.20,h:.81},
+    {id:10,x:.58,y:.13,w:.13,h:.34}
+  ]},
+  {key:'west',name:'西牆',cm:700,image:'../../新版/canon_new/studio/flat/W.png',zones:[
+    {id:9,x:.005,y:.10,w:.15,h:.42},
+    {id:8,x:.68,y:.22,w:.17,h:.69},
+    {id:3,x:.85,y:.17,w:.12,h:.30}
+  ]}
+];
+var INTERACTIONS={
+  1:{name:'落地鏡',text:'鏡前空間可以換上工作室裡的衣服與配件。',future:'換裝紙娃娃：挑選茶語的工作室服裝與配件。'},
+  2:{name:'照片牆',text:'牆上的空木夾會記下她們一路走來的日子。',future:'逐章拍立得回憶相簿：翻看每一章留下的照片。'},
+  3:{name:'明的軟木板',text:'明把工作室裡的重要提醒貼在這塊板上。',future:'逐章便利貼：查看三人留下的紙條與進度提醒。'},
+  4:{name:'望遠鏡',text:'從北窗望出去，可以看見島上的海與遠方。',future:'島嶼展望台：查看島的現況，以及三人所在的區域。'},
+  5:{name:'詩的唱片架',text:'唱片收藏會隨著故事慢慢增加。',future:'詩的專輯播放器：唱片旋轉、畫面隨音樂跳動，並顯示歌詞。'},
+  6:{name:'電子琴',text:'詩常在電子琴前試幾個音。',future:'試彈幾個音，讓詩接話或跟著旋律合奏。'},
+  7:{name:'吉他',text:'吉他放在音樂角，詩有時也會拿起來彈。',future:'撥弦小互動：聽音、試奏，讓詩接著回應。'},
+  8:{name:'晨的畫架',text:'晨把旅途中畫下的風景與回憶留在工作室。',future:'晨的展廳：收藏看過的 CG，附上晨寫的小卡。'},
+  9:{name:'晨的島地圖',text:'島地圖會放在西牆南端目前留白的位置。',future:'可放大查看目前開放的島嶼與已經走過的地方。'},
+  10:{name:'圓鐘',text:'鐘面記著大家等待的重要日子。',future:'倒數時鐘：配合劇情顯示時間與倒數。'},
+  11:{name:'圓拱門',text:'第三章第一次上島後，這扇門會通往島上。',future:'工作室與小島的出入口：依故事進度開放。'},
+  12:{name:'明的電腦',text:'明把進度、行事曆與備份整理在自己的桌面裡。',future:'作業系統「明」：進度表、月曆倒數、小遊戲重玩、備份與試用條款。'},
+  13:{name:'長桌',text:'大家可以在長桌邊一起喝茶、聊天。',future:'四人群聊：晨、明、詩輪流回應，也會彼此吐槽。'},
+  15:{name:'北面大窗',text:'窗外是海、天空與小島的草地。',future:'看海：天空與海面會依故事進度改變。'},
+  16:{name:'詩的耳機',text:'詩把耳機掛在音樂角的書架上。',future:'專輯播放器：聽解鎖的歌曲、看歌詞與詩寫下的話。'}
+};
+var RING_CM=WALLS.reduce(function(total,wall){return total+wall.cm;},0);
+var viewWidth=window.innerWidth,viewHeight=window.innerHeight,viewScale=1;
+var track=document.getElementById('ring-track');
+var stage=document.getElementById('scroll-stage');
+var label=document.getElementById('scroll-label');
+var timeButton=document.getElementById('scroll-time-toggle');
+var panel=document.getElementById('panel');
+var panelTitle=document.getElementById('panel-title');
+var panelBody=document.getElementById('panel-body');
+var scrim=document.getElementById('scrim');
+var closeButton=document.getElementById('panel-close');
+var playerCopies=[];
+// 起點：南牆圓拱門前（設計檔「南面門＝玩家起點」；北牆 360 會跟明 405 疊在一起）。南牆從 1600 起，門在 0.37–0.57。
+var state={version:2,mode:'scroll',x:2068,night:false,face:1};
+var cameraX=state.x,targetX=null,keyDirection=0,pointerDirection=0;
+var lastFrame=0,wasMoving=false,panelOpen=false,lastFocus=null,down=null;
+var frameRunning=false,hostVariables={},stationedPersons=[],proximityTargets=[],nearbyTarget=null;
+var hoverQuery=window.matchMedia('(hover: hover) and (pointer: fine)');
+var supportsHover=hoverQuery.matches;
+if(hoverQuery.addEventListener)hoverQuery.addEventListener('change',function(event){supportsHover=event.matches;updateProximity();});
+else if(hoverQuery.addListener)hoverQuery.addListener(function(event){supportsHover=event.matches;updateProximity();});
+
+function mod(value,period){return((value%period)+period)%period;}
+function loopDelta(from,to){return mod(to-from+RING_CM/2,RING_CM)-RING_CM/2;}
+function imageSourceHeight(){return IMAGE_HEIGHT_PX;}
+function updateScale(){
+  viewWidth=window.innerWidth;viewHeight=window.innerHeight;
+  viewScale=viewHeight/imageSourceHeight();
+  buildRing();
+  updatePlayer();
+  updateTrack();
+  updateLabel();
+}
+function openInteraction(id,focusBack){
+  if(window.STUDIO_FEATURES&&window.STUDIO_FEATURES.handle(id,focusBack)){
+    panelOpen=true;targetX=null;keyDirection=0;pointerDirection=0;return;
+  }
+  var item=INTERACTIONS[id];if(!item)return;
+  lastFocus=focusBack||document.activeElement;
+  panelTitle.textContent=String(id).padStart(2,'0')+'｜'+item.name;
+  panelBody.replaceChildren();
+  var description=document.createElement('p');description.textContent=item.text;panelBody.appendChild(description);
+  var future=document.createElement('div');future.className='future-box';
+  future.append('之後會做成：');
+  var strong=document.createElement('strong');strong.textContent=item.future;future.appendChild(strong);panelBody.appendChild(future);
+  var note=document.createElement('p');note.className='panel-note';note.textContent='這一版只提供互動佔位面板。';panelBody.appendChild(note);
+  panel.classList.add('on');panel.setAttribute('aria-hidden','false');scrim.classList.add('on');panelOpen=true;
+  targetX=null;keyDirection=0;pointerDirection=0;
+  closeButton.focus({preventScroll:true});
+}
+function closePanel(){
+  panel.classList.remove('on');panel.setAttribute('aria-hidden','true');scrim.classList.remove('on');panelOpen=false;
+  if(lastFocus&&lastFocus.focus)lastFocus.focus({preventScroll:true});
+}
+function labelForX(x){
+  if(x<900)return'北牆';if(x<1600)return'東牆';if(x<2500)return'南牆';return'西牆';
+}
+function updateLabel(){
+  var name=labelForX(state.x);if(label.textContent!==name)label.textContent=name;
+  timeButton.textContent=state.night?'切到白天':'切到夜晚';
+  timeButton.setAttribute('aria-label',state.night?'切換至白天':'切換至夜晚');
+  document.body.classList.toggle('is-night',state.night);
+}
+function updateProximity(){
+  if(supportsHover||panelOpen){
+    if(nearbyTarget)nearbyTarget.classList.remove('nearby');
+    nearbyTarget=null;return;
+  }
+  var next=null,nearest=NEARBY_DISTANCE_CM;
+  var playerWorldX=cameraX+loopDelta(cameraX,state.x);
+  proximityTargets.forEach(function(target){
+    if(!target.node.isConnected)return;
+    var distance=Math.abs(playerWorldX-target.worldX);
+    if(distance<nearest||(distance===nearest&&target.kind==='person')){nearest=distance;next=target.node;}
+  });
+  if(next===nearbyTarget)return;
+  if(nearbyTarget)nearbyTarget.classList.remove('nearby');
+  nearbyTarget=next;
+  if(nearbyTarget)nearbyTarget.classList.add('nearby');
+}
+function buildWall(wall,copy){
+  var piece=document.createElement('section');piece.className='wall-piece';piece.dataset.wall=wall.key;
+  piece.setAttribute('aria-label',wall.name);
+  var image=document.createElement('img');image.className='ring-image';image.src=wall.image;image.alt=wall.name+'無透視牆面';image.draggable=false;
+  piece.appendChild(image);
+  if(wall.key==='north'){
+    var blue=document.createElement('div');blue.className='night-window';
+    blue.style.left='4%';blue.style.top='4%';blue.style.width='92%';blue.style.height='80%';piece.appendChild(blue);
+  }
+  var zones=document.createElement('div');zones.className='ring-hotspots';
+  wall.zones.forEach(function(zone){
+    var item=INTERACTIONS[zone.id];if(!item)return;
+    var button=document.createElement('button');button.type='button';button.className='hotspot';
+    button.dataset.id=String(zone.id);button.dataset.mark='#'+zone.id;button.dataset.name=item.name;
+    if(zone.y<.12)button.dataset.labelPlacement='below';
+    button.setAttribute('aria-label',item.name+'，開啟互動');
+    button.style.left=(zone.x*100)+'%';button.style.top=(zone.y*100)+'%';
+    button.style.width=(zone.w*100)+'%';button.style.height=(zone.h*100)+'%';
+    button.addEventListener('pointerdown',function(event){event.stopPropagation();});
+    button.addEventListener('click',function(event){event.stopPropagation();openInteraction(zone.id,button);});
+    zones.appendChild(button);
+    proximityTargets.push({node:button,worldX:wall.offsetCm+(zone.x+zone.w/2)*wall.cm+copy*RING_CM,kind:'object'});
+  });
+  piece.appendChild(zones);
+  var station=PERSON_STATIONS[wall.key];
+  if(station){
+    var details=PERSONS[station.character];
+    var person=document.createElement('button');person.type='button';person.className='ring-person';
+    person.setAttribute('aria-label','和'+details.name+'聊天');
+    person.dataset.character=station.character;
+    var visual=window.StudioCharacterView.createStationary(details,person);
+    var talk=document.createElement('span');talk.className='person-talk-icon';talk.setAttribute('aria-hidden','true');
+    talk.append(document.createElement('i'),document.createElement('i'),document.createElement('i'));
+    person.append(visual,talk);
+    person.addEventListener('pointerdown',function(event){event.stopPropagation();});
+    person.addEventListener('click',function(event){
+      event.stopPropagation();
+      if(window.STUDIO_FEATURES&&window.STUDIO_FEATURES.person(station.character,person)){
+        panelOpen=true;targetX=null;keyDirection=0;pointerDirection=0;
+      }
+    });
+    piece.appendChild(person);
+    stationedPersons.push({node:person,wall:wall,station:station,copy:copy});
+    proximityTargets.push({node:person,worldX:wall.offsetCm+station.xCm+copy*RING_CM,kind:'person'});
+  }
+  var offset=wall.offsetCm+copy*RING_CM;
+  piece.style.left=(offset*PX_PER_CM*viewScale)+'px';
+  piece.style.width=(wall.cm*PX_PER_CM*viewScale)+'px';
+  piece.style.height=viewHeight+'px';
+  return piece;
+}
+function buildRing(){
+  var offset=0;
+  WALLS.forEach(function(wall){wall.offsetCm=offset;offset+=wall.cm;});
+  track.replaceChildren();playerCopies=[];stationedPersons=[];proximityTargets=[];nearbyTarget=null;
+  for(var copy=-2;copy<=2;copy++)WALLS.forEach(function(wall){track.appendChild(buildWall(wall,copy));});
+  for(var k=-2;k<=2;k++){
+    var figure=window.StudioCharacterView.createTea(k,'tea_side.png');
+    track.appendChild(figure.root);playerCopies.push(figure);
+  }
+  if(window.STUDIO_DECOR)window.STUDIO_DECOR.rebuilt();   // 常駐位與換裝（studio_decor.mjs）跟著重建
+}
+function updatePlayer(){
+  var sourceHeight=HEIGHT_CM.tea*FURNITURE_SCALE*PX_PER_CM;
+  var height=sourceHeight*viewScale;
+  var width=height*422/900;
+  var feetY=FLOOR_CONTACT_CM*PX_PER_CM*viewScale;
+  playerCopies.forEach(function(figure){
+    var x=(state.x+Number(figure.root.dataset.copy)*RING_CM)*PX_PER_CM*viewScale;
+    window.StudioCharacterView.renderTea(figure,{
+      left:x-width/2,top:feetY-height,width:width,height:height,face:state.face,walking:wasMoving
+    });
+  });
+  stationedPersons.forEach(function(entry){
+    var height=HEIGHT_CM[entry.station.character]*FURNITURE_SCALE*PX_PER_CM*viewScale;
+    var width=height*PERSONS[entry.station.character].ratio;
+    entry.node.style.left=(entry.station.xCm/entry.wall.cm*100)+'%';
+    entry.node.style.bottom=(viewHeight-feetY)+'px';
+    entry.node.style.width=width+'px';entry.node.style.height=height+'px';
+  });
+}
+function updateTrack(){
+  track.style.transform='translate3d('+(viewWidth/2-cameraX*PX_PER_CM*viewScale)+'px,0,0)';
+}
+function readSaved(raw){
+  if(!raw)return null;
+  try{
+    var saved=typeof raw==='string'?JSON.parse(raw):raw;
+    if(!saved||saved.version!==2||saved.mode!=='scroll')return null;
+    return saved;
+  }catch(error){return null;}
+}
+function loadState(){
+  if(QUERY.get('fresh')==='1')return;
+  var saved=arguments.length?readSaved(arguments[0]):null;
+  if(saved){if(Number.isFinite(Number(saved.x)))state.x=mod(Number(saved.x),RING_CM);state.face=saved.face===-1?-1:1;state.night=!!saved.night;}
+  if(QUERY.has('x')&&Number.isFinite(Number(QUERY.get('x'))))state.x=mod(Number(QUERY.get('x')),RING_CM);
+  if(QUERY.has('night'))state.night=QUERY.get('night')==='1';
+  cameraX=state.x;
+}
+var lastSaved='';
+function saveState(){
+  var value=JSON.stringify({version:2,mode:'scroll',x:Math.round(state.x*10)/10,face:state.face,night:state.night});
+  if(value===lastSaved)return;lastSaved=value;
+  window.StudioDB.set('studioRingState',JSON.parse(value)).catch(function(){});
+}
+function moveStep(delta){
+  var previousX=state.x;
+  var direction=keyDirection||pointerDirection,moving=false,stepDistance=WALK_CM_PER_SECOND*delta,targetMove=false,targetDistance=0,targetDestination=null;
+  if(!direction&&targetX!==null){
+    targetMove=true;
+    targetDestination=targetX;
+    var distance=loopDelta(state.x,targetDestination);
+    if(Math.abs(distance)<1.5){state.x=targetDestination;targetX=null;targetMove=false;}
+    else{targetDistance=Math.abs(distance);direction=Math.sign(distance);stepDistance=Math.min(targetDistance,stepDistance);}
+  }
+  if(direction&&!panelOpen){
+    if(!targetMove)targetX=null;state.face=direction;
+    var next=state.x+direction*stepDistance;
+    var loops=Math.floor(next/RING_CM);
+    if(loops){next=mod(next,RING_CM);cameraX-=loops*RING_CM;}
+    state.x=next;moving=true;
+    if(targetMove&&stepDistance>=targetDistance){state.x=targetDestination;targetX=null;}
+  }
+  var wanted=cameraX+loopDelta(cameraX,state.x);
+  cameraX+=(wanted-cameraX)*(1-Math.pow(.0005,delta));
+  window.StudioCharacterView.advanceWalking(Math.abs(loopDelta(previousX,state.x)),delta,moving,WALK_CM_PER_SECOND);
+  if(wasMoving&&!moving)saveState();
+  wasMoving=moving;updatePlayer();updateTrack();updateLabel();updateProximity();
+}
+function frame(now){
+  var delta=Math.min(.05,lastFrame?(now-lastFrame)/1000:0);lastFrame=now;
+  moveStep(delta);window.requestAnimationFrame(frame);
+}
+function startMove(direction){if(panelOpen)return;targetX=null;keyDirection=direction;pointerDirection=0;}
+function stopMove(direction){if(keyDirection===direction)keyDirection=0;}
+function screenToWorld(clientX){return mod(cameraX+(clientX-viewWidth/2)/(PX_PER_CM*viewScale),RING_CM);}
+function stopPointer(){
+  if(!down)return;window.clearTimeout(down.timer);
+  if(down.held){pointerDirection=0;saveState();}
+  down=null;
+}
+function pointerUp(event){
+  if(!down||down.id!==event.pointerId)return;
+  var held=down.held,moved=Math.hypot(event.clientX-down.x,event.clientY-down.y);
+  window.clearTimeout(down.timer);
+  if(held){pointerDirection=0;saveState();}
+  else if(!panelOpen&&moved<14&&event.clientY>=viewHeight*WALL_HEIGHT_CM/IMAGE_HEIGHT_CM){targetX=screenToWorld(event.clientX);keyDirection=0;pointerDirection=0;}
+  down=null;
+}
+stage.addEventListener('pointerdown',function(event){
+  if(panelOpen||event.target.closest('button,a'))return;
+  event.preventDefault();stage.setPointerCapture&&stage.setPointerCapture(event.pointerId);
+  down={id:event.pointerId,x:event.clientX,y:event.clientY,held:false,timer:0};
+  down.timer=window.setTimeout(function(){
+    if(!down)return;down.held=true;targetX=null;keyDirection=0;pointerDirection=down.x<viewWidth/2?-1:1;
+  },180);
+});
+stage.addEventListener('pointermove',function(event){
+  if(down&&down.id===event.pointerId&&down.held)pointerDirection=event.clientX<viewWidth/2?-1:1;
+});
+stage.addEventListener('pointerup',pointerUp);
+stage.addEventListener('pointercancel',pointerUp);
+stage.addEventListener('lostpointercapture',stopPointer);
+stage.addEventListener('contextmenu',function(event){event.preventDefault();});
+window.addEventListener('keydown',function(event){
+  if(event.key==='Escape'){if(panelOpen)closePanel();return;}
+  if(panelOpen)return;
+  if(event.key==='ArrowLeft'||event.key==='a'||event.key==='A'){event.preventDefault();startMove(-1);}
+  if(event.key==='ArrowRight'||event.key==='d'||event.key==='D'){event.preventDefault();startMove(1);}
+});
+window.addEventListener('keyup',function(event){
+  if(event.key==='ArrowLeft'||event.key==='a'||event.key==='A')stopMove(-1);
+  if(event.key==='ArrowRight'||event.key==='d'||event.key==='D')stopMove(1);
+});
+window.addEventListener('blur',function(){keyDirection=0;pointerDirection=0;stopPointer();});
+window.addEventListener('resize',updateScale);
+window.addEventListener('pagehide',saveState);
+document.addEventListener('visibilitychange',function(){if(document.hidden)saveState();});
+timeButton.addEventListener('click',function(){state.night=!state.night;updateLabel();saveState();});
+document.getElementById('table-entry').addEventListener('click',function(){openInteraction(13,this);});
+closeButton.addEventListener('click',closePanel);
+scrim.addEventListener('click',closePanel);
+var debug=QUERY.get('debug')==='1';if(debug)document.body.classList.add('debug');
+function start(){
+  if(frameRunning)return;frameRunning=true;loadState();updateScale();
+  var requestedWall=QUERY.get('wall');
+  if(QUERY.get('fresh')==='1'&&requestedWall){
+    var startWall=WALLS.find(function(wall){return wall.key===requestedWall;});
+    if(startWall){state.x=startWall.offsetCm+startWall.cm*.5;cameraX=state.x;updatePlayer();updateTrack();}
+  }
+  // start=seat（小插曲一起，她選了長桌的位子）：捲軸版沒畫長桌（作者 11-18 選 C），她站在北牆、明的右邊，
+  // 面向明；長桌面板由 studio_embed.mjs 進場自動打開。三人照 11-11 規則站原位，a、b、c 起點相同。
+  if(QUERY.get('start')==='seat'){
+    state.x=SEAT_START_CM;state.face=-1;cameraX=state.x;targetX=null;updatePlayer();updateTrack();
+  }
+  updateLabel();updateProximity();
+  if(QUERY.get('fresh')!=='1'&&QUERY.get('start')!=='seat')window.StudioDB.get('studioRingState').then(function(saved){if(!saved)return;loadState(saved);updateScale();updateLabel();updateProximity();}).catch(function(){});
+  window.requestAnimationFrame(frame);
+}
+window.addEventListener('message',function(event){
+  if(event.source!==window.parent)return;
+  var data=event.data||{};
+  if(data.type==='larch:init'){
+    hostVariables=data.variables||{};
+  }
+});
+window.parent.postMessage({type:'larch:ready'},'*');
+start();
+window.__studio={
+  walls:WALLS.map(function(wall){return wall.key;}),
+  interactions:INTERACTIONS,
+  get state(){return{x:state.x,night:state.night,face:state.face};},
+  get ringCm(){return RING_CM;},
+  heightPx:function(person){return HEIGHT_CM[person]*FURNITURE_SCALE*PX_PER_CM;},
+  toggleNight:function(){timeButton.click();},
+  // 給 studio_decor.mjs：公分換像素（含家具比例）、地板接觸線離畫面底多少、各牆寬；開自己的面板時停下走路
+  get variables(){return hostVariables;},
+  metrics:function(){var wallCm={};WALLS.forEach(function(wall){wallCm[wall.key]=wall.cm;});return{pxPerCm:PX_PER_CM*viewScale*FURNITURE_SCALE,floorGap:viewHeight-FLOOR_CONTACT_CM*PX_PER_CM*viewScale,wallCm:wallCm};},
+  panel:function(open,focus){panelOpen=!!open;if(open){lastFocus=focus||document.activeElement;targetX=null;keyDirection=0;pointerDirection=0;}},
+  teleport:function(x){state.x=mod(x,RING_CM);cameraX=state.x;targetX=null;updatePlayer();updateTrack();updateLabel();},
+  visibleHotspots:function(){return Array.from(track.querySelectorAll('.hotspot')).map(function(button){return Number(button.dataset.id);});}
+};
+})();
+</script>
+<script type="module" src="studio_features.mjs"></script>
+<script type="module" src="studio_decor.mjs"></script>
+<script type="module" src="studio_points.mjs"></script>
+<script type="module" src="studio_embed.mjs"></script>
+</body>
+</html>

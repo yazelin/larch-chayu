@@ -1,0 +1,270 @@
+{
+ "name": "月光岬",
+ "width": 2304,
+ "height": 1024,
+ "center": 0,
+ "fg": true,
+ "feet_y": 1.2,
+ "hero_h": 0.293,
+ "walk": [
+  455,
+  2224
+ ],
+ "exit": "right",
+ "cg": "../art/out/cape/cg_514_placeholder.jpg",
+ "night": true,
+ "npcs": [
+  {
+   "id": "ming",
+   "img": "../../../sprites/ming_3h.png",
+   "x": 600,
+   "h": 0.3252,
+   "face": 1
+  }
+ ],
+ "hot": [
+  {
+   "id": "exit",
+   "name": "回全島",
+   "x": 2194,
+   "w": 110,
+   "y": 0.72,
+   "h": 0.26
+  }
+ ],
+ "chain": [
+  "05",
+  "cape_right"
+ ],
+ "clock": {
+  "cx": 623.5,
+  "cy": 235.5,
+  "r": 25,
+  "rx": 25,
+  "ry": 32,
+  "squash": 0.78,
+  "hand_long": 22,
+  "hand_short": 14
+ },
+ "floats": [
+  {
+   "id": 1,
+   "img": "../art/sprites/cape_float_1.png",
+   "x": 844,
+   "y": 654,
+   "w": 46,
+   "h": 36,
+   "ax": 0.5,
+   "ay": 0.2,
+   "bob": 11,
+   "phase": 0.0,
+   "period": 3.8,
+   "wob": 1.5,
+   "wob_period": 2.3
+  },
+  {
+   "id": 2,
+   "img": "../art/sprites/cape_float_2.png",
+   "x": 808,
+   "y": 623,
+   "w": 58,
+   "h": 42,
+   "ax": 0.5,
+   "ay": 0.2,
+   "bob": 11,
+   "phase": 0.08,
+   "period": 3.8,
+   "wob": 1.5,
+   "wob_period": 2.9
+  },
+  {
+   "id": 3,
+   "img": "../art/sprites/cape_float_3.png",
+   "x": 772,
+   "y": 592,
+   "w": 46,
+   "h": 38,
+   "ax": 0.5,
+   "ay": 0.2,
+   "bob": 11,
+   "phase": 0.16,
+   "period": 3.8,
+   "wob": 1.5,
+   "wob_period": 2.1
+  },
+  {
+   "id": 4,
+   "img": "../art/sprites/cape_float_4.png",
+   "x": 736,
+   "y": 561,
+   "w": 54,
+   "h": 41,
+   "ax": 0.5,
+   "ay": 0.2,
+   "bob": 11,
+   "phase": 0.24,
+   "period": 3.8,
+   "wob": 1.5,
+   "wob_period": 2.7
+  },
+  {
+   "id": 5,
+   "img": "../art/sprites/cape_float_5.png",
+   "x": 700,
+   "y": 530,
+   "w": 44,
+   "h": 35,
+   "ax": 0.5,
+   "ay": 0.2,
+   "bob": 11,
+   "phase": 0.32,
+   "period": 3.8,
+   "wob": 1.5,
+   "wob_period": 2.5
+  }
+ ],
+ "float_ends": {
+  "ground": [
+   880,
+   685
+  ],
+  "top": [
+   690,
+   522
+  ],
+  "door_h": 81
+ },
+ "route": [
+  {
+   "x": 2224,
+   "y": 905,
+   "h": 300
+  },
+  {
+   "x": 2000,
+   "y": 850,
+   "h": 285
+  },
+  {
+   "x": 1820,
+   "y": 790,
+   "h": 255
+  },
+  {
+   "x": 1700,
+   "y": 735,
+   "h": 220
+  },
+  {
+   "x": 1620,
+   "y": 712,
+   "h": 195
+  },
+  {
+   "x": 1460,
+   "y": 712,
+   "h": 172
+  },
+  {
+   "x": 1300,
+   "y": 718,
+   "h": 150
+  },
+  {
+   "x": 1180,
+   "y": 730,
+   "h": 128
+  },
+  {
+   "x": 1060,
+   "y": 738,
+   "h": 106
+  },
+  {
+   "x": 960,
+   "y": 712,
+   "h": 86
+  },
+  {
+   "x": 880,
+   "y": 688,
+   "h": 71
+  },
+  {
+   "x": 760,
+   "y": 706,
+   "h": 71
+  },
+  {
+   "x": 640,
+   "y": 714,
+   "h": 71
+  },
+  {
+   "x": 540,
+   "y": 722,
+   "h": 71
+  },
+  {
+   "x": 455,
+   "y": 738,
+   "h": 71
+  }
+ ],
+ "route_foot": 10,
+ "route_shore": 14,
+ "platform": {
+  "x0": 640,
+  "x1": 748,
+  "y": 508,
+  "h": 71,
+  "land": [
+   700,
+   510
+  ],
+  "ming": [
+   602,
+   507
+  ]
+ },
+ "views": {
+  "road": {
+   "top": 0,
+   "h": 1
+  },
+  "tower": {
+   "top": 0.13,
+   "h": 0.68
+  },
+  "up": {
+   "top": 0.04,
+   "h": 0.62
+  },
+  "zoom_from": 1750,
+  "zoom_to": 1000
+ },
+ "moon": {
+  "x": 223,
+  "y": 267,
+  "r": 48,
+  "horizon": 474,
+  "band_bottom": 700
+ },
+ "cg_514": "../art/out/cape/cg_514_placeholder.jpg",
+ "over_patches": {
+  "lantern_off": {
+   "img": "../art/out/cape/lantern_off.png",
+   "x": 1907,
+   "y": 459,
+   "w": 273,
+   "h": 294
+  },
+  "tulip_open": {
+   "img": "../art/out/cape/tulip_open.png",
+   "x": 1593,
+   "y": 774,
+   "w": 211,
+   "h": 163
+  }
+ }
+}
