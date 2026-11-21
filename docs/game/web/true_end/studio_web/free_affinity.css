@@ -1,0 +1,11 @@
+.free-aff-toast,.free-aff-debug {
+  position:fixed; right:max(12px,env(safe-area-inset-right)); z-index:80;
+  max-width:calc(100vw - 24px); box-sizing:border-box; pointer-events:none;
+  padding:.48em .85em; border:1px solid #e4d1b7; border-radius:10px;
+  color:#382c2b; background:#fff5e9; box-shadow:0 4px 16px #382c2b35;
+  font:600 13px/1.5 system-ui,sans-serif;
+}
+.free-aff-toast { bottom:max(88px,calc(env(safe-area-inset-bottom) + 72px)); animation:free-aff-fade 2.6s ease both; }
+.free-aff-debug { bottom:max(12px,env(safe-area-inset-bottom)); }
+@keyframes free-aff-fade { 0%,100% { opacity:0 } 10%,78% { opacity:1 } }
+@media(prefers-reduced-motion:reduce) { .free-aff-toast { animation:none; } }

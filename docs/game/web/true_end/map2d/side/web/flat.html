@@ -7,7 +7,8 @@
 <style>
 @import url("https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&display=swap");
 /* 紙感介面（作者 2026-11-13，照《轉生成寶箱怪的我》的水彩紙卡做法；素材 art/ui/：洋紅幕生成、去背、border-image 九宮格四邊毛邊照原比例只拉中間） */
-:root{--ink:#5a4150;--dim:#8a7080;--hand:"LXGW WenKai TC","Iansui","Kaiti TC","Noto Sans TC",serif;
+/* --hud-clear：Larch 的常駐介面（右上角三顆愛心＋手機的紙卡＋底下的日期紙卡「第 N 天・時段」，框 258×112、離右邊 48px；播放器關閉鈕在它右邊）蓋在這頁上面，右上角自己的元件從它底下開始排（作者 2026-11-21 試玩：疊在一起）。新版/hud/README.md「收起」段 */
+:root{--hud-clear:calc(124px + env(safe-area-inset-top,0px));--ink:#5a4150;--dim:#8a7080;--hand:"LXGW WenKai TC","Iansui","Kaiti TC","Noto Sans TC",serif;
   --panel:url("../art/ui/ui_panel.webp");--tag:url("../art/ui/ui_tag.webp");--btn:url("../art/ui/ui_btn.webp");--frame:url("../art/ui/ui_frame.webp");
   --panel-slice:0 0 0 0;--panel-width:0;--tag-slice:0 0;--tag-width:0;--btn-slice:0 0;--btn-width:0;--frame-slice:0;--frame-width:0}
 html,body{width:100%;height:100%;height:100dvh;margin:0;overflow:hidden;background:#28232a;color:var(--ink);font-family:var(--hand)}
@@ -83,14 +84,14 @@ html,body{width:100%;height:100%;height:100dvh;margin:0;overflow:hidden;backgrou
 .fx.star,.fx.dot{animation:fxburst 1.3s ease-out forwards}@keyframes fxburst{0%{transform:translate(-50%,-50%) rotate(var(--a)) translateX(0) scale(.3);opacity:0}15%{opacity:1}100%{transform:translate(-50%,-50%) rotate(var(--a)) translateX(var(--d)) scale(.9) rotate(180deg);opacity:0}}
 .fx.heart.float{animation:fxheart 1.6s ease-out forwards}@keyframes fxheart{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}20%{opacity:1;transform:translate(-50%,-70%) scale(1.1)}100%{transform:translate(calc(-50% + var(--dx)),-180%) scale(.9);opacity:0}}
 .fx.drop.falling{animation:fxdrop .9s ease-in forwards}@keyframes fxdrop{0%{transform:translate(-50%,-50%);opacity:0}20%{opacity:.95}100%{transform:translate(-50%,var(--dy));opacity:0}}
-#quest,#c7note{position:fixed;z-index:10;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));padding:.5em 1.3em .55em;color:var(--ink);font:700 15px/1.3 var(--hand);letter-spacing:.12em;white-space:nowrap;pointer-events:none;rotate:1.2deg;
+#quest,#c7note{position:fixed;z-index:10;top:var(--hud-clear);right:max(12px,env(safe-area-inset-right));padding:.5em 1.3em .55em;color:var(--ink);font:700 15px/1.3 var(--hand);letter-spacing:.12em;white-space:nowrap;pointer-events:none;rotate:1.2deg;
   border-style:solid;border-width:0;border-image:var(--tag) var(--tag-slice) fill / var(--tag-width) stretch;color:#fff;text-shadow:0 0 .3em rgba(150,60,60,.45);filter:drop-shadow(0 3px 4px rgba(90,50,60,.22))}
 #quest[hidden]{display:none}
 /* 第七章跟著走的三個人：彎腰撿東西、蹲下來量 */
 .person.follower.bend .sheet{animation:fbend .7s ease-in-out}@keyframes fbend{45%{transform:translateY(4%) rotate(9deg) scaleX(var(--facing,1))}}
 .thing.c7flower.pop .sheet{animation:c7pop .45s cubic-bezier(.3,1.5,.5,1)}@keyframes c7pop{0%{transform:scale(.2);opacity:0}100%{transform:scale(1);opacity:1}}
 .thing.c7soil{z-index:1}.thing.c7soil .shadow{opacity:0}
-#palette{position:fixed;z-index:10;top:max(54px,calc(env(safe-area-inset-top) + 42px));right:max(12px,env(safe-area-inset-right));display:flex;gap:8px;padding:.5em 1.1em;rotate:-1deg;pointer-events:none;
+#palette{position:fixed;z-index:10;top:calc(var(--hud-clear) + 42px);right:max(12px,env(safe-area-inset-right));display:flex;gap:8px;padding:.5em 1.1em;rotate:-1deg;pointer-events:none;
   border-style:solid;border-width:0;border-image:var(--btn) var(--btn-slice) fill / var(--btn-width) stretch;filter:drop-shadow(0 3px 4px rgba(90,50,60,.22))}
 #palette[hidden]{display:none}
 #palette i{width:18px;height:18px;border-radius:50% 46% 52% 48%;background:#cfc6c0;opacity:.45;box-shadow:inset 0 0 0 1px rgba(90,60,70,.25);transition:background .4s,opacity .4s,transform .3s}
@@ -125,7 +126,6 @@ body.locked .hotspot{pointer-events:none}body.locked .hotspot::after{opacity:0!i
 .can::after{content:"";position:absolute;right:-18px;top:6px;width:24px;height:8px;border-radius:4px;background:#8fb3d6;transform:rotate(-25deg)}
 @keyframes pour{0%{transform:rotate(0);opacity:0}30%{opacity:1}60%{transform:rotate(-35deg)}100%{transform:rotate(0);opacity:0}}
 .person.sitting{top:var(--sit-y)!important}.person.sitting .sheet{transform:rotate(-3deg) scaleX(var(--facing,1))!important}.person.sitting .shadow{opacity:0}
-.windline{position:absolute;inset:0;z-index:4;pointer-events:none;background:repeating-linear-gradient(100deg,transparent 0 120px,rgba(255,255,255,.07) 120px 124px);animation:windk 2.4s linear infinite}@keyframes windk{to{background-position:400px 0}}
 #scroll{position:fixed;inset:0;z-index:31;display:none;background:rgba(30,20,28,.5);cursor:pointer}
 #scroll .card{position:absolute;left:50%;top:50%;width:min(760px,calc(100vw - 48px));padding:46px 60px 40px 86px;color:var(--ink);transform:translate(-50%,-50%) rotate(-1.5deg);
   border-style:solid;border-width:0;border-image:var(--panel) var(--panel-slice) fill / var(--panel-width) stretch;filter:drop-shadow(0 12px 18px rgba(0,0,0,.35))}
@@ -138,8 +138,12 @@ body.locked .hotspot{pointer-events:none}body.locked .hotspot::after{opacity:0!i
 body.nohud #label,body.nohud #hint,body.nohud #quest,body.nohud #c7note{display:none!important}
 body.flatpaper .person .sheet{filter:none}body.flatpaper .person .shadow{display:none}
 body.sitting .hotspot::after,body.panel-open .hotspot::after{opacity:0!important;visibility:hidden!important}
+/* 窄畫面：上緣中間的操作說明會伸進右上角的常駐介面，改放下緣（對話框打開時被它蓋住）；手機直式時紙卡橫跨上緣大半，地名也往下移 */
+@media(max-width:1100px){#hint{top:auto;bottom:max(14px,env(safe-area-inset-bottom));white-space:normal;box-sizing:border-box;width:max-content;max-width:calc(100vw - 32px);text-align:center;font-size:13px}}
+@media(max-width:700px){#label{top:var(--hud-clear)}}
 @media(prefers-reduced-motion:reduce){#panel,.hotspot::after,#scrim{transition-duration:0s}#cg .mat{animation:none}}
 </style>
+<link rel="stylesheet" href="../../../studio_web/free_affinity.css">
 </head>
 <body>
 <main id="stage" aria-label="朝霞丘"><div id="art"></div></main>
@@ -153,6 +157,7 @@ body.sitting .hotspot::after,body.panel-open .hotspot::after{opacity:0!important
 <div id="cg"><div class="mat"><img id="cg-img" alt="觀景"></div><span>點一下回到山丘</span></div>
 <script src="island_bridge.js"></script>
 <script src="../../../studio_web/studio_storage.js"></script>
+<script src="../../../studio_web/walk_sway.js"></script>
 <script type="module" src="flat_engine.js"></script>
 </body>
 </html>

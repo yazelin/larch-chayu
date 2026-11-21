@@ -29,9 +29,9 @@ export async function makeFollowers(api, { feet, hFrac, gap = 105, bounds, order
       const d = want - p.x;
       if (Math.abs(d) > 24) {
         const v = Math.sign(d) * Math.min(Math.abs(d) - 18, 560 * dt); p.x += v; p.face = Math.sign(d);
-        p.el.style.setProperty('--bob', (-Math.abs(Math.sin(p.t * 9)) * 2.2) + '%'); p.el.style.setProperty('--rock', (Math.sin(p.t * 9) * 3) + 'deg');
+        p.el.style.setProperty('--bob', (-window.WalkSway.pose(p.t, true).lift * 100) + '%'); p.el.style.setProperty('--rock', window.WalkSway.pose(p.t, true).tilt + 'deg');
       } else {
-        p.el.style.setProperty('--bob', '0%'); p.el.style.setProperty('--rock', (Math.sin(p.t * 1.6) * 0.6) + 'deg');
+        p.el.style.setProperty('--bob', '0%'); p.el.style.setProperty('--rock', '0deg');
         p.face = state.x >= p.x ? 1 : -1;
       }
       p.el.style.left = (p.x / W * 100) + '%'; p.el.style.setProperty('--facing', String(p.face));
@@ -41,8 +41,8 @@ export async function makeFollowers(api, { feet, hFrac, gap = 105, bounds, order
   const bend = p => new Promise(ok => { p.busy = true; p.el.classList.remove('bend'); void p.el.offsetWidth; p.el.classList.add('bend'); setTimeout(() => { p.el.classList.remove('bend'); p.busy = false; ok(); }, 700); });
   // 走到某個 x（演出用），走完回到跟隨
   const walkTo = (p, x) => new Promise(ok => { p.busy = true; const from = p.x; const secs = Math.max(0.2, Math.abs(x - from) / 420); let t = 0; p.face = x >= from ? 1 : -1;
-    const step = dt => { t += dt / secs; const e = Math.min(1, t); p.x = from + (x - from) * e; p.el.style.left = (p.x / W * 100) + '%'; p.el.style.setProperty('--facing', String(p.face)); p.el.style.setProperty('--bob', (-Math.abs(Math.sin(t * secs * 9)) * 2.2) + '%');
-      if (e >= 1) { const k = api.frameHooks.indexOf(step); if (k >= 0) api.frameHooks.splice(k, 1); p.el.style.setProperty('--bob', '0%'); ok(); } };
+    const step = dt => { t += dt / secs; const e = Math.min(1, t); p.x = from + (x - from) * e; p.el.style.left = (p.x / W * 100) + '%'; p.el.style.setProperty('--facing', String(p.face)); window.WalkSway.css(p.el, window.WalkSway.pose(t * secs, e < 1));
+      if (e >= 1) { const k = api.frameHooks.indexOf(step); if (k >= 0) api.frameHooks.splice(k, 1); window.WalkSway.css(p.el, window.WalkSway.pose(0, false)); ok(); } };
     api.frameHooks.push(step); });
   return { people, get: id => people.find(p => p.id === id), bend, walkTo, release: p => { p.busy = false; } };
 }

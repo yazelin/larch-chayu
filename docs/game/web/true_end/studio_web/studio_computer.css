@@ -1,0 +1,616 @@
+/* 明的電腦沿用新版/hud/mockup/index.html 的 V1～V5 版面。 */
+#panel.ming-os-panel{
+  left:0;top:0;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;
+  overflow:hidden;border:0;border-radius:0;background:transparent;box-shadow:none;
+  transform:none;transition:opacity .2s ease;
+}
+#panel.ming-os-panel.on{transform:none}
+#panel.ming-os-panel .panel-head{display:none}
+#panel.ming-os-panel #panel-body{display:grid;place-items:center;width:100%;height:100%;min-height:0;padding:0;overflow:hidden;line-height:normal;background:#17161b}
+
+.ming-computer-shell{--ink:#1f1c26;--ink2:rgba(31,28,38,.6);--ink3:rgba(31,28,38,.36);--sep:rgba(60,48,84,.14);--tint:#6c5fc0;--red:#e0605a;--ming:#45628f;--ming-ink:#34507c;--ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang TC","Noto Sans TC","Noto Sans CJK TC",system-ui,sans-serif;position:relative;display:grid;place-items:center;width:100%;height:100%;min-width:0;min-height:0;overflow:hidden;background:#17161b;color:var(--ink);font-family:var(--ui);-webkit-font-smoothing:antialiased}
+.imac-room-fill{position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);object-fit:cover;filter:blur(9px) brightness(.55) saturate(.85);pointer-events:none}
+.ming-os-stage{position:relative;z-index:1;flex:none;width:1280px;height:720px;overflow:hidden;transform:scale(var(--ming-scale,1));transform-origin:center center}
+.imac-room{position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);object-fit:cover;filter:blur(9px) brightness(.55) saturate(.85)}
+.imac{position:absolute;left:84.5px;top:8px;width:1111px;height:683px;border-radius:16px;background:linear-gradient(#5d6c8f,#566587 60%,#4d5b7b);box-shadow:0 30px 60px rgba(6,8,20,.55),0 0 0 1px rgba(30,38,60,.6),inset 0 1px 0 rgba(255,255,255,.18)}
+.imac-bezel{position:absolute;left:0;top:0;right:0;height:635px;border-radius:16px 16px 4px 4px;background:linear-gradient(#b0b8cb,#a6aec2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.35),0 1px 0 rgba(30,38,60,.35)}
+.imac-cam{position:absolute;left:50%;top:4px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#3c445c;box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+.imac-screen{position:absolute;left:11.5px;top:11.5px;width:1088px;height:612px;border-radius:5px;overflow:hidden;background:#000;box-shadow:0 0 0 1px rgba(40,48,70,.55)}
+.imac-screen>.mac{position:absolute;left:0;top:0;right:auto;bottom:auto;width:1280px;height:720px;transform:scale(.85);transform-origin:0 0}
+.imac-chin{position:absolute;left:0;right:0;bottom:0;height:48px;display:grid;place-items:center}
+.imac-chin .logo{width:26px;height:26px;opacity:.9}
+.imac-chin .logo circle{fill:#8494b8}
+.imac-chin .logo mask circle,.imac-chin .logo mask rect{fill:revert-layer}
+.imac-neck{position:absolute;left:520px;top:691px;width:240px;height:40px;background:linear-gradient(#333f5c,#3f4c6b 55%,#465473);box-shadow:inset 0 12px 12px -6px rgba(8,10,24,.75),0 0 18px rgba(6,8,20,.35)}
+.imac-base{display:none}
+
+.ming-computer-shell .mac{position:absolute;inset:0;font-family:var(--ui);color:var(--ink);font-size:13px;isolation:isolate}
+.ming-computer-shell .wp{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ming-computer-shell .menubar{position:absolute;left:0;right:0;top:0;height:25px;display:flex;align-items:center;padding:0 10px 0 14px;color:#fff;background:rgba(22,26,52,.26);backdrop-filter:blur(30px) saturate(1.7);-webkit-backdrop-filter:blur(30px) saturate(1.7);z-index:50;text-shadow:0 0 6px rgba(0,0,0,.2)}
+.ming-computer-shell .menubar button{font:inherit;color:inherit;border:0;background:transparent;padding:0;cursor:pointer}
+.ming-computer-shell .menubar .logo{width:17px;height:17px;margin-right:16px;flex:none}
+.ming-computer-shell .ming-menu-items{display:flex;align-items:center;flex:none}
+.ming-computer-shell .menubar .m{position:relative;flex:none;margin-right:6px;padding:2px 8px;border-radius:5px;font-size:13px;white-space:nowrap}
+.ming-computer-shell .menubar .m::before{content:"";position:absolute;inset:-8px -3px}
+.ming-computer-shell .menubar .m.app{font-weight:700;margin-right:10px}
+.ming-computer-shell .menubar .m:hover,.ming-computer-shell .menubar .m.on{background:rgba(255,255,255,.22)}
+.ming-computer-shell .menubar .rt{margin-left:auto;display:flex;align-items:center;gap:13px;flex:none;font-size:13px;white-space:nowrap}
+.ming-computer-shell .menubar .rt svg{display:block;flex:none}
+.ming-computer-shell .menubar .os-status{font-variant-numeric:tabular-nums}
+.ming-computer-shell .menubar .os-game-notice{padding:2px 7px;border-radius:999px;background:rgba(255,255,255,.2);font-size:10px}
+.ming-computer-shell .menubar .os-game-notice[hidden]{display:none}
+.ming-computer-shell .menubar .os-tier{font-size:11px;opacity:.9;padding:1px 3px}
+.ming-computer-shell .menubar .os-tier:hover{text-decoration:underline}
+.ming-computer-shell .menu-popover,.ming-computer-shell .quota-popover{position:absolute;z-index:70;min-width:190px;padding:5px;border-radius:9px;background:rgba(240,238,246,.9);backdrop-filter:blur(30px) saturate(1.6);-webkit-backdrop-filter:blur(30px) saturate(1.6);box-shadow:0 10px 30px rgba(0,0,0,.3),0 0 0 .5px rgba(0,0,0,.2);color:var(--ink);text-shadow:none}
+.ming-computer-shell .menu-popover button{display:block;width:100%;min-height:28px;padding:4px 10px;border-radius:5px;text-align:left;font-size:13px;color:inherit}
+.ming-computer-shell .menu-popover button:hover:not(:disabled){background:var(--tint);color:#fff}
+.ming-computer-shell .menu-popover button:disabled{color:var(--ink3);cursor:default}
+.ming-computer-shell .menu-separator{display:block;height:1px;margin:4px 6px;background:rgba(0,0,0,.15)}
+.ming-computer-shell .quota-popover{right:14px;width:340px;padding:13px 15px}
+.ming-computer-shell .quota-popover h2{margin:0 0 8px;font-size:15px}
+.ming-computer-shell .quota-list{display:grid;gap:5px;margin:0;padding-left:1.2em;font-size:12px;line-height:1.55}
+.ming-computer-shell .quota-reset{margin:8px 0 0;color:var(--ink2);font-size:11px}
+
+.ming-desktop-widgets{position:absolute;z-index:10;inset:0;pointer-events:none}
+.ming-desktop-widgets>*{pointer-events:auto}
+.mwidget{position:absolute;width:166px;height:166px;border-radius:22px;background:rgba(30,32,62,.42);backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 8px 24px rgba(0,0,10,.25),inset 0 0 0 .5px rgba(255,255,255,.2);color:#fff;padding:13px;text-align:left}
+.ming-desktop-widgets .mw-prog{right:188px;top:40px;display:flex;flex-direction:column}
+.ming-desktop-widgets .mw-cal{right:20px;top:40px}
+.ming-desktop-widgets .mw-favorites{right:20px;top:220px}
+.ming-desktop-widgets .mw-notes{right:20px;top:400px}
+.ming-desktop-widgets .mw-prog.pos-left,.ming-desktop-widgets .mw-cal.pos-left,.ming-desktop-widgets .mw-favorites.pos-left,.ming-desktop-widgets .mw-notes.pos-left{left:20px;right:auto;top:40px}
+.ming-desktop-widgets .mw-prog.pos-top,.ming-desktop-widgets .mw-cal.pos-top,.ming-desktop-widgets .mw-favorites.pos-top,.ming-desktop-widgets .mw-notes.pos-top{top:40px}
+.ming-desktop-widgets .mw-prog.pos-bottom,.ming-desktop-widgets .mw-cal.pos-bottom,.ming-desktop-widgets .mw-favorites.pos-bottom,.ming-desktop-widgets .mw-notes.pos-bottom{top:auto;bottom:86px}
+.mwidget-button{display:block;border:0;font:inherit;cursor:pointer}
+.mwidget-button:hover{background:rgba(40,44,80,.52)}
+.mw-prog .ring{position:relative;width:78px;height:78px}
+.mw-prog .ring svg{width:78px;height:78px}
+.mw-prog .ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:17px}
+.mw-prog .ring b small{display:block;font-size:10px;font-weight:500;opacity:.7;line-height:11px;text-align:center}
+.mw-prog .tx{margin-top:auto}
+.mw-prog .tx b{display:block;font-size:13px}
+.mw-prog .tx small{display:block;font-size:11px;opacity:.78;line-height:15px}
+.mw-cal .hd{display:flex;justify-content:space-between;margin-bottom:3px;font-size:12px;font-weight:700}
+.mw-cal .hd span{color:#ff8a80}
+.mw-cal .g{display:grid;grid-template-columns:repeat(7,1fr);row-gap:1px;text-align:center;font-size:9.5px;line-height:17px;font-weight:600}
+.mw-cal .g .wk{height:16px;opacity:.5;font-size:9px;font-weight:700}
+.mw-cal .g span{position:relative;display:grid;place-items:center;height:17px}
+.mw-cal .g .dim{opacity:.38}
+.mw-cal .g .today::before{content:"";position:absolute;width:17px;height:17px;border-radius:50%;background:#ff5f57;z-index:-1}
+.mw-cal .g .today{z-index:0}
+.mw-cal .g .circ svg{position:absolute;left:50%;top:50%;width:24px;height:22px;transform:translate(-50%,-50%)}
+.ming-computer-shell .mac.app-active .ming-desktop-widgets{opacity:.25}
+
+.ming-window-layer{position:absolute;z-index:20;inset:0 0 82px;pointer-events:none}
+.ming-computer-shell .win{position:absolute;overflow:hidden;display:flex;flex-direction:column;border-radius:11px;background:transparent;box-shadow:0 0 0 1px rgba(0,0,0,.26),inset 0 0 0 1px rgba(255,255,255,.4),0 2px 6px rgba(0,0,10,.28),0 26px 60px rgba(4,4,20,.5);pointer-events:auto}
+.ming-computer-shell .win:not(.has-side){background:#fbfafc}
+.ming-computer-shell .win.inactive{box-shadow:0 0 0 1px rgba(0,0,0,.18),inset 0 0 0 1px rgba(255,255,255,.4),0 1px 3px rgba(0,0,10,.16),0 12px 30px rgba(4,4,20,.26)}
+.ming-computer-shell .win.inactive .wbar h4{color:var(--ink3)}
+.ming-computer-shell .win[hidden]{display:none}
+.ming-computer-shell .win.zoomed{left:8px!important;top:8px!important;width:calc(100% - 16px)!important;height:calc(100% - 16px)!important}
+.ming-computer-shell .wbar{position:relative;z-index:3;flex:none;height:44px;display:flex;align-items:center;padding:0 10px 0 14px;border-bottom:1px solid rgba(0,0,0,.08);background:#f4f2f7;touch-action:none}
+.ming-computer-shell .lights{display:flex;gap:8px;flex:none;margin-right:16px}
+.ming-computer-shell .lights .window-control{position:relative;display:grid;place-items:center;width:12px;height:12px;padding:0;border:0;border-radius:50%;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.18);font-size:9px;line-height:1;color:rgba(0,0,0,.55);cursor:pointer}
+.ming-computer-shell .lights .window-control::before{content:"";position:absolute;inset:-10px -3px}
+.ming-computer-shell .lights .window-control.close{background:#ff5f57}
+.ming-computer-shell .lights .window-control.mini{background:#febc2e}
+.ming-computer-shell .lights .window-control.zoom{background:#28c840}
+.ming-computer-shell .win.inactive .lights .window-control{background:#d9d6de}
+.ming-computer-shell .lights:hover .window-control.close::after{content:"×"}
+.ming-computer-shell .lights:hover .window-control.mini::after{content:"−"}
+.ming-computer-shell .lights:hover .window-control.zoom::after{content:"+"}
+.ming-computer-shell .wbar h4{min-width:0;margin:0;overflow:hidden;font-size:13px;line-height:16px;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.ming-computer-shell .wbar h4 small{display:block;font-size:11px;line-height:13px;font-weight:400;color:var(--ink2)}
+.ming-computer-shell .wbar .tools{display:flex;align-items:center;gap:5px;margin-left:auto}
+.ming-computer-shell .wbar .tb{display:flex;align-items:center;justify-content:center;gap:5px;height:26px;padding:0 8px;border-radius:6px;color:#4a4552;font-size:12px;white-space:nowrap}
+.ming-computer-shell .wbar .tb:hover{background:rgba(0,0,0,.05)}
+.ming-computer-shell .wbar .tb.ic{width:28px;padding:0}
+.ming-computer-shell .wbar .tb svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ming-computer-shell .wsearch{display:flex;align-items:center}
+.ming-computer-shell .wsearch input{width:0;height:24px;border:0;padding:0;border-radius:6px;background:rgba(0,0,0,.06);font-size:12px;outline:0;transition:width .2s,padding .2s}
+.ming-computer-shell .wsearch.open input{width:120px;padding:0 8px;margin-right:2px}
+.ming-computer-shell .wsplit{flex:1;display:flex;min-height:0}
+.ming-computer-shell .side{position:relative;z-index:1;flex:none;width:184px;padding:8px 8px 10px;overflow:auto;border-right:1px solid rgba(0,0,0,.09);background:rgba(236,232,246,.72);backdrop-filter:blur(36px) saturate(1.7);-webkit-backdrop-filter:blur(36px) saturate(1.7);scrollbar-width:thin}
+.ming-computer-shell .win.has-side .wbar{position:absolute;left:0;right:0;top:0;border:0;padding-left:14px}
+.ming-computer-shell .win.has-side .wbar h4{position:absolute;left:200px;right:90px}
+.ming-computer-shell .win.has-side .side{padding-top:44px}
+.ming-computer-shell .win.has-side .main{padding-top:44px}
+.ming-computer-shell .side .sh{margin:10px 8px 2px;color:var(--ink3);font-size:11px;font-weight:700}
+.ming-computer-shell .side button{display:flex;align-items:center;gap:7px;width:100%;height:28px;padding:0 8px;border:0;border-radius:6px;background:transparent;color:var(--ink);font-size:13px;text-align:left;cursor:pointer}
+.ming-computer-shell .side button:hover,.ming-computer-shell .side button.on{background:rgba(70,56,120,.13)}
+.ming-computer-shell .side button .sq{display:grid;place-items:center;flex:none;width:18px;height:18px;border-radius:5px;background:var(--c)}
+.ming-computer-shell .side button .sq svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ming-computer-shell .side button .n{margin-left:auto;color:var(--ink3);font-size:11px}
+.ming-computer-shell .sideinfo{display:flex;align-items:center;gap:8px;height:24px;padding:0 8px;color:var(--ink2);font-size:12px}
+.ming-computer-shell .main{position:relative;flex:1;min-width:0;min-height:0;overflow:auto;background:#fbfafc;scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.25) transparent}
+.ming-computer-shell .win.has-side .main::before{content:"";position:absolute;z-index:0;left:0;right:0;top:0;height:44px;border-bottom:1px solid rgba(0,0,0,.07);background:#f4f2f7}
+.ming-window-content{position:relative;z-index:1;min-width:0;min-height:100%;padding:16px 24px 20px;font-size:13px;line-height:1.5}
+.ming-window-content .sf-context{display:none}
+.ming-window-content .sf-row{margin:0 0 8px}
+.ming-window-content .sf-button,.ming-window-content .sf-tab{border-radius:7px;border-color:rgba(0,0,0,.15);background:#fff;color:#4a4552;padding:5px 9px;font-size:12px}
+.ming-window-content .sf-button{min-height:30px}
+.ming-window-content .sf-button.primary{border-color:#45628f;background:#45628f;color:#fff}
+.ming-window-content .sf-button.danger{color:#a23b37}
+.ming-window-content .sf-input,.ming-window-content .sf-select,.ming-window-content .sf-textarea{border-color:rgba(60,48,84,.2);border-radius:7px;background:#fff;font-size:13px}
+.ming-window-content .sf-stack{gap:8px}
+.ming-window-content .sf-card{border-color:rgba(0,0,0,.08);border-radius:9px;background:#fff}
+.ming-window-content .sf-card h3{font-size:14px}
+.ming-window-content .sf-card p,.ming-window-content .sf-context{font-size:12px}
+.ming-window-content .sf-status{color:var(--ink2)}
+.ming-window-content .sf-empty{padding:24px 10px;color:var(--ink2)}
+.ming-window-content .mh{margin:0 0 8px;font-size:26px;line-height:32px;font-weight:700}
+.ming-window-content .ming-file-back{margin:0 0 12px;padding-left:0;border:0;background:transparent;color:var(--ming-ink)}
+.ming-window-content .ming-file-document{max-width:680px;margin:0 auto;padding:10px 4px}
+.ming-window-content .sf-chat{display:flex;flex-direction:column;min-height:0;height:100%;max-height:none}
+.ming-window-content:has(>.sf-chat){display:flex;flex-direction:column;height:100%}
+.ming-window-content:has(>.ming-game-detail){display:flex;flex-direction:column;height:100%;min-height:0;box-sizing:border-box}
+.ming-window-content .sf-chat-log{flex:1;min-height:0;padding:10px 14px;overflow:auto}
+.ming-window-content .sf-message{max-width:82%;gap:8px;margin:8px 0}
+.ming-window-content .sf-avatar{width:44px;height:44px;border:0;background:#dde3f0}
+.ming-window-content .sf-name{color:var(--ink2);font-size:10px}
+.ming-window-content .sf-bubble{border:0;border-radius:15px 15px 15px 4px;background:#ebeaf0;color:#292633;padding:7px 11px;font-size:13px;line-height:18px}
+.ming-window-content .sf-message.me .sf-bubble{border-radius:15px 15px 4px 15px;background:#8474d9;color:#fff}
+.ming-window-content .sf-composer{flex:none;align-items:center;gap:8px;margin:8px 12px 6px;padding:4px 6px 4px 12px;border:1px solid rgba(0,0,0,.14);border-radius:16px;background:#fff}
+.ming-window-content .sf-composer textarea{height:30px;min-height:30px;max-height:80px;padding:4px 0;border:0;background:transparent;resize:none;font-size:13px;line-height:20px;box-shadow:none}
+.ming-window-content .sf-composer .sf-button{flex:none;min-height:28px;padding:4px 10px;border:0;border-radius:50%;background:#6c5fc0;color:#fff}
+.ming-window-content .sf-chat .sf-status,.ming-window-content .sf-chat .sf-quota-hint{flex:none;margin:2px 14px 8px;font-size:11px}
+.ming-empty-app{margin:18px 0 4px;text-align:center;color:var(--ming-ink);font-size:22px;font-weight:700}
+.ming-empty-note{min-height:120px;display:grid;place-items:center}
+.ming-timeline-day{margin:0 0 4px;color:var(--ming-ink);font-size:22px}
+.ming-trial-line{margin:0;color:var(--ink2)}
+.ming-progress-list{padding:0 16px}
+.ming-progress-row{position:relative;display:flex;align-items:flex-start;gap:9px;width:100%;padding:8px 0;border:0;border-bottom:1px solid rgba(0,0,0,.08);background:transparent;color:var(--ink);text-align:left;font-size:13px;line-height:18px}
+.ming-progress-row .cb{display:grid;place-items:center;flex:none;width:16px;height:16px;margin-top:1px;border-radius:50%;box-shadow:inset 0 0 0 1.5px rgba(80,70,100,.35)}
+.ming-progress-row.done .cb{background:var(--ming);box-shadow:none}
+.ming-progress-row.done .cb::after{content:"";width:5px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.ming-progress-row.done .task-title{text-decoration:line-through;color:var(--ink3)}
+.ming-progress-row .task-body{flex:1;min-width:0}
+.ming-progress-row .task-meta{display:block;margin-top:2px;color:var(--ink2);font-size:11px}
+.ming-progress-row input.task-title{width:100%;padding:0;border:0;background:transparent;color:inherit;font:inherit;outline:0}
+.ming-progress-row input.task-title:focus{box-shadow:0 1px 0 var(--tint)}
+.ming-progress-row select{flex:none;max-width:92px;border:0;background:transparent;color:var(--ink2);font-size:11px}
+.ming-progress-row .delete-task{flex:none}
+.ming-progress-add{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:7px 16px 12px}
+.ming-progress-add input{flex:1;min-width:0;height:30px;padding:0 8px;border:1px solid rgba(80,70,100,.2);border-radius:7px;background:#fff;font-size:13px}
+.mcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));padding:5px 14px 10px}
+.mcal .wk{height:24px;color:var(--ink2);font-size:11px;text-align:center}
+.mcal button{position:relative;display:block;height:58px;padding:5px 6px;border:0;border-top:1px solid rgba(0,0,0,.08);background:transparent;color:var(--ink);font-size:12px;text-align:left}
+.mcal button.today{color:#e0605a;font-weight:700}
+.mcal button.today b{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:50%;background:#ff5f57;color:#fff}
+.mcal button.past{color:var(--ink3)}
+.mcal button.selected{background:rgba(108,95,192,.1)}
+.mcal button.deadline::after{content:"";position:absolute;left:50%;top:2px;width:31px;height:29px;border:1.5px solid #45628f;border-radius:48% 55% 51% 47%;transform:translateX(-50%) rotate(-8deg);pointer-events:none}
+.mcal button small{display:block;margin-top:2px;color:var(--ming-ink);font-size:9px;line-height:11px}
+.mcal-note{margin:0 14px;padding:8px 10px;border-radius:8px;background:rgba(69,98,143,.08);font-size:12px;line-height:17px}
+.ming-empty-panel{display:grid;place-items:center;min-height:180px;padding:24px;color:var(--ink2);text-align:center}
+.ming-games-app{max-width:900px;margin:0 auto}
+.ming-game-form{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px 12px;margin:0 0 16px;padding:14px;border:1px solid rgba(60,48,84,.12);border-radius:12px;background:#fff}
+.ming-window-content .ming-game-form .ming-empty-app{grid-column:1/-1;margin:0;text-align:left;font-size:19px}
+.ming-game-form>.sf-context{grid-column:1/-1;margin:0;color:var(--ink2);font-size:12px}
+.ming-game-prompt{grid-column:1/3;width:100%;min-height:48px;padding:8px 10px;border:1px solid rgba(60,48,84,.2);border-radius:8px;background:#fff;font:inherit;resize:vertical}
+.ming-game-framework-label{display:flex;align-items:center;gap:6px;color:var(--ink2);font-size:11px;white-space:nowrap}
+.ming-game-framework{height:34px;padding:0 7px;border:1px solid rgba(60,48,84,.2);border-radius:7px;background:#fff;color:var(--ink);font:inherit;font-size:12px}
+.ming-game-form .sf-button{min-height:36px;white-space:nowrap}
+.ming-game-form .sf-quota-hint{grid-column:1/3;margin:0;color:var(--ink2);font-size:11px}
+.ming-game-form-status{grid-column:1/-1;min-height:1.4em;margin:0;color:var(--ming-ink);font-size:12px}
+.ming-games-list-heading{margin:0 0 8px;color:var(--ming-ink);font-size:15px}
+.ming-games-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.ming-game-card{min-width:0;padding:12px}
+.ming-game-card-copy h4{margin:0 0 5px;font-size:15px}
+.ming-game-card-copy p,.ming-game-detail p{margin:6px 0;color:var(--ink2);font-size:12px;overflow-wrap:anywhere}
+.ming-game-trial-tag{display:inline-block;padding:2px 7px;border-radius:999px;background:#fbefd8;color:#805b24;font-size:10px}
+.ming-game-card-actions,.ming-game-controls{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.ming-game-card-actions .sf-button,.ming-game-controls .sf-button{min-height:30px}
+.ming-game-card-actions .sf-button.danger,.ming-game-controls .sf-button.danger{color:#a23b37}
+.ming-game-pending-note,.ming-game-status{color:var(--ink2);font-size:12px}
+.ming-game-detail{display:flex;flex-direction:column;width:100%;max-width:900px;height:100%;min-height:0;margin:0 auto}
+.ming-game-detail-head{display:flex;align-items:center;flex-wrap:wrap;gap:7px 12px}
+.ming-game-detail-head h2{margin:0;color:var(--ming-ink);font-size:20px}
+.ming-game-detail-head .ming-game-request{flex-basis:100%;margin:0}
+.ming-game-player-request{margin:5px 0;color:var(--ink2);font-size:12px}
+.ming-game-status,.ming-game-detail-head,.ming-game-player-request,.ming-game-controls{flex:none}
+.ming-game-frame-host{position:relative;z-index:1;isolation:isolate;flex:1 1 auto;width:100%;min-height:220px;overflow:hidden;border:1px solid rgba(60,48,84,.18);border-radius:10px;background:#fff}
+.ming-game-frame{position:absolute;inset:0;display:block;width:100%;height:100%;border:0;background:#fff;pointer-events:auto}
+.ming-game-controls{margin-top:10px}
+.ming-app-links{display:grid;gap:8px}
+.ming-app-link{display:flex;align-items:center;gap:10px;width:100%;padding:8px;border:0;border-bottom:1px solid rgba(0,0,0,.08);background:transparent;text-align:left;cursor:pointer}
+.ming-app-link:hover{background:rgba(60,40,90,.05)}
+.ming-app-link .ico{width:34px;height:34px}
+
+.mdock{position:absolute;left:50%;bottom:6px;z-index:40;display:flex;align-items:flex-end;gap:4px;height:68px;padding:0 6px 8px;border-radius:20px;background:rgba(255,255,255,.2);backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.4),0 10px 30px rgba(0,0,0,.2);transform:translateX(-50%)}
+.mdock .di{position:relative;display:flex;flex:none;align-items:center;justify-content:flex-end;flex-direction:column;width:52px;height:52px;border:0;border-radius:13px;background:transparent;cursor:pointer;transition:transform .12s ease}
+.mdock .di:hover,.mdock .di:focus-visible{z-index:2;outline:0;transform:translateY(-5px) scale(1.08)}
+.ming-computer-shell .ico{position:relative;display:block;flex:none;overflow:hidden;border-radius:22.5%;box-shadow:0 2px 6px rgba(40,30,90,.18)}
+.ming-computer-shell .ico>svg{display:block;width:100%;height:100%}
+.ming-computer-shell .ico::after{content:"";position:absolute;inset:0;border-radius:inherit;background:rgba(255,255,255,.12);opacity:.38;mix-blend-mode:soft-light;pointer-events:none}
+.ming-computer-shell .ico::before{content:"";position:absolute;z-index:2;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 .5px rgba(255,255,255,.4),inset 0 1.5px 1px rgba(255,255,255,.45),inset 0 -2px 4px rgba(40,20,60,.12);pointer-events:none}
+.ming-computer-shell .ico-cal{background:linear-gradient(#fff,#f6f3ee);text-align:center;font-family:var(--ui)}
+.ming-computer-shell .ico-cal b{position:absolute;left:0;right:0;top:12%;color:#e0605a;font-size:16.5em;line-height:1;font-weight:700;letter-spacing:.04em}
+.ming-computer-shell .ico-cal i{position:absolute;left:0;right:0;top:31%;color:#26222c;font-size:52em;line-height:1;font-weight:300;font-style:normal;letter-spacing:-.03em}
+.mdock .di .ico{width:52px;height:52px;border-radius:22.4%;box-shadow:0 3px 7px rgba(0,0,0,.28)}
+.mdock .di .run{position:absolute;bottom:-6px;width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.85)}
+.mdock .di .run{opacity:0}
+.mdock .di.has-game-notice::after{content:"";position:absolute;right:-2px;top:-2px;width:11px;height:11px;border:2px solid rgba(255,255,255,.9);border-radius:50%;background:#e0605a;box-shadow:0 1px 5px rgba(0,0,0,.25)}
+.mdock .di.running .run,.mdock .di.active .run{opacity:1}
+.mdock .di .tip{position:absolute;bottom:calc(100% + 10px);left:50%;padding:3px 10px;border-radius:6px;background:rgba(236,234,244,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 3px 10px rgba(0,0,0,.25);color:var(--ink);font-size:13px;white-space:nowrap;opacity:0;pointer-events:none;transform:translateX(-50%)}
+.mdock .di:hover .tip,.mdock .di:focus-visible .tip{opacity:1}
+.mdock .sep{flex:none;width:1px;height:46px;margin:0 6px 3px;background:rgba(255,255,255,.38)}
+.mdock .home .ico{width:52px;height:52px}
+.ming-toast{position:absolute;z-index:80;top:38px;left:50%;padding:8px 13px;border:1px solid rgba(255,255,255,.3);border-radius:999px;background:rgba(38,45,68,.88);color:#fff;font-size:12px;box-shadow:0 4px 15px rgba(0,0,0,.2);transform:translateX(-50%)}
+
+@media(prefers-reduced-motion:reduce){.ming-computer-shell .win,.ming-computer-shell .mdock .di{transition:none}}
+@media(max-width:740px){.ming-game-form{grid-template-columns:1fr}.ming-game-form>*{grid-column:1!important}.ming-game-framework-label{flex-wrap:wrap}.ming-games-list{grid-template-columns:1fr}.ming-game-frame-host{min-height:180px}}
+
+@media(max-width:600px),(orientation:portrait){
+  .ming-computer-shell{width:100vw;height:100dvh;}
+  .ming-os-stage{width:100vw;height:100dvh;transform:none;}
+  .imac-room,.imac-cam,.imac-chin,.imac-neck{display:none;}
+  .imac{inset:0;left:0;top:0;width:100%;height:100%;border-radius:0;background:transparent;box-shadow:none;}
+  .imac-bezel{inset:0;left:0;top:0;right:0;bottom:0;height:100%;border-radius:0;background:transparent;box-shadow:none;}
+  .imac-screen{left:0;top:0;width:100%;height:100%;border-radius:0;box-shadow:none;}
+  .imac-screen>.mac{width:100%;height:100%;transform:none;}
+  .ming-computer-shell .mac{overflow:hidden;}
+  .ming-desktop-widgets{display:none;}
+
+  .ming-computer-shell .menubar{height:44px;padding:0 10px;}
+  .ming-computer-shell .menubar>.logo,
+  .ming-computer-shell .menubar>.m,
+  .ming-computer-shell .menubar>.ming-menu-items{display:none;}
+  .ming-computer-shell .menubar .rt{width:100%;height:44px;margin:0;justify-content:space-between;gap:6px;font-size:14px;}
+  .ming-computer-shell .menubar .rt svg,
+  .ming-computer-shell .menubar .os-game-notice{display:none!important;}
+  .ming-computer-shell .menubar .os-status{font-size:14px;}
+  .ming-computer-shell .menubar .os-tier{min-width:44px;min-height:44px;padding:0 4px;font-size:14px;}
+  .ming-computer-shell .quota-popover{left:8px;right:8px;top:48px;width:auto;max-height:calc(100% - 132px);overflow:auto;}
+
+  .ming-window-layer{inset:44px 0 calc(68px + env(safe-area-inset-bottom));}
+  .ming-computer-shell .win,
+  .ming-computer-shell .win.zoomed{left:0!important;top:0!important;width:100%!important;height:100%!important;border-radius:0;box-shadow:none;}
+  .ming-computer-shell .win.inactive{display:none;}
+  .ming-computer-shell .wbar,
+  .ming-computer-shell .win.has-side .wbar{position:relative;left:auto;right:auto;top:auto;height:52px;padding:4px 8px;border-bottom:1px solid rgba(0,0,0,.1);touch-action:auto;}
+  .ming-computer-shell .lights{gap:4px;margin-right:8px;}
+  .ming-computer-shell .lights .window-control,
+  .ming-computer-shell .lights .window-control.close,
+  .ming-computer-shell .lights .window-control.mini{display:grid;width:44px;height:44px;min-width:44px;min-height:44px;border-radius:12px;box-shadow:none;font-size:24px;line-height:1;color:#fff;}
+  .ming-computer-shell .lights .window-control.close{background:#e05b59;}
+  .ming-computer-shell .lights .window-control.mini{background:#817b8c;}
+  .ming-computer-shell .lights .window-control::before{inset:0;pointer-events:none;}
+  .ming-computer-shell .lights .window-control.zoom{display:none;}
+  .ming-computer-shell .lights .window-control.close::after,
+  .ming-computer-shell .lights .window-control.mini::after{position:static;content:"×";font-size:25px;}
+  .ming-computer-shell .lights .window-control.mini::after{content:"‹";font-size:32px;}
+  .ming-computer-shell .lights:hover .window-control.close::after{content:"×";}
+  .ming-computer-shell .lights:hover .window-control.mini::after{content:"‹";}
+  .ming-computer-shell .wbar h4,
+  .ming-computer-shell .win.has-side .wbar h4{position:static;left:auto;right:auto;flex:1;font-size:15px;line-height:1.25;}
+  .ming-computer-shell .wbar h4 small{display:none;}
+  .ming-computer-shell .wbar .tools{gap:4px;margin-left:6px;}
+  .ming-computer-shell .wbar .tb,
+  .ming-computer-shell .wbar .tb.ic{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:9px;font-size:14px;}
+  .ming-computer-shell .wbar .tb svg{width:18px;height:18px;}
+  .ming-computer-shell .wsearch.open input{width:min(100px,calc(100vw - 250px));max-width:calc(100vw - 250px);height:40px;min-height:40px;padding:0 8px;font-size:14px;}
+  .ming-computer-shell .win.has-side .side{display:flex;flex:none;align-items:center;gap:4px;width:100%;height:52px;padding:4px 8px;overflow-x:auto;overflow-y:hidden;border-right:0;border-bottom:1px solid rgba(0,0,0,.1);scrollbar-width:none;}
+  .ming-computer-shell .win.has-side .side::-webkit-scrollbar{display:none;}
+  .ming-computer-shell .side .sh,.ming-computer-shell .side .sideinfo{display:none;}
+  .ming-computer-shell .side button{flex:0 0 auto;width:auto;height:44px;min-width:44px;min-height:44px;padding:0 10px;font-size:14px;white-space:nowrap;}
+  .ming-computer-shell .side button .sq{width:22px;height:22px;}
+  .ming-computer-shell .side button .sq svg{width:15px;height:15px;}
+  .ming-computer-shell .side button .n{font-size:14px;}
+  .ming-computer-shell .wsplit{flex:1;min-height:0;flex-direction:column;}
+  .ming-computer-shell .main{flex:1;width:100%;min-width:0;min-height:0;overflow:auto;}
+  .ming-computer-shell .win.has-side .main{padding-top:0;}
+  .ming-computer-shell .win.has-side .main::before{display:none;}
+  .ming-window-content{width:100%;min-height:100%;padding:12px 12px 16px;font-size:14px;box-sizing:border-box;}
+  .ming-window-content :not(svg):not(path):not(circle):not(rect):not(line):not(polyline){font-size:14px!important;}
+  .ming-window-content h1,.ming-window-content h2,.ming-window-content h3,.ming-window-content h4{font-size:18px!important;line-height:1.35;}
+  .ming-window-content .mh,.ming-window-content .ming-empty-app,.ming-window-content .ming-timeline-day{font-size:22px!important;}
+  .ming-window-content button,.ming-window-content .sf-button,.ming-window-content input:not([type="search"]),.ming-window-content select,.ming-window-content textarea{box-sizing:border-box;min-width:44px;min-height:44px;font-size:14px!important;}
+  .ming-window-content input:not([type="search"]),.ming-window-content select,.ming-window-content textarea{padding-top:8px;padding-bottom:8px;}
+  .ming-window-content .sf-button{padding:8px 12px;}
+  .ming-window-content .ming-progress-add{gap:6px;margin:8px 8px 12px;}
+  .ming-window-content .ming-progress-add input{height:44px;padding:0 10px;}
+  .ming-window-content .ming-progress-row{min-height:52px;align-items:center;font-size:14px;}
+  .ming-window-content .ming-progress-row .cb{width:44px;height:44px;}
+  .ming-window-content .ming-progress-row select{max-width:104px;}
+  .ming-window-content .mcal{padding:5px 4px 10px;}
+  .ming-window-content .mcal .wk{height:28px;}
+  .ming-window-content .mcal button{width:100%;min-width:0;height:58px;padding:5px 2px;text-align:center;}
+  .ming-window-content .ming-game-form{grid-template-columns:minmax(0,1fr);gap:8px;padding:10px;}
+  .ming-window-content .ming-game-form>*{grid-column:1!important;min-width:0;}
+  .ming-window-content .ming-game-prompt{width:100%;min-height:64px;}
+  .ming-window-content .ming-game-framework-label{align-items:flex-start;flex-wrap:wrap;white-space:normal;}
+  .ming-window-content .ming-game-framework{min-height:44px;font-size:14px!important;}
+  .ming-window-content .ming-games-list{grid-template-columns:minmax(0,1fr);}
+  .ming-window-content .ming-game-detail{width:100%;max-width:none;}
+  .ming-window-content .ming-game-frame-host,.ming-window-content .ming-game-frame{width:100%;max-width:none;}
+  .ming-window-content .ming-game-frame-host{min-height:180px;}
+  .ming-window-content .ming-game-controls,.ming-window-content .ming-game-card-actions{gap:6px;}
+  .ming-window-content .sf-chat{height:100%;min-height:0;}
+  .ming-window-content:has(>.sf-chat){height:100%;min-height:0;overflow:hidden;}
+  .ming-window-content .sf-chat-log{min-height:0;padding:8px 6px;}
+  .ming-window-content .sf-composer{gap:8px;margin:8px 6px 6px;padding:6px 8px;border-radius:14px;}
+  .ming-window-content .sf-composer textarea{flex:1;min-width:0;min-height:44px;max-height:80px;padding:5px 0;line-height:1.4;}
+  .ming-window-content .sf-composer .sf-button{flex:none;width:44px;min-width:44px;height:44px;min-height:44px;padding:0;border-radius:50%;}
+  .ming-window-content .sf-chat .sf-status,.ming-window-content .sf-chat .sf-quota-hint{margin:2px 10px 6px;}
+
+  .mdock{left:0;right:0;bottom:env(safe-area-inset-bottom);width:100%;height:68px;gap:2px;padding:7px 8px;border-radius:15px 15px 0 0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;transform:none;box-sizing:border-box;}
+  .mdock::-webkit-scrollbar{display:none;}
+  .mdock.has-scroll-overflow:not(.at-scroll-end)::after{content:"›";position:sticky;right:0;z-index:3;display:grid;flex:0 0 28px;align-self:stretch;place-items:center;margin-left:-28px;background:linear-gradient(90deg,rgba(75,69,99,.08),rgba(45,40,62,.78));color:#fff;font-size:28px;line-height:1;text-shadow:0 1px 4px rgba(0,0,0,.45);pointer-events:none;}
+  .mdock .di,.mdock .home{flex:0 0 44px;width:44px;height:44px;min-width:44px;min-height:44px;border-radius:10px;}
+  .mdock .di:hover,.mdock .di:focus-visible{transform:none;}
+  .mdock .di .ico,.mdock .home .ico{width:44px!important;height:44px!important;}
+  .mdock .di .tip{display:none;}
+  .mdock .sep{height:36px;margin:0 5px 2px;}
+  .ming-computer-shell .menubar,.ming-computer-shell .wbar,.ming-computer-shell .side,.mdock{padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right));}
+  .ming-toast{top:50px;max-width:calc(100vw - 24px);white-space:normal;text-align:center;}
+}
+
+/* 明在工作室裡使用的電腦。外殼保留藍色，畫面像夾在書桌上的活頁紙。 */
+.ming-computer-shell {
+  --ink: #26384c;
+  --ink2: #4e5a68;
+  --ink3: #646b76;
+  --tint: #385777;
+  --ming-ink: #304b6f;
+  --ming-paper: #fff7e6;
+}
+.ming-computer-shell .imac {
+  background: var(--studio-fiber), linear-gradient(#536c88 0%, #243b55 100%);
+  border-radius: 20px 20px 13px 13px;
+}
+.ming-computer-shell .imac-bezel { background: var(--studio-fiber), #c7c8bd; }
+.ming-computer-shell .wp { filter: saturate(.8); }
+.ming-computer-shell .menubar {
+  min-height: 44px;
+  background: #203954;
+  backdrop-filter: none;
+}
+.ming-computer-shell .menubar button { min-width: 44px; min-height: 44px; }
+.ming-computer-shell .menubar .m::before { content: none; }
+.ming-computer-shell .menubar .ming-exit {
+  padding: 0 10px;
+  border-radius: 4px;
+  background: #f3e5ca;
+  color: #29415a;
+}
+.ming-computer-shell .menu-popover, .ming-computer-shell .quota-popover {
+  max-width: calc(100% - 16px);
+  padding: 8px;
+  max-height: calc(100% - 100px);
+  overflow: auto;
+  border: 1px solid #b7a080;
+  border-radius: 5px 8px 9px 5px;
+  background: var(--studio-fiber), #fff4df;
+  backdrop-filter: none;
+}
+.ming-computer-shell .menu-popover button { min-height: 44px; }
+.ming-computer-shell .mdock {
+  border: 1px solid #e4d3a8a6;
+  border-radius: 8px 12px 5px 10px;
+  background: var(--studio-fiber), #263a4deb;
+  backdrop-filter: none;
+}
+.ming-computer-shell .di.active { background: #f8df9166; }
+.ming-computer-shell .di .ico { border: 2px solid #f3ead67d; border-radius: 10px 11px 8px 10px; }
+.ming-computer-shell .win {
+  --app-accent: #385574;
+  border: 1px solid #8d7b64;
+  border-radius: 7px 12px 7px 8px;
+  background: var(--studio-fiber), var(--ming-paper);
+}
+.ming-computer-shell .win[data-ming-window="progress"] { --app-accent: #53633b; }
+.ming-computer-shell .win[data-ming-window="calendar"] { --app-accent: #8a433e; }
+.ming-computer-shell .win[data-ming-window="games"],
+.ming-computer-shell .win[data-ming-window="story-games"] { --app-accent: #654d76; }
+.ming-computer-shell .win[data-ming-window="files"] { --app-accent: #75543d; }
+.ming-computer-shell .win[data-ming-window="favorites"] { --app-accent: #805438; }
+.ming-computer-shell .wbar {
+  background: var(--studio-fiber), #e9dabb;
+  border-bottom: 1px solid #8b735357;
+}
+.ming-computer-shell .wbar h4 {
+  color: var(--app-accent);
+  font: 19px/1.25 var(--studio-hand);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.ming-computer-shell .wbar .tb.ic { width: 44px; height: 44px; }
+.ming-computer-shell .side {
+  background: var(--studio-fiber), #ede0ca;
+  backdrop-filter: none;
+}
+.ming-computer-shell .side button { min-height: 44px; }
+.ming-computer-shell .side button.on { background: var(--app-accent); color: #fff; }
+.ming-computer-shell .side button.on .n { color: #fff9e7; }
+.ming-computer-shell .main, .ming-computer-shell .win.has-side .main::before {
+  background: var(--studio-fiber), var(--ming-paper);
+}
+.ming-window-content { overflow-wrap: anywhere; }
+.ming-window-content.ming-website {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 0;
+}
+.ming-website-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px 0 12px;
+  border-bottom: 1px solid #8b735357;
+  background: var(--studio-fiber), #ede0ca;
+}
+.ming-website-toolbar strong { flex: 1; color: var(--app-accent); }
+.ming-website-frame { flex: 1; width: 100%; min-height: 0; border: 0; background: #fff; }
+.ming-website-status { margin: 0; padding: 2px 12px; color: #5e5347; user-select: text; }
+.ming-window-content > .sf-context { display: block; color: #5e5347; }
+.ming-window-content > .sf-context:first-child { display: none; }
+.ming-window-content :is(.mh, .ming-timeline-day, .ming-empty-app) {
+  font-family: var(--studio-hand);
+  font-weight: 400;
+  color: var(--app-accent);
+}
+.ming-window-content :is(.sf-button, .sf-tab, .sf-input, .sf-select, .sf-textarea) {
+  min-height: 44px;
+  border-radius: 4px 7px 4px 6px;
+  border-color: #ad957650;
+  background: #fffbef;
+}
+.ming-window-content .sf-button.primary { background: var(--app-accent); border-color: var(--app-accent); }
+.ming-window-content .sf-card, .ming-window-content .ming-game-form {
+  border: 1px solid #bda784;
+  border-radius: 5px 9px 6px 7px;
+  background: var(--studio-fiber), #fffcf2;
+  box-shadow: 0 3px 0 #d8c4a855;
+}
+.ming-window-content .sf-card p { white-space: pre-wrap; }
+.ming-window-content .ming-empty-panel, .ming-window-content .sf-empty {
+  min-height: 110px;
+  margin: 10px 0 0;
+  border: 1px dashed #9f8564;
+  background: radial-gradient(ellipse at center, #f5e5c5, #fff9e9);
+}
+.ming-window-content .ming-progress-row {
+  align-items: center;
+  padding: 4px 7px;
+  background: #fffbed;
+  border-bottom: 1px solid #c7b696;
+}
+.ming-window-content .ming-progress-row .cb {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 5px;
+}
+.ming-window-content .ming-progress-row select { min-height: 44px; }
+.ming-window-content .mcal {
+  gap: 2px;
+  padding-inline: 0;
+  background: #d6b489;
+  border: 1px solid #d6b489;
+  border-top: 5px solid var(--app-accent);
+  border-radius: 4px;
+  padding-block: 0;
+  box-shadow: 0 4px 0 #e4d0ad;
+}
+.ming-window-content .mcal button {
+  background: #fffaf0;
+  border: 0;
+  color: #524138;
+}
+.ming-window-content .mcal button.past { background: #efe5cf; }
+.ming-window-content .mcal button.selected { background: #ead2bc; }
+.ming-window-content .mcal button.today b { background: #8a433e; }
+.ming-window-content .mcal button:last-child { border: 1px solid var(--app-accent); }
+.ming-window-content .mcal-note { margin: 12px 0 0; border-left: 3px solid var(--app-accent); }
+.ming-window-content .ming-trial-line,
+.ming-window-content .sf-backup-last {
+  padding: 8px 12px;
+  color: #374553;
+  border-left: 4px solid var(--app-accent);
+  background: #e2e7e2;
+}
+.ming-window-content .ming-backup-upload {
+  margin: 12px 0;
+  padding: 10px;
+  border: 1px dashed #aa9070;
+  background: var(--studio-fiber), #f8edd5;
+}
+.ming-window-content input[type="file"] { max-width: 100%; }
+.ming-window-content input::file-selector-button {
+  min-height: 44px;
+  margin: 0 8px 0 0;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 5px;
+  background: #e4dbc4;
+  color: #303c48;
+}
+.ming-window-content .ming-file-document {
+  padding: 12px;
+  border-left: 4px solid var(--app-accent);
+  background: var(--studio-fiber), #fffbed;
+}
+.ming-window-content .sf-computer { border: 1px solid #a78e6b; box-shadow: 0 3px 0 #b5a08066; }
+.ming-window-content .sf-chat { margin-bottom: 3px; }
+
+@media (min-width: 601px) and (orientation: landscape) {
+  .ming-computer-shell .wbar, .ming-computer-shell .win.has-side .main::before { height: 52px; }
+  .ming-computer-shell .win.has-side :is(.side, .main) { padding-top: 52px; }
+  /* 視窗三顆鈕：看起來是小圓點，可以點的範圍是 44×44。 */
+  .ming-computer-shell .lights { gap: 0; margin: 0 4px 0 -12px; }
+  .ming-computer-shell .lights .window-control,
+  .ming-computer-shell .lights .window-control:is(.close, .mini, .zoom),
+  .ming-computer-shell .win.inactive .lights .window-control {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: none;
+  }
+  .ming-computer-shell .lights .window-control::before {
+    content: "";
+    position: static;
+    grid-area: 1 / 1;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--dot, #d9d6de);
+    box-shadow: inset 0 0 0 1px #3b2a2033, 0 1px 0 #fff8;
+  }
+  .ming-computer-shell .lights .window-control.close { --dot: #d9675c; }
+  .ming-computer-shell .lights .window-control.mini { --dot: #e2ac4a; }
+  .ming-computer-shell .lights .window-control.zoom { --dot: #7f9a52; }
+  .ming-computer-shell .win.inactive .lights .window-control { --dot: #cfc6b8; }
+  .ming-computer-shell .lights .window-control::after {
+    grid-area: 1 / 1;
+    font-size: 13px;
+    font-weight: 700;
+    color: #3b2a20b0;
+    opacity: 0;
+  }
+  .ming-computer-shell .lights .window-control.close::after { content: "×"; }
+  .ming-computer-shell .lights .window-control.mini::after { content: "−"; }
+  .ming-computer-shell .lights .window-control.zoom::after { content: "+"; }
+  .ming-computer-shell .lights:is(:hover, :focus-within) .window-control::after { opacity: 1; }
+}
+@media (max-width: 600px), (orientation: portrait) {
+  .ming-computer-shell .imac, .ming-computer-shell .imac-bezel { border-radius: 0; }
+  .ming-computer-shell .menubar .rt { gap: 4px; }
+  .ming-computer-shell .menubar .os-status { font-size: 12px; }
+  .ming-computer-shell .wbar h4, .ming-computer-shell .win.has-side .wbar h4 { font-size: 18px; }
+  .ming-computer-shell .wbar:has(.wsearch.open) h4 { display: none; }
+  .ming-window-content .mcal button { min-width: 44px; }
+}
+@media (max-width: 350px) {
+  .ming-window-content .mcal { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
+.ming-desktop-widgets .mwidget {
+  color: #fff8e6;
+  background: var(--studio-fiber), #334f6be8;
+  border: 1px solid #e0c7938c;
+  border-radius: 7px 12px 8px 11px;
+  backdrop-filter: none;
+}
+.ming-desktop-widgets .mwidget:is(.mw-cal, .mw-favorites, .mw-notes) {
+  background: var(--studio-fiber), #fff4d9;
+  color: #324656;
+}
+.ming-desktop-widgets .mw-cal .hd span { color: #8a433e; }
+.ming-desktop-widgets :is(.mw-prog, .mw-cal, .mw-favorites, .mw-notes):not(.pos-bottom) { margin-top: 10px; }
+.ming-window-content .ming-settings-form { margin-top: 15px; }
+.ming-settings-widgets > .sf-row {
+  display: grid;
+  grid-template-columns: minmax(112px, 1fr) minmax(0, 1fr);
+  gap: 9px;
+  margin: 0;
+  padding: 0 9px;
+  background: #f2e6cf;
+  border-left: 3px solid #7088a1;
+}
+.ming-settings-widgets label.sf-row { margin: 0; cursor: pointer; }
+.ming-settings-widgets input { margin: 0; max-width: 44px; accent-color: #385777; }
+.ming-settings-phone { padding: 12px; background: #faf0dc; border: 1px solid #bca37d; }

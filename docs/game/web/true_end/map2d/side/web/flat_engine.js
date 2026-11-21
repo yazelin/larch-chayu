@@ -1,3 +1,4 @@
+import { createIslandAffinity } from './island_affinity.mjs';
 // 「一整張長畫」（作者 2026-11-13 定調：分層可以、不要視差，像故事插畫繪本，人物可以走動）：
 // 底圖 art/out/<scene>/flat.jpg（中心框＋接力外延拼成一張）＋可有可無的前景遮擋 fg.png（同一張剪、同速度）。鏡頭跟著人水平捲、兩端夾住。
 // 設定全部來自 art/out/<scene>/flat.json（flat.py 寫的：寬度、中心框位置、熱區、人物站位、腳底線、出口在哪一邊、CG）。
@@ -31,7 +32,7 @@ const inFrame = window.parent !== window && Q.get('mock') !== '1';
 const startX = Q.has('x') ? Number(Q.get('x')) * IMG.width : (META.exit === 'right' ? IMG.width - 140 : 140);
 const state = { x: startX, face: META.exit === 'right' ? -1 : 1 };
 const gifts = {};   // 這次拿到的禮物（gift_chen…）；嵌進 Larch 時也寫回變數
-let keyDir = Number(Q.get('walk')) || 0, pointerDir = 0, targetX = null, panelOpen = false, lastT = 0, scale = 1, larchVars = {}, player, hotEls = [], walkT = 0, flip = { from: 1, t: 1 };
+let keyDir = Number(Q.get('walk')) || 0, pointerDir = 0, targetX = null, panelOpen = false, lastT = 0, scale = 1, larchVars = {}, player, hotEls = [], walkT = 0, flip = { from: 1, t: 1 }, sway = window.WalkSway.create();
 
 async function person(src, hFrac, cls, face) {
   // 小紙人：白邊、紙紋、紙片影子都在 paperize 裡做；高度 hFrac 是原立繪的高，白邊另外多出來。?paper=0 關掉（對照用）
@@ -57,10 +58,9 @@ function camX() { const vw = innerWidth / scale; return Math.max(0, Math.min(IMG
 function render() {
   art.style.transform = `translateX(${-camX() * scale}px)`;
   player.style.left = (state.x / IMG.width * 100) + '%';
-  // 紙片翻面：轉向時 scaleX 從舊方向壓到 0 再張開到新方向（0.22 秒）；走路時微微左右傾＋上下輕彈
+  // 紙片翻面：轉向時 scaleX 從舊方向壓到 0 再張開到新方向（0.22 秒）；走路晃動跟工作室同一組（studio_web/walk_sway.js），停下來不晃
   const f = flip.t < 1 ? (flip.t < 0.5 ? flip.from * (1 - flip.t * 2) : state.face * ((flip.t - 0.5) * 2)) : state.face;
-  const walking = player.classList.contains('walking'); const rock = walking ? Math.sin(walkT * 9) * 3 : Math.sin(walkT * 1.6) * 0.6, bob = walking ? Math.abs(Math.sin(walkT * 9)) * 2.2 : 0;
-  player.style.setProperty('--facing', f.toFixed(3)); player.style.setProperty('--rock', rock.toFixed(2) + 'deg'); player.style.setProperty('--bob', (-bob).toFixed(2) + '%');
+  player.style.setProperty('--facing', f.toFixed(3)); window.WalkSway.css(player, sway);
   const n = nearest(); for (const b of art.querySelectorAll('.hotspot')) { b.classList.toggle('nearby', b.dataset.id === n); const h = META.hot.find(x => x.id === b.dataset.id); if (h && typeof h.name === 'function') b.dataset.name = h.name(); }
 }
 const cgClosedHooks = [];
@@ -77,6 +77,8 @@ let sfxPaper = () => {}; import('./sfx.js').then(m => { sfxPaper = () => m.sfx.p
 function showScroll(who, text) { const sc = document.getElementById('scroll'); sc.querySelector('b').textContent = who; sc.querySelector('p').textContent = text; sc.style.display = 'block'; sc.classList.remove('open'); void sc.offsetWidth; sc.classList.add('open'); }
 function toast(text) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = text; document.body.appendChild(t); setTimeout(() => t.classList.add('on'), 20); setTimeout(() => { t.classList.remove('on'); setTimeout(() => t.remove(), 400); }, 1800); }
 const BR = window.IslandBridge;
+const freeAffinity = createIslandAffinity(BR, Q, () => larchVars, () => ctl.chapter);
+const scenePerson = { dawn: 'chen', cape: 'ming', beach: 'shi' }[SCENE];
 function larchSet(vars) { Object.assign(larchVars, vars); if (inFrame) BR.set(vars); }
 function nearest() { let best = null; for (const h of META.hot) { if (h.hidden) continue; const d = Math.abs(h.x + h.w / 2 - state.x); if (d < NEARBY + h.w / 2 && (!best || d < best.d)) best = { id: h.id, d }; } return best && best.id; }
 // 對話：照劇本一句句推進（點對話框或 Enter），{choice} 出選項泡泡，選完接共通句。拿過禮物後再講就是 done 那幾句
@@ -133,19 +135,20 @@ function runHot(h) {
   if (h.script) {
     const got = h.gift && (larchVars[h.gift] === 'true' || gifts[h.gift]);
     if (got && h.done) openDialogue(h.done);
-    else openDialogue(h.script, h.gift ? [() => { gifts[h.gift] = true; if (inFrame) larchSet({ [h.gift]: 'true', gifts: String(Object.keys(gifts).length) }); }] : []);
+    else openDialogue(h.script, h.gift ? [() => { if (!got && h.gift === 'gift_chen') ctl.completeFreeInteraction(); gifts[h.gift] = true; if (inFrame) larchSet({ [h.gift]: 'true', gifts: String(Object.keys(gifts).length) }); }] : []);
   }
 }
 scrim.addEventListener('click', advance); cg.addEventListener('click', () => { if (!cg.classList.contains('under')) hideCg(); }); document.getElementById('scroll').addEventListener('click', e => { e.currentTarget.style.display = 'none'; });
 function step(dt) {
   camShift += (camShiftTarget - camShift) * Math.min(1, dt * 2.2); if (Math.abs(camShiftTarget - camShift) > 0.5) render();
-  if (locked) { player.classList.remove('walking'); render(); return; }
+  if (locked) { player.classList.remove('walking'); window.WalkSway.step(sway, dt, false); render(); return; }
   let dir = keyDir || pointerDir;
   if (targetX !== null) { const d = targetX - state.x; if (Math.abs(d) < 4) { targetX = null; dir = 0; } else dir = Math.sign(d); }
   const walking = !!dir && !panelOpen; player.classList.toggle('walking', walking); walkT += dt; if (flip.t < 1) flip.t = Math.min(1, flip.t + dt / 0.22);
+  if (!walking) window.WalkSway.step(sway, dt, false);
   if (walking) {
     if (dir !== state.face) { flip = { from: state.face, t: 0 }; state.face = dir; }
-    state.x = Math.max(WALK_X[0], Math.min(WALK_X[1], state.x + dir * WALK * dt));
+    const x0 = state.x; state.x = Math.max(WALK_X[0], Math.min(WALK_X[1], state.x + dir * WALK * dt)); window.WalkSway.step(sway, dt, state.x !== x0);
     const atExit = META.exit === 'right' ? (state.x >= WALK_X[1] - 1 && dir > 0) : (state.x <= WALK_X[0] + 1 && dir < 0);
     if (atExit) { keyDir = pointerDir = 0; interact('exit'); }
   }
@@ -174,7 +177,7 @@ stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel',
 addEventListener('resize', resize);
 // larch:init：變數放進同一個物件（各場景拿的是這個物件），同一張卡裡換頁前寫過的值蓋回去；場景要等它到了才裝
 let initArrived; const initWait = new Promise(ok => { initArrived = ok; });
-addEventListener('message', e => { const d = e.data || {}; if (d.type === 'larch:init') { Object.assign(larchVars, BR.merge(d.variables || {})); initArrived(); } });
+addEventListener('message', e => { const d = e.data || {}; if (d.type === 'larch:init') { Object.assign(larchVars, BR.merge(d.variables || {})); initArrived(); if (document.body.dataset.ready) freeAffinity.refresh(); } });
 if (inFrame) parent.postMessage({ type: 'larch:ready' }, '*');
 // 這一頁是哪一章、第幾步（island_bridge.js；規格在 ../_島段步驟清單.md）。cut()：做到要切回 Larch 對話卡的那一步
 const C7_KEYS = ['chen', 'shi', 'ming'];
@@ -184,6 +187,7 @@ const C7 = { chen: { name: '晨', scene: 'dawn', done: 'ch7DoneC', later: '好�
 const ctl = { embedded: inFrame, resume: Q.get('resume') === '1', startX: null, chapter: 'true', mode: 'main', step: 1, stepVar: null,
   cut(returnStep, payload = {}) { lock(true); BR.setStep(ctl.stepVar, returnStep); BR.fadeOut(); window.dawnHill.cut = { returnStep, payload }; setTimeout(() => BR.complete('to_dialogue', Object.assign({ scene: SCENE, returnStep }, payload)), 520); },
   setStep(n) { BR.setStep(ctl.stepVar, n); },
+  completeFreeInteraction() { if (scenePerson && !BR.done) freeAffinity.award(scenePerson); },
   truth: v => v === true || v === 1 || v === '1' || v === 'true',
   // 第七章評審週（第 24～26 天）：這一位陪過了沒（前幾天陪的看 ch7DoneC／M／S，今天陪的看回接步驟與 island_next_scene）
   c7Done(key) { return ctl.truth(larchVars[C7[key].done]) || larchVars['c7_' + key] === 'true' || (ctl.step >= 4 && larchVars.island_next_scene === C7[key].scene); },
@@ -206,6 +210,7 @@ async function start() {
   await build();
   if (inFrame) await Promise.race([initWait, new Promise(ok => setTimeout(ok, 2500))]);
   Object.assign(ctl, BR.context(inFrame ? larchVars : Object.assign({}, larchVars, Object.fromEntries(Q))));
+  freeAffinity.refresh();
   if (SCENE === 'dawn') { try { const m = await import('./dawn_play.js'); await m.install({ art, IMG, META, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, lock }); } catch (e) { console.error('dawn_play', e); } }
   if (SCENE === 'beach') { try { const m = await import('./beach_play.js'); await m.install({ art, IMG, META, VIEW, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, lock, isLocked: () => locked, panelOpen: () => panelOpen }); } catch (e) { console.error('beach_play', e); } }
   if (SCENE === 'cape') { try { const m = await import('./cape_play.js'); await m.install({ art, IMG, META, VIEW, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, lock, isLocked: () => locked, panelOpen: () => panelOpen }); } catch (e) { console.error('cape_play', e); } }

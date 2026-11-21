@@ -1,0 +1,404 @@
+/* 圖示對照（make_icons_css.py 產生，不要手改這一段） */
+html[data-icon-style="A"] .sp-ic[data-icon="box"]{background-image:url("icons/A/box.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="ch1"]{background-image:url("icons/A/ch1.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="ch2"]{background-image:url("icons/A/ch2.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="ch3"]{background-image:url("icons/A/ch3.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="ch4"]{background-image:url("icons/A/ch4.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="ch5"]{background-image:url("icons/A/ch5.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="ch6"]{background-image:url("icons/A/ch6.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="ch7"]{background-image:url("icons/A/ch7.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="chat"]{background-image:url("icons/A/chat.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="check"]{background-image:url("icons/A/check.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="clear"]{background-image:url("icons/A/clear.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="close"]{background-image:url("icons/A/close.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="decor"]{background-image:url("icons/A/decor.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="door"]{background-image:url("icons/A/door.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="download"]{background-image:url("icons/A/download.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="easel"]{background-image:url("icons/A/easel.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="eraser"]{background-image:url("icons/A/eraser.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="eye"]{background-image:url("icons/A/eye.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="frame"]{background-image:url("icons/A/frame.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="gamepad"]{background-image:url("icons/A/gamepad.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="hand"]{background-image:url("icons/A/hand.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="heartplus"]{background-image:url("icons/A/heartplus.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="home"]{background-image:url("icons/A/home.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="icetea"]{background-image:url("icons/A/icetea.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="list"]{background-image:url("icons/A/list.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="monitor"]{background-image:url("icons/A/monitor.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="moon"]{background-image:url("icons/A/moon.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="music"]{background-image:url("icons/A/music.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="next"]{background-image:url("icons/A/next.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="open"]{background-image:url("icons/A/open.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="pause"]{background-image:url("icons/A/pause.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="paw"]{background-image:url("icons/A/paw.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="pencil"]{background-image:url("icons/A/pencil.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="pick"]{background-image:url("icons/A/pick.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="play"]{background-image:url("icons/A/play.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="plus"]{background-image:url("icons/A/plus.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="predawn"]{background-image:url("icons/A/predawn.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="prev"]{background-image:url("icons/A/prev.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="record"]{background-image:url("icons/A/record.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="reset"]{background-image:url("icons/A/reset.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="send"]{background-image:url("icons/A/send.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="sketchbook"]{background-image:url("icons/A/sketchbook.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="sprout"]{background-image:url("icons/A/sprout.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="story"]{background-image:url("icons/A/story.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="sun"]{background-image:url("icons/A/sun.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="sunrise"]{background-image:url("icons/A/sunrise.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="sunset"]{background-image:url("icons/A/sunset.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="sync"]{background-image:url("icons/A/sync.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="table"]{background-image:url("icons/A/table.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="trash"]{background-image:url("icons/A/trash.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="undo"]{background-image:url("icons/A/undo.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="unlink"]{background-image:url("icons/A/unlink.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="upload"]{background-image:url("icons/A/upload.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="wand"]{background-image:url("icons/A/wand.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="water"]{background-image:url("icons/A/water.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="zoom-in"]{background-image:url("icons/A/zoom-in.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="zoom-out"]{background-image:url("icons/A/zoom-out.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="box"]{background-image:url("icons/B/box.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="ch1"]{background-image:url("icons/B/ch1.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="ch2"]{background-image:url("icons/B/ch2.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="ch3"]{background-image:url("icons/B/ch3.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="ch4"]{background-image:url("icons/B/ch4.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="ch5"]{background-image:url("icons/B/ch5.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="ch6"]{background-image:url("icons/B/ch6.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="ch7"]{background-image:url("icons/B/ch7.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="chat"]{background-image:url("icons/B/chat.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="check"]{background-image:url("icons/B/check.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="clear"]{background-image:url("icons/B/clear.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="close"]{background-image:url("icons/B/close.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="decor"]{background-image:url("icons/B/decor.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="door"]{background-image:url("icons/B/door.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="download"]{background-image:url("icons/B/download.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="easel"]{background-image:url("icons/B/easel.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="eraser"]{background-image:url("icons/B/eraser.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="eye"]{background-image:url("icons/B/eye.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="frame"]{background-image:url("icons/B/frame.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="gamepad"]{background-image:url("icons/B/gamepad.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="hand"]{background-image:url("icons/B/hand.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="heartplus"]{background-image:url("icons/B/heartplus.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="home"]{background-image:url("icons/B/home.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="icetea"]{background-image:url("icons/B/icetea.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="list"]{background-image:url("icons/B/list.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="monitor"]{background-image:url("icons/B/monitor.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="moon"]{background-image:url("icons/B/moon.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="music"]{background-image:url("icons/B/music.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="next"]{background-image:url("icons/B/next.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="open"]{background-image:url("icons/B/open.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="pause"]{background-image:url("icons/B/pause.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="paw"]{background-image:url("icons/B/paw.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="pencil"]{background-image:url("icons/B/pencil.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="pick"]{background-image:url("icons/B/pick.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="play"]{background-image:url("icons/B/play.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="plus"]{background-image:url("icons/B/plus.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="predawn"]{background-image:url("icons/B/predawn.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="prev"]{background-image:url("icons/B/prev.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="record"]{background-image:url("icons/B/record.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="reset"]{background-image:url("icons/B/reset.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="send"]{background-image:url("icons/B/send.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="sketchbook"]{background-image:url("icons/B/sketchbook.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="sprout"]{background-image:url("icons/B/sprout.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="story"]{background-image:url("icons/B/story.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="sun"]{background-image:url("icons/B/sun.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="sunrise"]{background-image:url("icons/B/sunrise.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="sunset"]{background-image:url("icons/B/sunset.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="sync"]{background-image:url("icons/B/sync.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="table"]{background-image:url("icons/B/table.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="trash"]{background-image:url("icons/B/trash.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="undo"]{background-image:url("icons/B/undo.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="unlink"]{background-image:url("icons/B/unlink.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="upload"]{background-image:url("icons/B/upload.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="wand"]{background-image:url("icons/B/wand.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="water"]{background-image:url("icons/B/water.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="zoom-in"]{background-image:url("icons/B/zoom-in.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="zoom-out"]{background-image:url("icons/B/zoom-out.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="box"]{background-image:url("icons/C/box.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="ch1"]{background-image:url("icons/C/ch1.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="ch2"]{background-image:url("icons/C/ch2.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="ch3"]{background-image:url("icons/C/ch3.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="ch4"]{background-image:url("icons/C/ch4.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="ch5"]{background-image:url("icons/C/ch5.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="ch6"]{background-image:url("icons/C/ch6.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="ch7"]{background-image:url("icons/C/ch7.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="chat"]{background-image:url("icons/C/chat.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="check"]{background-image:url("icons/C/check.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="clear"]{background-image:url("icons/C/clear.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="close"]{background-image:url("icons/C/close.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="decor"]{background-image:url("icons/C/decor.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="door"]{background-image:url("icons/C/door.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="download"]{background-image:url("icons/C/download.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="easel"]{background-image:url("icons/C/easel.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="eraser"]{background-image:url("icons/C/eraser.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="eye"]{background-image:url("icons/C/eye.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="frame"]{background-image:url("icons/C/frame.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="gamepad"]{background-image:url("icons/C/gamepad.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="hand"]{background-image:url("icons/C/hand.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="heartplus"]{background-image:url("icons/C/heartplus.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="home"]{background-image:url("icons/C/home.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="icetea"]{background-image:url("icons/C/icetea.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="list"]{background-image:url("icons/C/list.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="monitor"]{background-image:url("icons/C/monitor.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="moon"]{background-image:url("icons/C/moon.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="music"]{background-image:url("icons/C/music.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="next"]{background-image:url("icons/C/next.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="open"]{background-image:url("icons/C/open.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="pause"]{background-image:url("icons/C/pause.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="paw"]{background-image:url("icons/C/paw.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="pencil"]{background-image:url("icons/C/pencil.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="pick"]{background-image:url("icons/C/pick.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="play"]{background-image:url("icons/C/play.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="plus"]{background-image:url("icons/C/plus.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="predawn"]{background-image:url("icons/C/predawn.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="prev"]{background-image:url("icons/C/prev.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="record"]{background-image:url("icons/C/record.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="reset"]{background-image:url("icons/C/reset.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="send"]{background-image:url("icons/C/send.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="sketchbook"]{background-image:url("icons/C/sketchbook.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="sprout"]{background-image:url("icons/C/sprout.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="story"]{background-image:url("icons/C/story.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="sun"]{background-image:url("icons/C/sun.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="sunrise"]{background-image:url("icons/C/sunrise.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="sunset"]{background-image:url("icons/C/sunset.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="sync"]{background-image:url("icons/C/sync.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="table"]{background-image:url("icons/C/table.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="trash"]{background-image:url("icons/C/trash.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="undo"]{background-image:url("icons/C/undo.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="unlink"]{background-image:url("icons/C/unlink.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="upload"]{background-image:url("icons/C/upload.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="wand"]{background-image:url("icons/C/wand.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="water"]{background-image:url("icons/C/water.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="zoom-in"]{background-image:url("icons/C/zoom-in.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="zoom-out"]{background-image:url("icons/C/zoom-out.webp")}
+
+/* ── 以下是共用樣式（手寫） ── */
+/* 圖示按鈕（studio_icons.mjs 套上 class）：.sp-icon-btn＋.sp-icon-only（純圖示）或 .sp-with-label（圖示＋短字）。
+   三套圖示（A 水彩手繪、B 紙片貼紙、C 黃銅木頭）看 <html data-icon-style>，hover 效果也跟著換。
+   各面板原本的按鈕樣式寫得很具體（#panel ... .sf-button.primary），這裡外觀相關的幾項用 !important 蓋過去。 */
+/* 定位用 :where()（權重 0）：原本是 position:fixed 的按鈕（轉身鈕、劇情嵌入的繼續鈕）照舊 */
+:where(.sp-icon-btn) { position: relative; }
+.sp-icon-btn {
+  isolation: isolate;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  --ic: 46px;
+}
+.sp-ic {
+  display: block;
+  flex: none;
+  width: var(--ic);
+  height: var(--ic);
+  background: center / contain no-repeat;
+  filter: drop-shadow(0 2px 2px rgba(74, 46, 28, .26));
+  transition: transform .2s cubic-bezier(.3, 1.7, .5, 1), filter .2s ease;
+  pointer-events: none;
+}
+.sp-icon-btn.sp-icon-only {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px !important;
+  min-height: 48px !important;
+  padding: 1px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit;
+  font-size: 0 !important;
+}
+.sp-icon-only .sp-icon-label {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.sp-icon-btn.sp-with-label {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  min-height: 48px !important;
+  padding: 2px 16px 2px 3px !important;
+  border: 1px solid #a7826185 !important;
+  border-radius: 999px 22px 999px 26px / 999px 999px 999px 999px !important;
+  background: var(--studio-fiber, none), rgba(255, 250, 240, .95) !important;
+  box-shadow: 0 2px 0 #85583b2e !important;
+  color: #5b3d2b !important;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+  transition: transform .2s cubic-bezier(.3, 1.7, .5, 1), box-shadow .2s ease, background-color .2s ease;
+  --ic: 40px;
+}
+.sp-with-label .sp-icon-label { min-width: 0; }
+label.sp-with-label input[type="file"] { max-width: 100%; }
+/* 主要動作：邊框與字用面板的主色 */
+.sp-icon-btn.sp-with-label.primary, .sp-icon-btn.sp-with-label[type="submit"] {
+  border: 2px solid var(--binding, var(--studio-brown, #704934)) !important;
+  color: var(--binding, var(--studio-brown, #704934)) !important;
+  background: var(--studio-fiber, none), #fff3dd !important;
+}
+.sp-icon-btn.sp-with-label.danger { color: #8d3a2c !important; border-color: #b9806f99 !important; }
+/* 分頁、選項的「目前這個」 */
+.sp-icon-btn.sp-with-label:is([aria-selected="true"], [aria-pressed="true"]) {
+  border-color: var(--binding, #704934) !important;
+  background: var(--binding, #704934) !important;
+  color: #fffaf0 !important;
+}
+.sp-icon-btn.sp-icon-only[role="tab"]:not([aria-selected="true"]) .sp-ic { opacity: .7; filter: saturate(.65) drop-shadow(0 2px 2px rgba(74, 46, 28, .2)); }
+.sp-icon-btn.sp-icon-only:is([aria-selected="true"], [aria-pressed="true"]) .sp-ic { transform: scale(1.08); }
+.sp-icon-btn.sp-icon-only:is([aria-selected="true"], [aria-pressed="true"])::after {
+  content: "";
+  position: absolute;
+  left: 22%; right: 22%; bottom: -3px;
+  height: 4px;
+  border-radius: 3px 5px 2px 4px;
+  background: var(--binding, #704934);
+}
+.sp-icon-btn:disabled { cursor: default; }
+.sp-icon-btn:disabled .sp-ic { opacity: .45; filter: grayscale(.5); }
+.sp-icon-btn.sp-with-label:disabled { opacity: .6; }
+
+/* hover／鍵盤焦點：輕微上浮放大、陰影加深；按下縮一下，放開時回彈（transition 的曲線超過 1） */
+@media (hover: hover) {
+  .sp-icon-btn:not(:disabled):hover .sp-ic { transform: translateY(-2px) scale(1.08); filter: drop-shadow(0 5px 5px rgba(74, 46, 28, .36)); }
+  .sp-icon-btn.sp-with-label:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 5px 12px #85583b40 !important; }
+}
+.sp-icon-btn:not(:disabled):focus-visible .sp-ic { transform: translateY(-2px) scale(1.08); filter: drop-shadow(0 5px 5px rgba(74, 46, 28, .36)); }
+.sp-icon-btn:not(:disabled):active .sp-ic { transform: translateY(1px) scale(.9); transition-duration: .06s; }
+.sp-icon-btn.sp-with-label:not(:disabled):active { transform: translateY(1px) scale(.98); transition-duration: .06s; }
+
+/* A 水彩手繪：hover 時圖示後面暈開一圈水彩 */
+html[data-icon-style="A"] .sp-icon-btn::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: calc(3px + var(--ic) / 2);
+  width: calc(var(--ic) + 18px);
+  height: calc(var(--ic) + 18px);
+  margin: calc(var(--ic) / -2 - 9px) 0 0 calc(var(--ic) / -2 - 9px);
+  border-radius: 46% 54% 50% 48% / 52% 46% 54% 48%;
+  background: radial-gradient(circle at 45% 45%, rgba(196, 160, 214, .62), rgba(240, 186, 146, .42) 46%, transparent 70%);
+  filter: blur(2px);
+  opacity: 0;
+  transform: scale(.55) rotate(-8deg);
+  transition: opacity .3s ease, transform .45s cubic-bezier(.2, .8, .3, 1);
+  pointer-events: none;
+}
+html[data-icon-style="A"] .sp-icon-only::before { left: 50%; }
+@media (hover: hover) { html[data-icon-style="A"] .sp-icon-btn:not(:disabled):hover::before { opacity: 1; transform: scale(1.12) rotate(4deg); } }
+html[data-icon-style="A"] .sp-icon-btn:not(:disabled):focus-visible::before { opacity: 1; transform: scale(1.12) rotate(4deg); }
+/* B 紙片貼紙：hover 時像被掀起一角，歪一點、影子拉長 */
+@media (hover: hover) {
+  html[data-icon-style="B"] .sp-icon-btn:not(:disabled):hover .sp-ic { transform: translateY(-3px) rotate(-4deg) scale(1.06); filter: drop-shadow(2px 7px 4px rgba(90, 60, 40, .34)); }
+}
+html[data-icon-style="B"] .sp-icon-btn:not(:disabled):focus-visible .sp-ic { transform: translateY(-3px) rotate(-4deg) scale(1.06); filter: drop-shadow(2px 7px 4px rgba(90, 60, 40, .34)); }
+/* C 黃銅木頭：hover 時黃銅亮起一圈暖光 */
+@media (hover: hover) {
+  html[data-icon-style="C"] .sp-icon-btn:not(:disabled):hover .sp-ic { filter: brightness(1.07) drop-shadow(0 0 6px rgba(255, 212, 136, .9)) drop-shadow(0 4px 4px rgba(74, 46, 28, .32)); }
+}
+html[data-icon-style="C"] .sp-icon-btn:not(:disabled):focus-visible .sp-ic { filter: brightness(1.07) drop-shadow(0 0 6px rgba(255, 212, 136, .9)) drop-shadow(0 4px 4px rgba(74, 46, 28, .32)); }
+
+/* 減少動畫：不移動，只換亮度 */
+@media (prefers-reduced-motion: reduce) {
+  .sp-icon-btn, .sp-icon-btn .sp-ic, .sp-icon-btn::before { transition: filter .12s linear, opacity .12s linear !important; transform: none !important; }
+  .sp-icon-btn:not(:disabled):is(:hover, :focus-visible) .sp-ic { filter: brightness(1.14) drop-shadow(0 2px 2px rgba(74, 46, 28, .26)) !important; }
+  .sp-icon-btn:not(:disabled):active .sp-ic { filter: brightness(.9) !important; }
+}
+
+/* tooltip：紙卡小提示（studio_icons.mjs 放在 body 最外層、position:fixed，不會被面板裁掉） */
+.sp-tip {
+  position: fixed;
+  z-index: 2147483000;
+  max-width: min(280px, calc(100vw - 12px));
+  padding: 6px 11px 7px;
+  border: 1px solid #a78261;
+  border-radius: 6px 10px 7px 9px;
+  background: var(--studio-fiber, none), #fffaf0;
+  color: #4a3426;
+  font: 600 14px/1.45 "Noto Sans TC", "Noto Sans CJK TC", sans-serif;
+  box-shadow: 0 6px 18px rgba(45, 24, 39, .26), 0 2px 0 #dac09e;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity .12s ease, transform .12s ease;
+}
+.sp-tip.below { transform: translateY(-3px); }
+.sp-tip.on { opacity: 1; transform: none; }
+.sp-tip::after {
+  content: "";
+  position: absolute;
+  left: var(--arrow-x, 50%);
+  bottom: -6px;
+  width: 10px; height: 10px;
+  margin-left: -5px;
+  border: solid #a78261;
+  border-width: 0 1px 1px 0;
+  background: #fffaf0;
+  transform: rotate(45deg);
+}
+.sp-tip.below::after { top: -6px; bottom: auto; border-width: 1px 0 0 1px; }
+@media (prefers-reduced-motion: reduce) { .sp-tip { transition: none; transform: none; } }
+
+/* ── 各處位置微調 ── */
+/* 章節牌是橫的長方形，放大一點才看得清數字 */
+.sp-icon-btn.sp-icon-only:is([data-icon^="ch"]) { border-radius: 10px !important; --ic: 62px; }
+/* 工作室地圖左下角：牆名＋夜晚＋長桌 */
+#scroll-controls .sp-icon-btn.sp-icon-only, #tools .sp-icon-btn.sp-icon-only { flex: 0 0 auto !important; width: 64px; height: 64px !important; --ic: 62px; }
+#scroll-controls { align-items: center; }
+.turn.sp-icon-btn.sp-icon-only { width: 64px !important; height: 64px !important; margin-top: -32px !important; --ic: 60px; }
+#panel-close.sp-icon-btn { flex: 0 0 48px !important; width: 48px !important; height: 48px !important; --ic: 44px; }
+/* 劇情嵌入的右下角「繼續／直接到長桌」 */
+.studio-embed-continue.sp-icon-btn.sp-with-label { min-height: 56px !important; padding-right: 20px !important; font-size: 16px; --ic: 48px; }
+/* 聊天送出：在輸入框旁邊，直排置中 */
+#panel .sf-composer .sp-icon-btn.sp-with-label { align-self: stretch; justify-content: center; padding: 2px 14px 2px 4px !important; }
+/* 明的電腦選單列的「回工作室」：選單列比較矮，圖示縮小 */
+.ming-exit.sp-icon-btn.sp-with-label { min-height: 44px !important; padding: 1px 12px 1px 2px !important; gap: 4px; font-size: 13px; --ic: 36px; }
+/* 畫圖工具三顆（橡皮擦／復原／清空）排一列 */
+#panel .sf-draw-tools .sp-icon-btn.sp-icon-only { justify-self: center; }
+#panel .sp-mute.sp-icon-only { min-width: 44px !important; min-height: 44px !important; --ic: 32px; }
+#panel :is(.sp-pick-string, .sp-play, .sp-restart, .sp-use-shape).sp-icon-only { min-width: 44px !important; min-height: 44px !important; --ic: 32px; }
+#panel .sp-chord.sp-with-label {
+  display: grid !important; justify-items: center; justify-content: center; gap: 0;
+  min-width: 44px; min-height: 50px !important; padding: 2px !important; --ic: 16px;
+  flex: 1 0 auto;
+}
+#panel .sp-chord.target { outline: 2px solid #8f5a31; outline-offset: -2px; }
+#panel .sp-practice :is(.sp-pace, .sp-follow, .sp-progression).sp-with-label {
+  min-width: 44px; min-height: 44px !important; padding: 2px 7px 2px 3px !important;
+  gap: 3px; --ic: 26px; font-size: 13px;
+}
+#panel .sf-draw-tools .sp-icon-btn.sp-icon-only[aria-pressed="true"] .sp-ic, #panel .sf-draw-tools .sp-icon-btn.sp-icon-only.on .sp-ic { transform: scale(1.08); }
+
+@media (max-width: 600px) {
+  .sp-icon-btn.sp-with-label { gap: 5px; padding-right: 12px !important; font-size: 14px; --ic: 36px; }
+  #scroll-controls .sp-icon-btn.sp-icon-only, #tools .sp-icon-btn.sp-icon-only { width: 50px; height: 50px !important; --ic: 46px; }
+  .turn.sp-icon-btn.sp-icon-only { width: 52px !important; height: 52px !important; margin-top: -26px !important; --ic: 48px; }
+  .ming-exit.sp-icon-btn.sp-with-label { font-size: 12px; --ic: 26px; }
+  .sp-icon-btn.sp-icon-only:is([data-icon^="ch"]) { min-width: 46px !important; --ic: 50px; }
+}
+/* 「直接到長桌」原本有一圈淡黃光提醒（studio_embed.mjs），換成圖示鈕後保留 */
+.studio-embed-continue--table.sp-icon-btn.sp-with-label, .studio-embed-continue--table.sp-icon-btn.sp-with-label:not(:disabled):hover { box-shadow: 0 0 0 3px rgba(255, 242, 169, .85), 0 4px 16px rgba(25, 18, 24, .3) !important; }
+
+/* 牆名不是按鈕（作者 2026-11-21：「南牆是按鈕嗎？」）：從左下按鈕列移到左上，做成跟島上地名一樣的手寫紙條，不可點、沒有按鈕外框。 */
+#scroll-label{position:fixed !important;top:max(14px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));bottom:auto;flex:none;height:auto;
+  padding:.45em 1.2em .5em;border:0 !important;border-radius:2px !important;background:linear-gradient(180deg,#fbf3e2,#f3e6cc) !important;
+  box-shadow:0 3px 6px rgba(90,50,60,.18) !important;font-family:var(--studio-hand, Iansui, serif);font-size:16px;font-weight:700;letter-spacing:.14em;
+  color:#5a4030;rotate:-1.5deg;pointer-events:none;cursor:default}
+#scroll-label::before{content:"";display:inline-block;width:.55em;height:.55em;margin-right:.5em;border-radius:50%;background:#b98a54;box-shadow:inset 0 -1px 0 rgba(0,0,0,.25);vertical-align:.1em}
+@media (max-width:700px){#scroll-label{font-size:13px}}
+
+/* 關閉鈕與圖示鈕：不要外圈的硬框（作者 2026-11-21：選水彩，右上 XX 外面多一圈綠框）。
+   拿掉圓形描邊與淺底；鍵盤焦點改成跟風格一致的柔光，不用 3px 實線外框。 */
+#panel:not([data-design="album"]):not(.ming-os-panel) #panel-close.sp-icon-btn{border:0 !important;background:transparent !important;box-shadow:none !important}
+#panel .sp-icon-btn:focus-visible, .sf-help-layer .sp-icon-btn:focus-visible, #scroll-controls .sp-icon-btn:focus-visible{outline:none !important}
+html[data-icon-style="A"] .sp-icon-btn:focus-visible{filter:drop-shadow(0 0 6px rgba(214,150,170,.85)) drop-shadow(0 0 2px rgba(255,236,214,.9))}
+html[data-icon-style="B"] .sp-icon-btn:focus-visible{filter:drop-shadow(0 0 0 2px #fff) drop-shadow(0 2px 6px rgba(120,80,60,.45))}
+html[data-icon-style="C"] .sp-icon-btn:focus-visible{filter:drop-shadow(0 0 6px rgba(240,196,110,.9))}

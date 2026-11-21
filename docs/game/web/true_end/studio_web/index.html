@@ -4,16 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#28232a">
+<meta http-equiv="Content-Security-Policy" content="frame-src 'self' blob: https://yazelin.github.io/larch-chayu/; object-src 'none'">
 <meta name="studio-chat-api-base" content="https://larch-studio-chat.yazelinj303.workers.dev">
 <title>夜後明月．晨前朝霞．慕詩客｜工作室</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="studio_features.css">
 <link rel="stylesheet" href="studio_decor.css">
+<link rel="stylesheet" href="studio_computer.css">
+<link rel="modulepreload" href="studio_unlock.mjs">
 <script src="studio_storage.js"></script>
+<script src="ming_game_assets.js"></script>
+<script src="walk_sway.js"></script>
 <script src="studio_character_view.js"></script>
-<script>if(new URLSearchParams(location.search).get('mode')==='turn')document.documentElement.classList.add('turn-mode');</script>
+<script>if(new URLSearchParams(location.search).get('mode')==='turn')document.documentElement.classList.add('turn-mode');
+// 圖示按鈕用哪一套（studio_icons.mjs）：預設 C 黃銅木頭，網址 ?icons=A|B|C 給作者比較
+document.documentElement.dataset.iconStyle=(function(s){return /^[ABC]$/.test(s)?s:'A';})(String(new URLSearchParams(location.search).get('icons')||'').toUpperCase());</script>
 <style>
-:root{color-scheme:light;--ink:#382c2b;--paper:#fffaf2;--edge:#d8c4ab;--accent:#885d45;--shade:rgba(25,18,24,.56)}
+/* --hud-clear：Larch 常駐介面（右上角愛心＋手機的紙卡與底下的日期紙卡，框 258×112、離右邊 48px）蓋在這頁上面；
+   寬度 900 以下，上緣置中的操作提示與「第 N 天」會碰到它，改排到它底下（同 真結局/map2d/side/web 的 --hud-clear） */
+:root{--hud-clear:calc(124px + env(safe-area-inset-top,0px));color-scheme:light;--ink:#382c2b;--paper:#fffaf2;--edge:#d8c4ab;--accent:#885d45;--shade:rgba(25,18,24,.56)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;height:100dvh;margin:0;overflow:hidden;background:#28232a;color:var(--ink);font-family:"Noto Sans TC","Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif}
 button{font:inherit}
@@ -35,8 +44,8 @@ button{font:inherit}
 .hotspot:focus-visible{outline:3px solid #fff2a9;outline-offset:2px;background:rgba(255,221,134,.2)}
 .player{position:absolute;z-index:2;left:var(--player-x);top:var(--player-feet);height:var(--player-height,55%);width:auto;transform:translate(-50%,-100%);pointer-events:none;user-select:none}
 .player-image{display:block;height:100%;width:auto;max-width:none;object-fit:contain;transform:scaleX(var(--facing,1));filter:drop-shadow(0 2px 2px rgba(50,32,25,.18));user-select:none;-webkit-user-drag:none}
-.player-image.walking{animation:step .18s ease-in-out infinite alternate}
-@keyframes step{to{translate:0 -1.2%}}
+.player-image.walking{animation:step .252s ease-in-out infinite alternate}
+@keyframes step{to{translate:0 -.8%}}
 #wall-label{position:fixed;z-index:10;top:max(14px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));padding:8px 14px;border:1px solid rgba(255,250,242,.85);border-radius:999px;background:rgba(255,250,242,.9);font-size:14px;font-weight:700;letter-spacing:.08em;box-shadow:0 3px 14px rgba(26,18,18,.16);pointer-events:none}
 #tools{position:fixed;z-index:10;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));display:flex;gap:8px}
 .tool-button{min-height:40px;padding:7px 13px;border:1px solid var(--edge);border-radius:999px;background:rgba(255,250,242,.94);color:var(--ink);font-size:14px;font-weight:700;box-shadow:0 3px 14px rgba(26,18,18,.14);cursor:pointer}
@@ -88,13 +97,11 @@ html.turn-mode #scroll-mode{display:none}
 .person-silhouette::before{content:"";position:absolute;left:25%;top:1%;width:50%;aspect-ratio:1;border-radius:50%;background:rgba(58,47,53,.38)}
 .person-fallback-name{display:none;position:absolute;left:50%;top:52%;padding:3px 8px;border:1px solid rgba(255,250,242,.8);border-radius:999px;background:rgba(255,250,242,.72);color:#382c2b;font-size:12px;font-weight:700;white-space:nowrap;transform:translate(-50%,-50%);pointer-events:none}
 .ring-person.sprite-missing .person-silhouette,.ring-person.sprite-missing .person-fallback-name{display:block}
-#scroll-label{position:fixed;z-index:10;top:max(14px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));padding:8px 14px;border:1px solid rgba(255,250,242,.85);border-radius:999px;background:rgba(255,250,242,.9);font-size:14px;font-weight:700;letter-spacing:.08em;box-shadow:0 3px 14px rgba(26,18,18,.16);pointer-events:none}
-#scroll-controls{position:fixed;z-index:10;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));display:flex;gap:8px}
-.scroll-button{min-height:40px;padding:7px 13px;border:1px solid var(--edge);border-radius:999px;background:rgba(255,250,242,.94);color:var(--ink);font-size:14px;font-weight:700;box-shadow:0 3px 14px rgba(26,18,18,.14);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+#scroll-label{position:static;z-index:10;display:inline-flex;flex:0 0 84px;align-items:center;justify-content:center;height:42px;padding:7px 10px;border:1px solid rgba(255,250,242,.85);border-radius:999px;background:rgba(255,250,242,.9);font-size:14px;font-weight:700;letter-spacing:.08em;box-shadow:0 3px 14px rgba(26,18,18,.16);pointer-events:none}
+#scroll-controls{position:fixed;z-index:10;left:max(16px,env(safe-area-inset-left));bottom:max(16px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:calc(100vw - 32px)}
+.scroll-button{flex:0 0 124px;height:42px;padding:7px 13px;border:1px solid var(--edge);border-radius:999px;background:rgba(255,250,242,.94);color:var(--ink);font-size:14px;font-weight:700;box-shadow:0 3px 14px rgba(26,18,18,.14);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 .scroll-button:hover{background:#fff}
 #scroll-hint{position:fixed;z-index:8;left:50%;top:max(62px,calc(env(safe-area-inset-top) + 56px));transform:translateX(-50%);max-width:calc(100vw - 32px);padding:7px 13px;border:1px solid rgba(255,250,242,.76);border-radius:999px;background:rgba(40,32,35,.54);color:#fffaf2;font-size:13px;text-align:center;white-space:nowrap;pointer-events:none;backdrop-filter:blur(4px)}
-#table-entry{position:fixed;z-index:10;left:max(18px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom));min-height:48px;padding:10px 18px;border:1px solid rgba(255,250,242,.9);border-radius:999px;background:rgba(255,250,242,.96);color:var(--ink);font-size:15px;font-weight:700;box-shadow:0 5px 18px rgba(26,18,18,.22);cursor:pointer}
-#table-entry:hover{background:#fff}
 #scrim{position:fixed;inset:0;z-index:20;background:var(--shade);opacity:0;pointer-events:none;transition:opacity .2s ease}
 #scrim.on{opacity:1;pointer-events:auto}
 #panel{position:fixed;z-index:21;left:50%;top:50%;width:min(460px,calc(100vw - 32px));max-height:min(72vh,600px);transform:translate(-50%,-47%) scale(.98);opacity:0;pointer-events:none;display:flex;flex-direction:column;overflow:hidden;border:2px solid var(--edge);border-radius:16px;background:var(--paper);box-shadow:0 16px 50px rgba(0,0,0,.3);transition:transform .22s ease,opacity .22s ease}
@@ -110,17 +117,27 @@ html.turn-mode #scroll-mode{display:none}
 .panel-note{color:#826f60;font-size:13px}
 body.debug .hotspot{border:2px dashed #05c9a2;border-radius:5px;background:rgba(0,184,143,.15)}
 body.debug .hotspot::before{content:attr(data-mark);position:absolute;top:2px;left:2px;min-width:22px;padding:2px 5px;border:1px solid rgba(255,255,255,.95);border-radius:7px;background:rgba(16,74,66,.92);color:#fff;font:700 11px/1.35 "Noto Sans TC","Noto Sans CJK TC",sans-serif;text-align:center;text-shadow:0 1px 2px #16332d;pointer-events:none}
+.hotspot[hidden],#scroll-controls .scroll-button[hidden]{display:none!important}
+#table-entry,#seat-entry{position:relative}
+#seat-entry{flex-basis:auto;white-space:nowrap}
+#studio-unlock-status{position:fixed;z-index:60;left:max(14px,env(safe-area-inset-left));top:calc(max(14px,env(safe-area-inset-top)) + 48px);pointer-events:none}
+.hotspot.unlock-new::before,#table-entry.unlock-new::after,#seat-entry.unlock-new::after{content:'✦';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:25px;height:25px;border:1px solid #fff6d6;border-radius:50%;background:rgba(70,51,35,.8);color:#fff2c4;box-shadow:0 0 16px rgba(255,230,162,.75);pointer-events:none;animation:unlock-pulse 1.5s ease-in-out 2}
+#table-entry.unlock-new::after,#seat-entry.unlock-new::after{left:auto;right:-7px;top:-6px;transform:none;width:18px;height:18px}
+@keyframes unlock-pulse{0%,100%{opacity:.6}50%{opacity:1;box-shadow:0 0 22px rgba(255,230,162,.95)}}
+@media(prefers-reduced-motion:reduce){
+  .hotspot.unlock-new::before,#table-entry.unlock-new::after,#seat-entry.unlock-new::after{animation:none;background:transparent;box-shadow:none;color:transparent;border:2px solid #fff6d6}
+}
+@media(max-width:900px){#scroll-hint{top:calc(var(--hud-clear) + 40px)}}
 @media(max-width:600px){
   #wall-label{top:max(10px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));padding:7px 10px;font-size:12px}
   #tools{top:max(8px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));gap:5px}
   .tool-button{min-height:38px;padding:6px 10px;font-size:12px}
   .turn{width:40px;height:56px;margin-top:-28px;border-radius:13px;font-size:30px}
   #hint{bottom:max(10px,env(safe-area-inset-bottom));max-width:calc(100vw - 104px);padding:6px 10px;font-size:11px}
-  #scroll-label{top:max(10px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));padding:7px 10px;font-size:12px}
-  #scroll-controls{top:max(8px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));gap:5px}
-  .scroll-button{min-height:38px;padding:6px 10px;font-size:12px}
-  #scroll-hint{top:max(52px,calc(env(safe-area-inset-top) + 48px));padding:6px 10px;font-size:11px}
-  #table-entry{left:max(12px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom));min-height:44px;padding:9px 15px;font-size:14px}
+  #scroll-label{flex-basis:68px;height:38px;padding:6px 8px;font-size:12px}
+  #scroll-controls{left:max(12px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom));gap:6px}
+  .scroll-button{flex-basis:102px;height:38px;padding:6px 10px;font-size:12px}
+  #scroll-hint{padding:6px 10px;font-size:11px}
   #panel{left:0;right:0;top:auto;bottom:0;width:100%;max-height:64vh;transform:translateY(100%);border-width:2px 0 0;border-radius:17px 17px 0 0;padding-bottom:env(safe-area-inset-bottom)}
   #panel.on{transform:translateY(0)}
 }
@@ -128,19 +145,23 @@ body.debug .hotspot::before{content:attr(data-mark);position:absolute;top:2px;le
 .hotspot[data-id="15"]::after{left:12%;transform:translate(0,-4px)}
 .hotspot[data-id="15"]:focus-visible::after,.hotspot[data-id="15"].nearby::after{transform:translate(0,0)}
 @media(hover:hover) and (pointer:fine){.hotspot[data-id="15"]:hover::after{transform:translate(0,0)}}
-@media(prefers-reduced-motion:reduce){.wall-layer,#scrim,#panel,.night-veil,.hotspot::after,.person-talk-icon{transition-duration:0s}.player-image.walking,.ring-person-sprite,.ring-player .character-sprite{animation:idle-breathe-reduced 5s ease-in-out infinite}.character-facing{transition-duration:0s}.hotspot.nearby{border-color:transparent;background:transparent;box-shadow:none;filter:none}}
+@media(prefers-reduced-motion:reduce){.wall-layer,#scrim,#panel,.night-veil,.hotspot::after,.person-talk-icon{transition-duration:0s}.ring-person-sprite,.ring-player .character-sprite{animation:idle-breathe-reduced 5s ease-in-out infinite}.player-image.walking{animation:none}.character-facing{transition-duration:0s}.hotspot.nearby{border-color:transparent;background:transparent;box-shadow:none;filter:none}}
 </style>
+<link rel="stylesheet" href="studio_paper.css">
+<link rel="stylesheet" href="studio_icons.css">
+<link rel="stylesheet" href="studio_album.css">
+<link rel="stylesheet" href="./free_affinity.css">
 </head>
 <body>
 <section id="scroll-mode" aria-label="工作室連續捲軸">
   <main id="scroll-stage" aria-label="工作室四面牆連續場景"><div id="ring-track"></div></main>
-  <div id="scroll-label" aria-live="polite">北牆</div>
   <div id="scroll-controls">
+    <div id="scroll-label" aria-live="polite">北牆</div>
     <button class="scroll-button" id="scroll-time-toggle" type="button">切到夜晚</button>
-    <a class="scroll-button" id="turn-link" href="?mode=turn">轉身版</a>
+    <button class="scroll-button" id="table-entry" data-id="13" type="button" aria-label="長桌，開啟四人群聊">長桌</button>
+    <button class="scroll-button" id="seat-entry" data-id="14" type="button" hidden disabled>她的位子</button>
   </div>
   <div id="scroll-hint">方向鍵或 A、D 移動　點地板走過去</div>
-  <button id="table-entry" type="button" aria-label="長桌，開啟四人群聊">長桌</button>
 </section>
 <div id="turn-mode">
 <main id="stage" aria-label="工作室場景"></main>
@@ -153,12 +174,14 @@ body.debug .hotspot::before{content:attr(data-mark);position:absolute;top:2px;le
 <button class="turn" id="turn-right" type="button" aria-label="轉身到右側相鄰牆面">›</button>
 <div id="hint">A、D 移動　點地面走過去　左右箭頭轉身</div>
 </div>
+<div id="studio-unlock-status" role="status"></div>
 <div id="scrim"></div>
-<section id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" aria-hidden="true">
+<section id="panel" tabindex="-1" inert role="dialog" aria-modal="true" aria-labelledby="panel-title" aria-hidden="true">
   <header class="panel-head"><h1 id="panel-title"></h1><button id="panel-close" type="button" aria-label="關閉視窗">×</button></header>
   <div id="panel-body"></div>
 </section>
-<script>
+<script type="module">
+import { createStudioUnlock } from './studio_unlock.mjs';
 (function(){
 'use strict';
 
@@ -169,6 +192,7 @@ var WALLS=[
     {id:4,x:.78,y:.165,w:.12,h:.34},
     {id:12,x:.105,y:.205,w:.285,h:.275},
     {id:13,x:.052,y:.532,w:.895,h:.14},
+    {id:14,x:.285,y:.445,w:.17,h:.086},
     {id:15,x:.125,y:.005,w:.775,h:.325}
   ]},
   {key:'east',name:'東牆',image:'../../新版/canon_new/studio/G.png',feet:.91,realScale:.58,hotspots:[
@@ -179,30 +203,32 @@ var WALLS=[
   ]},
   {key:'south',name:'南牆',image:'../../新版/canon_new/studio/I.png',feet:.93,realScale:.61,hotspots:[
     {id:1,x:.025,y:.195,w:.17,h:.70},
+    {id:2,x:.20,y:.268,w:.075,h:.25},
     {id:10,x:.64,y:.075,w:.225,h:.34},
     {id:11,x:.28,y:.16,w:.29,h:.73}
   ]},
   {key:'west',name:'西牆',image:'../../新版/canon_new/studio/H.png',feet:.92,realScale:.60,hotspots:[
-    {id:8,x:.73,y:.16,w:.215,h:.76}
+    {id:8,x:.73,y:.16,w:.215,h:.76},
+    {id:9,x:.12,y:.106,w:.282,h:.224}
   ]}
 ];
 var INTERACTIONS={
   1:{name:'落地鏡',text:'鏡前空間可以換上工作室裡的衣服與配件。',future:'換裝紙娃娃：挑選茶語的工作室服裝與配件。'},
-  2:{name:'照片牆',text:'牆上的相片將記下她們一路走來的日子。',future:'逐章拍立得回憶相簿：翻看每一章留下的照片。'},
+  2:{name:'照片牆',text:'這裡夾著她每天拍給晨的天空。',future:'翻看天空日記，挑幾張夾在牆上。'},
   3:{name:'明的軟木板',text:'明把工作室裡的重要提醒貼在這塊板上。',future:'逐章便利貼：查看三人留下的紙條與進度提醒。'},
-  4:{name:'望遠鏡',text:'從北窗望出去，可以看見島上的海與遠方。',future:'島嶼展望台：查看島的現況，以及三人所在的區域。'},
-  5:{name:'詩的唱片架',text:'唱片收藏會隨著故事慢慢增加。',future:'詩的專輯播放器：唱片旋轉、畫面隨音樂跳動，並顯示歌詞。'},
+  4:{name:'望遠鏡',text:'轉動望遠鏡，看看島上各處的近景。',future:'選一個開放的地方，拉近看，也可以左右移動。'},
+  5:{name:'詩的唱片架',text:'把故事裡聽過的歌放上唱盤。',future:'挑一張黑膠，邊聽邊看歌詞。'},
   6:{name:'電子琴',text:'詩常在電子琴前試幾個音。',future:'試彈幾個音，讓詩接話或跟著旋律合奏。'},
   7:{name:'吉他',text:'吉他放在音樂角，詩有時也會拿起來彈。',future:'撥弦小互動：聽音、試奏，讓詩接著回應。'},
-  8:{name:'晨的畫架',text:'晨把旅途中畫下的風景與回憶留在工作室。',future:'晨的展廳：收藏看過的 CG，附上晨寫的小卡。'},
-  9:{name:'晨的島地圖',text:'島地圖會隨著新的區域開放，一塊一塊補上。',future:'可放大查看目前開放的島嶼與已經走過的地方。'},
+  8:{name:'晨的畫架',text:'晨把自己的畫掛在這裡。',future:'翻看晨的速寫和妳請他畫的作品。'},
+  9:{name:'晨的島地圖',text:'晨把島上開放的地方畫在地圖上。',future:'看看哪些地方開了，哪些地方已經去過。'},
   10:{name:'圓鐘',text:'鐘面記著大家等待的重要日子。',future:'倒數時鐘：配合劇情顯示時間與倒數。'},
   11:{name:'圓拱門',text:'第三章第一次上島後，這扇門會通往島上。',future:'工作室與小島的出入口：依故事進度開放。'},
   12:{name:'明的電腦',text:'明把進度、行事曆與備份整理在自己的桌面裡。',future:'作業系統「明」：進度表、月曆倒數、小遊戲重玩、備份與試用條款。'},
   13:{name:'長桌',text:'大家可以在長桌邊一起喝茶、聊天。',future:'四人群聊：晨、明、詩輪流回應，也會彼此吐槽。'},
   14:{name:'她的位子',text:'長桌北側西邊的紅椅，是她放素描本與冰紅茶的位置。',future:'翻看晨畫的素描本，也能看看桌上的冰紅茶。'},
-  15:{name:'北面大窗',text:'窗外是海、天空與小島的草地。',future:'看海：天空與海面會依故事進度改變。'},
-  16:{name:'詩的耳機',text:'詩把耳機掛在音樂角的書架上。',future:'專輯播放器：聽解鎖的歌曲、看歌詞與詩寫下的話。'}
+  15:{name:'北面大窗',text:'從北窗看外面的海和天。',future:'看看此刻的天色和海面。'},
+  16:{name:'詩的耳機',text:'戴上耳機，聽詩錄下來的試唱。',future:'試唱和妳請詩做的歌都可以在這裡聽。'}
 };
 var QUERY=new URLSearchParams(location.search);
 var TURN_MODE=QUERY.get('mode')==='turn';
@@ -260,7 +286,8 @@ function buildLayer(wall){
     hit.setAttribute('aria-label',INTERACTIONS[h.id].name+'，開啟互動');
     hit.style.left=(h.x*100)+'%';hit.style.top=(h.y*100)+'%';hit.style.width=(h.w*100)+'%';hit.style.height=(h.h*100)+'%';
     hit.addEventListener('pointerdown',function(event){event.stopPropagation();});
-    hit.addEventListener('click',function(event){event.stopPropagation();openInteraction(h.id,hit);});
+    hit.addEventListener('click',function(event){event.stopPropagation();if(!hit.disabled)openInteraction(h.id,hit);});
+    unlock.apply(hit);
     zones.appendChild(hit);
   });
   art.appendChild(image);art.appendChild(veil);art.appendChild(zones);art.appendChild(player);
@@ -324,6 +351,9 @@ function readSaved(raw){
 }
 function showPanel(title,text,future,focusBack){
   lastFocus=focusBack||document.activeElement;
+  const sheet=document.getElementById('panel');
+  sheet.dataset.design='note';
+  delete sheet.dataset.character;
   document.getElementById('panel-title').textContent=title;
   var body=document.getElementById('panel-body');body.replaceChildren();
   var description=document.createElement('p');description.textContent=text;body.appendChild(description);
@@ -331,6 +361,7 @@ function showPanel(title,text,future,focusBack){
   later.append('之後會做成：');
   var strong=document.createElement('strong');strong.textContent=future;later.appendChild(strong);body.appendChild(later);
   var note=document.createElement('p');note.className='panel-note';note.textContent='這一版只提供互動佔位面板。';body.appendChild(note);
+  document.getElementById('panel').inert=false;
   document.getElementById('panel').classList.add('on');
   document.getElementById('panel').setAttribute('aria-hidden','false');
   document.getElementById('scrim').classList.add('on');
@@ -342,6 +373,7 @@ function openInteraction(id,focusBack){
   showPanel(String(id).padStart(2,'0')+'｜'+item.name,item.text,item.future,focusBack);
 }
 function closePanel(){
+  document.getElementById('panel').inert=true;
   document.getElementById('panel').classList.remove('on');
   document.getElementById('panel').setAttribute('aria-hidden','true');
   document.getElementById('scrim').classList.remove('on');
@@ -410,17 +442,19 @@ function startMove(direction){if(document.getElementById('panel').classList.cont
 function stopMove(direction){if(keyDirection===direction)keyDirection=0;}
 
 if(!TURN_MODE)return;
+var unlock=createStudioUnlock(location.search,stage);
+unlock.sync(larch.variables);
 
 document.getElementById('turn-left').addEventListener('click',function(){turn(-1);});
 document.getElementById('turn-right').addEventListener('click',function(){turn(1);});
 document.getElementById('time-toggle').addEventListener('click',function(){state.night=!state.night;refreshLayers();saveState();});
 document.getElementById('decor-toggle').addEventListener('click',function(){
-  showPanel('自訂佈置','工作室之後可以依喜好換上不同的佈置。','壁紙、地板、窗簾、地毯與燈；20 件小物件和 6 件劇情禮物。',this);
+  showPanel('自訂佈置','工作室之後可以換上不同的佈置。','壁紙、地板、窗簾、地毯與燈，以及小物件和劇情禮物。',this);
 });
 document.getElementById('panel-close').addEventListener('click',closePanel);
 document.getElementById('scrim').addEventListener('click',closePanel);
 window.addEventListener('keydown',function(event){
-  if(event.key==='Escape'){closePanel();return;}
+  if(event.key==='Escape'&&!event.isComposing){closePanel();return;}
   if(document.getElementById('panel').classList.contains('on'))return;
   if(event.key==='ArrowLeft'){event.preventDefault();turn(-1);return;}
   if(event.key==='ArrowRight'){event.preventDefault();turn(1);return;}
@@ -439,6 +473,7 @@ window.addEventListener('message',function(event){
   var data=event.data||{};
   if(data.type==='larch:init'){
     larch.variables=data.variables||{};
+    unlock.sync(larch.variables);
     if(QUERY.has('wall')&&WALLS.some(function(w){return w.key===QUERY.get('wall');}))state.wall=QUERY.get('wall');
     if(QUERY.has('night'))state.night=QUERY.get('night')==='1';
     renderCurrentWall();refreshLayers();
@@ -455,19 +490,22 @@ window.__studio={
   get state(){return{wall:state.wall,x:state.x,night:state.night};},
   get transitioning(){return transitionBusy;},
   get variables(){return larch.variables;},
+  panel:function(open,focus){if(open){lastFocus=focus||document.activeElement;targetX=null;keyDirection=0;pointerDirection=0;}},
   turn:turn,
   setWall:setWall,
   toggleNight:function(){document.getElementById('time-toggle').click();},
   teleport:function(x){state.x=Math.max(.015,Math.min(.985,x));targetX=null;syncPlayer();},
-  visibleHotspots:function(){return Array.from(activeLayer.querySelectorAll('.hotspot')).map(function(button){return Number(button.dataset.id);});}
+  visibleHotspots:function(){return Array.from(activeLayer.querySelectorAll('.hotspot:not([hidden])')).map(function(button){return Number(button.dataset.id);});}
 };
 })();
 </script>
-<script>
+<script type="module">
+import { createStudioUnlock } from './studio_unlock.mjs';
 (function(){
 'use strict';
 var QUERY=new URLSearchParams(location.search);
 if(QUERY.get('mode')==='turn')return;
+var unlock=createStudioUnlock(location.search,document.getElementById('scroll-mode'));
 
 // 圖片與人物共用同一套公分比例；換高解析度圖時更新路徑與每公分像素值。
 var PX_PER_CM=1536/900;
@@ -478,7 +516,7 @@ var IMAGE_HEIGHT_PX=IMAGE_HEIGHT_CM*PX_PER_CM;
 var FURNITURE_SCALE=1.3;
 var HEIGHT_CM={tea:157,ming:188,chen:179,shi:177};
 var FLOOR_CONTACT_CM=WALL_HEIGHT_CM+FLOOR_BAND_CM*.72;
-var WALK_CM_PER_SECOND=340;
+var WALK_CM_PER_SECOND=290;   // 作者 2026-11-21：走慢一點點（340→290）
 var NEARBY_DISTANCE_CM=84;
 var PERSONS={
   chen:{name:'晨',image:'../sprites/chen_3h.png',ratio:601/1403},
@@ -514,20 +552,21 @@ var WALLS=[
 ];
 var INTERACTIONS={
   1:{name:'落地鏡',text:'鏡前空間可以換上工作室裡的衣服與配件。',future:'換裝紙娃娃：挑選茶語的工作室服裝與配件。'},
-  2:{name:'照片牆',text:'牆上的空木夾會記下她們一路走來的日子。',future:'逐章拍立得回憶相簿：翻看每一章留下的照片。'},
+  2:{name:'照片牆',text:'這裡夾著她每天拍給晨的天空。',future:'翻看天空日記，挑幾張夾在牆上。'},
   3:{name:'明的軟木板',text:'明把工作室裡的重要提醒貼在這塊板上。',future:'逐章便利貼：查看三人留下的紙條與進度提醒。'},
-  4:{name:'望遠鏡',text:'從北窗望出去，可以看見島上的海與遠方。',future:'島嶼展望台：查看島的現況，以及三人所在的區域。'},
-  5:{name:'詩的唱片架',text:'唱片收藏會隨著故事慢慢增加。',future:'詩的專輯播放器：唱片旋轉、畫面隨音樂跳動，並顯示歌詞。'},
+  4:{name:'望遠鏡',text:'轉動望遠鏡，看看島上各處的近景。',future:'選一個開放的地方，拉近看，也可以左右移動。'},
+  5:{name:'詩的唱片架',text:'把故事裡聽過的歌放上唱盤。',future:'挑一張黑膠，邊聽邊看歌詞。'},
   6:{name:'電子琴',text:'詩常在電子琴前試幾個音。',future:'試彈幾個音，讓詩接話或跟著旋律合奏。'},
   7:{name:'吉他',text:'吉他放在音樂角，詩有時也會拿起來彈。',future:'撥弦小互動：聽音、試奏，讓詩接著回應。'},
-  8:{name:'晨的畫架',text:'晨把旅途中畫下的風景與回憶留在工作室。',future:'晨的展廳：收藏看過的 CG，附上晨寫的小卡。'},
-  9:{name:'晨的島地圖',text:'島地圖會放在西牆南端目前留白的位置。',future:'可放大查看目前開放的島嶼與已經走過的地方。'},
+  8:{name:'晨的畫架',text:'晨把自己的畫掛在這裡。',future:'翻看晨的速寫和妳請他畫的作品。'},
+  9:{name:'晨的島地圖',text:'晨把島上開放的地方畫在地圖上。',future:'看看哪些地方開了，哪些地方已經去過。'},
   10:{name:'圓鐘',text:'鐘面記著大家等待的重要日子。',future:'倒數時鐘：配合劇情顯示時間與倒數。'},
   11:{name:'圓拱門',text:'第三章第一次上島後，這扇門會通往島上。',future:'工作室與小島的出入口：依故事進度開放。'},
   12:{name:'明的電腦',text:'明把進度、行事曆與備份整理在自己的桌面裡。',future:'作業系統「明」：進度表、月曆倒數、小遊戲重玩、備份與試用條款。'},
   13:{name:'長桌',text:'大家可以在長桌邊一起喝茶、聊天。',future:'四人群聊：晨、明、詩輪流回應，也會彼此吐槽。'},
-  15:{name:'北面大窗',text:'窗外是海、天空與小島的草地。',future:'看海：天空與海面會依故事進度改變。'},
-  16:{name:'詩的耳機',text:'詩把耳機掛在音樂角的書架上。',future:'專輯播放器：聽解鎖的歌曲、看歌詞與詩寫下的話。'}
+  14:{name:'她的位子',text:'長桌邊放著她的素描本與冰紅茶。',future:'翻看晨畫的素描本，也能看看桌上的冰紅茶。'},
+  15:{name:'北面大窗',text:'從北窗看外面的海和天。',future:'看看此刻的天色和海面。'},
+  16:{name:'詩的耳機',text:'戴上耳機，聽詩錄下來的試唱。',future:'試唱和妳請詩做的歌都可以在這裡聽。'}
 };
 var RING_CM=WALLS.reduce(function(total,wall){return total+wall.cm;},0);
 var viewWidth=window.innerWidth,viewHeight=window.innerHeight,viewScale=1;
@@ -568,6 +607,8 @@ function openInteraction(id,focusBack){
   }
   var item=INTERACTIONS[id];if(!item)return;
   lastFocus=focusBack||document.activeElement;
+  panel.dataset.design='note';
+  delete panel.dataset.character;
   panelTitle.textContent=String(id).padStart(2,'0')+'｜'+item.name;
   panelBody.replaceChildren();
   var description=document.createElement('p');description.textContent=item.text;panelBody.appendChild(description);
@@ -575,13 +616,21 @@ function openInteraction(id,focusBack){
   future.append('之後會做成：');
   var strong=document.createElement('strong');strong.textContent=item.future;future.appendChild(strong);panelBody.appendChild(future);
   var note=document.createElement('p');note.className='panel-note';note.textContent='這一版只提供互動佔位面板。';panelBody.appendChild(note);
-  panel.classList.add('on');panel.setAttribute('aria-hidden','false');scrim.classList.add('on');panelOpen=true;
+  panel.inert=false;panel.classList.add('on');panel.setAttribute('aria-hidden','false');scrim.classList.add('on');panelOpen=true;
   targetX=null;keyDirection=0;pointerDirection=0;
   closeButton.focus({preventScroll:true});
 }
 function closePanel(){
-  panel.classList.remove('on');panel.setAttribute('aria-hidden','true');scrim.classList.remove('on');panelOpen=false;
-  if(lastFocus&&lastFocus.focus)lastFocus.focus({preventScroll:true});
+  panel.inert=true;panel.classList.remove('on');panel.setAttribute('aria-hidden','true');scrim.classList.remove('on');panelOpen=false;
+  var target=lastFocus;
+  if(target&&!target.isConnected&&target.dataset.slot){
+    var key=target.dataset.slot;
+    target=Array.from(document.querySelectorAll('.decor-slot')).find(function(node){
+      var bounds=node.getBoundingClientRect();
+      return node.dataset.slot===key&&bounds.right>0&&bounds.left<window.innerWidth;
+    });
+  }
+  if(target&&target.focus)target.focus({preventScroll:true});
 }
 function labelForX(x){
   if(x<900)return'北牆';if(x<1600)return'東牆';if(x<2500)return'南牆';return'西牆';
@@ -600,7 +649,7 @@ function updateProximity(){
   var next=null,nearest=NEARBY_DISTANCE_CM;
   var playerWorldX=cameraX+loopDelta(cameraX,state.x);
   proximityTargets.forEach(function(target){
-    if(!target.node.isConnected)return;
+    if(!target.node.isConnected||target.node.disabled)return;
     var distance=Math.abs(playerWorldX-target.worldX);
     if(distance<nearest||(distance===nearest&&target.kind==='person')){nearest=distance;next=target.node;}
   });
@@ -628,7 +677,8 @@ function buildWall(wall,copy){
     button.style.left=(zone.x*100)+'%';button.style.top=(zone.y*100)+'%';
     button.style.width=(zone.w*100)+'%';button.style.height=(zone.h*100)+'%';
     button.addEventListener('pointerdown',function(event){event.stopPropagation();});
-    button.addEventListener('click',function(event){event.stopPropagation();openInteraction(zone.id,button);});
+    button.addEventListener('click',function(event){event.stopPropagation();if(!button.disabled)openInteraction(zone.id,button);});
+    unlock.apply(button);
     zones.appendChild(button);
     proximityTargets.push({node:button,worldX:wall.offsetCm+(zone.x+zone.w/2)*wall.cm+copy*RING_CM,kind:'object'});
   });
@@ -775,7 +825,7 @@ stage.addEventListener('pointercancel',pointerUp);
 stage.addEventListener('lostpointercapture',stopPointer);
 stage.addEventListener('contextmenu',function(event){event.preventDefault();});
 window.addEventListener('keydown',function(event){
-  if(event.key==='Escape'){if(panelOpen)closePanel();return;}
+  if(event.key==='Escape'&&!event.isComposing){if(panelOpen)closePanel();return;}
   if(panelOpen)return;
   if(event.key==='ArrowLeft'||event.key==='a'||event.key==='A'){event.preventDefault();startMove(-1);}
   if(event.key==='ArrowRight'||event.key==='d'||event.key==='D'){event.preventDefault();startMove(1);}
@@ -789,7 +839,11 @@ window.addEventListener('resize',updateScale);
 window.addEventListener('pagehide',saveState);
 document.addEventListener('visibilitychange',function(){if(document.hidden)saveState();});
 timeButton.addEventListener('click',function(){state.night=!state.night;updateLabel();saveState();});
-document.getElementById('table-entry').addEventListener('click',function(){openInteraction(13,this);});
+['table-entry','seat-entry'].forEach(function(id){
+  document.getElementById(id).addEventListener('click',function(){
+    if(!this.disabled)openInteraction(Number(this.dataset.id),this);
+  });
+});
 closeButton.addEventListener('click',closePanel);
 scrim.addEventListener('click',closePanel);
 var debug=QUERY.get('debug')==='1';if(debug)document.body.classList.add('debug');
@@ -814,9 +868,12 @@ window.addEventListener('message',function(event){
   var data=event.data||{};
   if(data.type==='larch:init'){
     hostVariables=data.variables||{};
+    unlock.sync(hostVariables);
+    updateProximity();
   }
 });
 window.parent.postMessage({type:'larch:ready'},'*');
+unlock.sync(hostVariables);
 start();
 window.__studio={
   walls:WALLS.map(function(wall){return wall.key;}),
@@ -830,13 +887,16 @@ window.__studio={
   metrics:function(){var wallCm={};WALLS.forEach(function(wall){wallCm[wall.key]=wall.cm;});return{pxPerCm:PX_PER_CM*viewScale*FURNITURE_SCALE,floorGap:viewHeight-FLOOR_CONTACT_CM*PX_PER_CM*viewScale,wallCm:wallCm};},
   panel:function(open,focus){panelOpen=!!open;if(open){lastFocus=focus||document.activeElement;targetX=null;keyDirection=0;pointerDirection=0;}},
   teleport:function(x){state.x=mod(x,RING_CM);cameraX=state.x;targetX=null;updatePlayer();updateTrack();updateLabel();},
-  visibleHotspots:function(){return Array.from(track.querySelectorAll('.hotspot')).map(function(button){return Number(button.dataset.id);});}
+  visibleHotspots:function(){return Array.from(track.querySelectorAll('.hotspot:not([hidden])')).map(function(button){return Number(button.dataset.id);});}
 };
 })();
 </script>
+<script type="module" src="studio_icons.mjs"></script>
+<script type="module" src="studio_panel.mjs"></script>
 <script type="module" src="studio_features.mjs"></script>
 <script type="module" src="studio_decor.mjs"></script>
 <script type="module" src="studio_points.mjs"></script>
+<script type="module" src="studio_points2.mjs"></script>
 <script type="module" src="studio_embed.mjs"></script>
 </body>
 </html>

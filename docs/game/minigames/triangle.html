@@ -194,14 +194,16 @@ function start() {
   var affection = { C: LARCH.num('affC', 0), M: LARCH.num('affM', 0), S: LARCH.num('affS', 0) };
   var highest = Math.max(affection.C, affection.M, affection.S);
   var lowest = Math.min(affection.C, affection.M, affection.S);
-  var allLit = highest - lowest <= 2;
+  var cleared = LARCH.v.clearedTrue === true;
+  var allLit = cleared || highest - lowest <= 2;
   ['C', 'M', 'S'].forEach(function (key) { state.lit[key] = allLit || affection[key] === highest; });
   state.lit.ALL = true;
   var leaders = ['C', 'M', 'S'].filter(function (key) { return affection[key] === highest; });
   var last = String(LARCH.param('lastAff', 'C')).toUpperCase();
   window.__bestAffRoute = leaders.indexOf(last) >= 0 ? last : leaders[0];
   state.best = window.__bestAffRoute;
-  state.hint = allLit ? '三人都在等妳。點一個人，或點中間的「三個人一起」。' : '亮著的人可以選；中間的「三個人一起」也可以。';
+  if (cleared) state.hint = '已看過真結局，三個人的線都可以選，也可以選「三個人一起」。';
+  else state.hint = allLit ? '三人都在等妳。點一個人，或點中間的「三個人一起」。' : '亮著的人可以選；中間的「三個人一起」也可以。';
   render();
   addEventListener('resize', render);
   // 觸控待確認時點空白處取消；按鍵盤就回到鍵盤模式

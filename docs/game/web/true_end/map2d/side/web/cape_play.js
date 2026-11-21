@@ -141,7 +141,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   if (me.mode === 'plat') setPose(clamp(onPlat ? PL.x0 + 14 : (savedPos.x || PL.land[0]), PL.x0, PL.x1), PL.y, KP); else { const p = posAt(me.s); setPose(p.x, p.y, p.h / BASE_H); }
   const savePos = () => { if (!window.StudioDB || (window.IslandBridge && window.IslandBridge.done)) return null; return StudioDB.set(POSKEY, me.mode === 'plat' ? { mode: 'plat', x: pose.x } : { mode: 'route', s: me.mode === 'route' ? me.s : S_FOOT }).catch(() => {}); };
   setInterval(savePos, 1500); if (window.IslandBridge) window.IslandBridge.beforeComplete(savePos);
-  const walkAnim = (el, t, on_) => { el.style.setProperty('--bob', on_ ? (-Math.abs(Math.sin(t * 9)) * 2.2) + '%' : '0%'); el.style.setProperty('--rock', on_ ? (Math.sin(t * 9) * 3) + 'deg' : (Math.sin(t * 1.6) * 0.6) + 'deg'); };
+  const walkAnim = (el, t, on_) => window.WalkSway.css(el, window.WalkSway.pose(t, on_));   // 走路晃動跟工作室同一組（studio_web/walk_sway.js），停下來不晃
   let walkClock = 0, prevX = state.x, firstFrame = true;
   const speedK = h => clamp(h / BASE_H, 0.22, 1);
   // 每一幀：引擎已經照按鍵把 state.x 往左或往右推了一步，這裡只拿「往哪邊、推多少」，換成沿路線前進的距離，再把 state.x 放回路線上
@@ -300,7 +300,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     if (me.mode === 'route') { if (dir < 0) return; me.busy = true; me.target = null; if (Math.abs(me.s - S_FOOT) > 3) { me.busy = false; await walkS(S_FOOT); me.busy = true; } me.mode = 'stone'; me.stone = 1; await hopTo(stoneTop(1)); landOn(); return; }
     if (me.mode === 'plat') { if (dir > 0) return; me.busy = true; me.target = null; if (Math.abs(pose.x - TOP.x) > 3) { me.busy = false; await walkP(TOP.x); me.busy = true; } me.mode = 'stone'; me.stone = 5; await hopTo(stoneTop(5)); landOn(); return; }
     const next = me.stone + dir; me.busy = true;
-    if (next > 5) { await hopTo(() => TOP, 0.3, 20); me.mode = 'plat'; me.stone = 0; me.busy = false; sfx.wood(0); refreshZones(); onArrive(); return; }
+    if (next > 5) { await hopTo(() => TOP, 0.3, 20); me.mode = 'plat'; me.stone = 0; me.busy = false; sfx.wood(0); if (CT.mode === 'visit') CT.completeFreeInteraction(); refreshZones(); onArrive(); return; }
     if (next < 1) { await hopTo(() => GROUND, 0.3, 16); me.mode = 'route'; me.s = S_FOOT; me.stone = 0; me.busy = false; refreshZones(); onArrive(); return; }
     me.stone = next; await hopTo(stoneTop(next)); landOn();
   }
@@ -420,7 +420,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
       const hx = ming.x - hpx * 0.2, hy = ming.y - hpx * 0.93; sparkle(hx, hy, 4, 0.5); mingGearEl.remove(); mingEl.style.visibility = ''; mingLook(-1);
       await flyGear(GEAR_SRC[n ? 'c' : 'a'], hx, hy, () => ({ x: CL.cx, y: CL.cy + 8 }), 0.7, 10, 8); sfx.gear(); sparkle(CL.cx, CL.cy, 6, 0.6); await wait(260); }
     mingLook(1); await wait(200); sfx.pick(); await flyGear(GEAR_SRC.b, ming.x + 8, ming.y - mingHpx() * 0.5, () => ({ x: pose.x - 6, y: pose.y - BASE_H * KP * 0.5 }), 0.5, 10, 12);
-    giveState = 'cg'; await wait(300);
+    giveState = 'cg'; CT.completeFreeInteraction(); await wait(300);
     if (CT.embedded) { save({ s4_gears_submitted: 'true' }); return CT.cut(6, { cg: '5-14' }); }   // 嵌在 Larch：CG 5-14～5-16 那一段交給對話卡演，回來接第 6 步
     api.showCg(true, M.cg_514, 1.5);
     setTimeout(() => openDialogue(CG514, [() => { api.hideCg(); save({ c5_cg: 'true', s4_gears_submitted: 'true' }); giveState = 'done'; lockOff(); setQuest(); refreshZones(); }],
@@ -452,7 +452,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     mingNod(); tip(on('te_stopped') ? '停下時間，再點鐘面' : '按「停下時間」讓指針停住');
   }
   function mingNod() { mingEl.classList.remove('nod'); void mingEl.offsetWidth; mingEl.classList.add('nod'); setTimeout(() => mingEl.classList.remove('nod'), 520); }
-  function giftTalk() { openDialogue(S43_B, [() => { api.gifts.gift_ming = true; save({ gift_ming: 'true', gifts: String(Object.keys(api.gifts).length) }); viewOverride = null; sfx.heart(); heart(ming.x + 10, ming.y - mingHpx() - 4); setQuest(); }],
+  function giftTalk() { openDialogue(S43_B, [() => { api.gifts.gift_ming = true; CT.completeFreeInteraction(); save({ gift_ming: 'true', gifts: String(Object.keys(api.gifts).length) }); viewOverride = null; sfx.heart(); heart(ming.x + 10, ming.y - mingHpx() - 4); setQuest(); }],
     line => { if (line === S43_B[4][1]) { viewOverride = { top: 0.1, h: 0.4, shift: -70 }; clock.a += 6; sfx.tick(); } if (line === S43_B[5][1]) viewOverride = null; if (line.startsWith('（兩個人坐在鐘塔底下')) { clock.a += 6; sfx.tick(); } }); }
   // 真結局：停下時間 → 點鐘面，把最後那個齒輪拿下來、翻面、裝回去
   const gc = document.createElement('div'); gc.id = 'gearcard'; gc.innerHTML = '<div class="card"><img alt="" src="../art/sprites/gear_3.png"><p></p></div>'; document.body.appendChild(gc); const gcImg = gc.querySelector('img'), gcP = gc.querySelector('p'); let gcStep = 0;
@@ -593,7 +593,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   const lampShow = () => { flick.style.display = st.errand_ming === 'accepted' ? '' : 'none'; refreshZones(); }; lampShow();
   function errandMing(after) {
     if (st.errand_ming === 'done') { if (after) return openDialogue(after); mingNod(); return; }
-    if (st.errand_ming === 'fixed') return openDialogue(ERR_MING_DONE, [() => { save({ errand_ming: 'done' }); sfx.heart(); if (pine) pine.take(); else pl.got('pine'); }]);
+    if (st.errand_ming === 'fixed') return openDialogue(ERR_MING_DONE, [() => { save({ errand_ming: 'done' }); CT.completeFreeInteraction(); sfx.heart(); if (pine) pine.take(); else pl.got('pine'); }]);
     if (st.errand_ming === 'accepted') { tip('鐘塔門口右邊那盞燈。停下時間再看看'); return; }
     return openDialogue(ERR_MING_ASK, [], line => { if (line === '（接下明的小委託：看看鐘塔門口右邊那盞燈。）') { save({ errand_ming: 'accepted' }); lampShow(); } });
   }

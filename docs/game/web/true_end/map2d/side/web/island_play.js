@@ -1,3 +1,4 @@
+import { createIslandAffinity } from './island_affinity.mjs';
 import { paperize } from './paper.js';
 import { entranceAction, isNearEntrance, isWalkable, landingVariables,
   memoryUpdates, orbitCompletion, pointInPolygon, dolphinActionVisible, boatActionVisible, diveActionVisible,
@@ -15,7 +16,9 @@ const memoryRoot = document.getElementById('memory'), dialog = document.getEleme
 const paint = document.getElementById('paint'), clouds = document.getElementById('clouds'), cloudWrap = document.getElementById('cloudwrap');
 // 底圖是四周延伸畫好的整張：#map-area 仍是原圖那一塊（座標 0～1），延伸圖往外多出 ext.left／top／right／bottom 個原圖寬高
 const EXT = CFG.ext;
-const ORBIT_UI_TOP = 44;   // 繞島時畫面頂端只留一條小提示（地名、進度先收起來）
+// 繞島時畫面頂端留給介面的高度（地名、進度先收起來）：桌機只有一條小提示，44px；
+// 手機直式（寬 ≤700，island.html 的窄版）Larch 常駐介面的紙卡橫跨上緣大半（含日期紙卡高 112），提示列改排在下緣，上面留 122px 給紙卡
+const orbitUiTop = () => innerWidth <= 700 ? 122 : 44;
 const CAMERA_EASE = 5;     // 鏡頭跟拍的平滑（每秒趨近的倍率）
 document.getElementById('dusk-matrix').setAttribute('values', CFG.duskGrade.matrix.join(' '));
 const inFrame = window.parent !== window;
@@ -32,7 +35,9 @@ const state = { x: CFG.start.x, y: CFG.start.y, face: 1, target: null, keyX: 0, 
   stage: 1, time: '早上', vars: queryVariables(), orbit: null, landing: false, dialogOpen: false,
   passed: new Set(), buttons: new Map(), ready: false, initApplied: !inFrame, mapReady: false,
   mapLoaded: false, mapGeneration: 0, mapPromise: Promise.resolve(false), readyWaiters: [],
-  lastFrame: 0, walkPhase: 0 };
+  lastFrame: 0, sway: window.WalkSway.create() };
+
+const freeAffinity = createIslandAffinity(BR, Q, () => state.vars, () => ctx().chapter);
 
 function placeArt() {
   // 延伸圖與雲層照設定換算成 #map-area 的百分比；原圖那一塊剛好落在 #map-area 上
@@ -287,7 +292,9 @@ function updateNearby() {
 function renderPerson() {
   if (tea) {
     tea.style.left = `${state.x * 100}%`; tea.style.top = `${state.y * 100}%`;
-    tea.style.transform = `translate(-50%,-100%) scaleX(${state.face})`;
+    // 走路晃動（studio_web/walk_sway.js，跟工作室同一組）：腳底為軸，上彈＋前後傾；停下來收回
+    const sw = state.sway, lift = sw.lift * (tea.offsetHeight || 0);
+    tea.style.transform = `translate(-50%,-100%) translateY(${(-lift).toFixed(2)}px) rotate(${(sw.tilt * state.face).toFixed(2)}deg) scaleX(${state.face})`;
     tea.style.display = state.landing || state.orbit ? 'none' : 'block';
   }
   if (shi) shi.style.display = 'none';
@@ -343,13 +350,13 @@ function lookAt() {
   const dx = (CFG.whale.x - p.x) * mw, dy = (CFG.whale.y - CFG.whale.width * W / H * 0.5 - p.y) * mh;   // 鯨魚身體中心（含水柱一半）
   const near = Math.max(0, Math.min(1, 1 - (Math.hypot(dx / mw * W, dy / mh * H) - 320) / 380));
   if (!near) return p;
-  const maxX = Math.max(0, innerWidth / 2 - box.width * mw / 2 - 16), maxY = Math.max(0, (innerHeight - ORBIT_UI_TOP) / 2 - box.height * mh / 2 - 16);
+  const maxX = Math.max(0, innerWidth / 2 - box.width * mw / 2 - 16), maxY = Math.max(0, (innerHeight - orbitUiTop()) / 2 - box.height * mh / 2 - 16);
   const sx = Math.max(-maxX, Math.min(maxX, dx * 0.6 * near)), sy = Math.max(-maxY, Math.min(maxY, dy * 0.6 * near));
   return { x: p.x + sx / mw, y: p.y + sy / mh };
 }
 function render(dt = 0, snap = false) {
   document.body.classList.toggle('orbiting', !!state.orbit && !state.landing);
-  if (state.orbit || state.landing || state.landingWalk) updateCamera(lookAt(), dt, snap, state.orbit && !state.landing ? ORBIT_UI_TOP : 0);
+  if (state.orbit || state.landing || state.landingWalk) updateCamera(lookAt(), dt, snap, state.orbit && !state.landing ? orbitUiTop() : 0);
   else updateCamera({ x: 0.5, y: 0.5 }, dt, snap);
   renderPerson(); renderVehicle();
   const near = updateNearby();
@@ -412,7 +419,10 @@ function navigateFlat(scene, area, extra = {}) {
   // 自由逛時各區是那一章主線做完之後的樣子（朝霞丘第三章、海灘第四章、月光岬第五章），可以接小委託
   const chapter = ctx().mode === 'visit' ? ({ dawn: '3', beach: '4', cape: '5' })[scene] : (Q.get('chapter') || state.vars.chapter);
   if (chapter) url.searchParams.set('chapter', chapter);
-  if (ctx().mode === 'visit') url.searchParams.set('visit', '1');
+  if (ctx().mode === 'visit') {
+    url.searchParams.set('visit', '1');
+    url.searchParams.set('visitChapter', ctx().chapter);
+  }
   if (state.time) url.searchParams.set('time', state.time);
   for (const key of QUERY_VARIABLES) {
     if (state.vars[key] !== undefined) url.searchParams.set(key, String(state.vars[key]));
@@ -424,6 +434,10 @@ function navigateFlat(scene, area, extra = {}) {
 function navigateHome() {
   const url = new URL('../../../studio_web/index.html', location.href);
   url.searchParams.set('fromIsland', location.href);
+  url.searchParams.set('chapter', Q.get('chapter') || ctx().chapter);
+  const day = state.vars.day ?? Q.get('day');
+  if (day) url.searchParams.set('day', day);
+  for (const key of ['mock', 'debug']) if (Q.has(key)) url.searchParams.set(key, Q.get(key));
   location.href = url.href;
 }
 function enterArea(id) {
@@ -559,6 +573,7 @@ function finishOrbit() {
   const completion = orbitCompletion(ride.kind, [...state.passed]);
   setVars(completion.variables);
   if (ride.kind === 'boat') addMemory7();
+  else if (ride.kind === 'dolphin') freeAffinity.award('shi');
   zk.saw(ride.kind === 'boat' ? 'whale' : 'dolphin'); updateZukanBtn();   // 坐船繞島看到遠海的鯨魚；騎海豚繞島也算遇到海豚
   // 嵌在 Larch 時繞完不送完成（這張卡還沒演完：海豚要回海灘、小船回碼頭繼續逛）
   if (!inFrame) complete(completion.result, completion.payload);
@@ -602,9 +617,7 @@ function moveFrame(dt) {
     else if (dx && walkable({ x: next.x, y: state.y })) state.x = next.x;
     else if (dy && walkable({ x: state.x, y: next.y })) state.y = next.y;
     state.face = dx < 0 ? -1 : dx > 0 ? 1 : state.face;
-    state.walkPhase += dt;
-    if (tea) tea.style.translate = `0 ${Math.sin(state.walkPhase * 9) * 2}px`;
-  } else if (tea) tea.style.translate = '0 0';
+  }
 }
 function orbitFrame(dt) {
   const ride = state.orbit; if (!ride || ride.frozen) return;
@@ -618,7 +631,7 @@ function orbitFrame(dt) {
 }
 // 真結局上岸：小船從北邊海上開進來，沿出發段倒著開到碼頭邊，茶語再從碼頭走上岸
 function landingAnimation() {
-  if (!shouldRunLanding(state.stage, state.vars, Q.get('arrival'))) return;
+  if (ctx().mode === 'visit' || !shouldRunLanding(state.stage, state.vars, Q.get('arrival'))) return;
   state.landing = true;
   const leg = CFG.orbitLeg.boat, path = polyline([CFG.landing.from, ...[...leg].reverse()]);
   const dock = CFG.landing.dock, shore = CFG.landing.shore;
@@ -650,6 +663,7 @@ function frame(now) {
     requestAnimationFrame(frame);
     return;
   }
+  const walkFrom = { x: state.x, y: state.y };
   if (state.landingTick) {
     if (state.landingTick(dt)) {
       state.landingTick = null;
@@ -658,6 +672,7 @@ function frame(now) {
     if (state.landingWalk(dt)) state.landingWalk = null;
   } else if (state.orbit) orbitFrame(dt);
   else moveFrame(dt);
+  window.WalkSway.step(state.sway, dt, !state.orbit && (state.x !== walkFrom.x || state.y !== walkFrom.y));
   render(dt); renderWhale(now); requestAnimationFrame(frame);
 }
 
@@ -743,6 +758,7 @@ addEventListener('message', event => {
     // 真結局三樣禮物拿齊：步驟變數進到第 6 步（回家），大地圖換成天剛暗
     if (c.chapter === 'true' && c.step < 6 && ['gift_chen', 'gift_shi', 'gift_ming'].every(k => truth(vars[k]))) { BR.setStep(c.stepVar, 6); vars[c.stepVar] = 6; c = BR.context(vars); }
     applyVariables(vars);
+    freeAffinity.refresh();
     // 回接：對話卡播完，直接回到剛才那張長畫（不先停在全島地圖）
     const backTo = c.chapter === '7' && c.mode === 'review' ? (c.step >= 4 && AREA_NAME[vars.island_next_scene] ? vars.island_next_scene : null)
       : FLAT_OF[c.chapter] && c.step >= 6 && !truth(vars[DONE_FLAG[c.chapter]]) ? FLAT_OF[c.chapter] : null;
@@ -768,6 +784,7 @@ function updateNote() {
 }
 state.stage = stageFromVars({ chapter: Q.get('chapter') || 1 });
 applyVariables(queryVariables());
+freeAffinity.refresh();
 if (inFrame) post({ type: 'larch:ready' });
 if (!inFrame) setTimeout(() => {
   placeFrom(); updateNote();

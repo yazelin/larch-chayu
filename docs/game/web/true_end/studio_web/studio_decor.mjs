@@ -1,3 +1,4 @@
+import { preparePanel } from './studio_panel.mjs';
 // 工作室佈置：5 個常駐位（寵物或植物）、澆水長大、落地鏡換裝（6 套衣服＋8 件配件）與穿著走路、換上三人私人物品時的一句話。
 // 方案與作者定案：真結局/studio_decor_plan.md；素材與疊圖規則：真結局/studio_decor/（art/wear/wear.json、wear.py 同一套規則）。
 // 存檔：StudioDB 的 studio_slots、plant_growth、plant_watered、outfit、accessories（Larch 卡裡會進 persistent 的 studioMisc，跨週目保留）。
@@ -73,9 +74,15 @@ function boot() {
     { key: 's1', name: '窗邊', wall: 'north', xCm: 548, base: 'cushion', baseW: 92, pets: ['cat', 'rabbit'], sit: .52, def: 'cat' },
     { key: 's2', name: '東南角水族缸', wall: 'south', xCm: 92, base: 'aquarium', baseW: 104, pets: ['hermit', 'crab', 'fish', 'jelly', 'turtle'], sit: .30, inset: true, def: 'hermit' },
     { key: 's3', name: '西南角', wall: 'south', xCm: 812, base: 'fence', baseW: 112, pets: ['rabbit', 'cat'], sit: .34, def: 'rabbit' },
-    { key: 's4', name: '矮櫃上', wall: 'south', xCm: 652, base: 'tray', baseW: 44, liftCm: 90, pets: ['bird', 'firefly'], sit: .60, def: 'tulip' },
-    { key: 's5', name: '窗邊花架', wall: 'north', xCm: 706, base: 'stand', baseW: 54, pets: ['bird', 'butterfly'], sit: .97, def: 'bird' }
+    { key: 's4', name: '矮櫃上', wall: 'south', xCm: 652, base: 'tray', baseW: 44, liftCm: 90, pets: ['bird', 'firefly'], sit: .90, floor: .30, floorPets: ['firefly'], def: 'tulip' },
+    { key: 's5', name: '窗邊花架', wall: 'north', xCm: 706, base: 'stand', baseW: 54, pets: ['bird', 'butterfly'], sit: .88, def: 'bird' }
   ];
+  // sit：放上去的東西「底部」落在台子圖高度的哪裡（從下往上量，對的是台面的中前段，不是台子的最頂邊）。
+  // 花架頂盤的盤面在圖高 .87～.95（前緣到後緣），放 .88；原本 .97 是頂盤後緣，東西會浮在半空（作者 2026-11-21 回饋）。
+  // floor：台子底盤的盤面（矮櫃上的托盤是 .30）；植物與 floorPets（螢火蟲是一整個玻璃罐）放這裡，鳥才站上面的橫桿（sit .90，橫桿在圖高 .88～.97；原本 .60 是立柱中段，鳥腳底下沒有東西）。
+  // 寵物與植物的圖四周都留了約 6px（原圖高約 3%）的透明邊，落點要把這段往下扣，底部才會貼住台面。
+  const ART_PAD = .028;
+  function seatBottom(fraction, heightPx) { return 'calc(' + (fraction * 100) + '% - ' + (heightPx * ART_PAD).toFixed(1) + 'px)'; }
   const BASE_AR = { cushion: 462 / 295, aquarium: 426 / 361, fence: 477 / 326, tray: 373 / 291, stand: 275 / 420 };
 
   // ── 狀態 ──
@@ -200,7 +207,8 @@ function boot() {
   }
   const STATION = { ming: 405, shi: 900 + 230, chen: 2500 + 424 };   // 三人站的位置（整圈公分，跟 index.html 的 PERSON_STATIONS 一致）
   function checkLines() {
-    const studio = window.__studio; if (!studio || document.getElementById('panel').classList.contains('on')) return;
+    if (!panel.isConnected) { clearInterval(lineTimer); return; }
+    const studio = window.__studio; if (!studio || panel.classList.contains('on')) return;
     const key = st.accs.filter(function (a) { return LINES[a]; }).join(',');
     if (!key) return;
     const said = saidFor.split('|');
@@ -210,7 +218,7 @@ function boot() {
       if (d < 90) { saidFor += '|' + a; window.__decorLastLine = a; say(line.lines); }
     });
   }
-  setInterval(checkLines, 300);
+  const lineTimer = setInterval(checkLines, 300);
 
   // ── 常駐位 ──
   function metrics() { return window.__studio && window.__studio.metrics ? window.__studio.metrics() : null; }
@@ -233,12 +241,12 @@ function boot() {
           const pic = document.createElement('img'); pic.alt = ''; pic.draggable = false;
           if (o.kind === 'pet') {
             const pet = PETS[o.id]; pic.className = 'decor-pet act-' + pet.act; pic.src = ART + 'pet_' + pet.img + '.webp'; pic.dataset.rest = pic.src; if (pet.walk) pic.dataset.walk = ART + 'pet_' + pet.walk + '.webp';
-            pic.style.height = (pet.h * 1.3 * m.pxPerCm) + 'px'; pic.style.bottom = (slot.sit * 100) + '%';
+            const ph = pet.h * 1.3 * m.pxPerCm; pic.style.height = ph + 'px'; pic.style.bottom = seatBottom((slot.floorPets || []).includes(o.id) ? slot.floor : slot.sit, ph);
           } else {
             const big = grown(o.id); pic.className = 'decor-plant'; pic.src = ART + 'plant_' + o.id + '_' + (big ? 'grown' : 'young') + '.webp';
             pic.dataset.stage = big ? 'grown' : 'young';
-            pic.style.height = ((big ? 62 : 34 + 5 * (st.growth[o.id] || 0)) * m.pxPerCm) + 'px';
-            pic.style.bottom = (plantInAquarium ? 0 : slot.base === 'tray' ? 30 : slot.sit * 100) + '%';
+            const ph = (big ? 62 : 34 + 5 * (st.growth[o.id] || 0)) * m.pxPerCm; pic.style.height = ph + 'px';
+            pic.style.bottom = seatBottom(plantInAquarium ? 0 : slot.floor != null ? slot.floor : slot.sit, ph);
           }
           node.appendChild(pic);
         }
@@ -271,13 +279,17 @@ function boot() {
 
   // ── 面板 ──
   const panel = document.getElementById('panel'), panelTitle = document.getElementById('panel-title'), panelBody = document.getElementById('panel-body'), scrim = document.getElementById('scrim');
-  function openPanel(title, focus) {
-    if (window.__studio && window.__studio.panel) window.__studio.panel(true, focus);
+  function openPanel(title, focus, design) {
+    preparePanel(design, focus);
     panelTitle.textContent = title; panelBody.replaceChildren(); panel.classList.add('on', 'decor-panel'); panel.setAttribute('aria-hidden', 'false'); scrim.classList.add('on');
     document.getElementById('panel-close').focus({ preventScroll: true });
   }
   new MutationObserver(function () { if (!panel.classList.contains('on') && panel.classList.contains('decor-panel')) panel.classList.remove('decor-panel'); }).observe(panel, { attributes: true, attributeFilter: ['class'] });
   function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; }
+  function restoreChoice(id) {
+    const control = panelBody.querySelector('[data-id="' + CSS.escape(id) + '"]:enabled');
+    (control || document.getElementById('panel-close')).focus({ preventScroll: true });
+  }
   function card(opts) {
     const b = el('button', 'decor-card' + (opts.locked ? ' locked' : '') + (opts.on ? ' on' : '')); b.type = 'button'; b.disabled = !!opts.locked; if (opts.id) b.dataset.id = opts.id;
     const pic = el('span', 'decor-card-pic' + (opts.picClass ? ' ' + opts.picClass : '')); if (opts.src) { const i = el('img'); i.src = opts.src; i.alt = ''; i.draggable = false; pic.appendChild(i); } b.appendChild(pic);
@@ -287,12 +299,24 @@ function boot() {
   }
   function openSlot(index, focus) {
     const slot = SLOTS[index];
-    openPanel('常駐位｜' + slot.name, focus);
+    openPanel('常駐位｜' + slot.name, focus, 'slot');
     function draw() {
       panelBody.replaceChildren(); const o = occupant(index);
       if (!islandOpen()) { panelBody.appendChild(el('p', 'decor-empty', '島上遇到的小生物，會來這裡住。')); return; }
+      const vignette = el('div', 'decor-vignette');
+      const base = el('img', 'decor-vignette-base');
+      base.src = ART + 'base_' + slot.base + '.webp'; base.alt = '';
+      vignette.appendChild(base);
       if (o) {
-        const now = el('div', 'decor-now'); now.appendChild(el('strong', '', '現在：' + (o.kind === 'pet' ? PETS[o.id].name : PLANT[o.id].name)));
+        const occupant = el('img', 'decor-vignette-occupant');
+        occupant.alt = o.kind === 'pet' ? PETS[o.id].name : PLANT[o.id].name;
+        occupant.src = o.kind === 'pet' ? ART + 'pet_' + PETS[o.id].img + '.webp'
+          : ART + 'plant_' + o.id + '_' + (grown(o.id) ? 'grown' : 'young') + '.webp';
+        vignette.appendChild(occupant);
+      }
+      panelBody.appendChild(vignette);
+      if (o) {
+        const now = el('div', 'decor-now'); now.appendChild(el('strong', '', o.kind === 'pet' ? PETS[o.id].name : PLANT[o.id].name));
         if (o.kind === 'pet') { const b = el('button', 'decor-action', '摸摸牠'); b.type = 'button'; b.dataset.action = 'pet'; b.addEventListener('click', function () { document.querySelectorAll('.decor-slot[data-slot="' + slot.key + '"]').forEach(function (n) { pet(n, o.id); }); toast(PETS[o.id].name + '看起來很開心。'); }); now.appendChild(b); }
         else { const b = el('button', 'decor-action', grown(o.id) ? '已經長大了' : '澆水（' + (st.growth[o.id] || 0) + '／3 天）'); b.type = 'button'; b.dataset.action = 'water'; b.disabled = grown(o.id); b.addEventListener('click', function () { toast(water(o.id)); renderSlots(); draw(); }); now.appendChild(b); }
         const clear = el('button', 'decor-action', '收起來'); clear.type = 'button'; clear.dataset.action = 'clear'; clear.addEventListener('click', function () { setSlot(index, '-'); draw(); }); now.appendChild(clear);
@@ -301,19 +325,19 @@ function boot() {
       panelBody.appendChild(el('h2', 'decor-h', '寵物（圖鑑遇過的才能放）'));
       const pets = el('div', 'decor-grid');
       slot.pets.forEach(function (id) { const p = PETS[id], seen = st.seenPets.has(id);
-        pets.appendChild(card({ id: id, name: p.name, hideName: true, locked: !seen, src: ART + 'pet_' + p.img + '.webp', sub: seen ? '' : '在' + p.place + '遇到', on: o && o.id === id, click: function () { setSlot(index, id); draw(); } })); });
+        pets.appendChild(card({ id: id, name: p.name, hideName: true, locked: !seen, src: ART + 'pet_' + p.img + '.webp', sub: seen ? '' : '在' + p.place + '遇到', on: o && o.id === id, click: function () { setSlot(index, id); draw(); restoreChoice(id); } })); });
       panelBody.appendChild(pets);
       panelBody.appendChild(el('h2', 'decor-h', '植物（收集到的才能放；放在這裡每天可以澆一次水）'));
       const plants = el('div', 'decor-grid');
       PLANTS.forEach(function (p) { const have = st.plants.has(p.id);
-        plants.appendChild(card({ id: p.id, name: p.name, hideName: true, locked: !have, src: ART + 'plant_' + p.id + '_' + (grown(p.id) ? 'grown' : 'young') + '.webp', sub: have ? (grown(p.id) ? '長大了' : '澆水 ' + (st.growth[p.id] || 0) + '／3 天') : '在' + p.place, on: o && o.id === p.id, click: function () { setSlot(index, p.id); draw(); } })); });
+        plants.appendChild(card({ id: p.id, name: p.name, hideName: true, locked: !have, src: ART + 'plant_' + p.id + '_' + (grown(p.id) ? 'grown' : 'young') + '.webp', sub: have ? (grown(p.id) ? '長大了' : '澆水 ' + (st.growth[p.id] || 0) + '／3 天') : '在' + p.place, on: o && o.id === p.id, click: function () { setSlot(index, p.id); draw(); restoreChoice(p.id); } })); });
       panelBody.appendChild(plants);
       panelBody.appendChild(el('p', 'decor-note', '換下來的會回到圖鑑和花盆，不會不見。'));
     }
     draw();
   }
   function openMirror(focus) {
-    openPanel('落地鏡｜換裝', focus);
+    openPanel('落地鏡｜換裝', focus, 'mirror');
     const wrap = el('div', 'mirror'); const glass = el('div', 'mirror-glass'); const view = document.createElement('canvas'); view.width = 512; view.height = 768; view.className = 'mirror-view'; glass.appendChild(view);
     const side = el('div', 'mirror-side'); wrap.append(glass, side); panelBody.appendChild(wrap);
     const hint = el('p', 'decor-note mirror-hint', '同一個部位一次一件；換上之後會穿著在工作室裡走。');
@@ -323,7 +347,7 @@ function boot() {
       side.appendChild(el('h2', 'decor-h', '衣服'));
       const og = el('div', 'decor-grid outfits');
       OUTFITS.forEach(function (o) { const open = UNLOCK_ALL || o.open(g);
-        og.appendChild(card({ id: o.id, name: o.name, locked: !open, src: WEAR + 'outfit_' + o.id + '.webp', picClass: 'tall', sub: open ? '' : o.lock, on: st.outfit === o.id, click: function () { st.outfit = o.id; saveWear(); draw(); } })); });
+        og.appendChild(card({ id: o.id, name: o.name, locked: !open, src: WEAR + 'outfit_' + o.id + '.webp', picClass: 'tall', sub: open ? '' : o.lock, on: st.outfit === o.id, click: function () { st.outfit = o.id; saveWear(); draw(); restoreChoice(o.id); } })); });
       side.appendChild(og);
       side.appendChild(el('h2', 'decor-h', '配件'));
       const ag = el('div', 'decor-grid accs');
@@ -332,7 +356,7 @@ function boot() {
         ag.appendChild(card({ id: a.id, name: a.name, locked: !open, src: ART + 'acc_' + a.id + '.webp', sub: open ? SLOT_NAME[a.slot] + (clash ? '・會換掉' + ACC[clash].name : '') : a.lock, on: on, click: function () {
           if (on) st.accs = st.accs.filter(function (b) { return b !== a.id; });
           else { if (clash) hint.textContent = EXCLUSIVE[a.slot]; st.accs = st.accs.filter(function (b) { return ACC[b].slot !== a.slot; }).concat([a.id]); }
-          saveWear(); draw(); } })); });
+          saveWear(); draw(); restoreChoice(a.id); } })); });
       side.appendChild(ag); side.appendChild(hint);
       const mine = ++mirrorToken, key = st.outfit + ':' + st.accs.join(','), temp = document.createElement('canvas'); temp.width = 512; temp.height = 768;
       try { await compose(st.outfit, st.accs.slice(), temp); } catch (error) { console.error(error); return; }

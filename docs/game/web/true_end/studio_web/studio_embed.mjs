@@ -12,10 +12,10 @@ if (query.get('embed') === '1' && window.parent !== window) {
     free_time: '可以走動、和角色聊天，並使用目前已接上的工作室互動。',
     open_chat: '長桌群聊已開啟；聊完後可按「繼續」接回劇情。',
     investigation: target ? '調查目標：' + target : '查看指定的工作室物件。',
-    album_player: query.get('album') || '打開詩的唱片專輯。'
+    album_player: query.get('album') || '打開詩的唱片架。'
   };
   const styles = document.createElement('style');
-  styles.textContent = '.studio-embed-card{position:fixed;z-index:30;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(520px,calc(100vw - 24px));padding:9px 13px;border:1px solid rgba(255,250,242,.88);border-radius:13px;background:rgba(255,250,242,.94);box-shadow:0 4px 18px rgba(25,18,24,.22);color:#382c2b;font:14px/1.45 "Noto Sans TC","Noto Sans CJK TC",sans-serif}.studio-embed-card--plain{width:auto;padding:5px 16px;border-radius:999px}.studio-embed-card--plain .studio-embed-meta{margin:0;opacity:1;font-size:14px}.studio-embed-card[hidden]{display:none}.studio-embed-card strong{display:block;font-size:15px}.studio-embed-card p{margin:3px 0 0}.studio-embed-meta{opacity:.78;font-size:12px}.studio-embed-note{color:#805533}.studio-embed-continue{position:fixed;z-index:31;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));min-height:46px;padding:9px 21px;border:1px solid #76513f;border-radius:999px;background:#885d45;color:#fffaf2;font:700 16px/1.2 "Noto Sans TC","Noto Sans CJK TC",sans-serif;box-shadow:0 4px 16px rgba(25,18,24,.28);cursor:pointer}.studio-embed-continue:focus-visible{outline:3px solid #fff2a9;outline-offset:3px}.studio-embed-continue:disabled{opacity:.72;cursor:default}@media(max-width:600px){.studio-embed-card{top:max(8px,env(safe-area-inset-top));padding:8px 11px;font-size:12px}.studio-embed-card strong{font-size:14px}.studio-embed-continue{right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));min-height:42px;padding:8px 17px;font-size:14px}}';
+  styles.textContent = '.studio-embed-card{position:fixed;z-index:19;pointer-events:none;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(520px,calc(100vw - 24px));padding:9px 13px;border:1px solid rgba(255,250,242,.88);border-radius:13px;background:rgba(255,250,242,.94);box-shadow:0 4px 18px rgba(25,18,24,.22);color:#382c2b;font:14px/1.45 "Noto Sans TC","Noto Sans CJK TC",sans-serif}.studio-embed-card--plain{width:auto;padding:5px 16px;border-radius:999px}.studio-embed-card--plain .studio-embed-meta{margin:0;opacity:1;font-size:14px}.studio-embed-card[hidden]{display:none}.studio-embed-card strong{display:block;font-size:15px}.studio-embed-card p{margin:3px 0 0}.studio-embed-meta{opacity:.78;font-size:12px}.studio-embed-note{color:#805533}.studio-embed-continue{position:fixed;z-index:31;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));min-height:46px;padding:9px 21px;border:1px solid #76513f;border-radius:999px;background:#885d45;color:#fffaf2;font:700 16px/1.2 "Noto Sans TC","Noto Sans CJK TC",sans-serif;box-shadow:0 4px 16px rgba(25,18,24,.28);cursor:pointer}.studio-embed-continue:focus-visible{outline:3px solid #fff2a9;outline-offset:3px}.studio-embed-continue:disabled{opacity:.72;cursor:default}.studio-embed-continue--table{min-height:48px;padding:10px 24px;font-size:17px;background:#b0623c;border-color:#8a4a2c;box-shadow:0 0 0 3px rgba(255,242,169,.85),0 4px 16px rgba(25,18,24,.3)}@media(max-width:900px){.studio-embed-card{top:var(--hud-clear,124px)}}@media(max-width:600px){.studio-embed-card{padding:8px 11px;font-size:12px}.studio-embed-card strong{font-size:14px}.studio-embed-continue{right:max(10px,env(safe-area-inset-right));bottom:calc(max(12px,env(safe-area-inset-bottom)) + 48px);min-height:42px;padding:8px 17px;font-size:14px}.studio-embed-continue.studio-embed-continue--table{min-height:46px;padding:9px 18px;font-size:15px}}';
   document.head.appendChild(styles);
 
   const card = document.createElement('section');
@@ -45,6 +45,16 @@ if (query.get('embed') === '1' && window.parent !== window) {
   continueButton.type = 'button';
   continueButton.textContent = '繼續';
   continueButton.setAttribute('aria-label', '完成工作室互動並回到劇情');
+  // 「走到長桌觸發本段」的地圖卡（作者 2026-11-21 選定）：捲軸版沒有畫長桌，原本只能自己按「繼續」；
+  // 這類卡把右下角的鈕改成「直接到長桌」，按一下跟走到長桌一樣接回劇情（同樣寫回 completionWrites、送 larch:complete）。
+  // 想逛的照樣走動；沒有「走到長桌」條件的自由逛卡、從長桌座位起頭的卡（start=seat）照舊是「繼續」。
+  const tableTrigger = mode === 'map' && query.get('start') !== 'seat' && /走到長桌/.test(locationText);
+  if (tableTrigger) {
+    continueButton.textContent = '直接到長桌';
+    continueButton.classList.add('studio-embed-continue--table');
+    continueButton.dataset.trigger = 'table';
+    continueButton.setAttribute('aria-label', '直接到長桌，接回劇情');
+  }
   document.body.appendChild(continueButton);
 
   let completed = false;
@@ -83,14 +93,14 @@ if (query.get('embed') === '1' && window.parent !== window) {
     if (opened || !window.STUDIO_FEATURES) return;
     let handled = false;
     if (mode === 'open_chat') handled = window.STUDIO_FEATURES.handle(13, continueButton);
-    else if (mode === 'album_player') handled = window.STUDIO_FEATURES.handle(16, continueButton);
+    // 夥伴結局「最後一格「？」解鎖」：作者 2026-11-21 把劇情曲搬到唱片架（5），這張卡記下解鎖、開唱片架放最後一首
+    else if (mode === 'album_player') handled = window.STUDIO_FEATURES.albumFinal ? window.STUDIO_FEATURES.albumFinal(continueButton) : window.STUDIO_FEATURES.handle(5, continueButton);
     // 小插曲一起「長桌她自己的位子」：進場就開長桌面板（作者 11-18 選 C，不畫長桌）。
     else if (mode === 'map' && query.get('start') === 'seat') handled = window.STUDIO_FEATURES.handle(13, continueButton);
     else if (mode === 'investigation') {
       const targetIds = { '圓鐘': 10, '門': 11, '電子琴': 6, '畫架': 8, 'M 的螢幕': 12 };
       const id = targetIds[target];
-      const hotspot = id && document.querySelector('.hotspot[data-id="' + id + '"]');
-      if (hotspot) { hotspot.click(); handled = true; }
+      if (id) handled = window.STUDIO_FEATURES.handle(id, continueButton);
     }
     if (handled) opened = true;
   }
@@ -99,7 +109,7 @@ if (query.get('embed') === '1' && window.parent !== window) {
     if (completed) return;
     completed = true;
     continueButton.disabled = true;
-    continueButton.textContent = '已返回劇情';
+    continueButton.textContent = tableTrigger ? '到長桌了' : '已返回劇情';
     Object.entries(completionWrites).forEach(function (entry) {
       window.parent.postMessage({ type: 'larch:set', name: entry[0], value: entry[1] }, '*');
     });

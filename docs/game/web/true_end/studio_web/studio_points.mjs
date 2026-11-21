@@ -1,3 +1,8 @@
+import { studioPointOpen } from './studio_unlock.mjs';
+import { preparePanel } from './studio_panel.mjs';
+import { CHORDS, CHORD_GROUPS, guitarFrequency } from './guitar_chords.mjs';
+import { makeGuitarPractice } from './guitar_practice.mjs';
+import { makeGuitarArranger } from './guitar_arranger.mjs';
 // 工作室互動點（真結局/設計.md「工作室互動總表」，2026-11-11 作者同意；2026-11-17 作者：九個佔位面板逐個做成真的互動）。
 // 第一批是劇情調查卡會點到的三個＋順手的吉他：圓鐘（10，倒數）、圓拱門（11，出門上島）、電子琴（6，可彈）、吉他（7，可彈）。
 // 只接 window.STUDIO_FEATURES.handle 與 index.html 的面板，不動其他互動點。面板上的字只有介面標示，沒有新寫角色台詞（「詩接話」等台詞要先給作者看，還沒做）。
@@ -17,21 +22,17 @@
 .sp-window.blank{color:#c9b9a2}
 .sp-cap{margin:0;color:#6d5a4b;font-size:13px}
 .sp-door{display:flex;flex-direction:column;align-items:center;gap:12px}
-.sp-door svg{width:min(190px,48vw);height:auto}
+.sp-door-img{display:block;width:100%;height:auto}
 .sp-go{appearance:none;border:2px solid #8b6a45;border-radius:999px;background:#f6e2b8;color:#4a3a30;font:inherit;font-weight:700;padding:8px 22px;cursor:pointer}
 .sp-go:disabled{opacity:.55;cursor:default}
 .sp-keys{position:relative;display:flex;justify-content:center;margin:8px auto 4px;width:min(400px,100%);height:150px;user-select:none;touch-action:none}
 .sp-key{position:relative;flex:1 1 0;border:2px solid #6d5a4b;border-left-width:1px;border-right-width:1px;border-radius:0 0 7px 7px;background:linear-gradient(#fffdf8,#f1e7d6);cursor:pointer;padding:0;font:600 11px/1 inherit;color:#9a8478;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px}
 .sp-key.black{position:absolute;top:0;z-index:2;width:8%;height:60%;flex:none;border-radius:0 0 5px 5px;background:linear-gradient(#5a4a40,#2f2622);color:#d8c9b6;border-color:#2f2622}
-.sp-key.down{background:#f3cf8c}.sp-key.black.down{background:#8b6a45}
-.sp-strings{display:flex;flex-direction:column;gap:13px;margin:10px auto 4px;width:min(400px,100%);padding:16px 14px;border-radius:14px;background:linear-gradient(90deg,#b98a56,#d8ab73 55%,#b98a56);box-sizing:border-box;touch-action:none}
-.sp-string{appearance:none;display:block;width:100%;height:16px;padding:0;border:0;background:linear-gradient(transparent 6px,#f4ead7 6px,#f4ead7 calc(6px + var(--w,2px)),transparent calc(6px + var(--w,2px)));cursor:pointer}
-.sp-string.down{animation:sp-pluck .28s ease-out}
-@keyframes sp-pluck{0%{transform:translateY(3px)}35%{transform:translateY(-3px)}70%{transform:translateY(1.5px)}100%{transform:none}}`;
+.sp-key.down{background:#f3cf8c}.sp-key.black.down{background:#8b6a45}`;
   document.head.appendChild(style);
 
-  function openPanel(title, focus) {
-    if (window.__studio && window.__studio.panel) window.__studio.panel(true, focus);
+  function openPanel(title, focus, design) {
+    preparePanel(design, focus);
     panelTitle.textContent = title; panelBody.replaceChildren(); panel.classList.add('on'); panel.setAttribute('aria-hidden', 'false'); scrim.classList.add('on');
     panel.dataset.point = title; document.getElementById('panel-close').focus({ preventScroll: true });
   }
@@ -40,14 +41,48 @@
   let ctx = null;
   function audio() { if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ctx = new C(); } if (ctx.state === 'suspended') ctx.resume(); return ctx; }
   const played = [];   // 給測試看：彈過哪些音
-  function tone(freq, kind) {
+  const pluckBuffers = new Map();
+  function guitarSample(a, freq) {
+    if (pluckBuffers.has(freq)) return pluckBuffers.get(freq);
+    const rate = a.sampleRate;
+    // Karplus–Strong：取相鄰樣本平均會多半個樣本的延遲，用播放速率補回音高。
+    const period = Math.round(rate / freq - 0.5);
+    const playbackRate = freq * (period + 0.5) / rate;
+    const buffer = a.createBuffer(1, Math.ceil(2 * rate * playbackRate), rate);
+    const samples = buffer.getChannelData(0);
+    const pick = Math.round(period * 0.22);
+    let mean = 0;
+    for (let i = 0; i < period; i++) {
+      const displacement = i < pick ? i / pick : (period - i) / (period - pick);
+      samples[i] = 0.65 * displacement + 0.35 * (2 * Math.random() - 1);
+      mean += samples[i] / period;
+    }
+    for (let i = 0; i < period; i++) samples[i] -= mean;
+    const decay = Math.exp(-1.25 * period / rate);
+    samples[period] = decay * (samples[0] + samples[period - 1]) / 2;
+    for (let i = period + 1; i < samples.length; i++) {
+      samples[i] = decay * (samples[i - period] + samples[i - period - 1]) / 2;
+    }
+    for (let i = 0; i < samples.length; i++) {
+      const time = i / (rate * playbackRate);
+      samples[i] *= Math.min(1, time / 0.002) * Math.exp(-2 * time) * Math.min(1, (2 - time) / 0.12);
+    }
+    const sample = { buffer, playbackRate };
+    pluckBuffers.set(freq, sample);
+    return sample;
+  }
+  function tone(freq, kind, delay = 0) {
     played.push(Math.round(freq * 10) / 10); const a = audio(); if (!a) return;
-    const t = a.currentTime, gain = a.createGain(); gain.connect(a.destination);
+    const t = a.currentTime + delay, gain = a.createGain(); gain.connect(a.destination);
     if (kind === 'pluck') {
-      const o = a.createOscillator(); o.type = 'triangle'; o.frequency.value = freq; const o2 = a.createOscillator(); o2.type = 'sine'; o2.frequency.value = freq * 2;
-      const g2 = a.createGain(); g2.gain.value = 0.25; o.connect(gain); o2.connect(g2); g2.connect(gain);
-      gain.gain.setValueAtTime(0.0001, t); gain.gain.exponentialRampToValueAtTime(0.32, t + 0.008); gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
-      o.start(t); o2.start(t); o.stop(t + 1.6); o2.stop(t + 1.6);
+      const { buffer, playbackRate } = guitarSample(a, freq);
+      const source = a.createBufferSource();
+      source.buffer = buffer;
+      source.playbackRate.value = playbackRate;
+      gain.gain.value = 0.28;
+      source.connect(gain);
+      source.start(t);
+      return source;
     } else {
       const o = a.createOscillator(); o.type = 'sine'; o.frequency.value = freq; const o2 = a.createOscillator(); o2.type = 'triangle'; o2.frequency.value = freq * 2.001;
       const g2 = a.createGain(); g2.gain.value = 0.18; o.connect(gain); o2.connect(g2); g2.connect(gain);
@@ -60,7 +95,7 @@
   // ── 圓鐘（10）：鐘面＋底下的數字小窗（試用期還剩幾天；第 30 天之後小窗是空的） ──
   // 指針：第一章劇本寫她房間半夜十二點時工作室是下午三點，所以用裝置時間加十五小時。
   function openClock(focus) {
-    openPanel('圓鐘', focus);
+    openPanel('圓鐘', focus, 'clock');
     const wrap = el('div', 'sp-clock'); const s = svg('svg', { viewBox: '0 0 200 200', role: 'img', 'aria-label': '牆上的圓鐘' });
     s.append(svg('circle', { cx: 100, cy: 100, r: 94, fill: '#8b6a45' }), svg('circle', { cx: 100, cy: 100, r: 84, fill: '#fffaf0', stroke: '#d8c3a8', 'stroke-width': 3 }));
     for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6, big = i % 3 === 0; s.append(svg('line', { x1: 100 + Math.sin(a) * (big ? 66 : 71), y1: 100 - Math.cos(a) * (big ? 66 : 71), x2: 100 + Math.sin(a) * 77, y2: 100 - Math.cos(a) * 77, stroke: '#6d5a4b', 'stroke-width': big ? 4 : 2, 'stroke-linecap': 'round' })); }
@@ -70,27 +105,35 @@
     tick(); const timer = setInterval(() => { if (!wrap.isConnected) { clearInterval(timer); return; } tick(); }, 1000);
     const day = Number(game().day) || 1, left = day <= TRIAL_LAST_DAY ? TRIAL_LAST_DAY + 1 - day : null;
     const win = el('div', 'sp-window' + (left === null ? ' blank' : ''), left === null ? '－－' : String(left)); win.dataset.left = left === null ? '' : String(left); win.setAttribute('aria-label', left === null ? '數字小窗是空的' : '數字小窗：' + left);
-    wrap.append(s, win, el('p', 'sp-cap', '第 ' + day + ' 天')); panelBody.append(wrap);
+    const ticket = el('div', 'sp-clock-ticket');
+    ticket.append(el('p', 'sp-cap', '第 ' + day + ' 天'), win,
+      el('p', 'sp-cap', left === null ? '試用期已結束' : '試用期剩餘天數'));
+    wrap.append(s, ticket); panelBody.append(wrap);
   }
 
   // ── 圓拱門（11）：第三章以後可以出門上島。嵌在 Larch 裡時，要白板那張卡有接「出門」的下一張卡才開放（網址帶 islandDoor=1），不然按了會把劇情卡結束掉 ──
   const inFrame = window.parent !== window;
   function openDoor(focus) {
-    openPanel('圓拱門', focus);
-    const g = game(), chapter = g.chapter === 'true' ? 99 : Number(g.chapter) || 1, open = chapter >= 3;
-    const wrap = el('div', 'sp-door'); const s = svg('svg', { viewBox: '0 0 160 190', role: 'img', 'aria-label': open ? '圓拱木門，門縫透著外面的光' : '圓拱木門，關著' });
-    s.append(svg('path', { d: 'M12 188V84a68 68 0 0 1 136 0v104z', fill: '#d8c3a8' }), svg('path', { d: 'M24 188V86a56 56 0 0 1 112 0v102z', fill: open ? '#fff3c9' : '#a9764a' }));
-    if (open) s.append(svg('path', { d: 'M24 188V86a56 56 0 0 1 56-56v158z', fill: '#a9764a' }), svg('path', { d: 'M92 188V120q22-26 44-6v74z', fill: '#bfe3c0' }), svg('path', { d: 'M80 30a56 56 0 0 1 56 56v40q-24-18-44 0V96z', fill: '#bfe0f2' }));
-    else for (const x of [52, 80, 108]) s.append(svg('line', { x1: x, y1: x === 80 ? 30 : 42, x2: x, y2: 188, stroke: '#8b6a45', 'stroke-width': 2 }));
-    s.append(svg('circle', { cx: open ? 70 : 122, cy: 122, r: 5, fill: '#e2b23c', stroke: '#8b6a45', 'stroke-width': 1.5 }));
-    wrap.append(s); wrap.dataset.open = open ? '1' : '0';
+    openPanel('圓拱門', focus, 'door');
+    const g = game();
+    const open = studioPointOpen(11, location.search, window.__studio?.variables || {}, inFrame);
+    // 門的水彩插圖（作者 2026-11-21：換掉原本 CSS 畫的扁平門）；門還沒開放時圖淡一點、蓋一層紙色，下面照舊寫「門關著。」
+    const wrap = el('div', 'sp-door');
+    const img = el('img', 'sp-door-img'); img.src = open ? 'illust/door.webp' : 'illust/door_closed.webp'; img.width = 1200; img.height = 900; img.decoding = 'async';
+    img.alt = open ? '圓拱木門半開著，門外是藍天、海和開滿花的小島' : '圓拱木門關著';
+    const arch = el('div', 'sp-door-arch' + (open ? '' : ' closed')); arch.append(img);
+    wrap.append(arch); wrap.dataset.open = open ? '1' : '0';
     if (!open) wrap.append(el('p', 'sp-cap', '門關著。'));
     else {
       const allowed = !inFrame || query.get('islandDoor') === '1';
       const go = el('button', 'sp-go', '出門到島上'); go.type = 'button'; go.disabled = !allowed; go.dataset.act = 'island';
       go.addEventListener('click', () => {
         if (inFrame) { parent.postMessage({ type: 'larch:complete', result: 'go_island', payload: { from: 'studio_door' } }, '*'); return; }
-        location.href = '../map2d/side/web/island.html' + (query.get('mock') ? '?mock=1' : '');
+        const url = new URL('../map2d/side/web/island.html', location.href);
+        for (const key of ['mock', 'debug']) if (query.has(key)) url.searchParams.set(key, query.get(key));
+        url.searchParams.set('chapter', g.chapter); url.searchParams.set('day', g.day);
+        url.searchParams.set('visit', '1');
+        location.href = url.href;
       });
       wrap.append(go); if (!allowed) wrap.append(el('p', 'sp-cap', '現在先留在工作室。'));
     }
@@ -108,21 +151,302 @@
     addEventListener('keydown', keyHandler, true);
   }
   function openPiano(focus) {
-    openPanel('電子琴', focus);
+    openPanel('電子琴', focus, 'piano');
     const wrap = el('div', 'sp-keys'); const keys = {};
-    WHITE.forEach(([n, name, k]) => { const b = el('button', 'sp-key', name); b.type = 'button'; b.dataset.note = String(n); b.setAttribute('aria-label', name + '（鍵盤 ' + k.toUpperCase() + '）'); const hit = () => press(b, NOTE(n), 'key'); b.addEventListener('pointerdown', e => { e.preventDefault(); hit(); }); keys[k] = hit; wrap.append(b); });
-    BLACK.forEach(([n, after, k]) => { const b = el('button', 'sp-key black'); b.type = 'button'; b.dataset.note = String(n); b.style.left = ((after + 1) * 12.5 - 4) + '%'; b.setAttribute('aria-label', '黑鍵（鍵盤 ' + k.toUpperCase() + '）'); const hit = () => press(b, NOTE(n), 'key'); b.addEventListener('pointerdown', e => { e.preventDefault(); hit(); }); keys[k] = hit; wrap.append(b); });
-    panelBody.append(wrap, el('p', 'sp-cap', '點琴鍵，或按鍵盤 A S D F G H J K。')); bindKeys({ wrap, keys });
+    WHITE.forEach(([n, name, k]) => { const b = el('button', 'sp-key', name); b.type = 'button'; b.dataset.note = String(n); b.setAttribute('aria-label', name + '（鍵盤 ' + k.toUpperCase() + '）'); const hit = () => press(b, NOTE(n), 'key'); b.addEventListener('pointerdown', e => { e.preventDefault(); hit(); }); b.addEventListener('click', e => { if (e.detail === 0) hit(); }); keys[k] = hit; wrap.append(b); });
+    BLACK.forEach(([n, after, k]) => { const b = el('button', 'sp-key black', k.toUpperCase()); b.type = 'button'; b.dataset.note = String(n); b.style.left = ((after + 1) * 12.5 - 4) + '%'; b.setAttribute('aria-label', '黑鍵（鍵盤 ' + k.toUpperCase() + '）'); const hit = () => press(b, NOTE(n), 'key'); b.addEventListener('pointerdown', e => { e.preventDefault(); hit(); }); b.addEventListener('click', e => { if (e.detail === 0) hit(); }); keys[k] = hit; wrap.append(b); });
+    const instrument = el('div', 'sp-piano-case');
+    const deck = el('div', 'sp-piano-deck');
+    deck.append(el('span'), el('span', 'sp-piano-lamp'), el('span'));
+    deck.setAttribute('aria-hidden', 'true');
+    instrument.append(deck, wrap);
+    panelBody.append(instrument, el('p', 'sp-cap', '白鍵：A S D F G H J K。黑鍵：W E T Y U。')); bindKeys({ wrap, keys });
   }
 
-  // ── 吉他（7）：六條空弦（Mi La Re Sol Si Mi），點或滑過去就撥；鍵盤 1～6 ──
-  const STRINGS = [82.41, 110, 146.83, 196, 246.94, 329.63];
+  // ── 吉他（7）：作者 2026-11-21 第二版：弦是直的（左低音 Mi → 右高音 Mi），四排鍵是第 1～4 格：
+  //   1 2 3 4 5 6 ＝第 1 格、Q W E R T Y ＝第 2 格、A S D F G H ＝第 3 格、Z X C V B N ＝第 4 格。
+  //   按鍵只壓弦，空白鍵刷弦。滑鼠與手機可點格子、琴枕的 × 或和弦卡。
+  const STRINGS = [0, 1, 2, 3, 4, 5];
+  const FRET_ROWS = ['123456', 'qwerty', 'asdfgh', 'zxcvbn'];
+  let closeGuitar;
   function openGuitar(focus) {
-    openPanel('吉他', focus);
-    const wrap = el('div', 'sp-strings'); const keys = {}; let dragging = false;
-    STRINGS.forEach((f, i) => { const b = el('button', 'sp-string'); b.type = 'button'; b.dataset.string = String(i + 1); b.style.setProperty('--w', (4.2 - i * 0.5) + 'px'); b.setAttribute('aria-label', '第 ' + (6 - i) + ' 弦（鍵盤 ' + (i + 1) + '）'); const hit = () => press(b, f, 'pluck'); b.addEventListener('pointerdown', e => { e.preventDefault(); dragging = true; hit(); }); b.addEventListener('pointerenter', () => { if (dragging) hit(); }); keys[String(i + 1)] = hit; wrap.append(b); });
-    addEventListener('pointerup', () => { dragging = false; }); wrap.addEventListener('pointerdown', e => { if (e.target.releasePointerCapture) try { e.target.releasePointerCapture(e.pointerId); } catch (_) {} });
-    panelBody.append(wrap, el('p', 'sp-cap', '點弦或按住滑過去；鍵盤 1 到 6。')); bindKeys({ wrap, keys });
+    closeGuitar?.();
+    openPanel('吉他', focus, 'guitar');
+    const layout = el('div', 'sp-guitar-layout');
+    const wrap = el('section', 'sp-guitar');
+    wrap.setAttribute('aria-label', '指板與和弦');
+    const neck = el('div', 'sp-neck');
+    const keyHeld = STRINGS.map(() => new Set());
+    const tapHeld = STRINGS.map(() => 0);
+    // null 跟著指法，true 悶弦，false 打開指法原本悶掉的弦。
+    const muteOverrides = STRINGS.map(() => null);
+    const lines = [], cells = [], muteButtons = [], pickButtons = [];
+    const cards = new Map();
+    const automaticNotes = new Set();
+    const flashes = new Set();
+    const automaticFlashes = new Set();
+    const feedback = el('output', 'sp-chord-feedback');
+    const capoInput = document.createElement('input');
+    capoInput.type = 'range'; capoInput.min = '0'; capoInput.max = '7'; capoInput.value = '0';
+    const capoValue = el('output', '', '0');
+    let capo = 0;
+    function setCapo(value) {
+      capo = value;
+      capoInput.value = String(value);
+      capoValue.textContent = value ? 'Capo ' + value : '0';
+      renderName();
+    }
+    const capoLabel = el('label', 'sp-guitar-capo');
+    capoLabel.append(el('span', '', '移調夾'), capoInput, capoValue);
+    capoInput.addEventListener('input', () => setCapo(Number(capoInput.value)));
+
+    let held, shape, muted, selected, feedbackTimer, lastStrum;
+    function renderName() {
+      if (lastStrum === undefined) return;
+      feedback.textContent = lastStrum ? lastStrum + (capo ? '（Capo ' + capo + '）' : '') : '—';
+    }
+    function refresh() {
+      held = tapHeld.map((fret, i) => Math.max(fret, ...keyHeld[i]));
+      const fits = frets => held.every((fret, i) => frets[i] === 'x'
+        ? muteOverrides[i] !== false
+        : fret === Number(frets[i]) && muteOverrides[i] !== true);
+      // 同樣的按格方式也可能有不同低音，例如 C 與 C/E。
+      // 選卡時保留玩家的指法。打開原本悶掉的弦之後，以實際發聲的弦來比。
+      shape = selected && fits(CHORDS[selected]) ? selected :
+        Object.keys(CHORDS).find(name => fits(CHORDS[name]));
+      muted = muteOverrides.map((override, i) => override ?? (CHORDS[shape]?.[i] === 'x'));
+      muteButtons.forEach((button, i) => {
+        button.setAttribute('aria-pressed', String(muted[i]));
+        lines[i].classList.toggle('muted', muted[i]);
+        pickButtons[i].disabled = muted[i];
+      });
+      cells.forEach((row, f) => row.forEach((cell, i) => {
+        const on = held[i] === f + 1;
+        cell.classList.toggle('on', on);
+        if (!on) cell.classList.remove('down');
+        cell.setAttribute('aria-pressed', String(on));
+      }));
+      for (const [name, card] of cards) card.setAttribute('aria-pressed', String(shape === name));
+    }
+    function ring(string, delay = 0, automatic = false) {
+      if (muted[string]) return false;
+      const fret = held[string];
+      const source = tone(guitarFrequency(string, fret, capo), 'pluck', delay / 1000);
+      if (automatic && source) {
+        automaticNotes.add(source);
+        source.onended = () => automaticNotes.delete(source);
+      }
+      const line = lines[string];
+      const timer = setTimeout(() => {
+        flashes.delete(timer);
+        automaticFlashes.delete(timer);
+        const dot = held[string] === fret && cells[fret - 1]?.[string];
+        line.classList.remove('down');
+        if (dot) dot.classList.remove('down');
+        void line.offsetWidth;
+        line.classList.add('down');
+        if (dot) dot.classList.add('down');
+      }, delay);
+      flashes.add(timer);
+      if (automatic) automaticFlashes.add(timer);
+      return true;
+    }
+    function brush(strings, automatic) {
+      let delay = 0;
+      for (const string of strings) if (ring(string, delay, automatic)) delay += 22;
+      return delay > 0;
+    }
+    function showStrum() {
+      lastStrum = shape || '';
+      renderName();
+      feedback.classList.add('on');
+      clearTimeout(feedbackTimer);
+      feedbackTimer = setTimeout(() => feedback.classList.remove('on'), 1200);
+    }
+    function strum() {
+      if (!brush(STRINGS, false)) return;
+      showStrum();
+      if (shape) window.STUDIO_FEATURES?.completeFreeInteraction('shi');
+      practice.strum(shape);
+    }
+    function applyShape(name) {
+      selected = name;
+      Array.from(CHORDS[name]).forEach((fret, i) => {
+        tapHeld[i] = fret === 'x' ? 0 : Number(fret);
+        muteOverrides[i] = fret === 'x' ? true : null;
+      });
+      refresh();
+    }
+    function playChord(name, stroke) {
+      for (const frets of keyHeld) frets.clear();
+      applyShape(name);
+      if (stroke === 'down') brush(STRINGS, true);
+      else if (stroke === 'up') brush([...STRINGS].reverse(), true);
+      else ring({ p: muted.indexOf(false), i: 3, m: 4, a: 5 }[stroke], 0, true);
+      showStrum();
+    }
+    function stopNotes() {
+      for (const source of automaticNotes) source.stop();
+      automaticNotes.clear();
+      for (const timer of automaticFlashes) {
+        clearTimeout(timer);
+        flashes.delete(timer);
+      }
+      automaticFlashes.clear();
+    }
+    const button = (className, label, action) => {
+      const node = el('button', className, label);
+      node.type = 'button';
+      node.addEventListener('click', action);
+      return node;
+    };
+
+    const strings = el('div', 'sp-vstrings');
+    const grid = el('div', 'sp-frets');
+    const picks = el('div', 'sp-picks');
+    STRINGS.forEach(i => {
+      const string = String(i + 1);
+      const label = '第 ' + (6 - i) + ' 弦';
+      const line = el('span', 'sp-vstring');
+      line.dataset.string = string;
+      line.style.setProperty('--w', (4.4 - i * 0.55) + 'px');
+      lines.push(line);
+      strings.append(line);
+
+      const mute = button('sp-mute', label + '悶弦', () => {
+        muteOverrides[i] = muted[i] ? (CHORDS[shape]?.[i] === 'x' ? false : null) : true;
+        refresh();
+      });
+      mute.dataset.string = string;
+      muteButtons.push(mute);
+      grid.append(mute);
+
+      const pick = button('sp-pick-string', '撥第 ' + (6 - i) + ' 弦', () => ring(i));
+      pick.dataset.string = string;
+      pickButtons.push(pick);
+      picks.append(pick);
+    });
+    for (const [row, keys] of FRET_ROWS.entries()) {
+      const f = row + 1;
+      cells.push(STRINGS.map(i => {
+        const k = keys[i].toUpperCase();
+        const cell = el('button', 'sp-fret');
+        cell.type = 'button';
+        const fret = () => { tapHeld[i] = tapHeld[i] === f ? 0 : f; refresh(); };
+        let touch = false;
+        cell.addEventListener('pointerdown', e => {
+          touch = e.pointerType === 'touch';
+          if (touch || e.button > 0) return;
+          e.preventDefault();
+          fret();
+        });
+        cell.addEventListener('click', e => {
+          if (touch || e.detail === 0) fret();
+          touch = false;
+        });
+        cell.dataset.fret = String(f);
+        cell.dataset.string = String(i + 1);
+        cell.setAttribute('aria-label', '第 ' + (6 - i) + ' 弦第 ' + f + ' 格（鍵盤 ' + k + '）');
+        cell.append(el('span', 'sp-k', k));
+        grid.append(cell);
+        return cell;
+      }));
+    }
+    neck.append(strings, grid);
+    const tools = el('div', 'sp-gtools');
+    tools.append(
+      button('sp-strum', '刷弦（空白鍵）', strum),
+      button('sp-clear', '放開', () => {
+        selected = null;
+        tapHeld.fill(0);
+        muteOverrides.fill(null);
+        refresh();
+      }),
+      feedback,
+    );
+    const chords = el('div', 'sp-chords');
+    chords.setAttribute('aria-label', '和弦指法');
+    for (const [label, shapes] of CHORD_GROUPS) {
+      const row = el('div', 'sp-chord-group');
+      row.append(el('h3', '', label));
+      const list = el('div', 'sp-chord-list');
+      for (const [name, frets] of Object.entries(shapes)) {
+        const card = button('sp-chord', '', () => {
+          applyShape(name);
+          arranger.chooseChord(name);
+        });
+        card.dataset.chord = name;
+        card.draggable = true;
+        card.addEventListener('dragstart', event => {
+          event.dataTransfer.effectAllowed = 'copy';
+          event.dataTransfer.setData('application/x-studio-guitar-chord', name);
+        });
+        card.setAttribute('aria-label', name + ' 和弦指法 ' + frets);
+        card.append(el('b', '', name), el('kbd', '', frets));
+        list.append(card);
+        cards.set(name, card);
+      }
+      row.append(list);
+      chords.append(row);
+    }
+    const practice = makeGuitarPractice({
+      el, button, applyShape, setCapo, cards, playChord, stopNotes,
+      beforePlay: () => { arranger.stop(); audio(); },
+    });
+    const arranger = makeGuitarArranger({
+      el, button, playChord, stopNotes, storage: window.StudioDB,
+      beforePlay: () => { practice.stop(); audio(); },
+    });
+    wrap.append(picks, neck, capoLabel, tools, practice.hint, chords,
+      el('p', 'sp-cap', '點格子壓弦，點指板上方的撥片試音，點琴枕可悶弦。也能按住格上的鍵，再按空白鍵刷弦。'));
+    layout.append(wrap, practice.panel, arranger.panel);
+    panelBody.append(layout);
+    refresh();
+
+    const bindings = new Map(FRET_ROWS.flatMap((row, fret) =>
+      Array.from(row, (key, string) => [key, [string, fret + 1]])));
+    const events = new AbortController();
+    const options = { capture: true, signal: events.signal };
+    addEventListener('keydown', e => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.target.closest?.('input, select, textarea')) return;
+      const k = e.key.toLowerCase();
+      if (k === ' ') {
+        // 空白鍵仍可操作鍵盤焦點所在的按鈕。滑鼠選卡後可直接用空白鍵刷。
+        if (e.target.matches?.('.sp-mute, button:focus-visible:not(#panel-close, .sp-strum)')) return;
+        e.preventDefault(); e.stopPropagation(); if (!e.repeat) strum();
+        return;
+      }
+      const hit = bindings.get(k);
+      if (!hit) return;
+      e.preventDefault();
+      e.stopPropagation();
+      keyHeld[hit[0]].add(hit[1]);
+      refresh();
+    }, options);
+    addEventListener('keyup', e => {
+      const hit = bindings.get(e.key.toLowerCase());
+      if (!hit) return;
+      keyHeld[hit[0]].delete(hit[1]);
+      refresh();
+    }, options);
+    addEventListener('blur', () => {
+      for (const frets of keyHeld) frets.clear();
+      refresh();
+    }, { signal: events.signal });
+    const observer = new MutationObserver(() => {
+      if (!panel.classList.contains('on') || !layout.isConnected) closeGuitar();
+    });
+    observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(panelBody, { childList: true });
+    closeGuitar = () => {
+      events.abort();
+      observer.disconnect();
+      clearTimeout(feedbackTimer);
+      for (const timer of flashes) clearTimeout(timer);
+      practice.dispose();
+      arranger.dispose();
+      closeGuitar = null;
+    };
   }
 
   const OPEN = { 10: openClock, 11: openDoor, 6: openPiano, 7: openGuitar };

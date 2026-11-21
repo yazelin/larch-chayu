@@ -10,7 +10,7 @@
 .sf-chat-log{flex:1;min-height:0;overflow:auto;padding:4px 2px 12px;scroll-behavior:smooth}
 .sf-message{display:flex;align-items:flex-end;gap:8px;margin:10px 0;max-width:92%}
 .sf-message.me{margin-left:auto;flex-direction:row-reverse}
-.sf-avatar{width:42px;height:42px;flex:none;object-fit:cover;border-radius:50%;background:#eee5d9;border:1px solid #d8c4ab}
+.sf-avatar{width:clamp(52px,5vw,64px);height:clamp(52px,5vw,64px);flex:none;object-fit:cover;border-radius:50%;background:#eee5d9;border:1px solid #d8c4ab}
 .sf-message-body{display:flex;flex-direction:column;gap:3px;min-width:0}
 .sf-name{font-size:11px;color:#887569;padding:0 5px}
 .sf-bubble{padding:9px 12px;border:1px solid #e2d3c1;border-radius:14px 14px 14px 3px;background:#fffdf8;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.65}
@@ -29,6 +29,7 @@
 .sf-progress{display:grid;grid-template-columns:50px minmax(0,1fr) 100px;gap:7px;align-items:center;margin:7px 0}
 .sf-day{color:#887569;font-size:12px;text-align:center}.sf-table-input{padding:7px 8px;font-size:13px}
 .sf-computer{--computer-accent:#eadfda;padding:12px;border-radius:14px;background-color:var(--computer-accent);background-size:cover;background-position:center;transition:background-color .2s}
+.sf-computer.wp-moonlight{background-image:linear-gradient(rgba(25,34,68,.3),rgba(25,34,68,.3)),url('../../../cg/ch5/ch5_cg_019.webp')}
 .sf-computer.wp-north{background-image:linear-gradient(rgba(255,250,242,.78),rgba(255,250,242,.78)),url('../../新版/canon_new/studio/flat/N.png')}
 .sf-computer.wp-east{background-image:linear-gradient(rgba(255,250,242,.76),rgba(255,250,242,.76)),url('../../新版/canon_new/studio/flat/E.png')}
 .sf-computer.wp-south{background-image:linear-gradient(rgba(255,250,242,.76),rgba(255,250,242,.76)),url('../../新版/canon_new/studio/flat/S.png')}
@@ -117,3 +118,25 @@
 .sf-quota-lines{margin:4px 0 2px;padding-left:1.1em;list-style:disc}
 .sf-quota-lines li{margin:1px 0}
 .sf-quota-reset{display:block;color:#80624d;font-size:12px}
+
+.sf-replay{position:fixed;inset:0;z-index:9999;background:#111}
+.sf-replay iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.sf-replay-back{position:absolute;top:max(12px,env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));z-index:1;min-height:44px;padding:0 16px;border:0;border-radius:22px;background:rgba(20,18,28,.78);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+/* 等 AI 回應的分段提示（studio_wait.mjs） */
+.sf-wait{--wait-color:#885d45;margin:8px 2px;color:#7b6b60;font-size:13px}
+.sf-wait-line{display:flex;align-items:center;gap:7px}
+.sf-wait-note{margin-top:3px;font-size:11px;color:#9a8a7d}
+.sf-wait-marks{display:inline-flex;align-items:center}
+.sf-wait-dots{display:inline-flex;gap:3px}
+.sf-wait-dots i{width:5px;height:5px;border-radius:50%;background:var(--wait-color);animation:sf-wait-hop 1.2s infinite ease-in-out}
+.sf-wait-dots i:nth-child(2){animation-delay:.2s}.sf-wait-dots i:nth-child(3){animation-delay:.4s}
+.sf-wait-write{position:relative;display:inline-block;width:34px;height:18px}
+.sf-wait-ink{position:absolute;left:2px;bottom:2px;height:2px;border-radius:2px;background:var(--wait-color);animation:sf-wait-ink 1.6s infinite ease-in-out}
+.sf-wait-pen{position:absolute;left:0;bottom:2px;width:16px;height:16px;fill:none;stroke:var(--wait-color);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transform-origin:2px 14px;animation:sf-wait-pen 1.6s infinite ease-in-out}
+.sf-wait-still{display:none;color:var(--wait-color);font-weight:700;letter-spacing:.1em}
+.sf-chat-log .sf-wait{padding:6px 10px}
+li.sf-job .sf-wait{margin:4px 0 0}
+@keyframes sf-wait-ink{0%{width:0;opacity:1}75%{width:26px;opacity:1}100%{width:26px;opacity:0}}
+@keyframes sf-wait-pen{0%{translate:0 0;rotate:0deg}15%{translate:5px -2px;rotate:-8deg}30%{translate:10px 0;rotate:4deg}45%{translate:15px -2px;rotate:-8deg}60%{translate:20px 0;rotate:4deg}75%{translate:24px -1px;rotate:0deg}100%{translate:0 0;rotate:0deg}}
+@keyframes sf-wait-hop{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-4px);opacity:1}}
+@media(prefers-reduced-motion:reduce){.sf-wait-dots,.sf-wait-write{display:none}.sf-wait-still{display:inline}}

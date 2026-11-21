@@ -1,8 +1,7 @@
 (function (global) {
   'use strict';
 
-  var reducedMotion = global.matchMedia('(prefers-reduced-motion: reduce)');
-  var motion = { phase: 0, lift: 0, tilt: 0 };
+  var motion = global.WalkSway.create();
 
   function createFacingBody(className) {
     var facing = document.createElement('div');
@@ -52,17 +51,10 @@
     return visual.facing;
   }
 
+  // 走路晃動的數值在 walk_sway.js（工作室與島上共用；作者 2026-11-21：原本抖得太大太快，調小調慢）
   function advanceWalking(distanceCm, elapsedSeconds, moving, speedCmPerSecond) {
-    if (moving && distanceCm > 0 && speedCmPerSecond > 0) {
-      var cycleLength = speedCmPerSecond * 0.34;
-      motion.phase += Math.PI * 2 * distanceCm / cycleLength;
-    }
-
-    var targetLift = moving ? Math.abs(Math.sin(motion.phase)) * (reducedMotion.matches ? 1 : 5) : 0;
-    var targetTilt = moving && !reducedMotion.matches ? Math.sin(motion.phase * 2) * 1.4 : 0;
-    var settle = moving ? 1 : 1 - Math.exp(-Math.max(0, elapsedSeconds) * 9);
-    motion.lift += (targetLift - motion.lift) * settle;
-    motion.tilt += (targetTilt - motion.tilt) * settle;
+    var cycles = moving && distanceCm > 0 && speedCmPerSecond > 0 ? distanceCm / (speedCmPerSecond * global.WalkSway.WALK.cycle) : 0;
+    global.WalkSway.advance(motion, cycles, elapsedSeconds, moving);
   }
 
   function renderTea(character, layout) {
@@ -77,7 +69,7 @@
       character.face = face;
       character.facing.classList.toggle('facing-left', face < 0);
     }
-    character.body.style.transform = 'translate3d(0,' + (-motion.lift).toFixed(2) + 'px,0) rotate(' + motion.tilt.toFixed(2) + 'deg)';
+    character.body.style.transform = 'translate3d(0,' + (-motion.lift * layout.height).toFixed(2) + 'px,0) rotate(' + motion.tilt.toFixed(2) + 'deg)';
   }
 
   global.StudioCharacterView = {

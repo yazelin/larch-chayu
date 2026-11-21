@@ -155,6 +155,8 @@
         if (message.speaker) item.s = message.speaker;
         if (message.mood) item.m = message.mood;   // 這句話的表情（頭像用）
         if (message.draw) item.d = message.draw;   // 「妳給晨看了一張畫」那一則：作品編號，用來顯示縮圖
+        if (message.day != null) item.day = message.day;
+        if (message.chapter != null) item.chapter = message.chapter;
         return item;
       });
       return fitList(items, name);
@@ -166,12 +168,18 @@
         if (item.s) message.speaker = item.s;
         if (item.d) message.draw = item.d;
         if (item.m) message.mood = item.m;
+        if (item.day != null) message.day = item.day;
+        if (item.chapter != null) message.chapter = item.chapter;
         return message;
       });
     }
     // 作品清單只存編號、種類、標題、時間（每件約 100 字）；檔案在 Worker 的 R2，歌詞不存。
     function workMeta(work) {
-      return { id: work.id, kind: work.kind, title: String(work.title || '').slice(0, 40), createdAt: work.createdAt, workId: work.workId || work.jobId || '' };
+      var meta = { id: work.id, kind: work.kind, title: String(work.title || '').slice(0, 40), createdAt: work.createdAt, workId: work.workId || work.jobId || '' };
+      if (work.character) meta.character = work.character;
+      if (work.note) meta.note = String(work.note).slice(0, 160);
+      if (work.replyTo) meta.replyTo = work.replyTo;
+      return meta;
     }
     function works() { var list = parse(VARS.works, []); return Array.isArray(list) ? list : []; }
     function writeWorks(list) { writeVar(VARS.works, fitList(list.slice(-LIMITS.works), VARS.works)); }
@@ -300,5 +308,12 @@
 
   var inLarchFrame = false;
   try { inLarchFrame = window.parent !== window; } catch (error) { inLarchFrame = true; }
-  window.StudioDB = indexedDbUsable() ? idbBackend() : inLarchFrame ? larchBackend() : memoryBackend();
+  var baseDB = indexedDbUsable() ? idbBackend() : inLarchFrame ? larchBackend() : memoryBackend();
+  function syncRelevantKey(key) { return key === 'anonymousPlayerId' || key === 'progressTable' || key === 'progressUserTasks' || /^chat:(chen|ming|shi|group)$/.test(String(key)) || /^(image|song|drawing):/.test(String(key)); }
+  function notifySyncChange(key) { if (syncRelevantKey(key)) window.dispatchEvent(new CustomEvent('studio:db-change', { detail: { key: String(key) } })); }
+  window.StudioDB = Object.assign({}, baseDB, {
+    set: async function (key, value) { var result = await baseDB.set(key, value); notifySyncChange(key); return result; },
+    remove: async function (key) { var result = await baseDB.remove(key); notifySyncChange(key); return result; },
+    replaceAll: async function (items) { var result = await baseDB.replaceAll(items); window.dispatchEvent(new CustomEvent('studio:db-change', { detail: { key: '*' } })); return result; }
+  });
 })();

@@ -1,0 +1,237 @@
+/* 詩的黑膠唱盤（studio_album.mjs）：唱片架（#panel[data-design="shelf"]）與耳機的「唱片專輯」分頁（[data-design="album"]）。
+   版面照草圖 A（mockup_album/A.html）：左曲目、中唱盤、右詩寫下的話＋歌詞；外觀改成工作室的水彩紙：木頭唱盤座、紙卡、膠帶，
+   唱片本身是黑膠。窄畫面唱盤在上，曲目與歌詞用分頁切。按鈕的水彩圖示由 studio_icons.mjs 依登錄表套上（.sa-btn）。 */
+#panel:is([data-design="shelf"], [data-design="album"]):not(.ming-os-panel) { --binding: var(--studio-shi); --wash: #e7c3cb; }
+@media (min-width: 601px) {
+  #panel:is([data-design="shelf"], [data-design="album"]):not([data-paper-off]):not(.ming-os-panel) { width: min(1180px, calc(100vw - 32px)); }
+}
+.sa { --wine: var(--studio-shi, #7d3b50); --wine-soft: #b8687e; --ink: #4a3330; --ink2: #6f5650; --ink3: #9a8379; min-width: 0; color: var(--ink); }
+.sa-heading { margin: 0 0 10px; font: 400 clamp(22px, 3vw, 30px)/1.25 var(--studio-hand); color: var(--wine); }
+.sa .sf-empty { padding: 28px 12px 12px; font-size: 15px; color: var(--ink2); }
+.sa-empty-go { display: flex; justify-content: center; padding-bottom: 16px; }
+
+.sa-grid { display: grid; gap: 18px; grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(250px, 330px); height: min(68dvh, 660px); min-height: 440px; }
+.sa-card {
+  position: relative; display: flex; flex-direction: column; min-height: 0; min-width: 0;
+  padding: 12px 10px 10px;
+  border: 1px solid #b89a7c; border-radius: 5px 10px 7px 9px;
+  background: var(--studio-fiber), #fff8ec;
+  box-shadow: 0 3px 0 #e4cfb2, 2px 8px 14px #5a3b2c22;
+}
+.sa-card::before {
+  content: ""; position: absolute; z-index: 1; top: -9px; left: calc(50% - 30px); width: 60px; height: 18px; transform: rotate(-3deg);
+  background: repeating-linear-gradient(95deg, #d9b67d80 0 3px, #e8cd9b80 3px 5px); pointer-events: none;
+}
+.sa-side::before { transform: rotate(4deg); background: repeating-linear-gradient(95deg, #d7a1ae80 0 3px, #e9c2cb80 3px 5px); }
+
+/* 曲目 */
+.sa-list { flex: 1; min-height: 0; overflow: auto; padding: 2px 2px 6px; overscroll-behavior: contain; }
+.sa-group { margin: 12px 8px 3px; font: 400 17px/1.3 var(--studio-hand); color: var(--wine); letter-spacing: .06em; }
+.sa-group:first-child { margin-top: 2px; }
+.sa-row {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 10px;
+  width: 100%; min-height: 56px; padding: 5px 8px; border: 0; border-radius: 6px 9px 7px 8px; background: none;
+  color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.sa-row:hover { background: #f3e2cf; }
+.sa-row.on { background: linear-gradient(90deg, #ecc9d1, #f6e6dc 80%); box-shadow: inset 3px 0 0 var(--wine); }
+.sa-no { display: grid; place-items: center; width: 44px; height: 44px; overflow: hidden; border-radius: 50%; background: #2b2125; color: #fff3ea; font: 400 18px var(--studio-hand); box-shadow: 0 0 0 2px #fff8ec, 0 0 0 3px #b89a7c80; }
+.sa-no img { width: 100%; height: 100%; object-fit: cover; }
+.sa-tt { min-width: 0; }
+.sa-tt b { display: block; overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.sa-tt small { display: block; overflow: hidden; color: var(--ink3); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.sa-t { color: var(--ink3); font-size: 12px; font-variant-numeric: tabular-nums; }
+.sa-row.lock { cursor: default; }
+.sa-row.lock .sa-no { background: #e9dccb; color: var(--wine); box-shadow: 0 0 0 2px #fff8ec, 0 0 0 3px #b89a7c80; font-size: 20px; }
+.sa-row.lock b { color: var(--ink2); }
+.sa-row.nudge { animation: sa-nudge .4s; }
+.sa-eq { display: inline-flex; gap: 2px; align-items: flex-end; height: 16px; }
+.sa-eq i { width: 3px; height: 30%; background: #f0b8c6; animation: sa-eq .9s infinite ease-in-out; }
+.sa-eq i:nth-child(2) { animation-delay: .2s; } .sa-eq i:nth-child(3) { animation-delay: .4s; }
+@keyframes sa-eq { 50% { height: 100%; } }
+@keyframes sa-nudge { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.sa-foot { margin: 6px 8px 0; padding-top: 6px; border-top: 1px dashed #b89a7c80; color: var(--ink3); font-size: 12px; }
+
+/* 唱盤 */
+.sa-stage { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-width: 0; min-height: 0; padding: 4px 0; }
+.sa-deck {
+  position: relative; width: min(100%, 430px, calc(68dvh - 270px)); min-width: 220px; aspect-ratio: 1.06; flex: none;
+  border: 1px solid #7d5434; border-radius: 14px 18px 15px 17px;
+  background: var(--studio-fiber), linear-gradient(150deg, #c08a5a, #9c673f 55%, #845331);
+  box-shadow: inset 0 2px 0 #e2b88b, inset 0 -3px 0 #6b4227, 0 6px 0 #6b4227, 2px 14px 22px #3b241855;
+  --bass: 0; --ang: 0;
+}
+.sa-platter { position: absolute; left: 7%; top: 50%; width: 72%; aspect-ratio: 1; transform: translateY(-50%); border-radius: 50%; background: #2c2024; box-shadow: 0 0 0 5px #6b4227, 0 0 0 7px #d6aa7c, 0 0 calc(10px + var(--bass) * 40px) calc(var(--bass) * 8px) rgba(125, 59, 80, calc(.12 + var(--bass) * .45)); }
+.sa-spectrum { position: absolute; inset: -14%; width: 128%; height: 128%; pointer-events: none; }
+.sa-record {
+  position: absolute; inset: 3%; border-radius: 50%;
+  background: radial-gradient(circle, transparent 0 34%, #121012 34.2% 100%), repeating-radial-gradient(circle, #17141a 0 2px, #25202a 2px 3px);
+  animation: sa-spin 5.5s linear infinite; animation-play-state: paused;
+}
+.sa-record::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 20deg, transparent 0 18%, rgba(255, 240, 225, .16) 24%, transparent 32% 68%, rgba(255, 240, 225, .12) 74%, transparent 82%); }
+.sa-deck.playing .sa-record { animation-play-state: running; }
+.sa-label { position: absolute; left: 50%; top: 50%; width: 36%; aspect-ratio: 1; transform: translate(-50%, -50%); overflow: hidden; border-radius: 50%; background: var(--wine); box-shadow: 0 0 0 3px #0c0a0c; }
+.sa-label img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.sa-label::after { content: ""; position: absolute; left: 50%; top: 50%; width: 7%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: #2c2024; box-shadow: 0 0 0 2px #fff4e6aa; }
+.sa-label.blank { display: grid; place-items: center; color: #fff3ea; font: 400 clamp(22px, 3.2vw, 36px) var(--studio-hand); background: radial-gradient(circle at 40% 35%, #a8566c, var(--wine)); }
+.sa-arm { position: absolute; right: 5%; top: 6%; width: 9%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f6e2b8, #a07a45); box-shadow: 0 3px 6px #3b241866; }
+.sa-arm i { position: absolute; left: 50%; top: 50%; width: 300%; height: 5px; border-radius: 3px; background: linear-gradient(#f1dcb8, #a8875a); transform-origin: 0 50%; transform: rotate(112deg); transition: transform .9s cubic-bezier(.3, .7, .2, 1); box-shadow: 0 3px 4px #3b241866; }
+.sa-arm i::after { content: ""; position: absolute; right: -6px; top: -5px; width: 16px; height: 14px; border-radius: 3px; background: #5a3b2c; border: 1px solid #d6aa7c; }
+.sa-deck.playing .sa-arm i { transform: rotate(calc(150deg + var(--ang) * 1deg)); }
+@keyframes sa-spin { to { transform: rotate(360deg); } }
+
+.sa-meta { max-width: 430px; text-align: center; }
+.sa-chapter { color: var(--wine); font-size: 13px; letter-spacing: .2em; }
+.sa-title { margin: 0; font: 400 clamp(22px, 2.6vw, 28px)/1.25 var(--studio-hand); color: var(--ink); overflow-wrap: anywhere; }
+.sa-sub { margin: 0; color: var(--ink2); font-size: 13px; min-height: 1em; }
+.sa-sub:empty { display: none; }
+.sa-ctl { display: grid; gap: 4px; width: min(100%, 440px); }
+.sa-seekrow { display: grid; grid-template-columns: 40px minmax(0, 1fr) 40px; align-items: center; gap: 8px; color: var(--ink2); font-size: 12px; font-variant-numeric: tabular-nums; }
+.sa-seekrow .sa-dur { text-align: right; }
+.sa input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; margin: 0; background: transparent; --p: 0%; cursor: pointer; }
+.sa input[type="range"]::-webkit-slider-runnable-track { height: 7px; border-radius: 4px; background: linear-gradient(90deg, var(--wine-soft) var(--p), #e3d2bd var(--p)); box-shadow: inset 0 1px 1px #7a5a4433; }
+.sa input[type="range"]::-moz-range-track { height: 7px; border-radius: 4px; background: #e3d2bd; }
+.sa input[type="range"]::-moz-range-progress { height: 7px; border-radius: 4px; background: var(--wine-soft); }
+.sa input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; margin-top: -6.5px; border: 2px solid var(--wine); border-radius: 50%; background: #fff8ec; box-shadow: 0 2px 0 #7a5a4444; }
+.sa input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border: 2px solid var(--wine); border-radius: 50%; background: #fff8ec; }
+.sa-trans { display: flex; align-items: center; justify-content: center; gap: 14px; }
+.sa-trans .sa-btn { --ic: 52px; }
+.sa-trans .sa-toggle { --ic: 66px; }
+.sa-volrow { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: center; gap: 6px; width: min(100%, 260px); margin: 0 auto; }
+.sa-volrow .sa-btn { --ic: 36px; }
+.sa-mute.is-muted .sp-ic { opacity: .45; filter: grayscale(.8); }
+.sa-mute.is-muted::after { content: ""; position: absolute; left: 22%; right: 22%; top: 50%; height: 3px; border-radius: 2px; background: var(--wine); transform: rotate(-40deg); pointer-events: none; }
+.sa-status { min-height: 1.3em; margin: 0; color: #8d3a2c; font-size: 13px; text-align: center; }
+/* 圖示還沒套上（或套不上）時的退路：文字按鈕 */
+.sa-btn:not(.sp-icon-btn) { min-width: 48px; min-height: 48px; padding: 4px 12px; border: 1px solid #b89a7c; border-radius: 999px; background: #fff8ec; color: var(--ink); font: inherit; cursor: pointer; }
+
+/* 詩寫下的話＋歌詞 */
+.sa-side { padding: 12px 12px 8px; }
+.sa-quote { margin: 4px 2px 8px; padding: 10px 12px; border-left: 4px solid var(--wine); border-radius: 0 9px 8px 0; background: #f6e3e2; }
+.sa-quote h4 { margin: 0 0 3px; font: 400 16px/1.3 var(--studio-hand); color: var(--wine); letter-spacing: .08em; }
+.sa-qtext { margin: 0; font: 400 17px/1.7 var(--studio-hand); color: var(--ink); overflow-wrap: anywhere; }
+.sa-qhint { font-size: 15px; color: var(--ink2); }
+.sa-qsrc { margin: 3px 0 0; color: var(--ink3); font-size: 12px; }
+.sa-lyrics {
+  flex: 1; min-height: 120px; overflow: auto; padding: 10px 6px 40%; text-align: center; overscroll-behavior: contain;
+  background: repeating-linear-gradient(transparent 0 33px, #d9c1a644 33px 34px);
+  -webkit-mask-image: linear-gradient(transparent, #000 8%, #000 86%, transparent); mask-image: linear-gradient(transparent, #000 8%, #000 86%, transparent);
+}
+.sa-ly { display: block; width: 100%; min-height: 44px; padding: 6px 4px; border: 0; border-radius: 6px; background: none; color: var(--ink3); font: 400 18px/1.5 var(--studio-hand); cursor: pointer; transition: color .3s, transform .3s; }
+.sa-ly:hover { background: #f3e2cf88; }
+.sa-ly.past { color: var(--ink2); }
+.sa-ly.on { color: var(--wine); transform: scale(1.06); text-shadow: 0 0 12px #f2c3cf; }
+.sa-ly.static { margin: 0; min-height: 0; color: var(--ink2); cursor: default; font-size: 17px; }
+.sa-ly-empty { margin: 30px 0 4px; color: var(--ink2); font-size: 15px; }
+.sa-ly-note { margin: 10px 0 0; color: var(--ink3); font-size: 12px; }
+
+/* 這首歌的小卡（沒有歌詞時取代歌詞區）：水彩五線譜跟著音樂動＋章節／做好日期、長度、已播 */
+.sa-songcard { display: flex; flex: 1; flex-direction: column; gap: 10px; min-height: 0; }
+.sa-songcard[hidden], .sa-lyrics[hidden] { display: none; }
+.sa-vizbox {
+  position: relative; flex: 1; min-height: 170px; overflow: hidden;
+  border: 1px solid #d9c1a6; border-radius: 9px 6px 10px 7px;
+  background: var(--studio-fiber), radial-gradient(ellipse at 18% 88%, #f2cfd6aa, transparent 58%), radial-gradient(ellipse at 86% 12%, #f6e2c4, transparent 52%), #fffaf1;
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 18px #e9d3b955;
+}
+.sa-viz { position: absolute; left: 0; top: 0; width: 100%; height: calc(100% - 30px); display: block; }
+.sa-viz-note { position: absolute; left: 10px; right: 10px; bottom: 6px; margin: 0; color: var(--ink2); font: 400 15px/1.4 var(--studio-hand); text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sa-viz-note:empty { display: none; }
+.sa-vizbox:has(.sa-viz-note:empty) .sa-viz { height: 100%; }
+.sa-info { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.sa-info[hidden] { display: none; }
+.sa-info-cell { position: relative; padding: 7px 8px 8px; border: 1px dashed #c9ad8e; border-radius: 7px 9px 6px 8px; background: #fff8ec; text-align: center; overflow: hidden; }
+.sa-info-cell:last-child::after { content: ""; position: absolute; left: 0; bottom: 0; height: 4px; width: var(--p, 0%); background: var(--wine-soft); border-radius: 0 3px 0 0; opacity: .75; }
+.sa-info dt { color: var(--ink3); font-size: 12px; letter-spacing: .1em; }
+.sa-info dd { margin: 1px 0 0; overflow: hidden; color: var(--ink); font: 400 19px/1.3 var(--studio-hand); font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 窄畫面分頁（桌機版藏起來） */
+.sa-tabs { display: none; }
+@media (max-width: 999px) {
+  .sa-grid { grid-template-columns: minmax(0, 1fr); height: auto; min-height: 0; gap: 12px; }
+  .sa-stage { order: -1; }
+  .sa-deck { width: min(72vw, 330px); min-width: 0; }
+  .sa-tabs { display: flex; gap: 6px; margin: 2px 0 10px; }
+  .sa-tab { flex: 1; min-height: 44px; border: 1px solid #b89a7c; border-radius: 8px 8px 3px 3px; background: #fff8e9; color: var(--ink2); font: inherit; font-weight: 700; cursor: pointer; }
+  .sa-tab[aria-selected="true"] { background: var(--wine); border-color: var(--wine); color: #fffaf0; }
+  .sa-tabs { order: 0; }
+  .sa[data-tab="list"] .sa-side, .sa[data-tab="ly"] .sa-listcard { display: none; }
+  .sa-list { max-height: 46dvh; }
+  .sa-lyrics { max-height: 46dvh; min-height: 200px; padding-bottom: 30%; }
+  .sa-vizbox { flex: none; height: clamp(190px, 34dvh, 280px); }
+  .sa { display: flex; flex-direction: column; }
+  .sa-grid { display: contents; }
+  .sa-stage { order: 1; } .sa-tabs { order: 2; } .sa-listcard, .sa-side { order: 3; }
+}
+@media (max-width: 600px) {
+  .sa-deck { width: min(58vw, 240px); }
+  .sa-trans .sa-btn { --ic: 46px; } .sa-trans .sa-toggle { --ic: 58px; }
+  .sa-ctl { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sa-record, .sa-eq i { animation: none !important; }
+  .sa-arm i, .sa-ly { transition: none !important; }
+  .sa-ly.on { transform: none; }
+}
+/* 耳機：還沒請詩做歌時，曲目底下的小提示 */
+.sa-listcard .sa-empty { margin: 4px 4px 0; padding: 6px 8px 2px; border-top: 1px dashed #b89a7c80; }
+.sa-listcard .sa-empty .sf-empty { padding: 4px 2px 6px; font-size: 13px; line-height: 1.6; }
+.sa-listcard .sa-empty-go { padding-bottom: 4px; }
+
+.sa-deck.sa-recorder {
+  box-sizing: border-box;
+  width: min(100%, 320px);
+  min-width: 0;
+  aspect-ratio: 1.62;
+  display: grid;
+  place-items: center;
+  border: 1px solid #94786b;
+  border-radius: 19px;
+  background: var(--studio-fiber), radial-gradient(ellipse at 15% 15%, #fff8e4 0%, transparent 52%), #dfc2ac;
+  box-shadow: inset 0 0 14px #a47c634f, 0 5px 15px #56433532;
+}
+.sa-tape {
+  position: relative;
+  box-sizing: border-box;
+  width: 83%;
+  height: 77%;
+  border: 2px solid #7c6257;
+  border-radius: 12px;
+  background: radial-gradient(ellipse at 70% 45%, #a9666a6b, transparent 67%), #985f66;
+  box-shadow: 0 3px 8px #4e292f57, inset 0 0 9px #65424679;
+}
+.sa-tape-paper {
+  position: absolute;
+  inset: 11% 7% 23%;
+  border-radius: 6px;
+  background: repeating-linear-gradient(0deg, transparent 0 13px, #bb867a36 13px 14px),
+    radial-gradient(ellipse at 88% 20%, #e1b5999c, transparent 60%), #f4dfbc;
+}
+.sa-reels {
+  position: absolute;
+  inset: 38% 21% 33%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5%;
+  border-radius: 20px;
+  background: #514044;
+  box-shadow: inset 0 2px 6px #24191c9c;
+}
+.sa-reels i {
+  height: 73%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, #554044 32%, transparent 38%),
+    repeating-conic-gradient(#e3c3a8 0deg 29deg, #8a655d 30deg 60deg);
+  animation: sa-reel 2.6s linear infinite paused;
+}
+.sa-recorder.playing .sa-reels i { animation-play-state: running; }
+.sa-tape-foot {
+  position: absolute;
+  inset: 80% 25% 0;
+  clip-path: polygon(12% 0, 88% 0, 100% 100%, 0 100%);
+  background: #65484b;
+}
+@keyframes sa-reel { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .sa-reels i { animation: none; } }

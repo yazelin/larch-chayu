@@ -119,7 +119,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   // 自己帶著茶語走一段（引擎鎖住時）：x、腳底 y、縮放一起內插，走路的上下彈照引擎的寫法
   function walkTea(x1, y1, k1, speed = 430) {
     return new Promise(ok => { const x0 = state.x, y0 = pose.y, k0 = pose.k; const dist = Math.hypot(x1 - x0, (y1 - y0) * 1.6); const secs = Math.max(0.12, dist / (speed * (k0 + k1) / 2)); let t = 0; if (Math.abs(x1 - x0) > 3) state.face = x1 > x0 ? 1 : -1;
-      const anim = dt => { t += dt / secs; const e = Math.min(1, t); state.x = x0 + (x1 - x0) * e; setPose(y0 + (y1 - y0) * e, k0 + (k1 - k0) * e); tea.style.setProperty('--bob', (-Math.abs(Math.sin(t * secs * 9)) * 2.2) + '%'); tea.style.setProperty('--rock', (Math.sin(t * secs * 9) * 3) + 'deg'); api.render();
+      const anim = dt => { t += dt / secs; const e = Math.min(1, t); state.x = x0 + (x1 - x0) * e; setPose(y0 + (y1 - y0) * e, k0 + (k1 - k0) * e); tea.style.setProperty('--bob', (-window.WalkSway.pose(t * secs, true).lift * 100) + '%'); tea.style.setProperty('--rock', window.WalkSway.pose(t * secs, true).tilt + 'deg'); api.render();
         if (e >= 1) { tea.style.setProperty('--bob', '0%'); tea.style.setProperty('--rock', '0deg'); const k = api.frameHooks.indexOf(anim); if (k >= 0) api.frameHooks.splice(k, 1); ok(); } };
       api.frameHooks.push(anim); });
   }
@@ -314,7 +314,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   const shi = { x: 0, y: FEET, k: 1, face: 1, busy: false, t: 0 }; const shiPose = (x, y, k) => { shi.x = x; shi.y = y; shi.k = k; shiEl.style.left = X(x); shiEl.style.top = Y(y); shiEl.style.height = (shiH0 * k) + '%'; };
   const shiLook = dir => { shiEl.style.setProperty('--facing', dir > 0 ? -1 : 1); };   // 立繪本身朝畫面左前方：看右邊要鏡射
   function walkShi(x1, y1, k1, speed = 400) { return new Promise(ok => { const x0 = shi.x, y0 = shi.y, k0 = shi.k; const secs = Math.max(0.12, Math.hypot(x1 - x0, (y1 - y0) * 1.6) / (speed * (k0 + k1) / 2)); let t = 0; if (Math.abs(x1 - x0) > 3) shiLook(x1 - x0);
-    const anim = dt => { t += dt / secs; const e = Math.min(1, t); shiPose(x0 + (x1 - x0) * e, y0 + (y1 - y0) * e, k0 + (k1 - k0) * e); shiEl.style.setProperty('--bob', (-Math.abs(Math.sin(t * secs * 9)) * 2.2) + '%'); shiEl.style.setProperty('--rock', (Math.sin(t * secs * 9) * 3) + 'deg'); if (e >= 1) { shiEl.style.setProperty('--bob', '0%'); shiEl.style.setProperty('--rock', '0deg'); const k = api.frameHooks.indexOf(anim); if (k >= 0) api.frameHooks.splice(k, 1); ok(); } }; api.frameHooks.push(anim); }); }
+    const anim = dt => { t += dt / secs; const e = Math.min(1, t); shiPose(x0 + (x1 - x0) * e, y0 + (y1 - y0) * e, k0 + (k1 - k0) * e); shiEl.style.setProperty('--bob', (-window.WalkSway.pose(t * secs, true).lift * 100) + '%'); shiEl.style.setProperty('--rock', window.WalkSway.pose(t * secs, true).tilt + 'deg'); if (e >= 1) { shiEl.style.setProperty('--bob', '0%'); shiEl.style.setProperty('--rock', '0deg'); const k = api.frameHooks.indexOf(anim); if (k >= 0) api.frameHooks.splice(k, 1); ok(); } }; api.frameHooks.push(anim); }); }
   // 坐在舞台邊的紙片（人和舞台前緣那一段同一張）：照 sprites/<鍵>.json 量好的矮牆左右緣與前緣，縮放到蓋住原畫柱腳到台階那一段
   const sitPieces = {};
   async function sitPiece(key) { if (sitPieces[key]) return sitPieces[key]; const m = await (await fetch(`../art/sprites/${key}.json`)).json(); const el = await sprite(`../art/sprites/${key}.png`, 'sit stagepiece ' + key, { edge: 6, jitter: 2 });
@@ -326,8 +326,8 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     shiPose(clamp(state.x - 110, M.walk[0], M.walk[1]), FEET, 1); shiLook(1);
     shiZ = zone('shi', () => picked.size >= 7 && !on('c4_melody') ? '把貝殼交給詩' : '詩', { x: shi.x - 50, w: 100, y: FEET - SHI_HPX - 6, h: SHI_HPX + 10 }, () => talkShi4()); /* 只在沙灘走道上點得到：她去浪邊或上舞台時，詩的熱區不能蓋住那邊的貝殼 */
     api.onFrame(dt => { if (shi.busy) return; shi.t += dt; const tx = moving ? shi.x : lane === 'beach' ? clamp(state.x - state.face * 118, M.walk[0], M.walk[1]) : lane === 'shore' ? S.shore.x0 - 96 : S.stage.steps.x - 96; /* 她去浪邊、上舞台時，詩站到旁邊等，不擋在前面 */ const d = tx - shi.x;
-      if (Math.abs(d) > 26) { const v = Math.sign(d) * Math.min(Math.abs(d) - 20, 540 * dt); shiPose(shi.x + v, FEET, 1); shiLook(d); shiEl.style.setProperty('--bob', (-Math.abs(Math.sin(shi.t * 9)) * 2.2) + '%'); shiEl.style.setProperty('--rock', (Math.sin(shi.t * 9) * 3) + 'deg'); }
-      else { shiEl.style.setProperty('--bob', '0%'); shiEl.style.setProperty('--rock', (Math.sin(shi.t * 1.6) * 0.6) + 'deg'); shiLook(state.x - shi.x); }
+      if (Math.abs(d) > 26) { const v = Math.sign(d) * Math.min(Math.abs(d) - 20, 540 * dt); shiPose(shi.x + v, FEET, 1); shiLook(d); shiEl.style.setProperty('--bob', (-window.WalkSway.pose(shi.t, true).lift * 100) + '%'); shiEl.style.setProperty('--rock', window.WalkSway.pose(shi.t, true).tilt + 'deg'); }
+      else { shiEl.style.setProperty('--bob', '0%'); shiEl.style.setProperty('--rock', '0deg'); shiLook(state.x - shi.x); }
       shiZ.moveTo(shi.x); });
     teachCall = () => { if (on('c4_call') || api.panelOpen()) { if (!on('c4_call')) setTimeout(teachCall, 800); return; } openDialogue([['詩', '牠們怕生啦。'], ['詩', '妳最近不是一直在哼我的歌嗎？在這裡哼，牠們就會過來。']], [() => { save({ c4_call: 'true' }); showCall(); setQuest(); api.toast('學會了「呼喚」'); }]); };
     if (resumed) setTimeout(() => openDialogue([['詩', '最後一個。叫牠。']]), 900);
@@ -380,7 +380,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     if (api.gifts.gift_shi || on('gift_shi')) { strum(); return errandShi(S42_DONE); }
     sitting = true; const A = sitPieces.shi_sit_guitar, B = await sitPiece('shi_tea_sit'); let seated = false;
     const sitDown = async () => { lockOn(); await walkTea(S.sit.x0 + 30, S.stage.foot + 6, 0.80, 420); showSit(B); A.el.remove(); tea.style.visibility = 'hidden'; sfx.sit(); seated = true; lockOff(); };
-    openDialogue(S42, [async () => { api.gifts.gift_shi = true; save({ gift_shi: 'true', gifts: String(Object.keys(api.gifts).length) }); sfx.heart(); heart(B.cx + 10, B.head - 4);
+    openDialogue(S42, [async () => { api.gifts.gift_shi = true; CT.completeFreeInteraction(); save({ gift_shi: 'true', gifts: String(Object.keys(api.gifts).length) }); sfx.heart(); heart(B.cx + 10, B.head - 4);
       lockOn(); await wait(500); B.el.classList.remove('sink'); B.el.classList.add('rise'); await wait(400); B.el.classList.remove('rise'); B.el.remove(); showSit(A, false); tea.style.visibility = ''; api.render(); await walkTea(S.sit.x0 + 30, FEET, 1); lockOff(); sitting = false; }],
       line => { if (line === S42[1][1] && !seated) sitDown(); wave.next = Math.min(wave.next, 0.4); });
   }
@@ -464,7 +464,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   const recShow = () => { if (st.errand_shi === 'accepted') recZ.show(); else recZ.hide(); }; recShow();
   function errandShi(after) {
     if (st.errand_shi === 'done') { if (after) return openDialogue(after); sfx.heart(); heart(shi.x, shi.y - SHI_HPX - 6); return; }
-    if (st.errand_shi === 'recorded') return openDialogue(ERR_SHI_DONE, [() => { save({ errand_shi: 'done' }); sfx.heart(); if (morning) morning.take(); else pl.got('morning'); }]);
+    if (st.errand_shi === 'recorded') return openDialogue(ERR_SHI_DONE, [() => { save({ errand_shi: 'done' }); CT.completeFreeInteraction(); sfx.heart(); if (morning) morning.take(); else pl.got('morning'); }]);
     if (st.errand_shi === 'accepted') { api.toast('到浪邊，等浪打上來的時候錄下來'); return; }
     return openDialogue(ERR_SHI_ASK, [], line => { if (line === '（接下詩的小委託：到浪邊錄一段海浪聲。）') { save({ errand_shi: 'accepted' }); recShow(); } });
   }
@@ -504,7 +504,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
       const el = await sprite('../art/sprites/shell_6.png', 'shell flat glow'); place(el, x, y, 24); el.classList.add('hopup'); sparkle(x, y - 12, 8, 0.8); setQ();
       pinkZ = zone('c7pink', '粉紅色的貝殼', { x: x - 34, w: 68, y: y - 40, h: 50 }, async z => { if (done()) return; await approach(x, 70); z.off(); sfx.shell(0); el.classList.add('ring'); sparkle(x, y - 12, 10);
         save({ c7s_pink: 'true' }); setQ(); setTimeout(() => { el.classList.add('picked'); setTimeout(() => el.remove(), 500); }, 520);
-        lockOn(); openDialogue([['詩', '這個敲起來是 Do。'], ['晨', '這個是粉紅色的。'], ['明', '二十三個了。'], ['茶語', '全部帶回去，放在長桌上。']], [() => { save({ c7s_done: 'true', chapter7_shell_count: '23' }); lockOff(); setQ(); }]); });
+        lockOn(); openDialogue([['詩', '這個敲起來是 Do。'], ['晨', '這個是粉紅色的。'], ['明', '二十三個了。'], ['茶語', '全部帶回去，放在長桌上。']], [() => { save({ c7s_done: 'true', chapter7_shell_count: '23' }); CT.completeFreeInteraction(); lockOff(); setQ(); }]); });
     }
     for (const s0 of TEA_SHELLS) {
       if (d28Picked.has(s0.k)) continue; const el = await sprite(`../art/sprites/shell_${s0.n}.png`, 'shell flat'); const h = 24 - (s0.n - 1) * 1.6; const s = { ...s0, el, h };

@@ -144,9 +144,9 @@ export async function install(api) {
   const SITPIECE = { two: { x: 2248.5, feet: 0.833, h: 0.3357 }, one: { x: 2248.7, feet: 0.8252, h: 0.3329 } };
   const sitImgs = {}; for (const k of ['two', 'one']) { try { sitImgs[k] = await sprite(`../art/sprites/bench_sit_${k}.png`, 'sit bench ' + k); } catch { sitImgs[k] = null; } }
   bench.fn = () => { if (!sitting) sit(); };
-  const walkTo = (el, fromX, toX, secs) => new Promise(ok => { let t = 0; el.classList.add('walking'); el.style.setProperty('--facing', toX > fromX ? 1 : -1); const anim = dt => { t += dt / secs; const e = Math.min(1, t); el.style.left = X(fromX + (toX - fromX) * e); el.style.setProperty('--bob', (-Math.abs(Math.sin(t * secs * 9)) * 2.2) + '%'); if (e >= 1) { el.classList.remove('walking'); el.style.setProperty('--bob', '0%'); const k = api.frameHooks.indexOf(anim); if (k >= 0) api.frameHooks.splice(k, 1); ok(); } }; api.frameHooks.push(anim); });
+  const walkTo = (el, fromX, toX, secs) => new Promise(ok => { let t = 0; el.classList.add('walking'); el.style.setProperty('--facing', toX > fromX ? 1 : -1); const anim = dt => { t += dt / secs; const e = Math.min(1, t); el.style.left = X(fromX + (toX - fromX) * e); window.WalkSway.css(el, window.WalkSway.pose(t * secs, e < 1)); if (e >= 1) { el.classList.remove('walking'); window.WalkSway.css(el, window.WalkSway.pose(0, false)); const k = api.frameHooks.indexOf(anim); if (k >= 0) api.frameHooks.splice(k, 1); ok(); } }; api.frameHooks.push(anim); });
   // 坐下流程（作者 2026-11-13 定案：只有一個「坐下」）：茶語走到椅前、晨照劇情條件走過來，站姿藏起來，換上「人和長凳畫在一起」的那一張紙片，疊在原畫長凳的位置把它蓋住（作者同日：坐下時人要和椅子一起畫才完整）、
-  // 往下一沉、鏡頭推一點、風聲；坐穩 2 秒觀景 CG 淡入；點一下或按鍵 CG 淡出、仍坐著；再點一下起身，晨走回畫架。坐下進行中忽略重複點擊。
+  // 往下一沉、鏡頭推一點；坐穩 2 秒觀景 CG 淡入；點一下或按鍵 CG 淡出、仍坐著；再點一下起身，晨走回畫架。坐下進行中忽略重複點擊。
   let sitting = false, standNow = null;
   async function sit() {
     if (sitting) return; sitting = true;
@@ -158,13 +158,14 @@ export async function install(api) {
     const pk = chenComes ? 'two' : 'one', sp = SITPIECE[pk]; put(sitImgs[pk], sp.x, sp.feet, sp.h);
     api.player.style.visibility = 'hidden'; if (chenComes) chenEl.style.visibility = 'hidden'; sfx.sit();
     api.setCamShift(140); document.body.classList.add('sitting'); api.render();
-    const w = document.createElement('div'); w.className = 'windline'; art.appendChild(w);
-    try { const ac = new (window.AudioContext || window.webkitAudioContext)(); const buf = ac.createBuffer(1, ac.sampleRate * 4, ac.sampleRate); const dd = buf.getChannelData(0); let l = 0; for (let i = 0; i < dd.length; i++) { const wn = Math.random() * 2 - 1; l = 0.985 * l + 0.015 * wn; dd[i] = l * 3; } const src = ac.createBufferSource(); src.buffer = buf; src.loop = true; const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 420; f.Q.value = 0.6; const g = ac.createGain(); g.gain.value = 0; src.connect(f).connect(g).connect(ac.destination); src.start(); g.gain.linearRampToValueAtTime(.25, ac.currentTime + 1.5); const lfo = ac.createOscillator(); lfo.frequency.value = 0.18; const lg = ac.createGain(); lg.gain.value = 220; lfo.connect(lg).connect(f.frequency); lfo.start(); wind = { ac, g }; } catch { wind = {}; }
+    // 原本這裡還有「風的線條」（整片長畫蓋一層白色細斜線、一直往右捲）與另開一個 Web Audio 做的風聲；作者 2026-11-21 試玩：斜紋像下雨、配樂被打斷。
+    // 兩樣都拿掉：坐下時畫面只有原畫與坐姿紙片，聲音只有坐下那一下的布料聲（sfx.sit，共用 sfx.js 那一個音訊環境），配樂照常往下播。
+    wind = { on: true };   // 坐著的旗標（stand 用）
     let phase = 'settling'; const cgTimer = setTimeout(() => { if (wind) { phase = 'cg'; api.showCg(false, chenComes ? api.META.cg : (api.META.cg_one || api.META.cg)); } }, 2000);
     const justClosed = () => Date.now() - Number(document.getElementById('cg').dataset.closedAt || 0) < 300;   // 引擎自己的按鍵處理可能先把 CG 關了，同一下不能再當成起身
     const onKey = e => { if (!wind) return; if (phase === 'settling') return; if (phase === 'cg' || justClosed()) { if (api.cgOpen()) api.hideCg(); phase = 'sit'; return; } stand(); };
-    const stand = async () => { if (!wind) return; const wd = wind; wind = null; standNow = null; clearTimeout(cgTimer); removeEventListener('keydown', onKey); art.removeEventListener('pointerdown', onKey); if (wd.ac) { wd.g.gain.linearRampToValueAtTime(0, wd.ac.currentTime + .6); setTimeout(() => wd.ac.close(), 800); }
-      for (const e of parts) { e.classList.remove('sink'); e.classList.add('rise'); } w.remove(); document.body.classList.remove('sitting'); api.setCamShift(0);
+    const stand = async () => { if (!wind) return; if (chenComes && phase === 'sit') CT.completeFreeInteraction(); wind = null; standNow = null; clearTimeout(cgTimer); removeEventListener('keydown', onKey); art.removeEventListener('pointerdown', onKey);
+      for (const e of parts) { e.classList.remove('sink'); e.classList.add('rise'); } document.body.classList.remove('sitting'); api.setCamShift(0);
       setTimeout(async () => { for (const e of parts) { e.classList.remove('rise'); e.remove(); } api.player.style.visibility = ''; if (chenComes) chenEl.style.visibility = ''; api.render(); if (chenComes) await walkTo(chenEl, bx + 60, chenHome, Math.abs(chenHome - bx - 60) / 380 + 0.1); chenEl.style.setProperty('--facing', 1); api.lock(false); sitting = false; }, 420); };
     api.onCgClosed(() => { if (wind && phase === 'cg') phase = 'sit'; }); standNow = stand;
     setTimeout(() => { phase = phase === 'settling' ? 'sit' : phase; addEventListener('keydown', onKey); art.addEventListener('pointerdown', onKey); }, 2300);
@@ -280,7 +281,7 @@ export async function install(api) {
     if (ch3) {
       if (st.ch3_done === 'true') { const rest = [['', '〔晨把畫筆放下，看著東邊的海。〕']]; return justDone ? openDialogue(rest) : errandChen(rest); }   // 第三章做完之後的上島自由時間：可以接晨的小委託
       if (!allDone()) return openDialogue([['晨', '昨天在色之國，妳碰到灰色的地方，顏色就回來了。這裡也可以。']]);
-      api.lock(true); setQuest(''); await paintCanvas();
+      api.lock(true); setQuest(''); CT.completeFreeInteraction(); await paintCanvas();
       if (CT.embedded) { save({ s2_flowers_submitted: 'true' }); await new Promise(ok => setTimeout(ok, 500)); return CT.cut(6, { cg: '3-15' }); }   // 嵌在 Larch：CG 3-15 那一段交給對話卡演，回來接第 6 步
       setTimeout(() => { api.showCg(true, EASEL_IMG.painting, EASEL_AR, EASEL_TRIM); setTimeout(() => openDialogue(CG315, [() => { api.hideCg(); removeGray(); pal.hidden = true; if (rabG) paintRabbit(rabZone); if (bfG && bfG.isConnected) bfZ.hot.fn(); justDone = true; save({ ch3_done: 'true', s2_flowers_submitted: 'true', chapter3_dawn_done: 'true' }); api.lock(false); }]), 700); }, 600); return;
     }
@@ -295,7 +296,7 @@ export async function install(api) {
   const ERR_CHEN_DONE = [['茶語', '給你。我覺得這朵最漂亮。'], ['晨', '所以看到它，才想到妳。'], ['茶語', '你……'], ['晨', '這盆小番茄苗給妳。是我種的。等它變紅，妳再拿來給我看。我想畫它。'], ['茶語', '蛤？畫番茄喔？不是畫我喔？'], ['晨', '嗯。這樣妳就會多來找我一次。'], ['茶語', '……你想見我，可以直接講啦。真的不是畫我？'], ['晨', '……我想見妳。……現在就想畫妳。'], ['茶語', '我現在就在這裡啊。'], ['', '〔晨笑了。〕']];
   function errandChen(after) {
     if (st.errand_chen === 'done') return openDialogue(after);
-    if (st.errand_chen === 'found') return openDialogue(ERR_CHEN_DONE, [() => { save({ errand_chen: 'done' }); sfx.heart(); heart(chenHome, 0.36); }]);
+    if (st.errand_chen === 'found') return openDialogue(ERR_CHEN_DONE, [() => { save({ errand_chen: 'done' }); CT.completeFreeInteraction(); sfx.heart(); heart(chenHome, 0.36); }]);
     if (st.errand_chen === 'accepted') { api.toast('花田裡有一朵特別大的藍色的花'); return; }
     return openDialogue(ERR_CHEN_ASK, [], line => { if (line === '（接下晨的小委託：摘一朵藍色的花。）') { save({ errand_chen: 'accepted' }); showBig(); } });
   }
@@ -373,7 +374,7 @@ export async function install(api) {
     const refresh = () => { setQuest(questText()); for (const row of rows) { row.z.btn.dataset.name = row.z.hot.name(); } api.render(); };
     async function finish() {
       api.lock(true);
-      openDialogue([['詩', '明年這裡會整片都是吧？'], ['晨', '……嗯。']], [() => { setTimeout(() => { save({ c7g_done: 'true' }); api.lock(false); refresh(); }, 2000); }]);   // 沒有人接下去，停兩秒
+      openDialogue([['詩', '明年這裡會整片都是吧？'], ['晨', '……嗯。']], [() => { setTimeout(() => { save({ c7g_done: 'true' }); CT.completeFreeInteraction(); api.lock(false); refresh(); }, 2000); }]);   // 沒有人接下去，停兩秒
     }
     async function act(row) {
       if (busy || api.cgOpen()) return; const s0 = rowState(row.i);

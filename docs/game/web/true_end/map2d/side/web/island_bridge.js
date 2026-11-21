@@ -83,7 +83,7 @@
   window.IslandBridge = {
     bgm: bgm,
     // 換到島的另一頁時要跟著帶的網址參數（自由逛、配樂）
-    carry: function (url) { ['bgm', 'visit'].forEach(function (key) { if (Q.has(key) && !url.searchParams.has(key)) url.searchParams.set(key, Q.get(key)); }); return url; },
+    carry: function (url) { ['bgm', 'visit', 'visitChapter', 'debug'].forEach(function (key) { if (Q.has(key) && !url.searchParams.has(key)) url.searchParams.set(key, Q.get(key)); }); return url; },
     embedded: embedded,
     overlay: function () { return publicOverlay(); },
     merge: function (initVars) { return Object.assign({}, initVars || {}, publicOverlay()); },
