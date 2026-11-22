@@ -1,3 +1,4 @@
+import { horizontalInteraction, hintBlocked, stepToward } from './walk_interaction.mjs';
 // 朝霞丘「工作室模式」：一個畫面＝一張完整的畫（不拆層、不捲動），畫等比縮放置中（studio_web 轉身版的 fitArt），
 // 角色在畫面內左右走，走到邊緣（或按 ‹ ›）快速平移加淡入切到相鄰那張（studio_web 的 turn）。
 // 三個畫面：左＝櫻花林與進場小路（wide_left 完整版）、中＝03 原圖、右＝梯田到海（wide_right 完整版）。
@@ -27,6 +28,13 @@ let active = null, player = null, keyDir = 0, pointerDir = 0, targetX = null, bu
 
 const sceneByKey = k => SCENES.find(s => s.key === k) || SCENES[1];
 const indexOf = k => SCENES.findIndex(s => s.key === k);
+const clickWalk = horizontalInteraction({
+  position: () => state.x,
+  bounds: () => sceneByKey(state.scene).walk,
+  available: h => !busy && !panelOpen && sceneByKey(state.scene).hotspots.includes(h),
+  interact: h => interact(h.id),
+  blocked: hintBlocked,
+});
 function fitArt() {
   const s = Math.min(innerWidth / FRAME.width, innerHeight / FRAME.height), w = FRAME.width * s, h = FRAME.height * s;
   return { left: (innerWidth - w) / 2, top: (innerHeight - h) / 2, width: w, height: h };
@@ -45,7 +53,12 @@ function buildLayer(sc) {
   for (const h of sc.hotspots) {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'hotspot'; b.dataset.id = h.id; b.dataset.name = h.name; b.setAttribute('aria-label', h.name);
     Object.assign(b.style, { left: h.x * 100 + '%', top: h.y * 100 + '%', width: h.w * 100 + '%', height: h.h * 100 + '%' });
-    b.addEventListener('click', e => { e.stopPropagation(); interact(h.id); }); b.addEventListener('pointerdown', e => e.stopPropagation()); art.appendChild(b);
+    b.addEventListener('click', e => { e.stopPropagation();
+      cancelClickWalk();
+      if (e.detail === 0) return interact(h.id);
+      keyDir = pointerDir = 0;
+      h.reach = NEARBY + h.w / 2;
+      clickWalk.begin(h); }); b.addEventListener('pointerdown', e => e.stopPropagation()); art.appendChild(b);
   }
   art.addEventListener('pointerdown', onDown); art.addEventListener('pointerup', onUp); art.addEventListener('pointercancel', onUp); art.addEventListener('pointermove', onMove);
   layer.appendChild(art); layoutArt(layer); return layer;
@@ -60,11 +73,15 @@ function show(key, x, face) {
 }
 function turn(dir) {
   if (busy) return; const i = indexOf(state.scene), ni = i + dir; if (ni < 0 || ni >= SCENES.length) return;
-  busy = true; keyDir = pointerDir = 0; targetX = null; const next = SCENES[ni]; const old = active;
+  busy = true; keyDir = pointerDir = 0; cancelClickWalk(); const next = SCENES[ni]; const old = active;
   const incoming = buildLayer(next); incoming.classList.add('entering'); incoming.style.setProperty('--enter-from', dir > 0 ? '100%' : '-100%'); stage.appendChild(incoming);
   state.scene = next.key; state.x = dir > 0 ? next.walk[0] + 0.02 : next.walk[1] - 0.02; state.face = dir; player = incoming.querySelector('.person.tea'); renderPlayer();
   requestAnimationFrame(() => requestAnimationFrame(() => { old.classList.add('leaving', dir > 0 ? 'to-left' : 'to-right'); incoming.classList.add('arrived'); }));
   setTimeout(() => { old.remove(); incoming.classList.remove('entering', 'arrived'); active = incoming; busy = false; syncUi(); save(); }, 450);
+}
+function cancelClickWalk() {
+  clickWalk.cancel();
+  targetX = null;
 }
 function nearest() {
   const sc = sceneByKey(state.scene); let best = null;
@@ -84,6 +101,7 @@ function openPanel(title, lines, note) {
 }
 function closePanel() { panel.classList.remove('on'); scrim.classList.remove('on'); panelOpen = false; }
 function interact(id) {
+  cancelClickWalk();
   if (id === 'bench') { document.getElementById('cg-img').src = '../../../garden/concept/03_dawn_hill.webp'; cg.style.display = 'block'; return; }
   if (id === 'exit') { if (inFrame) { parent.postMessage({ type: 'larch:set', variables: { dawn_visited: 'true' } }, '*'); parent.postMessage({ type: 'larch:complete' }, '*'); } else openPanel('回全島', ['（嵌進 Larch 時這裡會回到全島地圖的 (36,9)。）']); return; }
   const t = TALK[id]; if (t) openPanel(t.title, t.text, t.note);
@@ -92,11 +110,14 @@ document.getElementById('panel-close').addEventListener('click', closePanel); sc
 document.getElementById('turn-left').addEventListener('click', () => turn(-1)); document.getElementById('turn-right').addEventListener('click', () => turn(1));
 
 function step(dt) {
-  if (busy || !player) return; let dir = keyDir || pointerDir;
-  if (targetX !== null) { const d = targetX - state.x; if (Math.abs(d) < 0.004) { targetX = null; dir = 0; } else dir = Math.sign(d); }
+  if (busy || !player) return;
+  const approaching = clickWalk.active;
+  const target = approaching ? clickWalk.destination() : targetX;
+  const dir = target === null ? keyDir || pointerDir : Math.sign(target - state.x);
+  if (!approaching && targetX === state.x) targetX = null;
   const walking = !!dir && !panelOpen; player.classList.toggle('walking', walking);
   if (walking) {
-    state.face = dir; state.x += dir * WALK * dt / FRAME.width; const [a, b] = sceneByKey(state.scene).walk;
+    state.face = dir; state.x = target === null ? state.x + dir * WALK * dt / FRAME.width : stepToward(state.x, target, WALK * dt / FRAME.width); const [a, b] = sceneByKey(state.scene).walk;
     if (state.x < a) { state.x = a; if (indexOf(state.scene) > 0) { turn(-1); return; } }
     if (state.x > b) { state.x = b; if (indexOf(state.scene) < SCENES.length - 1) { turn(1); return; } }
     renderPlayer(); syncUi();
@@ -107,17 +128,21 @@ function frame(t) { const dt = Math.min((t - lastT) / 1000, .05); lastT = t; ste
 addEventListener('keydown', e => {
   if (panelOpen) { if (e.key === 'Escape' || e.key === 'Enter') closePanel(); return; }
   if (cg.style.display === 'block') { cg.style.display = 'none'; return; }
-  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); targetX = null; keyDir = -1; }
-  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); targetX = null; keyDir = 1; }
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); cancelClickWalk(); keyDir = -1; }
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); cancelClickWalk(); keyDir = 1; }
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const k = nearest(); if (k) interact(k); }
 });
 addEventListener('keyup', e => { if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && keyDir < 0) keyDir = 0; if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && keyDir > 0) keyDir = 0; });
 let down = null;
-function onDown(e) { down = { x: e.clientX, y: e.clientY, held: false }; down.timer = setTimeout(() => { if (down) { down.held = true; pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; targetX = null; } }, 180); }
+function onDown(e) { cancelClickWalk(); if (down) clearTimeout(down.timer); down = { x: e.clientX, y: e.clientY, held: false }; down.timer = setTimeout(() => { if (down) { down.held = true; pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; targetX = null; } }, 180); }
 function onMove(e) { if (down && down.held) pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; }
+addEventListener('pointerdown', () => { if (clickWalk.active) cancelClickWalk(); }, true);
+addEventListener('keydown', e => {
+  if (clickWalk.active && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) cancelClickWalk();
+}, true);
 function onUp(e) {
   if (!down) return; clearTimeout(down.timer); const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
-  if (!down.held && moved < 14 && !panelOpen) { const r = fitArt(); const xr = (e.clientX - r.left) / r.width, yr = (e.clientY - r.top) / r.height; if (yr >= FEET - 0.12 && xr >= 0 && xr <= 1) targetX = xr; }
+  if (e.type === 'pointerup' && !down.held && moved < 14 && !panelOpen) { const r = fitArt(); const xr = (e.clientX - r.left) / r.width, yr = (e.clientY - r.top) / r.height; if (yr >= FEET - 0.12 && xr >= 0 && xr <= 1) targetX = xr; }
   down = null; pointerDir = 0;
 }
 addEventListener('resize', () => { if (active) layoutArt(active); });

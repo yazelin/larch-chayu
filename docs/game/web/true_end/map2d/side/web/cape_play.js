@@ -15,7 +15,7 @@ export async function install(api) {
   const smooth = t => t * t * (3 - 2 * t), lerp = (a, b, t) => a + (b - a) * t;
   const Q = new URLSearchParams(location.search); document.body.classList.add('cape'); document.title = M.name + '（一整張長畫）'; document.getElementById('stage').setAttribute('aria-label', M.name);
   document.querySelector('#cg span').textContent = '點一下回到月光岬';
-  document.getElementById('hint').textContent = '方向鍵或 A、D 沿石板路走・點地面走過去・T 停下時間';
+  document.getElementById('hint').textContent = '方向鍵移動，點地面或物件走過去。按 T 停下時間';
 
   // ── 樣式（只給月光岬用，掛在 body.cape 底下；flat.html 不動） ──
   const css = document.createElement('style'); css.textContent = `
@@ -110,13 +110,14 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   function zone(id, name, r, onClick, opt = {}) {   /* r：x、w、y、h 都是長畫 px；opt.when 回 false 時整個收起來 */
     const b = document.createElement('button'); b.type = 'button'; b.className = 'hotspot'; b.dataset.id = id; b.dataset.name = typeof name === 'function' ? name() : name; b.setAttribute('aria-label', b.dataset.name);
     Object.assign(b.style, { left: X(r.x), top: Y(r.y), width: X(r.w), height: Y(r.h) });
-    const hot = { id, name, x: r.x, w: r.w, y: r.y / H, h: r.h / H };
+    const hot = { id, name, x: r.x, w: r.w, y: r.y / H, h: r.h / H, reach: opt.reach,
+      approachX: opt.approachX, canReach: opt.canReach, approachStop: opt.approachStop };
     const z = { id, btn: b, hot, r, vis: true, when: opt.when || null,
       refresh() { const v = z.vis && (!z.when || !!z.when()); if (b.hidden !== !v) { b.hidden = !v; hot.hidden = !v; } },
       off() { z.vis = false; b.remove(); const i = api.hot.indexOf(hot); if (i >= 0) api.hot.splice(i, 1); const k = zones.indexOf(z); if (k >= 0) zones.splice(k, 1); },
       hide() { z.vis = false; z.refresh(); }, show() { z.vis = true; z.refresh(); },
       moveTo(cx, top) { hot.x = cx - r.w / 2; b.style.left = X(hot.x); if (top !== undefined) { hot.y = top / H; b.style.top = Y(top); } } };
-    hot.fn = () => onClick(z); b.addEventListener('click', e => { e.stopPropagation(); hot.fn(); }); b.addEventListener('pointerdown', e => e.stopPropagation());
+    hot.fn = () => onClick(z); api.bindHotspot(b, hot);
     art.appendChild(b); api.hot.push(hot); zones.push(z); z.refresh(); return z;
   }
   const refreshZones = () => { for (const z of zones) z.refresh(); };
@@ -134,6 +135,21 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   const pose = { x: state.x, y: R[0].y, k: 1 };
   function setPose(x, y, k) { pose.x = x; pose.y = y; pose.k = k; state.x = x; tea.style.top = Y(y); tea.style.height = (teaH0 * k) + '%'; tea.style.setProperty('--k', k.toFixed(3)); }
   const me = { mode: 'route', s: 90, stone: 0, target: null, busy: false, idle: 0, moving: false };
+  api.setClickMovement({
+    bounds: () => me.mode === 'route' ? [R.at(-1).x, R[0].x] : me.mode === 'plat' ? [PL.x0, PL.x1] : [pose.x, pose.x],
+    available: () => !me.busy && !hold,
+    move: x => { me.target = x === null || me.mode !== 'route' ? x : sOfX(x); },
+    cancel: () => { me.target = null; },
+  });
+  // 上下層之間保留浮空石的操作。走到同一層的路口後，玩家可接著跳。
+  function layerApproach(mode) {
+    return {
+      canReach: () => me.mode === mode(),
+      approachStop: () => me.mode === mode() ? null : me.mode === 'route' ? posAt(S_FOOT).x : me.mode === 'plat' ? PL.land[0] : pose.x,
+    };
+  }
+  const onRoute = layerApproach(() => 'route');
+  Object.assign(api.hot.find(h => h.id === 'exit'), onRoute);
   let hold = 0; const lockOn = () => { hold += 1; api.lock(true); }, lockOff = () => { hold = Math.max(0, hold - 1); if (!hold) api.lock(false); };
   if (Q.has('x') && !onPlat) me.s = sOfX(Number(Q.get('x')) * W);
   else if (savedPos && savedPos.mode === 'plat') { me.mode = 'plat'; }
@@ -309,13 +325,14 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     me.busy = false; if (queued) { const d = queued; queued = 0; jump(d); } }
   thawHooks.push(() => { if (me.mode === 'stone' && !me.busy) sinkDown(); else if (me.mode === 'stone') { const chk = () => { if (me.mode !== 'stone') return; if (me.busy) { setTimeout(chk, 60); return; } if (!tm.frozen) sinkDown(); }; setTimeout(chk, 60); } });
   const nextSpot = dir => { if (me.mode === 'route') return floats[0]; if (me.mode === 'plat') return floats[4]; const n = me.stone + dir; if (n > 5) return { cx: TOP.x, cy: TOP.y - 20 }; if (n < 1) return { cx: GROUND.x, cy: GROUND.y - 20 }; return floats[n - 1]; };
-  const zUp = zone('jump_up', () => me.mode === 'route' ? '跳上浮空石' : '往上跳', { x: 0, w: 62, y: 0, h: 64 }, () => jump(1), { when: () => me.mode !== 'plat' });
-  const zDown = zone('jump_down', () => me.mode === 'plat' ? '跳下浮空石' : '往下跳', { x: 0, w: 62, y: 0, h: 64 }, () => jump(-1), { when: () => me.mode !== 'route' });
+  const zUp = zone('jump_up', () => me.mode === 'route' ? '跳上浮空石' : '往上跳', { x: 0, w: 62, y: 0, h: 64 }, () => jump(1), { when: () => me.mode !== 'plat', approachX: () => me.mode === 'route' ? posAt(S_FOOT).x : pose.x, reach: 60 });
+  const zDown = zone('jump_down', () => me.mode === 'plat' ? '跳下浮空石' : '往下跳', { x: 0, w: 62, y: 0, h: 64 }, () => jump(-1), { when: () => me.mode !== 'route', approachX: () => me.mode === 'plat' ? TOP.x : pose.x, reach: 60 });
   api.onFrame(() => { const u = nextSpot(1), d = nextSpot(-1); zUp.moveTo(u.cx, u.cy - 40); zDown.moveTo(d.cx, d.cy - 40); });
   addEventListener('keydown', e => {
     if (api.panelOpen() || api.cgOpen() || document.getElementById('gearcard')?.style.display === 'block') return; const k = e.key;
     if (k === 't' || k === 'T') { freeze(); return; }
     const up = k === 'ArrowUp' || k === 'w' || k === 'W', down = k === 'ArrowDown' || k === 's' || k === 'S', left = k === 'ArrowLeft' || k === 'a' || k === 'A', right = k === 'ArrowRight' || k === 'd' || k === 'D', act = k === 'Enter' || k === ' ';
+    if (up || down || left || right) api.cancelClickWalk();
     if (me.mode === 'stone') { if (!(up || down || left || right || act)) return; e.preventDefault(); e.stopImmediatePropagation();
       if (act && me.stone === GEAR_STONE && gearOn('c') && !me.busy) { takeGear('c'); return; } jump(up || left || act ? 1 : -1); return; }
     if (me.mode === 'route' && up && Math.abs(me.s - S_FOOT) < 60) { e.preventDefault(); jump(1); }
@@ -354,8 +371,9 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   const zGearA = zone('gear_a', '礁石縫裡的齒輪', { x: GEAR_A.x - 26, w: 52, y: GEAR_A.y - 34, h: 46 }, async () => {
     if (me.busy) return; if (!nearShore()) { tip('走到浪邊才拿得到'); if (me.mode === 'route') me.target = S_SHORE; return; }
     if (!tm.frozen) { tip(wave.level < 0.3 ? '浪一下子又蓋上來。趁浪退的時候按「停下時間」' : '浪蓋著。等浪退下去，再按「停下時間」'); return; }
-    if (wave.level >= 0.3) { tip('停住了，可是浪還蓋著。等浪退下去再停一次'); return; } takeGear('a'); }, { when: () => gearOn('a') });
-  const zGearC = zone('gear_c', '浮空石上的齒輪', { x: 0, w: 44, y: 0, h: 40 }, () => { if (me.busy) return; if (me.mode !== 'stone' || me.stone !== GEAR_STONE) { tip('要跳到那一塊浮空石上才拿得到'); return; } takeGear('c'); }, { when: () => gearOn('c') });
+    if (wave.level >= 0.3) { tip('停住了，可是浪還蓋著。等浪退下去再停一次'); return; } takeGear('a'); }, { ...onRoute, approachX: () => posAt(S_SHORE).x, reach: 30, when: () => gearOn('a') });
+  const zGearC = zone('gear_c', '浮空石上的齒輪', { x: 0, w: 44, y: 0, h: 40 }, () => { if (me.busy) return; if (me.mode !== 'stone' || me.stone !== GEAR_STONE) { tip('要跳到那一塊浮空石上才拿得到'); return; } takeGear('c'); }, { when: () => gearOn('c'), canReach: () => me.mode === 'stone' && me.stone === GEAR_STONE,
+    approachStop: () => me.mode === 'route' ? posAt(S_FOOT).x : me.mode === 'plat' ? TOP.x : pose.x });
   api.onFrame(() => { if (gearEls.a) gearEls.a.style.opacity = clamp(1 - (wave.level - 0.2) / 0.25, 0, 1).toFixed(2);
     if (gearEls.c) { const f = floats[GEAR_STONE - 1]; const el = gearEls.c; el._x = f.cx + 9; el._y = f.cy + 1; el.style.left = X(el._x); el.style.top = Y(el._y); zGearC.moveTo(el._x, el._y - 30); } });
 
@@ -371,6 +389,9 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   api.onFrame(dt0 => { const dt = wdt(dt0); bird.a += dt * 1.45; const p = birdAt(bird.a), q = birdAt(bird.a + 0.02); bird.x = p.x; bird.y = p.y; bird.face = q.x >= p.x ? 1 : -1; bird.flap += dt * 9;
     bird.el.style.left = X(bird.x); bird.el.style.top = Y(bird.y + BIRD_H / 2); bird.el.style.setProperty('--facing', bird.face); bird.el.style.setProperty('--rot', (clamp((q.y - p.y) * 9, -22, 22) * bird.face) + 'deg');
     const fr = (Math.floor(bird.flap) % 2) + (bird.gear ? 0 : 2); if (birdSheet.dataset.fr !== String(fr)) { birdSheet.dataset.fr = String(fr); birdSheet.src = birdSrc[fr]; }
+    // 停住的齒輪要點得到，即使鳥停在蘑菇等固定熱區前面。
+    const priority = tm.frozen && bird.gear && gearOn('b') ? '5' : '3';
+    if (zBird.btn.style.zIndex !== priority) zBird.btn.style.zIndex = priority;
     zBird.moveTo(bird.x + (bird.gear ? bird.face * 12 : 0), bird.y - BIRD_H / 2 - 8); });
 
   // ── 明 ──
@@ -398,7 +419,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
       if (Math.abs(d) > 10) { ming.s += Math.sign(d) * Math.min(Math.abs(d) - 6, 600 * k * dt); moving = true; mingLook(d > 0 ? -1 : 1); } else mingLook(pose.x - ming.x);
       const p = posAt(ming.s); mingPose(p.x, p.y + 1, p.h / BASE_H); walkAnim(mingEl, ming.t, moving); });
   } else { mingPose(PL.ming[0], PL.ming[1], KP); mingLook(1); }
-  const zMing = zone('ming', () => ch5 ? (got.size >= 3 && !on('c5_cg') ? '把齒輪交給明' : '明') : '跟明說話', { x: 0, w: 60, y: 0, h: 100 }, () => talkMing(), { when: () => !ming.busy });
+  const zMing = zone('ming', () => ch5 ? (got.size >= 3 && !on('c5_cg') ? '把齒輪交給明' : '明') : '跟明說話', { x: 0, w: 60, y: 0, h: 100 }, () => talkMing(), { ...layerApproach(() => ming.where), when: () => !ming.busy });
   api.onFrame(() => { const h = mingHpx(); const w = Math.max(40, h * 0.5); zMing.r.w = w; zMing.hot.w = w; zMing.btn.style.width = X(w); zMing.btn.style.height = Y(h + 8); zMing.hot.h = (h + 8) / H; zMing.moveTo(ming.x, ming.y - h - 4); });
   // 到了一個地方（岩壁下、平台）之後要接的事
   function onArrive() {
@@ -466,7 +487,8 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   }
   zone('clock', '鐘面', { x: CL.cx - 34, w: 68, y: CL.cy - 40, h: 80 }, () => {
     if (te && on('te_talk') && !on('te_flipped') && me.mode === 'plat') { if (!tm.frozen) { tip('指針還在轉。先按「停下時間」'); return; } if (gcStep === 0) openGearCard(); return; }
-    sfx.tick(clock.dir === 'ccw'); tip(clock.dir === 'stop' ? '指針停著' : clock.dir === 'ccw' ? '指針逆時針走' : '指針順時針走'); });
+    sfx.tick(clock.dir === 'ccw'); tip(clock.dir === 'stop' ? '指針停著' : clock.dir === 'ccw' ? '指針逆時針走' : '指針順時針走');
+  }, { ...layerApproach(() => te && on('te_talk') && !on('te_flipped') ? 'plat' : me.mode) });
 
   // ── 第五章的劇情觸發 ──
   if (ch5) {
@@ -490,7 +512,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   // ── 海龜：在左下的礁石邊慢慢游，點了抬頭 ──
   const turSrc = []; for (const k of [0, 1]) turSrc.push((await paperize(`../art/sprites/turtle_${k}.webp`, { edge: 5, jitter: 2 })).src);
   turtle.el = await sprite('../art/sprites/turtle_0.webp', 'turtle flat', { edge: 5, jitter: 2 }); const TUR_H = 30; const turSheet = turtle.el.querySelector('.sheet'); place(turtle.el, turtle.x, turtle.y, TUR_H); under(turtle.el); turtle.el.style.zIndex = 1;
-  const zTurtle = zone('turtle', '海龜', { x: turtle.x - 34, w: 68, y: turtle.y - TUR_H - 12, h: TUR_H + 18 }, () => { stats.turtle += 1; sfx.splash(); turtle.up = 2.6; turSheet.src = turSrc[1]; turtle.el.style.setProperty('--dip', '8%'); drops(turtle.x, turtle.y - 10, 4); setTimeout(() => heart(turtle.x + turtle.dir * 14, turtle.y - TUR_H - 6), 350); });
+  const zTurtle = zone('turtle', '海龜', { x: turtle.x - 34, w: 68, y: turtle.y - TUR_H - 12, h: TUR_H + 18 }, () => { stats.turtle += 1; sfx.splash(); turtle.up = 2.6; turSheet.src = turSrc[1]; turtle.el.style.setProperty('--dip', '8%'); drops(turtle.x, turtle.y - 10, 4); setTimeout(() => heart(turtle.x + turtle.dir * 14, turtle.y - TUR_H - 6), 350); }, { ...onRoute, approachX: () => posAt(S_SHORE).x, reach: 60 });
   api.onFrame(dt0 => { const dt = wdt(dt0); turtle.t += dt;
     if (turtle.up > 0) { turtle.up -= dt; if (turtle.up <= 0) { turSheet.src = turSrc[0]; turtle.el.style.setProperty('--dip', '26%'); } }
     else { turtle.x += turtle.dir * 9 * dt; if (turtle.x > 150) turtle.dir = -1; if (turtle.x < 52) turtle.dir = 1; }
@@ -535,7 +557,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   const setLantern = v => { lanternOn = v; if (lanOff) lanOff.style.opacity = v ? '0' : '1'; lanGlow.classList.toggle('off', !v); }; setLantern(lanternOn);
   zone('lantern', () => lanternOn ? '吹熄提燈' : '點亮提燈', { x: 1996, w: 104, y: 520, h: 190 }, async z => { if (lanternBusy || me.busy) return; lanternBusy = true; if (me.mode === 'route') await approach(LAN.x - 40, 260);
     if (lanternOn) { sfx.blow(); setLantern(false); } else { sfx.ignite(); setLantern(true); lanGlow.style.setProperty('--s', '1.5'); setTimeout(() => lanGlow.style.setProperty('--s', '1'), 450); sparkle(LAN.x, LAN.y, 5, 0.6); }
-    save({ [K('lantern')]: String(lanternOn) }); z.btn.dataset.name = lanternOn ? '吹熄提燈' : '點亮提燈'; await wait(500); lanternBusy = false; });
+    save({ [K('lantern')]: String(lanternOn) }); z.btn.dataset.name = lanternOn ? '吹熄提燈' : '點亮提燈'; await wait(500); lanternBusy = false; }, { ...onRoute, approachX: () => LAN.x - 40, reach: 260 });
 
   // ── 路牌：明貼的便利貼（紙片），角落畫著小笑臉；便利貼上的字用介面顯示 ──
   const sticky = await sprite('../art/sprites/sticky.webp', 'sticky flat spin', { edge: 3, jitter: 1 }); place(sticky, 2196, 512, 30); sticky.style.setProperty('--rot', '5deg'); let signN = 0;
@@ -563,7 +585,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   { const g = cloudCv.getContext('2d'); g.filter = 'blur(7px)'; const blobs = [[70, 78, 54, 26], [120, 60, 60, 34], [178, 70, 62, 30], [236, 80, 50, 22], [150, 88, 110, 22]]; for (const [x, y, rx, ry] of blobs) { g.fillStyle = 'rgba(52,66,128,.96)'; g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, 6.283); g.fill(); }
     g.filter = 'blur(5px)'; for (const [x, y, rx, ry] of blobs.slice(0, 4)) { g.fillStyle = 'rgba(132,150,214,.5)'; g.beginPath(); g.ellipse(x - 4, y - ry * 0.55, rx * 0.7, ry * 0.3, 0, 0, 6.283); g.fill(); } }
   const cloud = { on: false, t: 0 };
-  zone('moon', '月亮', { x: MOON.x - 58, w: 116, y: MOON.y - 58, h: 116 }, () => { if (cloud.on) return; cloud.on = true; cloud.t = 0; stats.clouds += 1; sfx.cloud(); });
+  zone('moon', '月亮', { x: MOON.x - 58, w: 116, y: MOON.y - 58, h: 116 }, () => { if (cloud.on) return; cloud.on = true; cloud.t = 0; stats.clouds += 1; sfx.cloud(); }, { approachX: () => clamp(MOON.x, R.at(-1).x, R[0].x) });
   api.onFrame(dt0 => { if (!cloud.on) return; const dt = wdt(dt0); cloud.t += dt / 9; const e = Math.min(1, cloud.t); const x = lerp(MOON.x - 330, MOON.x + 190, e); cloudCv.style.left = X(x); cloudCv.style.opacity = String(clamp(Math.min(e, 1 - e) * 8, 0, 1));
     const c = x + CLOUD.w / 2; moonDim = clamp(1 - Math.abs(c - MOON.x) / 120, 0, 1); moonGlow.style.setProperty('--o', (1 - moonDim * 0.8).toFixed(2)); moonGlow.style.opacity = (1 - moonDim * 0.8).toFixed(2); seaShade.style.opacity = moonDim.toFixed(2);
     if (e >= 1) { cloud.on = false; moonDim = 0; moonGlow.style.opacity = ''; seaShade.style.opacity = '0'; cloudCv.style.opacity = '0'; } });
@@ -601,7 +623,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   await plantSpot('primrose', 1262, 668, '月見草', () => tm.frozen ? '' : '花一下就合起來了。停下時間再摘摘看');
   window.dawnHill.cape = { st, chapter, me, pose, tm, clock, floats, wave, bird, turtle, ming, flies, fast, flyState, leaves, cones, glints, cloud, tulip, stats, zones, got, S_FOOT, S_SHORE, TOTAL, posAt, sOfX,
     freeze, thaw, jump, lanternOn: () => lanternOn, giveState: () => giveState, gearCard: () => gcStep, moonDim: () => moonDim, busy: () => hold > 0 || me.busy || ming.busy,
-    goto(s) { me.mode = 'route'; me.s = clamp(s, 0, TOTAL); me.target = null; const p = posAt(me.s); setPose(p.x, p.y, p.h / BASE_H); prevX = pose.x; api.render(); refreshZones(); },
+    goto(s) { api.cancelClickWalk(); me.mode = 'route'; me.s = clamp(s, 0, TOTAL); me.target = null; const p = posAt(me.s); setPose(p.x, p.y, p.h / BASE_H); prevX = pose.x; api.render(); refreshZones(); },
     walkTo(s) { me.target = clamp(s, 0, TOTAL); } };
   api.render();
 }

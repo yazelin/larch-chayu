@@ -525,22 +525,19 @@ screen.setLoadingArt({ walker: art.walker, ...art.casts[screen.dataset.cast] });
 })();
 </script>
 <!-- page-loading:screen:end -->
-<script src="../page_loading.js"></script>
-<link rel="stylesheet" href="studio_features.css">
-<link rel="stylesheet" href="studio_decor.css">
-<link rel="stylesheet" href="studio_computer.css">
-<link rel="modulepreload" href="studio_unlock.mjs">
-<script src="studio_storage.js"></script>
-<script src="ming_game_assets.js"></script>
-<script src="walk_sway.js"></script>
-<script src="studio_character_view.js"></script>
 <script>
 const studioQuery = new URLSearchParams(location.search);
-const realChat = window.parent !== window && studioQuery.get('embed') === '1'
-  && studioQuery.get('place') === 'real' && studioQuery.get('mode') === 'open_chat';
+const realChat = studioQuery.get('mode') === 'open_chat';
 if (studioQuery.get('mode') === 'turn') document.documentElement.classList.add('turn-mode');
 if (realChat) {
   document.documentElement.classList.add('studio-real-chat');
+  document.title = '夜後明月．晨前朝霞．慕詩客｜開放聊天';
+  const screen = document.getElementById('page-loading');
+  if (screen) {
+    screen.querySelector('.place').textContent = '開放聊天';
+    screen.querySelector('.lab.b').textContent = '開放聊天';
+    screen.querySelector('.walker').hidden = true;
+  }
   // 聊天與存檔模組沿用相同的進場變數，現實場景不用啟動走動引擎。
   window.__studio = { variables: {} };
   window.addEventListener('message', event => {
@@ -551,6 +548,15 @@ if (realChat) {
 }
 // 圖示按鈕用哪一套（studio_icons.mjs）：預設 C 黃銅木頭，網址 ?icons=A|B|C 給作者比較
 document.documentElement.dataset.iconStyle=(function(s){return /^[ABC]$/.test(s)?s:'A';})(String(new URLSearchParams(location.search).get('icons')||'').toUpperCase());</script>
+<script src="../page_loading.js"></script>
+<link rel="stylesheet" href="studio_features.css">
+<link rel="stylesheet" href="studio_decor.css">
+<link rel="stylesheet" href="studio_computer.css">
+<link rel="modulepreload" href="studio_unlock.mjs">
+<script src="studio_storage.js"></script>
+<script src="ming_game_assets.js"></script>
+<script src="walk_sway.js"></script>
+<script src="studio_character_view.js"></script>
 <style>
 /* --hud-clear：Larch 常駐介面（右上角愛心＋手機的紙卡與底下的日期紙卡，框 258×112、離右邊 48px）蓋在這頁上面；
    寬度 900 以下，上緣置中的操作提示與「第 N 天」會碰到它，改排到它底下（同 真結局/map2d/side/web 的 --hud-clear） */

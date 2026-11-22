@@ -1,28 +1,467 @@
 <!doctype html>
-<html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>擦紅茶</title>
+
 <style>
-*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;touch-action:none;background:#382a2c;color:#f8e9d1;font-family:serif}main{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:12px}h1{font-size:20px;font-weight:400;margin:0}p{margin:0;font-size:15px}#desk{position:relative;width:min(92vw,900px);height:min(72vh,620px);border:10px solid #5d3e30;border-radius:12px;background:repeating-linear-gradient(2deg,#96734f 0px,#96734f 32px,#8b6748 34px,#96734f 37px);box-shadow:0 24px 40px #0006;overflow:hidden}canvas{position:absolute;inset:0;width:100%;height:100%}#paper{position:absolute;left:27%;top:25%;width:54%;height:52%;background:linear-gradient(90deg,#e6d5b5 49%,#b4a184 50%,#eee0c4 52%);transform:rotate(-7deg);box-shadow:3px 8px 12px #30201866;border-radius:3px;pointer-events:none}#tea{position:absolute;left:72%;top:5%;color:#624b38;font-size:clamp(14px,3vw,25px)}#poem{position:absolute;left:52%;top:22%;width:44%;height:72%;overflow:hidden;color:#745a43;text-align:center;font-size:clamp(8px,min(1.25vw,1.8vh),15px);line-height:1.5;filter:blur(1px)}#tissue{position:absolute;width:70px;height:58px;left:12%;top:78%;background:repeating-linear-gradient(35deg,#f1e9d9,#e2d7c6 5px,#f6efe4 9px);transform:rotate(14deg);box-shadow:1px 3px 8px #31251b80;pointer-events:none;border-radius:4px;opacity:.95}progress{width:min(80vw,500px);accent-color:#c6b8a3}#desk:focus-visible{outline:3px solid #fff}
+:root { color-scheme:light; --ink:#3b2f2c; --dim:#6e5a52; --gold:#946525; --paper:#f3ecdf; --grain:url("./img/wipe_tea/paper.webp"); }
+* { box-sizing:border-box; }
+html,body { margin:0; width:100%; height:100%; }
+body { color:var(--ink); font-family:"Iansui","LXGW WenKai TC","Kaiti TC","BiauKai",serif; background:radial-gradient(ellipse at 26% 12%,#fae9cc,#e2d3bb 63%,#b6a192); }
+body::before { content:""; position:fixed; inset:0; pointer-events:none; background:var(--grain) repeat; mix-blend-mode:multiply; opacity:.5; }
+button { font:inherit; color:inherit; cursor:pointer; touch-action:manipulation; }
+button:focus-visible,#desk:focus-visible { outline:2px solid var(--gold); outline-offset:3px; }
+.app { position:relative; height:100%; min-height:0; display:grid; grid-template-rows:auto minmax(0,1fr) auto; gap:10px; padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left)); }
+.bar,.controls { width:min(100%,880px); justify-self:center; display:flex; align-items:center; gap:12px; }
+.kicker { color:var(--gold); font-size:clamp(13px,1.3vw,16px); font-weight:400; letter-spacing:.32em; margin:0; white-space:nowrap; }
+.rule { flex:1; height:1px; background:linear-gradient(90deg,#a9783c80,transparent); }
+.count { display:flex; align-items:center; gap:7px; font-size:14px; white-space:nowrap; }
+output { color:var(--gold); min-width:3em; text-align:right; font-variant-numeric:tabular-nums; }
+progress { width:clamp(24px,7vw,96px); height:5px; border:0; border-radius:4px; appearance:none; background:#9f735529; color:var(--gold); }
+progress::-webkit-progress-bar { background:#9f735529; border-radius:4px; }
+progress::-webkit-progress-value { background:#a77134; border-radius:4px; }
+progress::-moz-progress-bar { background:#a77134; border-radius:4px; }
+.paper { border:1px solid #89674b50; border-radius:45% 47% 44% 42% / 19% 21% 18% 20%; background:var(--grain),var(--paper); background-blend-mode:multiply; box-shadow:inset 0 0 11px #96765c38,0 5px 10px -7px #3e2a22aa; }
+button.paper:hover:not([aria-disabled="true"]) { filter:brightness(1.05); }
+.mute { min-height:36px; padding:3px 12px; font-size:13px; letter-spacing:.08em; white-space:nowrap; }
+.stage { min-width:0; min-height:0; display:grid; place-items:center; container-type:size; }
+.frame { width:min(100cqw,calc(100cqh * 900 / 760),880px); aspect-ratio:900 / 760; padding:5px; border:1px solid #785d4955; border-radius:11px; background:var(--grain),var(--paper); background-blend-mode:multiply; box-shadow:inset 0 0 13px #96765c77,0 17px 29px -13px #3e2a22b0; }
+#desk { position:relative; width:100%; height:100%; border-radius:6px; overflow:hidden; isolation:isolate; touch-action:none; user-select:none; -webkit-user-select:none; container-type:inline-size; }
+#desk[data-phase="ready"] { cursor:grab; }
+#desk[data-phase="ready"]:active { cursor:grabbing; }
+#desk[data-soaked] { cursor:default; }
+#desk img,#desk canvas,#notebook { position:absolute; pointer-events:none; -webkit-user-drag:none; }
+#desktop,#stain { inset:0; width:100%; height:100%; }
+#desktop { object-fit:cover; }
+#notebook { transform:rotate(-7deg); }
+#book { width:100%; height:100%; filter:drop-shadow(2px 5px 5px #3b211787); }
+#bleed { left:55%; top:13%; width:40%; height:75%; opacity:.25; mix-blend-mode:multiply; }
+#poem { position:absolute; left:54%; top:16%; width:40%; height:72%; display:grid; align-content:space-evenly; color:#4f405e; letter-spacing:.025em; font-size:2.15cqw; line-height:1.45; mix-blend-mode:multiply; filter:blur(.13cqw) url("#ink"); }
+#poem span:nth-child(2n) { transform:translateX(7%) rotate(-2deg); }
+#stain { mix-blend-mode:multiply; }
+#cup { filter:drop-shadow(2px 4px 3px #3b211788); }
+#tissue,#discard { transform:translate(-50%,-50%); }
+#tissue img,#discard img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; }
+#tissue,#discard { position:absolute; width:14%; aspect-ratio:1.45; pointer-events:none; filter:drop-shadow(2px 4px 3px #3922188c); }
+#tissueWet { opacity:0; transition:opacity .16s; }
+#discard { transform:translate(-50%,-50%) rotate(-21deg); width:13%; }
+.controls { justify-content:center; min-height:48px; }
+.hint { flex:1; margin:0; color:#4d3d37; text-align:center; text-wrap:balance; font-size:clamp(15px,1.3vw,18px); line-height:1.55; letter-spacing:.075em; }
+#replace { min-height:44px; padding:5px 16px; white-space:nowrap; font-size:15px; letter-spacing:.06em; }
+#replace[aria-disabled="true"] { opacity:.5; cursor:default; }
+#replace.attention { background:var(--grain),#e9cf9a; background-blend-mode:multiply; border-color:#a77134; }
+.intro { position:fixed; inset:0; z-index:10; display:grid; place-items:center; background:#e9dfd06b; backdrop-filter:blur(1px); }
+.intro[hidden] { display:none; }
+.card { width:min(440px,88vw); max-height:calc(100% - 24px); overflow:auto; padding:clamp(16px,4vh,28px) 28px; text-align:center; border-radius:8px 11px 10px 7px; box-shadow:inset 0 0 18px #96765c66,0 14px 26px -14px #3c281eaa; }
+.card h2 { margin:8px 0 0; font-weight:400; font-size:clamp(24px,3vw,32px); letter-spacing:.32em; text-indent:.32em; }
+.card .rule { display:block; width:66%; margin:14px auto 16px; background:linear-gradient(90deg,transparent,var(--gold),transparent); }
+.card p { margin:0 0 7px; color:var(--dim); font-size:16px; line-height:1.75; letter-spacing:.06em; text-align:left; }
+.go { min-height:44px; margin-top:12px; padding:8px 26px 8px 30px; background:var(--grain),#e9cf9a; background-blend-mode:multiply; font-size:18px; letter-spacing:.22em; }
+@media (orientation:portrait) and (min-height:470px) {
+  .app { grid-template-rows:minmax(0,1fr) auto auto auto minmax(0,1fr); gap:12px; }
+  .bar { grid-row:2; }
+  .stage { grid-row:3; height:min(calc((100vw - 24px) * 760 / 900),calc(100dvh - 204px)); }
+  .controls { grid-row:4; flex-direction:column; gap:7px; min-height:88px; }
+  .hint { flex:initial; min-height:1.55em; }
+}
+@media (max-width:410px) { .bar { gap:8px; } .count { gap:4px; font-size:13px; } .mute { padding-inline:8px; } }
+@media (prefers-reduced-motion:reduce) { #tissueWet { transition:none; } }
 </style>
-<main><h1>擦紅茶</h1><p id="hint">拖曳衛生紙，慢慢擦桌面。</p><div id="desk" tabindex="0" role="application" aria-label="擦桌面。拖曳衛生紙，或用方向鍵移動衛生紙，按住空白鍵擦拭。"><div id="paper"><span id="tea">茶</span><div id="poem">香葉，嫩芽。<br>慕詩客，愛僧家。<br>碾雕白玉，羅織紅紗。<br>銚煎黃蕊色，碗轉曲塵花。<br>夜後邀陪明月，晨前命對朝霞。<br>洗盡古今人不倦，將知醉後豈堪誇。</div></div><canvas id="stain"></canvas><div id="tissue"></div></div><progress max="100" value="0" aria-label="桌面擦拭進度"></progress></main>
+</head>
+<body>
+<main class="app" id="game" inert>
+  <header class="bar">
+    <h1 class="kicker">擦紅茶</h1><span class="rule"></span>
+    <div class="count"><label for="progress">桌面擦乾</label><progress id="progress" max="100" value="0"></progress><output id="percent" aria-hidden="true">0%</output></div>
+    <button id="mute" class="paper mute" type="button" aria-pressed="false">聲音 開</button>
+  </header>
+  <div class="stage"><div class="frame">
+    <div id="desk" data-phase="intro" tabindex="0" role="application" aria-label="按住拖曳衛生紙擦桌面。鍵盤可用方向鍵移動衛生紙，按住空白鍵擦拭。">
+      <img id="desktop" src="./img/wipe_tea/desk.webp" alt="">
+      <div id="notebook">
+        <img id="book" crossorigin="anonymous" src="./img/wipe_tea/notebook.webp" alt="">
+        <img id="bleed" src="./img/wipe_tea/ink.webp" alt="">
+        <div id="poem" aria-hidden="true">
+          <span>香葉，嫩芽。</span><span>慕詩客，愛僧家。</span><span>碾雕白玉，羅織紅紗。</span>
+          <span>銚煎黃蕊色，碗轉曲塵花。</span><span>夜後邀陪明月，晨前命對朝霞。</span><span>洗盡古今人不倦，將知醉後豈堪誇。</span>
+        </div>
+      </div>
+      <canvas id="stain" width="900" height="760" aria-hidden="true"></canvas>
+      <img id="cup" src="./img/wipe_tea/cup.webp" alt="">
+      <div id="discard" hidden><img src="./img/wipe_tea/tissue_used.webp" alt=""></div>
+      <div id="tissue"><img id="tissueClean" crossorigin="anonymous" src="./img/wipe_tea/tissue_clean.webp" alt=""><img id="tissueWet" src="./img/wipe_tea/tissue_used.webp" alt=""></div>
+    </div>
+  </div></div>
+  <footer class="controls">
+    <p id="hint" class="hint" role="status">按住拖曳衛生紙，擦掉桌上的茶水。</p>
+    <button id="replace" class="paper" type="button" aria-disabled="true">換張衛生紙</button>
+  </footer>
+</main>
+<div class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="title">
+  <div class="card paper">
+    <h2 id="title">擦紅茶</h2><span class="rule"></span>
+    <p>杯子倒了，紅茶正漫向她寫完最後一幕的筆記本。</p>
+    <p>按住拖曳衛生紙，擦掉桌上的茶水。衛生紙吸飽了，就換一張。</p>
+    <button id="go" class="go paper" type="button" disabled>拿衛生紙</button>
+  </div>
+</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="ink" x="-15%" y="-25%" width="130%" height="150%">
+    <feTurbulence type="fractalNoise" baseFrequency=".055" numOctaves="2" seed="6" result="paper"/>
+    <feDisplacementMap in="SourceGraphic" in2="paper" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+<img id="spillArt" crossorigin="anonymous" src="./img/wipe_tea/spill.webp" alt="" hidden>
 <script src="../web/true_end/page_loading.js"></script>
 <script>
-(()=>{
- const desk=document.querySelector('#desk'),canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),tissue=document.querySelector('#tissue'),poem=document.querySelector('#poem'),progress=document.querySelector('progress');
- const W=900,H=620;canvas.width=W;canvas.height=H;
- // Fixed logical surface keeps all stains reachable on narrow screens; only table cells count toward completion.
- const cells=[];for(let y=45;y<H-30;y+=26)for(let x=38;x<W-25;x+=26){if(x>240&&x<745&&y>135&&y<490)continue;if(((x-450)/415)**2+((y-310)/265)**2<1)cells.push({x,y,clean:false});}
- ctx.fillStyle='rgba(89,40,12,.65)';for(const c of cells){ctx.beginPath();ctx.ellipse(c.x,c.y,31,23,.2,0,7);ctx.fill();}
- let done=false,down=false,px=100,py=500,smudge=0;
- function wipe(x,y){if(done)return;px=Math.max(0,Math.min(W,x));py=Math.max(0,Math.min(H,y));tissue.style.left=(px/W*100)+'%';tissue.style.top=(py/H*100)+'%';tissue.style.transform='translate(-50%,-50%) rotate(14deg)';
- ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(px,py,48,0,Math.PI*2);ctx.fill();
- for(const c of cells)if(Math.hypot(c.x-px,c.y-py)<42)c.clean=true;
- if(px>240&&px<745&&py>135&&py<490){smudge=Math.min(8,smudge+.14);poem.style.filter=`blur(${1+smudge}px)`;poem.style.opacity=String(1-smudge*.07);}
- const ratio=cells.filter(c=>c.clean).length/cells.length;progress.value=ratio*100;
- if(cells.every(c=>c.clean)){ctx.clearRect(0,0,W,H);done=true;document.querySelector('#hint').textContent='桌面擦乾了。';setTimeout(()=>{window.__done={result:'wiped',payload:{}};parent.postMessage({type:'larch:complete',result:'wiped',payload:{}},'*');},900);}}
- function point(e){const r=desk.getBoundingClientRect();return [(e.clientX-r.left-desk.clientLeft)/(desk.clientWidth)*W,(e.clientY-r.top-desk.clientTop)/(desk.clientHeight)*H];}
- desk.addEventListener('pointerdown',e=>{if(e.button!==0)return;down=true;desk.setPointerCapture(e.pointerId);wipe(...point(e));});desk.addEventListener('pointermove',e=>{if(down)wipe(...point(e));});for(const type of ['pointerup','pointercancel','lostpointercapture'])desk.addEventListener(type,()=>down=false);
- desk.addEventListener('keydown',e=>{const moves={ArrowLeft:[-24,0],ArrowRight:[24,0],ArrowUp:[0,-24],ArrowDown:[0,24]};if(moves[e.key]){e.preventDefault();const [x,y]=moves[e.key];wipe(px+x,py+y);}else if(e.key===' '){e.preventDefault();wipe(px,py);}});
- parent.postMessage({type:'larch:ready'},'*');window.PageLoading.finish();
+(() => {
+  const $ = id => document.getElementById(id);
+  const W = 900, H = 760, angle = -7 * Math.PI / 180;
+  const book = { x: 92, y: 203, w: 622, h: 336 };
+  const cup = { x: 694, y: 68, w: 166 };
+  const spill = { x: 158, y: 154, w: 584, h: 567 };
+  const desk = $('desk'), ctx = $('stain').getContext('2d');
+  const tissue = $('tissue'), poem = $('poem'), replace = $('replace'), intro = $('intro'), go = $('go');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const wipeHint = '按住拖曳衛生紙，擦掉桌上的茶水。';
+  const capacity = .29;
+  const brushSize = 136, halfBrush = brushSize / 2;
+  const home = { x: 114, y: 697 };
+  let point = home, pointer = null, previous = null, keyboardWipe = false;
+  let phase = 'intro', soaked = false, used = 0, ink = 0, removed = 0, total = 0, lastSound = 0;
+  let dirty = false, frame = 0;
+
+  function surface(w = W, h = H, sample = false) {
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    return canvas.getContext('2d', { willReadFrequently: sample });
+  }
+  const deskWet = surface(), pageWet = surface(), deskDry = surface(), pageDry = surface(), spreadMask = surface();
+  const meter = surface(150, 127, true);
+  let brush;
+  const setPhase = value => { desk.dataset.phase = phase = value; };
+  const showHint = text => { $('hint').textContent = text; };
+
+  function place(element, box) {
+    element.style.left = 100 * box.x / W + '%';
+    element.style.top = 100 * box.y / H + '%';
+    if (box.w) element.style.width = 100 * box.w / W + '%';
+    if (box.h) element.style.height = 100 * box.h / H + '%';
+  }
+  function moveTissue(next) {
+    point = next;
+    place(tissue, next);
+  }
+  place($('notebook'), book);
+  place($('cup'), cup);
+  place($('discard'), { x: 774, y: 694 });
+  moveTissue(home);
+
+  const SND = (() => {
+    let audio, master, noise, muted = false;
+    function unlock() {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!audio) {
+        audio = new AC();
+        master = audio.createGain();
+        master.gain.value = muted ? 0 : .52;
+        master.connect(audio.destination);
+        noise = audio.createBuffer(1, audio.sampleRate * .44, audio.sampleRate);
+        const data = noise.getChannelData(0);
+        let previous = 0;
+        for (let i = 0; i < data.length; i++) {
+          previous = .58 * previous + .42 * (Math.random() * 2 - 1);
+          data[i] = previous;
+        }
+      }
+      if (audio.state === 'suspended') audio.resume().catch(() => {});
+    }
+    function envelope(source, duration, amplitude, filter) {
+      const t = audio.currentTime, gain = audio.createGain();
+      gain.gain.setValueAtTime(.0001, t);
+      gain.gain.exponentialRampToValueAtTime(amplitude, t + .018);
+      gain.gain.exponentialRampToValueAtTime(.0001, t + duration);
+      if (filter) { source.connect(filter); filter.connect(gain); }
+      else source.connect(gain);
+      gain.connect(master);
+      source.start(t);
+      source.stop(t + duration);
+    }
+    function paper(hz, duration, amplitude) {
+      if (!audio || muted) return;
+      const source = audio.createBufferSource(), band = audio.createBiquadFilter();
+      source.buffer = noise;
+      band.type = 'bandpass'; band.frequency.value = hz; band.Q.value = .7;
+      envelope(source, duration, amplitude, band);
+    }
+    return {
+      unlock,
+      mute(value) {
+        muted = value;
+        if (master) master.gain.setTargetAtTime(value ? 0 : .52, audio.currentTime, .025);
+      },
+      rub: () => paper(960, .14, .13),
+      swap: () => paper(1710, .28, .17),
+      drop() {
+        if (!audio || muted) return;
+        const source = audio.createOscillator(), t = audio.currentTime;
+        source.frequency.setValueAtTime(690, t);
+        source.frequency.exponentialRampToValueAtTime(210, t + .1);
+        envelope(source, .15, .105);
+      }
+    };
+  })();
+
+  function prepareLayers() {
+    const cut = surface();
+    cut.translate(book.x + book.w / 2, book.y + book.h / 2);
+    cut.rotate(angle);
+    cut.drawImage($('book'), -book.w / 2, -book.h / 2, book.w, book.h);
+    for (const layer of [deskWet, pageWet]) {
+      layer.drawImage($('spillArt'), spill.x, spill.y, spill.w, spill.h);
+      layer.globalCompositeOperation = layer === deskWet ? 'destination-out' : 'destination-in';
+      layer.drawImage(cut.canvas, 0, 0);
+      layer.globalCompositeOperation = 'source-over';
+    }
+    for (const [wet, dry] of [[deskWet, deskDry], [pageWet, pageDry]]) {
+      dry.filter = 'blur(3px)';
+      dry.drawImage(wet.canvas, 0, 0);
+      dry.filter = 'none';
+      dry.globalCompositeOperation = wet === deskWet ? 'destination-out' : 'destination-in';
+      dry.drawImage(cut.canvas, 0, 0);
+    }
+    total = wetness();
+    // 用衛生紙本身的輪廓做刷頭，軟化紙邊，擦過的區域仍看得見原圖的顏料紋理。
+    const imprint = surface(brushSize, brushSize);
+    imprint.filter = 'blur(8px)';
+    imprint.drawImage($('tissueClean'), 12, 22, brushSize - 24, brushSize - 44);
+    brush = imprint.canvas;
+  }
+
+  function wetness() {
+    const w = meter.canvas.width, h = meter.canvas.height;
+    meter.clearRect(0, 0, w, h);
+    meter.drawImage(deskWet.canvas, 0, 0, w, h);
+    const rgba = meter.getImageData(0, 0, w, h).data;
+    let sum = 0;
+    for (let i = 3; i < rgba.length; i += 4) sum += rgba[i];
+    return sum;
+  }
+
+  function render(spreading = 1) {
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalAlpha = .19;
+    ctx.drawImage(deskDry.canvas, 0, 0);
+    ctx.globalAlpha = .91;
+    ctx.drawImage(deskWet.canvas, 0, 0);
+    ctx.globalAlpha = .22;
+    ctx.drawImage(pageDry.canvas, 0, 0);
+    ctx.globalAlpha = .46 * (1 - removed) * (1 - ink * .38);
+    ctx.drawImage(pageWet.canvas, 0, 0);
+    ctx.globalAlpha = 1;
+    if (spreading >= 1) return;
+    // 從杯口向筆記本揭開原圖，柔邊保留水彩滲開的邊緣。
+    const front = spreading * 590;
+    const sx = 758 - front * .64, sy = 162 + front * .77;
+    const edge = spreadMask.createLinearGradient(sx + 25, sy - 30, sx - 31, sy + 37);
+    edge.addColorStop(0, '#fff'); edge.addColorStop(1, '#fff0');
+    spreadMask.clearRect(0, 0, W, H);
+    spreadMask.fillStyle = edge;
+    spreadMask.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.drawImage(spreadMask.canvas, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function blurInk(level) {
+    ink = Math.min(1, level);
+    poem.style.filter = `blur(${.17 + ink * .49}cqw) url("#ink")`;
+    poem.style.opacity = 1 - ink * .78;
+    $('bleed').style.opacity = .19 + ink * .53;
+  }
+
+  function pressBook(x, y) {
+    // 把擦拭點轉回筆記本自身的角度，只在最後一頁暈開墨跡。
+    const dx = x - book.x - book.w / 2, dy = y - book.y - book.h / 2;
+    const localX = dx * Math.cos(angle) + dy * Math.sin(angle);
+    const localY = -dx * Math.sin(angle) + dy * Math.cos(angle);
+    if (localX > 0 && localX < book.w / 2 - 12 && Math.abs(localY) < book.h / 2 - 15) blurInk(ink + .031);
+  }
+
+  function paint(next) {
+    if (phase !== 'ready' || soaked) return;
+    moveTissue(next);
+    const start = previous || next;
+    const count = Math.max(1, Math.ceil(Math.hypot(next.x - start.x, next.y - start.y) / 18));
+    deskWet.globalCompositeOperation = 'destination-out';
+    for (let i = 1; i <= count; i++) {
+      const x = start.x + (next.x - start.x) * i / count;
+      const y = start.y + (next.y - start.y) * i / count;
+      deskWet.drawImage(brush, x - halfBrush, y - halfBrush);
+      pressBook(x, y);
+    }
+    deskWet.globalCompositeOperation = 'source-over';
+    previous = next;
+    dirty = true;
+    if (!frame) frame = requestAnimationFrame(update);
+    const now = performance.now();
+    if (now - lastSound >= 78) { SND.rub(); lastSound = now; }
+  }
+
+  function update() {
+    frame = 0;
+    if (!dirty || phase !== 'ready') return;
+    dirty = false;
+    const next = 1 - wetness() / total;
+    used += Math.max(0, next - removed);
+    removed = next;
+    const percent = Math.min(99, Math.floor(100 * removed));
+    $('progress').value = percent;
+    $('percent').value = percent + '%';
+    $('tissueWet').style.opacity = Math.min(1, used / capacity);
+    if (removed >= .987) { finish(); return; }
+    if (used >= capacity) {
+      const focused = document.activeElement === desk;
+      desk.dataset.soaked = '';
+      soaked = true;
+      previous = null;
+      keyboardWipe = false;
+      replace.setAttribute('aria-disabled', 'false');
+      replace.classList.add('attention');
+      showHint('衛生紙吸飽了，換一張再擦。');
+      if (focused && pointer === null) replace.focus();
+    }
+    render();
+  }
+
+  function finish() {
+    setPhase('done');
+    removed = 1;
+    deskWet.clearRect(0, 0, W, H);
+    blurInk(1);
+    $('tissueWet').style.opacity = Math.max(.58, Math.min(1, used / capacity));
+    $('progress').value = 100;
+    $('percent').value = '100%';
+    showHint('桌面擦乾了。最後一頁的字已經糊了。');
+    render();
+    setTimeout(() => {
+      window.__done = { result: 'wiped', payload: {} };
+      parent.postMessage({ type: 'larch:complete', ...window.__done }, '*');
+    }, 1500);
+  }
+
+  function changeTissue() {
+    if (!soaked || phase !== 'ready') return;
+    SND.unlock();
+    SND.swap();
+    $('discard').hidden = false;
+    $('tissueWet').style.opacity = 0;
+    soaked = false;
+    used = 0;
+    pointer = previous = null;
+    delete desk.dataset.soaked;
+    moveTissue(home);
+    replace.setAttribute('aria-disabled', 'true');
+    replace.classList.remove('attention');
+    showHint(wipeHint);
+    if (replace.matches(':focus-visible')) desk.focus();
+  }
+  replace.addEventListener('click', changeTissue);
+  // 觸控拖曳後，瀏覽器可能省略下一次合成的 click。
+  let swapTouch = null;
+  replace.addEventListener('pointerdown', event => {
+    if (event.pointerType === 'touch') swapTouch = { id: event.pointerId, x: event.clientX, y: event.clientY };
+  });
+  replace.addEventListener('pointercancel', () => { swapTouch = null; });
+  replace.addEventListener('pointerup', event => {
+    const start = swapTouch;
+    swapTouch = null;
+    if (start?.id === event.pointerId && Math.hypot(event.clientX - start.x, event.clientY - start.y) <= 12) changeTissue();
+  });
+  $('mute').addEventListener('click', event => {
+    const button = event.currentTarget, mute = button.getAttribute('aria-pressed') !== 'true';
+    button.setAttribute('aria-pressed', String(mute));
+    button.textContent = mute ? '聲音 關' : '聲音 開';
+    SND.mute(mute);
+  });
+
+  const clamp = (value, max) => Math.max(0, Math.min(max, value));
+  function fromEvent(event) {
+    const r = desk.getBoundingClientRect();
+    return { x: clamp((event.clientX - r.left) * W / r.width, W), y: clamp((event.clientY - r.top) * H / r.height, H) };
+  }
+  desk.addEventListener('pointerdown', event => {
+    if (phase !== 'ready' || soaked || pointer !== null || event.button !== 0) return;
+    event.preventDefault();
+    SND.unlock();
+    pointer = event.pointerId;
+    previous = null;
+    desk.setPointerCapture(pointer);
+    paint(fromEvent(event));
+  });
+  desk.addEventListener('pointermove', event => {
+    if (pointer === event.pointerId) paint(fromEvent(event));
+  });
+  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) desk.addEventListener(type, event => {
+    if (pointer !== event.pointerId) return;
+    pointer = previous = null;
+  });
+  const arrows = { ArrowLeft: [-27, 0], ArrowRight: [27, 0], ArrowUp: [0, -27], ArrowDown: [0, 27] };
+  desk.addEventListener('keydown', event => {
+    if (phase !== 'ready' || soaked) return;
+    if (event.key === ' ') {
+      event.preventDefault();
+      if (keyboardWipe) return;
+      SND.unlock();
+      keyboardWipe = true;
+      paint(point);
+    } else if (event.key in arrows) {
+      event.preventDefault();
+      const [dx, dy] = arrows[event.key];
+      const next = { x: clamp(point.x + dx, W), y: clamp(point.y + dy, H) };
+      if (keyboardWipe) paint(next);
+      else moveTissue(next);
+    }
+  });
+  desk.addEventListener('keyup', event => {
+    if (event.key === ' ') { keyboardWipe = false; previous = null; }
+  });
+  desk.addEventListener('blur', () => { keyboardWipe = false; previous = null; });
+
+  go.addEventListener('click', () => {
+    SND.unlock();
+    SND.drop();
+    intro.hidden = true;
+    $('game').inert = false;
+    desk.focus({ preventScroll: true });
+    setPhase('spreading');
+    const start = performance.now(), duration = reduced ? 0 : 1150;
+    function spread(now) {
+      const progress = duration ? clamp((now - start) / duration, 1) : 1;
+      blurInk(.22 + progress * .28);
+      render(.17 + .83 * Math.sqrt(progress));
+      if (progress < 1) requestAnimationFrame(spread);
+      else setPhase('ready');
+    }
+    requestAnimationFrame(spread);
+    if (!reduced) setTimeout(SND.drop, 380);
+  });
+
+  parent.postMessage({ type: 'larch:ready' }, '*');
+  const assets = ['desktop', 'book', 'bleed', 'spillArt', 'cup', 'tissueClean', 'tissueWet'];
+  const ready = Promise.all(assets.map(id => $(id).decode())).then(() => {
+    prepareLayers();
+    blurInk(.22);
+    render(.38);
+    go.disabled = false;
+  });
+  if (window.PageLoading) window.PageLoading.prepare('擦紅茶插畫', ready);
+  else ready.catch(console.error);
+  window.PageLoading?.finish();
 })();
-</script></html>
+</script>
+</body>
+</html>

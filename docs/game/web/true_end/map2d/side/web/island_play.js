@@ -1,3 +1,5 @@
+import { approachRoute } from './island_walk.mjs';
+import { WALK_BLOCKED } from './walk_interaction.mjs';
 import { createIslandAffinity } from './island_affinity.mjs';
 import { paperize } from './paper.js';
 import { entranceAction, isNearEntrance, isWalkable, landingVariables,
@@ -225,7 +227,7 @@ function updateEntrances() {
     b.dataset.id = e.id; b.dataset.name = e.name; b.setAttribute('aria-label', e.name);
     b.style.left = `${e.x * 100}%`; b.style.top = `${e.y * 100}%`;
     b.addEventListener('pointerdown', ev => ev.stopPropagation());
-    b.addEventListener('click', ev => { ev.stopPropagation(); interact(e.id); });
+    b.addEventListener('click', ev => { ev.stopPropagation(); clickInteraction(e.id, ev); });
     zones.append(b); state.buttons.set(e.id, b);
   }
   if (state.stage === 5) {
@@ -234,7 +236,7 @@ function updateEntrances() {
       const scroll = document.createElement('img'); scroll.className = 'memory'; scroll.src = CFG.sprites.scroll;
       scroll.alt = '第一章回憶捲軸'; scroll.id = 'memory1-scroll'; scroll.style.left = `${m.x * 100}%`; scroll.style.top = `${m.y * 100}%`;
       scroll.addEventListener('pointerdown', ev => ev.stopPropagation());
-      scroll.addEventListener('click', ev => { ev.stopPropagation(); collectMemory1(); });
+      scroll.addEventListener('click', ev => { ev.stopPropagation(); clickInteraction('memory1', ev); });
       memoryRoot.append(scroll);
     }
     if (shouldShowMemory7(state.stage, state.vars)) addMemory7();
@@ -247,7 +249,7 @@ function addMemory7() {
   const scroll = document.createElement('img'); scroll.className = 'memory'; scroll.src = CFG.sprites.scroll;
   scroll.alt = '第七章回憶捲軸'; scroll.id = 'memory7-scroll'; scroll.style.left = `${m.x * 100}%`; scroll.style.top = `${m.y * 100}%`;
   scroll.addEventListener('pointerdown', ev => ev.stopPropagation());
-  scroll.addEventListener('click', ev => { ev.stopPropagation(); collectMemory7(); });
+  scroll.addEventListener('click', ev => { ev.stopPropagation(); clickInteraction('memory7', ev); });
   memoryRoot.append(scroll);
 }
 function updateMemory() {
@@ -462,8 +464,47 @@ function enterArea(id) {
   }
   return true;
 }
+function interactionReady() {
+  return state.ready && !state.dialogOpen && !state.orbit && !state.landing && !state.landingWalk &&
+    !panelOpen() && !plantPanelOpen() && !sceneOpen();
+}
+let walkInteraction = null;
+function cancelMove() {
+  walkInteraction = null;
+  state.target = null;
+}
+function clickInteraction(id, event) {
+  cancelMove();
+  if (!interactionReady()) return;
+  if (event.detail === 0) return interact(id);
+  const memory = id === 'memory1' || id === 'memory7';
+  const point = memory ? CFG[id] : entrances().find(e => e.id === id);
+  if (!point) return;
+  const reach = memory ? 86 : point.radius * H + 45;
+  if (distance(state, point) <= reach) return interact(id);
+  state.keyX = state.keyY = state.pointerDir = 0;
+  const route = approachRoute(state, point, reach, W, H, walkable);
+  walkInteraction = { id, point, reach, route, stage: state.stage };
+  state.target = route.shift() || null;
+}
+function advanceInteraction() {
+  const walk = walkInteraction;
+  if (!walk) return;
+  if (!interactionReady() || walk.stage !== state.stage ||
+      (walk.id === 'memory1' && truth(state.vars.memory1)) ||
+      (walk.id === 'memory7' && !shouldShowMemory7(state.stage, state.vars))) {
+    cancelMove();
+  } else if (distance(state, walk.point) <= walk.reach) {
+    cancelMove();
+    interact(walk.id);
+  } else if (!state.target) {
+    state.target = walk.route.shift() || null;
+    if (!state.target) { cancelMove(); toast(WALK_BLOCKED); }
+  }
+}
 function interact(id) {
-  if (!state.ready || state.dialogOpen || state.orbit || state.landing || state.landingWalk) return false;
+  if (!interactionReady()) return false;
+  cancelMove();
   if (id === 'memory1') return collectMemory1();
   if (id === 'memory7') return collectMemory7();
   return enterArea(id);
@@ -539,7 +580,7 @@ function startOrbit(kind) {
   state.orbit = { kind, s: 0, lastLoop: null, face: faceAt(kind, 0) || 1, start,
     speed: T.total / (Q.has('fast') ? 3.2 : 32) };
   const p = tripPoint(kind, 0); state.x = p.x; state.y = p.y;
-  state.passed = new Set(); state.keyX = state.keyY = state.pointerDir = 0; state.target = null;
+  state.passed = new Set(); state.keyX = state.keyY = state.pointerDir = 0; cancelMove();
   state.orbit.hint = document.getElementById('hint').textContent = kind === 'dolphin' ? '茶語和詩坐上海豚，沿海繞島一圈' : '小船沿海繞島，遠處鯨魚正在噴水';
   renderVehicle(); toast(kind === 'dolphin' ? '出發繞島' : '小船離開碼頭');
   return true;
@@ -572,7 +613,7 @@ function finishOrbit() {
   }
   state.x = ride.start.x; state.y = ride.start.y; state.orbit = null;
   vehicle.classList.remove('on'); clearTimeout(document.getElementById('hint')._timer);
-  document.getElementById('hint').textContent = '方向鍵移動，點地走近；靠近入口後按互動';
+  document.getElementById('hint').textContent = '方向鍵移動，也可以點地面、入口或物件走過去';
   const completion = orbitCompletion(ride.kind, [...state.passed]);
   setVars(completion.variables);
   if (ride.kind === 'boat') addMemory7();
@@ -592,20 +633,22 @@ function finishOrbit() {
 function setPosition(p) {
   if (!state.ready || !p || !Number.isFinite(p.x) || !Number.isFinite(p.y)) return false;
   if (!walkable(p)) return false;
-  state.x = p.x; state.y = p.y; state.target = null; render(); return true;
+  state.x = p.x; state.y = p.y; cancelMove(); render(); return true;
 }
 function moveTarget(p) {
+  cancelMove();
   if (!state.ready) return false;
   if (!walkable(p)) { toast('沿島上的草地走'); return false; }
   state.target = { x: p.x, y: p.y }; return true;
 }
 function moveFrame(dt) {
+  advanceInteraction();
   if (state.dialogOpen || state.orbit || state.landing) return;
   let dx = 0, dy = 0;
   if (state.target) {
     const ax = (state.target.x - state.x) * W, ay = (state.target.y - state.y) * H;
     const d = Math.hypot(ax, ay);
-    if (d < 4) state.target = null;
+    if (d < 0.01) state.target = null;
     else { dx = ax / d; dy = ay / d; }
   } else {
     dx = state.keyX || state.pointerDir;
@@ -615,12 +658,15 @@ function moveFrame(dt) {
   if (directionLength) { dx /= directionLength; dy /= directionLength; }
   const speed = Number(Q.get('speed')) || 390;
   if (dx || dy) {
-    const next = { x: state.x + dx * speed * dt / W, y: state.y + dy * speed * dt / H };
+    const step = state.target ? Math.min(speed * dt, distance(state, state.target)) : speed * dt;
+    const next = { x: state.x + dx * step / W, y: state.y + dy * step / H };
     if (walkable(next)) { state.x = next.x; state.y = next.y; }
+    else if (walkInteraction) { walkInteraction.route.length = 0; state.target = null; }
     else if (dx && walkable({ x: next.x, y: state.y })) state.x = next.x;
     else if (dy && walkable({ x: state.x, y: next.y })) state.y = next.y;
     state.face = dx < 0 ? -1 : dx > 0 ? 1 : state.face;
   }
+  advanceInteraction();
 }
 function orbitFrame(dt) {
   const ride = state.orbit; if (!ride || ride.frozen) return;
@@ -685,8 +731,11 @@ function pointFromEvent(e) {
   return { x: Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)),
     y: Math.max(0, Math.min(1, (e.clientY - r.top) / r.height)) };
 }
+addEventListener('pointerdown', () => { if (walkInteraction) cancelMove(); }, true);
 world.addEventListener('pointerdown', e => {
   if (e.target.closest('.entrance,.memory,.action,.move')) return;
+  cancelMove();
+  if (state.pointer) clearTimeout(state.pointer.timer);
   state.pointer = { x: e.clientX, y: e.clientY, held: false };
   state.pointer.timer = setTimeout(() => { if (state.pointer) { state.pointer.held = true; state.pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; state.target = null; } }, 190);
 });
@@ -695,13 +744,13 @@ function pointerUp(e) {
   if (!state.pointer) return;
   clearTimeout(state.pointer.timer);
   const moved = Math.hypot(e.clientX - state.pointer.x, e.clientY - state.pointer.y);
-  if (!state.pointer.held && moved < 14) moveTarget(pointFromEvent(e));
+  if (e.type === 'pointerup' && !state.pointer.held && moved < 14) moveTarget(pointFromEvent(e));
   state.pointer = null; state.pointerDir = 0;
 }
 world.addEventListener('pointerup', pointerUp); world.addEventListener('pointercancel', pointerUp);
 for (const b of document.querySelectorAll('.move')) {
   const dir = Number(b.dataset.dir);
-  b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); b.setPointerCapture(e.pointerId); state.pointerDir = dir; });
+  b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); b.setPointerCapture(e.pointerId); cancelMove(); state.pointerDir = dir; });
   b.addEventListener('pointerup', e => { e.preventDefault(); state.pointerDir = 0; });
   b.addEventListener('pointercancel', () => { state.pointerDir = 0; });
   b.addEventListener('lostpointercapture', () => { state.pointerDir = 0; });
@@ -709,10 +758,10 @@ for (const b of document.querySelectorAll('.move')) {
 addEventListener('keydown', e => {
   if (panelOpen() || plantPanelOpen() || sceneOpen()) return;   // 圖鑑、植物一覽打開時不走路（Esc 由 zukan.js 收起）
   if (state.dialogOpen) { if (e.key === 'Enter' || e.key === ' ') closeScroll(); return; }
-  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); state.target = null; state.keyX = -1; }
-  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); state.target = null; state.keyX = 1; }
-  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { e.preventDefault(); state.target = null; state.keyY = -1; }
-  if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { e.preventDefault(); state.target = null; state.keyY = 1; }
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); cancelMove(); state.keyX = -1; }
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); cancelMove(); state.keyX = 1; }
+  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { e.preventDefault(); cancelMove(); state.keyY = -1; }
+  if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { e.preventDefault(); cancelMove(); state.keyY = 1; }
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const id = updateNearby(); if (id) interact(id); }
 });
 addEventListener('keyup', e => {
@@ -728,25 +777,26 @@ document.getElementById('dive').addEventListener('click', () => startDive());
 const zk = createZukan({ vars: () => state.vars, set: setVars, toast: t => setTimeout(() => toast(t), 2000) });   // 繞島回來的那句提示先講完，再講收進圖鑑
 function updateZukanBtn() { const b = document.getElementById('zukan'); if (b) b.textContent = `圖鑑 ${zk.count}／${ZK_TOTAL}`; }
 zk.ready.then(updateZukanBtn);
-document.getElementById('zukan').addEventListener('click', e => { e.stopPropagation(); if (!state.ready || state.orbit) return; state.keyX = state.keyY = state.pointerDir = 0; state.target = null; openPanel(zk, { onClose: updateZukanBtn }); });
+document.getElementById('zukan').addEventListener('click', e => { e.stopPropagation(); if (!state.ready || state.orbit) return; state.keyX = state.keyY = state.pointerDir = 0; cancelMove(); openPanel(zk, { onClose: updateZukanBtn }); });
 document.getElementById('zukan').addEventListener('pointerdown', e => e.stopPropagation());
 // 植物收集（plants.js）：右上「植物 n／11」開一覽；真結局三樣禮物都拿到之後，多一顆「一起種小樹」（碼頭，四個人一起種的小樹）
 const pl = createPlants({ vars: () => state.vars, set: setVars, toast: t => setTimeout(() => toast(t), 600) }); window.__plants = pl;
 function updatePlantBtn() { const b = document.getElementById('plants'); if (b) b.textContent = `植物 ${pl.count}／${PL_TOTAL}`; const t = document.getElementById('plant-tree'); if (t) t.hidden = !(state.stage === 5 && Number(state.vars.gifts || 0) >= 3 && !pl.has('olive')); }
 pl.ready.then(updatePlantBtn); setInterval(updatePlantBtn, 1500);
-document.getElementById('plants').addEventListener('click', e => { e.stopPropagation(); if (!state.ready || state.orbit) return; state.keyX = state.keyY = state.pointerDir = 0; state.target = null; openPlantPanel(pl, { onClose: updatePlantBtn }); });
-document.getElementById('plant-tree').addEventListener('click', e => { e.stopPropagation(); if (!state.ready || state.orbit) return; state.keyX = state.keyY = state.pointerDir = 0; state.target = null; playScene(TREE_LINES, { cg: TREE_CG, onDone: () => { pl.got('olive'); updatePlantBtn(); } }); });
+document.getElementById('plants').addEventListener('click', e => { e.stopPropagation(); if (!state.ready || state.orbit) return; state.keyX = state.keyY = state.pointerDir = 0; cancelMove(); openPlantPanel(pl, { onClose: updatePlantBtn }); });
+document.getElementById('plant-tree').addEventListener('click', e => { e.stopPropagation(); if (!state.ready || state.orbit) return; state.keyX = state.keyY = state.pointerDir = 0; cancelMove(); playScene(TREE_LINES, { cg: TREE_CG, onDone: () => { pl.got('olive'); updatePlantBtn(); } }); });
 for (const id of ['plants', 'plant-tree']) document.getElementById(id).addEventListener('pointerdown', e => e.stopPropagation());
 // 真結局：從碼頭水邊下潛 → dive.html（潛到最底）；浮回水面後回到碼頭（?at=dock）。回來時 dive.html 把 memory6、memories 等寫在網址上
 function startDive() {
   if (!state.ready || state.orbit || state.landing || state.landingWalk || state.stage !== 5) return false;
+  cancelMove();
   const back = new URL(location.href); back.searchParams.set('at', 'dock'); back.searchParams.set('arrival', '0');
   const url = new URL('./dive.html', location.href); url.searchParams.set('chapter', 'true'); url.searchParams.set('back', back.href);
   for (const k of ['memories', 'memory6', 'creatures', 'coral_dive']) if (state.vars[k] !== undefined) url.searchParams.set(k, String(state.vars[k]));
   state.diveUrl = url.href; if (Q.get('noNav') === '1') return true;
   location.href = url.href; return true;
 }
-if (Q.get('at') === 'dock') waitUntilReady().then(() => { const p = { x: CFG.landing.shore[0], y: CFG.landing.shore[1] }; state.x = p.x; state.y = p.y; state.target = null; render(0, true);
+if (Q.get('at') === 'dock') waitUntilReady().then(() => { const p = { x: CFG.landing.shore[0], y: CFG.landing.shore[1] }; state.x = p.x; state.y = p.y; cancelMove(); render(0, true);
   if (Q.get('diveDone') === '1') { const got = ['memory6', 'memories', 'creatures', 'zukan_complete', 'coral_dive', 'dive_done'].filter(k => Q.has(k)); if (got.length) setVars(Object.fromEntries(got.map(k => [k, state.vars[k] ?? Q.get(k)]))); zk.refresh(); render(); } });
 addEventListener('message', event => {
   const data = event.data || {};
@@ -783,7 +833,7 @@ function placeFrom() {
   const e = CFG.entrances.find(x => x.scene === Q.get('from')); if (!e || state.placedFrom) return; state.placedFrom = true;
   let p = { x: e.x, y: e.y };
   for (const k of [0.16, 0.1, 0.05]) { const q = { x: e.x + (CFG.start.x - e.x) * k, y: e.y + (CFG.start.y - e.y) * k }; if (walkable(q)) { p = q; break; } }
-  state.x = p.x; state.y = p.y; state.target = null; state.face = CFG.start.x >= e.x ? 1 : -1; render(0, true);
+  state.x = p.x; state.y = p.y; cancelMove(); state.face = CFG.start.x >= e.x ? 1 : -1; render(0, true);
 }
 // 第七章評審週：右上紙條列三個人，陪過的打勾
 function updateNote() {

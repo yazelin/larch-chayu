@@ -1,3 +1,4 @@
+import { horizontalInteraction, stepToward, WALK_BLOCKED } from './walk_interaction.mjs';
 import { createIslandAffinity } from './island_affinity.mjs';
 // 「一整張長畫」（作者 2026-11-13 定調：分層可以、不要視差，像故事插畫繪本，人物可以走動）：
 // 底圖 art/out/<scene>/flat.jpg（中心框＋接力外延拼成一張）＋可有可無的前景遮擋 fg.png（同一張剪、同速度）。鏡頭跟著人水平捲、兩端夾住。
@@ -49,7 +50,7 @@ async function build() {
   for (const h of META.hot) {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'hotspot'; b.dataset.id = h.id; b.dataset.name = h.name; b.setAttribute('aria-label', h.name);
     Object.assign(b.style, { left: h.x / IMG.width * 100 + '%', top: h.y * 100 + '%', width: h.w / IMG.width * 100 + '%', height: h.h * 100 + '%' });
-    b.addEventListener('click', e => { e.stopPropagation(); interact(h.id); }); b.addEventListener('pointerdown', e => e.stopPropagation()); art.appendChild(b); hotEls.push(b);
+    bindHotspot(b, h); art.appendChild(b); hotEls.push(b);
   }
 }
 async function plainSprite(src) { const im = await PageLoading.preload(src); document.body.classList.add('flatpaper'); return { src, shadow: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', pad: 0, width: im.width, height: im.height }; }
@@ -65,16 +66,16 @@ function render() {
 }
 const cgClosedHooks = [];
 // ar：圖要露出來那一塊的寬÷高，紙框開口跟著這個比例開；trim：圖檔四邊要藏到紙邊底下的留白（上右下左，各佔圖高、圖寬的比例）
-function showCg(under = false, src, ar = 1.5, trim = [0, 0, 0, 0]) { document.getElementById('cg-img').src = src || META.cg; cg.style.setProperty('--cg-ar', String(ar)); ['t', 'r', 'b', 'l'].forEach((k, n) => cg.style.setProperty('--cg-trim-' + k, String(trim[n] || 0))); cg.classList.toggle('under', under);
+function showCg(under = false, src, ar = 1.5, trim = [0, 0, 0, 0]) { cancelClickWalk(); document.getElementById('cg-img').src = src || META.cg; cg.style.setProperty('--cg-ar', String(ar)); ['t', 'r', 'b', 'l'].forEach((k, n) => cg.style.setProperty('--cg-trim-' + k, String(trim[n] || 0))); cg.classList.toggle('under', under);
   cg.style.display = 'block'; requestAnimationFrame(() => requestAnimationFrame(() => cg.classList.add('on'))); sfxPaper(); }
 function hideCg() { if (cg.style.display !== 'block') return; cg.classList.remove('on'); cg.dataset.closedAt = String(Date.now()); setTimeout(() => { cg.style.display = 'none'; cg.classList.remove('under'); }, 600); for (const f of cgClosedHooks) f(); }
 function cgOpen() { return cg.style.display === 'block' && cg.classList.contains('on'); }
 function onCgClosed(f) { cgClosedHooks.push(f); }
 let camShift = 0, camShiftTarget = 0, locked = false;
 function setCamShift(px) { camShiftTarget = px; }
-function lock(v) { locked = v; document.body.classList.toggle('locked', v); if (v) { keyDir = pointerDir = 0; targetX = null; } }
+function lock(v) { locked = v; document.body.classList.toggle('locked', v); if (v) { keyDir = pointerDir = 0; cancelClickWalk(); } }
 let sfxPaper = () => {}; PageLoading.prepare('sfx.js', import('./sfx.js').then(m => { sfxPaper = () => m.sfx.paper(); }));
-function showScroll(who, text) { const sc = document.getElementById('scroll'); sc.querySelector('b').textContent = who; sc.querySelector('p').textContent = text; sc.style.display = 'block'; sc.classList.remove('open'); void sc.offsetWidth; sc.classList.add('open'); }
+function showScroll(who, text) { cancelClickWalk(); const sc = document.getElementById('scroll'); sc.querySelector('b').textContent = who; sc.querySelector('p').textContent = text; sc.style.display = 'block'; sc.classList.remove('open'); void sc.offsetWidth; sc.classList.add('open'); }
 function toast(text) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = text; document.body.appendChild(t); setTimeout(() => t.classList.add('on'), 20); setTimeout(() => { t.classList.remove('on'); setTimeout(() => t.remove(), 400); }, 1800); }
 const BR = window.IslandBridge;
 const freeAffinity = createIslandAffinity(BR, Q, () => larchVars, () => ctl.chapter);
@@ -99,7 +100,7 @@ function larchSet(vars) {
 function nearest() { let best = null; for (const h of META.hot) { if (h.hidden) continue; const d = Math.abs(h.x + h.w / 2 - state.x); if (d < NEARBY + h.w / 2 && (!best || d < best.d)) best = { id: h.id, d }; } return best && best.id; }
 // 對話：照劇本一句句推進（點對話框或 Enter），{choice} 出選項泡泡，選完接共通句。拿過禮物後再講就是 done 那幾句
 const dlg = { steps: [], i: 0, after: [], onLine: null };
-function openDialogue(steps, after, onLine) { sfxPaper(); dlg.steps = steps.slice(); dlg.i = 0; dlg.after = after || []; dlg.onLine = onLine || null; panel.classList.add('on'); scrim.classList.add('on'); document.body.classList.add('panel-open'); panelOpen = true; keyDir = pointerDir = 0; targetX = null; showStep(); }
+function openDialogue(steps, after, onLine) { sfxPaper(); dlg.steps = steps.slice(); dlg.i = 0; dlg.after = after || []; dlg.onLine = onLine || null; panel.classList.add('on'); scrim.classList.add('on'); document.body.classList.add('panel-open'); panelOpen = true; keyDir = pointerDir = 0; cancelClickWalk(); showStep(); }
 function showStep() {
   const ch = document.getElementById('choices'); ch.replaceChildren(); panel.classList.remove('choosing');
   if (dlg.i >= dlg.steps.length) { closePanel(); for (const f of dlg.after) f(); return; }
@@ -115,7 +116,31 @@ function showStep() {
 function advance() { if (!panelOpen || panel.classList.contains('choosing')) return; showStep(); }
 panel.addEventListener('click', advance);
 function closePanel() { panel.classList.remove('on', 'choosing'); scrim.classList.remove('on'); document.body.classList.remove('panel-open'); panelOpen = false; }
-function interact(id) { const h = META.hot.find(x => x.id === id); if (!h) return; if (h.fn) return h.fn(); return runHot(h); }
+function interact(id, point) { const h = META.hot.find(x => x.id === id); if (!h) return; if (h.fn) return h.fn(point); return runHot(h); }
+let clickMovement = { bounds: () => WALK_X };
+const clickWalk = horizontalInteraction({
+  position: () => state.x,
+  bounds: () => clickMovement.bounds(),
+  available: h => !locked && !panelOpen && !PageLoading.loading && !h?.hidden &&
+    META.hot.includes(h) && (clickMovement.available?.() ?? true),
+  interact: (h, point) => interact(h.id, point),
+  blocked: () => toast(WALK_BLOCKED),
+  resetMovement: () => clickMovement.cancel?.(),
+});
+function cancelClickWalk() {
+  clickWalk.cancel();
+  targetX = null;
+}
+function bindHotspot(button, hot) {
+  button.addEventListener('pointerdown', e => { e.stopPropagation(); });
+  button.addEventListener('click', e => {
+    e.stopPropagation();
+    cancelClickWalk();
+    if (e.detail === 0) return interact(hot.id);
+    keyDir = pointerDir = 0;
+    clickWalk.begin(hot, { x: camX() + e.clientX / scale, y: VIEW.top + VIEW.h * e.clientY / innerHeight });
+  });
+}
 function returnToIsland() {
   const back = Q.get('back');
   if (!back) return false;
@@ -158,15 +183,23 @@ scrim.addEventListener('click', advance); cg.addEventListener('click', () => { i
 function step(dt) {
   camShift += (camShiftTarget - camShift) * Math.min(1, dt * 2.2); if (Math.abs(camShiftTarget - camShift) > 0.5) render();
   if (locked) { player.classList.remove('walking'); window.WalkSway.step(sway, dt, false); render(); return; }
+  const approaching = clickWalk.active;
+  const destination = clickWalk.destination();
+  if (destination !== null && clickMovement.move) clickMovement.move(destination);
+  if (locked || panelOpen) { player.classList.remove('walking'); return; }
+  const target = approaching ? (clickMovement.move ? null : destination) : targetX;
   let dir = keyDir || pointerDir;
-  if (targetX !== null) { const d = targetX - state.x; if (Math.abs(d) < 4) { targetX = null; dir = 0; } else dir = Math.sign(d); }
+  if (target !== null) dir = Math.sign(target - state.x);
+  if (!approaching && targetX !== null && Math.abs(targetX - state.x) < 0.01) { targetX = null; dir = keyDir || pointerDir; }
   const walking = !!dir && !panelOpen; player.classList.toggle('walking', walking); walkT += dt; if (flip.t < 1) flip.t = Math.min(1, flip.t + dt / 0.22);
   if (!walking) window.WalkSway.step(sway, dt, false);
   if (walking) {
     if (dir !== state.face) { flip = { from: state.face, t: 0 }; state.face = dir; }
-    const x0 = state.x; state.x = Math.max(WALK_X[0], Math.min(WALK_X[1], state.x + dir * WALK * dt)); window.WalkSway.step(sway, dt, state.x !== x0);
+    const x0 = state.x;
+    const next = target === null ? state.x + dir * WALK * dt : stepToward(state.x, target, WALK * dt);
+    state.x = Math.max(WALK_X[0], Math.min(WALK_X[1], next)); window.WalkSway.step(sway, dt, state.x !== x0);
     const atExit = META.exit === 'right' ? (state.x >= WALK_X[1] - 1 && dir > 0) : (state.x <= WALK_X[0] + 1 && dir < 0);
-    if (atExit) { keyDir = pointerDir = 0; interact('exit'); }
+    if (atExit && !approaching) { keyDir = pointerDir = 0; targetX = null; interact('exit'); }
   }
   render();
 }
@@ -176,17 +209,27 @@ addEventListener('keydown', e => {
   if (panelOpen) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); advance(); } return; }
   if (cg.style.display === 'block' && !cg.classList.contains('under')) { if (!cg.classList.contains('on')) return; hideCg(); return; }
   const scEl = document.getElementById('scroll'); if (scEl.style.display === 'block') { scEl.style.display = 'none'; return; }
-  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); targetX = null; keyDir = -1; }
-  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); targetX = null; keyDir = 1; }
-  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (locked) return; const k = nearest(); if (k) interact(k); }
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); cancelClickWalk(); keyDir = -1; }
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); cancelClickWalk(); keyDir = 1; }
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (locked) return; const k = nearest(); if (k) { cancelClickWalk(); interact(k); } }
 });
 addEventListener('keyup', e => { if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && keyDir < 0) keyDir = 0; if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && keyDir > 0) keyDir = 0; });
+addEventListener('pointerdown', () => { if (clickWalk.active) cancelClickWalk(); }, true);
+addEventListener('keydown', e => {
+  if (clickWalk.active && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) cancelClickWalk();
+}, true);
 let down = null;
-stage.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, held: false }; down.timer = setTimeout(() => { if (down) { down.held = true; pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; targetX = null; } }, 180); });
+stage.addEventListener('pointerdown', e => {
+  cancelClickWalk();
+  if (down) clearTimeout(down.timer);
+  down = { x: e.clientX, y: e.clientY, held: false }; down.timer = setTimeout(() => { if (down) { down.held = true; pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; targetX = null; } }, 180); });
 stage.addEventListener('pointermove', e => { if (down && down.held) pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; });
 function up(e) {
   if (!down) return; clearTimeout(down.timer); const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
-  if (!down.held && moved < 14 && !panelOpen && e.clientY >= (FEET - 0.12 - VIEW.top) / VIEW.h * innerHeight) targetX = camX() + e.clientX / scale;
+  if (e.type === 'pointerup' && !down.held && moved < 14 && !panelOpen && e.clientY >= (FEET - 0.12 - VIEW.top) / VIEW.h * innerHeight) {
+    const [left, right] = clickMovement.bounds();
+    targetX = Math.max(left, Math.min(right, camX() + e.clientX / scale));
+  }
   down = null; pointerDir = 0;
 }
 stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
@@ -228,9 +271,9 @@ async function start() {
   if (inFrame) await Promise.race([initWait, new Promise(ok => setTimeout(ok, 2500))]);
   Object.assign(ctl, BR.context(inFrame ? larchVars : Object.assign({}, larchVars, Object.fromEntries(Q))));
   freeAffinity.refresh();
-  if (SCENE === 'dawn') { try { const m = await PageLoading.track('dawn_play.js', import('./dawn_play.js')); await m.install({ art, IMG, META, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, lock }); } catch (e) { console.error('dawn_play', e); } }
-  if (SCENE === 'beach') { try { const m = await PageLoading.track('beach_play.js', import('./beach_play.js')); await m.install({ art, IMG, META, VIEW, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, lock, isLocked: () => locked, panelOpen: () => panelOpen }); } catch (e) { console.error('beach_play', e); } }
-  if (SCENE === 'cape') { try { const m = await PageLoading.track('cape_play.js', import('./cape_play.js')); await m.install({ art, IMG, META, VIEW, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, lock, isLocked: () => locked, panelOpen: () => panelOpen }); } catch (e) { console.error('cape_play', e); } }
+  if (SCENE === 'dawn') { try { const m = await PageLoading.track('dawn_play.js', import('./dawn_play.js')); await m.install({ art, IMG, META, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, bindHotspot, lock }); } catch (e) { console.error('dawn_play', e); } }
+  if (SCENE === 'beach') { try { const m = await PageLoading.track('beach_play.js', import('./beach_play.js')); await m.install({ art, IMG, META, VIEW, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, bindHotspot, lock, isLocked: () => locked, panelOpen: () => panelOpen, setClickMovement: movement => { clickMovement = movement; }, cancelClickWalk }); } catch (e) { console.error('beach_play', e); } }
+  if (SCENE === 'cape') { try { const m = await PageLoading.track('cape_play.js', import('./cape_play.js')); await m.install({ art, IMG, META, VIEW, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, bindHotspot, lock, isLocked: () => locked, panelOpen: () => panelOpen, setClickMovement: movement => { clickMovement = movement; }, cancelClickWalk }); } catch (e) { console.error('cape_play', e); } }
   sceneAssembled = true;
   PageLoading.shown.then(() => { document.body.dataset.ready = '1'; });
   if (window.StudioDB && !Q.has('x')) { try { const v = await StudioDB.get('flat_x_' + SCENE); if (Number.isFinite(v)) state.x = v; } catch {} }
@@ -241,5 +284,5 @@ async function start() {
 }
 const sceneReady = start();
 PageLoading.track(`長畫組裝：${SCENE}`, sceneReady).then(() => PageLoading.finish()).catch(console.error);
-window.dawnHill = { ctl, get x() { return state.x / IMG.width; }, set x(v) { state.x = v * IMG.width; targetX = null; render(); }, interact, runHot, gifts, characters: CHARACTERS,
+window.dawnHill = { ctl, get x() { return state.x / IMG.width; }, set x(v) { state.x = v * IMG.width; cancelClickWalk(); render(); }, interact, runHot, gifts, characters: CHARACTERS,
   closeAll() { closePanel(); hideCg(); document.getElementById('scroll').style.display = 'none'; lock(false); } };

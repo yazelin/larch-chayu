@@ -1,3 +1,4 @@
+import { horizontalInteraction, hintBlocked, stepToward } from './walk_interaction.mjs';
 // 朝霞丘橫向捲軸小樣：六層視差＋茶語左右走＋熱區。操作與橋接照 studio_web/index.html 的捲軸版（方向鍵或 A、D、點地面走過去、
 // 手機按住左右半邊、靠近熱區亮起、Enter 或點擊互動、larch:init／larch:ready、IndexedDB 記位置）；角色表共用 studio_core.mjs。
 // 層用 canvas 畫（工作室是 DOM 一張長圖；這裡六層各自速度，canvas 比六個 div 省事），超出條帶的地方鏡射補。
@@ -52,6 +53,18 @@ const HOT = { chen: { label: '跟晨說話', title: '晨', text: ['這次是我�
               easel: { label: '看畫布', title: '畫架', text: ['畫布上只有一層淡淡的粉橘。'], note: '之後接「一種顏色」。' },
               bench_view: { label: '坐下看海', cg: true },
               exit_to_island: { label: '回全島', exit: true } };
+const hotspots = Object.keys(HOT).map(id => ({ id, x: P[id].x * SW, w: 0, reach: NEARBY }));
+const clickWalk = horizontalInteraction({
+  position: () => state.x,
+  bounds: () => scene.walk_x.map(x => x * SW),
+  available: h => !panelOpen && hotspots.includes(h),
+  interact: h => interact(h.id),
+  blocked: hintBlocked,
+});
+function cancelClickWalk() {
+  clickWalk.cancel();
+  targetX = null;
+}
 function nearest() {
   let best = null;
   for (const [k, pt] of Object.entries(P)) { if (!HOT[k]) continue; const d = Math.abs(pt.x * SW - state.x); if (d < NEARBY && (!best || d < best.d)) best = { k, d }; }
@@ -59,6 +72,7 @@ function nearest() {
 }
 function interact(k) {
   const h = HOT[k]; if (!h) return;
+  cancelClickWalk();
   if (h.cg) { document.getElementById('cg-img').src = '../../../garden/concept/03_dawn_hill.webp'; cg.style.display = 'block'; return; }
   if (h.exit) { if (inFrame) { parent.postMessage({ type: 'larch:set', variables: { dawn_visited: 'true' } }, '*'); parent.postMessage({ type: 'larch:complete' }, '*'); } else openPanel('回全島', ['（嵌進 Larch 時這裡會回到全島地圖的 (36,9)。）']); return; }
   openPanel(h.title, h.text, h.note);
@@ -75,13 +89,15 @@ cg.addEventListener('click', () => { cg.style.display = 'none'; });
 nearBtn.addEventListener('click', () => interact(nearest()));
 
 function step(dt) {
-  let dir = keyDir || pointerDir;
-  if (targetX !== null) { const d = targetX - state.x; if (Math.abs(d) < 4) { targetX = null; dir = 0; } else dir = Math.sign(d); }
+  const approaching = clickWalk.active;
+  const target = approaching ? clickWalk.destination() : targetX;
+  const dir = target === null ? keyDir || pointerDir : Math.sign(target - state.x);
+  if (!approaching && targetX === state.x) targetX = null;
   state.walking = !!dir && !panelOpen;
   if (state.walking) {
-    state.face = dir; state.x += dir * WALK * dt; state.phase += dt * 11;
+    state.face = dir; state.x = target === null ? state.x + dir * WALK * dt : stepToward(state.x, target, WALK * dt); state.phase += dt * 11;
     const [a, b] = scene.walk_x; state.x = Math.max(a * SW, Math.min(b * SW, state.x));
-    if (state.x <= P.exit_to_island.x * SW + 1 && dir < 0) { keyDir = pointerDir = 0; interact('exit_to_island'); }
+    if (!approaching && state.x <= P.exit_to_island.x * SW + 1 && dir < 0) { keyDir = pointerDir = 0; targetX = null; interact('exit_to_island'); }
   }
   const k = nearest(); nearBtn.style.display = k && !panelOpen ? 'block' : 'none'; if (k) nearBtn.textContent = HOT[k].label;
 }
@@ -91,20 +107,27 @@ requestAnimationFrame(frame);
 addEventListener('keydown', e => {
   if (panelOpen) { if (e.key === 'Escape' || e.key === 'Enter') closePanel(); return; }
   if (cg.style.display === 'block') { cg.style.display = 'none'; return; }
-  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); targetX = null; keyDir = -1; }
-  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); targetX = null; keyDir = 1; }
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); cancelClickWalk(); keyDir = -1; }
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); cancelClickWalk(); keyDir = 1; }
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const k = nearest(); if (k) interact(k); }
 });
 addEventListener('keyup', e => { if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && keyDir < 0) keyDir = 0; if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && keyDir > 0) keyDir = 0; });
 let down = null;
-canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: Date.now(), held: false }; down.timer = setTimeout(() => { if (down) { down.held = true; pointerDir = e.clientX < viewW / 2 ? -1 : 1; targetX = null; } }, 180); });
+addEventListener('pointerdown', () => { if (clickWalk.active) cancelClickWalk(); }, true);
+addEventListener('keydown', e => {
+  if (clickWalk.active && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) cancelClickWalk();
+}, true);
+canvas.addEventListener('pointerdown', e => { cancelClickWalk(); if (down) clearTimeout(down.timer); down = { x: e.clientX, y: e.clientY, t: Date.now(), held: false }; down.timer = setTimeout(() => { if (down) { down.held = true; pointerDir = e.clientX < viewW / 2 ? -1 : 1; targetX = null; } }, 180); });
 canvas.addEventListener('pointermove', e => { if (down && down.held) pointerDir = e.clientX < viewW / 2 ? -1 : 1; });
 function up(e) {
   if (!down) return; clearTimeout(down.timer); const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
-  if (!down.held && moved < 14 && !panelOpen) {
-    const xRef = camX() + e.clientX / scale; const k = nearest();
-    if (k && Math.abs(P[k].x * SW - xRef) < NEARBY) interact(k);
-    else if (e.clientY >= scene.feet_y * FH * scale - 0.1 * FH * scale) targetX = xRef;   // 點地面走過去
+  if (e.type === 'pointerup' && !down.held && moved < 14 && !panelOpen) {
+    const xRef = camX() + e.clientX / scale;
+    const yRef = e.clientY / (FH * scale);
+    const hit = yRef >= scene.feet_y - scene.chen_height && yRef <= scene.feet_y + 0.04 &&
+      hotspots.reduce((best, h) => Math.abs(h.x - xRef) < Math.min(NEARBY, best ? Math.abs(best.x - xRef) : Infinity) ? h : best, null);
+    if (hit) { keyDir = pointerDir = 0; clickWalk.begin(hit); }
+    else if (yRef >= scene.feet_y - 0.1) targetX = Math.max(scene.walk_x[0] * SW, Math.min(scene.walk_x[1] * SW, xRef));   // 點地面走過去
   }
   down = null; pointerDir = 0;
 }
@@ -115,4 +138,4 @@ addEventListener('message', e => { const d = e.data || {}; if (d.type === 'larch
 if (inFrame) parent.postMessage({ type: 'larch:ready' }, '*');
 // 位置記在 IndexedDB（跟工作室同一個 StudioDB）
 if (window.StudioDB && !Q.has('x')) { StudioDB.get('dawn_hill_x').then(v => { if (Number.isFinite(v)) state.x = v; }).catch(() => {}); setInterval(() => StudioDB.set('dawn_hill_x', state.x).catch(() => {}), 2000); }
-window.dawnHill = { get x() { return state.x / SW; }, set x(v) { state.x = v * SW; targetX = null; }, characters: CHARACTERS, interact };
+window.dawnHill = { get x() { return state.x / SW; }, set x(v) { state.x = v * SW; cancelClickWalk(); }, characters: CHARACTERS, interact };

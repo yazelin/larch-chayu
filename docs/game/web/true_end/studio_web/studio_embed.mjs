@@ -1,15 +1,20 @@
 import { preparePanel } from './studio_panel.mjs';
 
 const query = new URLSearchParams(location.search);
-if (query.get('embed') === '1' && window.parent !== window) {
+const embedded = query.get('embed') === '1' && window.parent !== window;
+const realChat = document.documentElement.classList.contains('studio-real-chat');
+if (embedded || realChat) {
   const mode = query.get('mode') || 'map';
-  const realChat = document.documentElement.classList.contains('studio-real-chat');
   if (realChat) {
     document.getElementById('panel').setAttribute('aria-modal', 'false');
     const background = document.createElement('img');
     background.id = 'real-chat-bg';
     background.alt = '';
-    background.src = query.get('bg');
+    const desk = '../../新版/canon_new/room/DESK-A_morning.jpg';
+    if (query.get('bg')) {
+      background.addEventListener('error', () => { background.src = desk; }, { once: true });
+    }
+    background.src = query.get('bg') || desk;
     document.body.prepend(background);
   }
   const targetIds = { '圓鐘': 10, '門': 11, '電子琴': 6, '畫架': 8, 'M 的螢幕': 12 };
@@ -24,7 +29,7 @@ if (query.get('embed') === '1' && window.parent !== window) {
   const descriptions = {
     map: locationText || '走動、查看工作室裡的互動物件。',
     free_time: '可以走動、和角色聊天，並使用目前已接上的工作室互動。',
-    open_chat: '長桌群聊已開啟；聊完後可按「繼續」接回劇情。',
+    open_chat: '可選群聊或私聊，按「繼續」接回劇情。',
     investigation: target ? '調查目標：' + target : '查看指定的工作室物件。',
     album_player: query.get('album') || '打開詩的唱片架。'
   };
@@ -162,7 +167,6 @@ if (query.get('embed') === '1' && window.parent !== window) {
       showInvestigationLine();
       handled = true;
     }
-    else if (mode === 'open_chat') handled = window.STUDIO_FEATURES.handle(13, continueButton);
     // 夥伴結局「最後一格「？」解鎖」：作者 2026-11-21 把劇情曲搬到唱片架（5），這張卡記下解鎖、開唱片架放最後一首
     else if (mode === 'album_player') handled = window.STUDIO_FEATURES.albumFinal ? window.STUDIO_FEATURES.albumFinal(continueButton) : window.STUDIO_FEATURES.handle(5, continueButton);
     // 小插曲一起「長桌她自己的位子」：進場就開長桌面板（作者 11-18 選 C，不畫長桌）。
@@ -203,7 +207,7 @@ if (query.get('embed') === '1' && window.parent !== window) {
     if (data.type !== 'larch:init') return;
     const variables = data.variables || {};
     updateContext(variables);
-    openRequestedInteraction();
+    if (!realChat) openRequestedInteraction();
   });
   // larch:init 常比這支模組早到（index.html 先收）：有的話直接用那一份，不然先用目前的遊戲狀態。
   const early = window.__studio && window.__studio.variables;
@@ -215,6 +219,10 @@ if (query.get('embed') === '1' && window.parent !== window) {
     affS: window.STUDIO_GAME_STATE.affinity.shi,
     trialKnown: window.STUDIO_GAME_STATE.trialKnown
   } : {});
-  if (realChat) window.parent.postMessage({ type: 'larch:ready' }, '*');
-  window.setTimeout(openRequestedInteraction, 0);
+  if (realChat) {
+    if (window.parent !== window) window.parent.postMessage({ type: 'larch:ready' }, '*');
+    window.PageLoading.prepare('開放聊天', window.StudioDB.ready.then(() => window.STUDIO_FEATURES.openChat(continueButton)));
+  } else {
+    window.setTimeout(openRequestedInteraction, 0);
+  }
 }

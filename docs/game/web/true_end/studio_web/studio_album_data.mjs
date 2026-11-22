@@ -236,7 +236,8 @@ export const ALBUM_TRACKS = [
   "note": "",
   "unlock": {
    "hud": "s10",
-   "birthday": "ch6_cg_026",
+   "birthday": "ch6_cg_028",
+   "birthdayLegacy": "ch6_cg_026",
    "day": 20
   },
   "lrc": [

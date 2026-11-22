@@ -6,6 +6,7 @@
 //   真結局才到最底：海龜（點了游過來讓她搭一段）、灰珊瑚（靠近按「上色」塗回顏色）、回憶捲軸第 6 張（靠近撿起，第六章　茶語）。
 //   點過的生物收進全劇的小生物圖鑑（zukan.js，變數 creatures；第一版的 dive_seen 讀的時候併進去）。浮回水面停一下就上岸，回到進來的地方（?back=）。
 // 狀態：Larch 變數優先（larch:init），本機存 StudioDB 'dive_state'；?reset=1 清掉。
+import { stepToward, WALK_BLOCKED } from './walk_interaction.mjs';
 import { sfx } from './sfx.js';
 import { fit, follow, apply } from './vscroll.js';
 import { createZukan } from './zukan.js';
@@ -105,7 +106,7 @@ async function boot() {
   }
   art.append(tea.el);   // 茶語畫在最上面
   layout(); addEventListener('resize', layout);
-  if (matchMedia('(pointer: coarse)').matches) hint.textContent = '按住往下潛，放開慢慢浮上來；按住往左右拖可以游過去';   // 手機沒有方向鍵
+  if (matchMedia('(pointer: coarse)').matches) hint.textContent = '按住下潛，放開上浮。點珊瑚或捲軸就會游過去';   // 手機沒有方向鍵
   follow(cam, W, H, S.x - cam.Vw / 2, S.y - cam.Vh * 0.42, 0);
   render(performance.now() / 1000);
   PageLoading.shown.then(() => {
@@ -120,10 +121,10 @@ function mk(cls) { const d = document.createElement('div'); d.className = 'sp ' 
 function addImg(el, src) { const im = new Image(); im.src = src; im.alt = ''; im.draggable = false; el.append(im); return im; }
 function size(el, w, h) { el.style.width = w + 'px'; el.style.height = h + 'px'; }
 function place(el, x, y, w, h, extra = '') { el.style.transform = `translate3d(${(x - w / 2).toFixed(1)}px,${(y - h / 2).toFixed(1)}px,0)${extra}`; }
-function tag(text, fn) { const b = document.createElement('button'); b.type = 'button'; b.className = 'tag'; b.textContent = text; b.hidden = true; b.addEventListener('pointerdown', e => { e.stopPropagation(); }); b.addEventListener('click', e => { e.stopPropagation(); fn(); }); art.append(b); return b; }
+function tag(text, fn) { const b = document.createElement('button'); b.type = 'button'; b.className = 'tag'; b.textContent = text; b.hidden = true; b.addEventListener('pointerdown', e => { e.stopPropagation(); }); b.addEventListener('click', e => { e.stopPropagation(); swimTarget = null; fn(); }); art.append(b); return b; }
 function layout() { fit(cam, W, H, stage.clientWidth || innerWidth, stage.clientHeight || innerHeight, 900); }
 function toast(t) { toastEl.textContent = t; toastEl.classList.add('on'); clearTimeout(toastEl._t); toastEl._t = setTimeout(() => toastEl.classList.remove('on'), 2200); }
-function showScroll(title, text) { $('dialog-title').textContent = title; $('dialog-text').textContent = text; dialog.classList.add('on'); S.dialog = true; S.held = false; }
+function showScroll(title, text) { swimTarget = null; $('dialog-title').textContent = title; $('dialog-text').textContent = text; dialog.classList.add('on'); S.dialog = true; S.held = false; }
 function closeScroll() { dialog.classList.remove('on'); S.dialog = false; }
 dialog.addEventListener('click', closeScroll);
 function note(x, y) { const im = new Image(); im.className = 'note'; im.src = IMG.notes[Math.floor(Math.random() * IMG.notes.length)]; im.alt = ''; im.style.left = x + 'px'; im.style.top = y + 'px'; im.style.setProperty('--dx', rnd(-30, 30) + 'px'); art.append(im); setTimeout(() => im.remove(), 2000); }
@@ -136,11 +137,15 @@ const DIVE_KINDS = ['fish', 'jelly', 'turtle']; let zk = null;
 function saw(kind) { if (!zk) return; zk.saw(kind); S.seen = DIVE_KINDS.filter(k => zk.has(k)); S.zk = zk.list(); }   // 只在第一次遇到時跳一句提示（zukan.js 裡）
 
 // ── 操作 ──
+let swimTarget = null;
 let keyX = 0, keyDown = false, pointerHeld = false, steerX = null, last = 0, surfT = 0;
 function artPt(e) { return { x: cam.vx + e.clientX / cam.s, y: cam.vy + e.clientY / cam.s }; }
 function bindInput() {
+  addEventListener('pointerdown', e => {
+    if (e.isPrimary && e.button === 0) swimTarget = null;
+  }, true);
   stage.addEventListener('pointerdown', e => {
-    if (S.state !== 'ready' || S.dialog) return;
+    if (!e.isPrimary || e.button !== 0 || S.state !== 'ready' || S.dialog) return;
     const p = artPt(e); if (tapCreature(p)) return;
     pointerHeld = true; steerX = p.x; try { stage.setPointerCapture(e.pointerId); } catch (err) {}
   });
@@ -149,6 +154,7 @@ function bindInput() {
   stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up); stage.addEventListener('lostpointercapture', up);
   addEventListener('keydown', e => {
     if (S.dialog) { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') { e.preventDefault(); closeScroll(); } return; }
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 's', 'S', 'a', 'A', 'd', 'D', ' '].includes(e.key)) swimTarget = null;
     if (e.key === ' ' || e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { e.preventDefault(); keyDown = true; }
     if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); keyX = -1; }
     if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); keyX = 1; }
@@ -160,9 +166,9 @@ function bindInput() {
     if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && keyX < 0) keyX = 0;
     if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && keyX > 0) keyX = 0;
   });
-  addEventListener('blur', () => { keyDown = pointerHeld = false; keyX = 0; });
+  addEventListener('blur', () => { keyDown = pointerHeld = false; keyX = 0; swimTarget = null; });
   for (const b of [callBtn, upBtn]) b.addEventListener('pointerdown', e => e.stopPropagation());
-  callBtn.addEventListener('click', call); upBtn.addEventListener('click', () => finish('up'));
+  callBtn.addEventListener('click', () => { swimTarget = null; call(); }); upBtn.addEventListener('click', () => finish('up'));
 }
 function hitWhat(p) {   // 點到哪一個生物（或捲軸、珊瑚）；回 [種類, 物件]，沒點到回 null
   if (turtle && turtle.mode === 'roam' && Math.abs(p.x - turtle.x) < turtle.w * 0.5 && Math.abs(p.y - turtle.y) < turtle.h * 0.5) return ['turtle', turtle];
@@ -174,13 +180,36 @@ function hitWhat(p) {   // 點到哪一個生物（或捲軸、珊瑚）；回 [
 }
 function tapCreature(p) {
   const h = hitWhat(p); if (!h) return false; const [k, o] = h;
-  if (k === 'turtle') turtleCome(); else if (k === 'jelly') glowJelly(o); else if (k === 'fish') scatter(o, p); else if (k === 'scroll') pickScroll(); else if (k === 'coral') paintCoral(p);
+  if (k === 'turtle') turtleCome(); else if (k === 'jelly') glowJelly(o); else if (k === 'fish') scatter(o, p); else approachObject(k, o, p);
   return true;
 }
 S.hitAt = (sx, sy) => !!hitWhat({ x: cam.vx + sx / cam.s, y: cam.vy + sy / cam.s });   // 測試用：畫面座標那一點有沒有東西
 S.tapAt = (x, y) => tapCreature({ x, y });
 
 // ── 生物的反應 ──
+function approachObject(kind, object, p) {
+  if ((kind === 'coral' && S.coral) || S.riding) return;
+  const reach = L[kind].reach;
+  const interact = kind === 'scroll' ? pickScroll : () => paintCoral(p);
+  if (Math.hypot(S.x - object.x, S.y - object.y) <= reach) return interact();
+  swimTarget = {
+    object, reach, interact,
+    x: clamp(object.x, ...L.x_range),
+    y: clamp(object.y, L.surface + L.rest, S.limitY),
+  };
+}
+function finishApproach() {
+  const target = swimTarget;
+  if (!target) return;
+  const { object, reach, x, y, interact } = target;
+  if (Math.hypot(S.x - object.x, S.y - object.y) <= reach) {
+    swimTarget = null;
+    interact();
+  } else if (S.x === x && S.y === y) {
+    swimTarget = null;
+    toast(WALK_BLOCKED);
+  }
+}
 function scatter(sc, p) { sc.scatterT = 0; sc.from = [p ? p.x : sc.cx, p ? p.y : sc.cy]; S.events.scatter++; play('splash'); saw('fish'); }
 function glowJelly(j) { j.glowT = performance.now() / 1000; j.el.classList.add('glow'); clearTimeout(j._t); j._t = setTimeout(() => j.el.classList.remove('glow'), 3200); S.events.glow++; play('twinkle'); saw('jelly'); }
 function call() {
@@ -226,20 +255,28 @@ function frame(now) {
 }
 function step(dt, t) {
   if (S.dialog) { S.vy = 0; follow(cam, W, H, S.x - cam.Vw / 2, S.y - cam.Vh * 0.42, dt, 4); return; }   // 展開捲軸時停在原地
-  const held = (pointerHeld || keyDown) && !S.riding; S.held = held;
+  const held = !S.riding && (swimTarget ? swimTarget.y > S.y : pointerHeld || keyDown); S.held = held;
   // 上下：按住往下潛（加速到 330 px／秒），放開慢慢浮上來（110 px／秒起，越深越快一點）
   if (!S.riding) {
     const want = held ? 330 * FAST : -(110 + 0.06 * (S.y - L.surface)) * FAST;
     S.vy += (want - S.vy) * (1 - Math.exp(-dt * (held ? 2.4 : 1.6)));
+    const y0 = S.y;
     S.y += S.vy * dt;
+    if (swimTarget && (swimTarget.y - y0) * (swimTarget.y - S.y) <= 0) {
+      S.y = swimTarget.y; S.vy = 0;
+    }
     const top = L.surface + L.rest;
     if (S.y < top) { S.y = top; S.vy = Math.max(0, S.vy); }
     if (S.y > S.limitY) { S.y = S.limitY; S.vy = Math.min(0, S.vy); if (S.ch4 && held && !S.limitShown) { S.limitShown = true; S.events.limit++; toast('這次只潛到這裡'); } }
     if (S.ch4 && S.y < S.limitY - 260) S.limitShown = false;
     // 左右：鍵盤，或按住時往手指那邊游
-    let vx = keyX * 260;
+    let vx = swimTarget ? clamp((swimTarget.x - S.x) * 3, -260, 260) : keyX * 260;
     if (pointerHeld && steerX !== null && Math.abs(steerX - S.x) > 36) vx = Math.sign(steerX - S.x) * Math.min(260, Math.abs(steerX - S.x) * 2.2);
-    S.x = clamp(S.x + vx * dt * FAST, L.x_range[0], L.x_range[1]);
+    if (swimTarget) {
+      const step = Math.max(1, Math.abs(vx)) * dt * FAST;
+      S.x = stepToward(S.x, swimTarget.x, step);
+      finishApproach();
+    } else S.x = clamp(S.x + vx * dt * FAST, ...L.x_range);
     if (Math.abs(vx) > 20) tea.face = vx > 0 ? 1 : -1;
     S.vx = vx;
   }
@@ -247,7 +284,7 @@ function step(dt, t) {
   // 浮回水面：潛下去過之後，回到水面放開停 1.2 秒就上岸
   const atTop = S.y <= L.surface + L.rest + 2;
   upBtn.hidden = !atTop;
-  if (atTop && S.maxDepth > 320 && !held && !S.dialog) { surfT += dt; if (surfT > 1.2) finish('surfaced'); } else surfT = 0;
+  if (atTop && S.maxDepth > 320 && !held && !S.dialog && !swimTarget) { surfT += dt; if (surfT > 1.2) finish('surfaced'); } else surfT = 0;
   // 氣泡
   if ((held || Math.abs(S.vy) > 80) && Math.random() < dt * 5) bubble(S.x + tea.face * 40, S.y - tea.h * 0.35);
   // 魚群
@@ -275,7 +312,7 @@ function turtleStep(dt, t) {
   else if (T.mode === 'come') {   // 游到她下面（她的腳下一點點）
     T.t += dt * FAST; const tx = clamp(S.x, R.x0, R.x1), ty = clamp(S.y + tea.h * 0.45, R.y - 700, R.y + 60); const k = 1 - Math.exp(-dt * 2.2 * FAST);
     T.face = tx > T.x ? 1 : -1; T.x += (tx - T.x) * k; T.y += (ty - T.y) * k;
-    if (Math.hypot(tx - T.x, ty - T.y) < 12 || T.t > 3) { T.mode = 'ride'; T.t = 0; S.riding = true; S.vy = 0; pointerHeld = keyDown = false; T.rx0 = T.x; T.dir = T.x < W / 2 ? 1 : -1; play('splash'); }
+    if (Math.hypot(tx - T.x, ty - T.y) < 12 || T.t > 3) { T.mode = 'ride'; T.t = 0; S.riding = true; swimTarget = null; S.vy = 0; pointerHeld = keyDown = false; T.rx0 = T.x; T.dir = T.x < W / 2 ? 1 : -1; play('splash'); }
   } else if (T.mode === 'ride') {   // 載著她游一段：往一邊游過去、繞回來，沿路冒泡
     T.t += dt * FAST; const k = clamp(T.t / 5, 0, 1), e = 0.5 - 0.5 * Math.cos(Math.PI * 2 * k);
     T.x = clamp(T.rx0 + T.dir * 420 * e, R.x0 - 120, R.x1 + 120); T.face = k < 0.5 ? T.dir : -T.dir; T.y = Math.min(T.y, R.y) + Math.sin(t * 2) * 0.6;
@@ -328,7 +365,7 @@ function drawRays(t) {   // 三道慢慢晃的暖色斜光（從右上方照下�
 // ── 上岸：回到進來的地方 ──
 function finish(reason) {
   if (S.state === 'done' || S.state === 'leaving') return;
-  setState('leaving'); S.reason = reason; play('splash');
+  swimTarget = null; setState('leaving'); S.reason = reason; play('splash');
   const done = S.ch4 ? { c4_dive: 'true' } : { dive_done: 'true' }; setVars(done);
   const creatures = zk.list().join(',');
   if (creatures) setVars({ creatures });

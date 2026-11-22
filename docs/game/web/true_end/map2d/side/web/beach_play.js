@@ -101,12 +101,12 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   function zone(id, name, r, onClick, opt = {}) {   // r：x、w、y、h 都是長畫 px
     const b = document.createElement('button'); b.type = 'button'; b.className = 'hotspot'; b.dataset.id = id; b.dataset.name = typeof name === 'function' ? name() : name; b.setAttribute('aria-label', b.dataset.name);
     Object.assign(b.style, { left: X(r.x), top: Y(r.y), width: X(r.w), height: Y(r.h) });
-    const hot = { id, name, x: r.x, w: r.w, y: r.y / H, h: r.h / H }; const z = { id, btn: b, hot, r, vis: true, lane: opt.lane === undefined ? 'beach' : opt.lane,
+    const hot = { id, name, x: r.x, w: r.w, y: r.y / H, h: r.h / H, reach: opt.reach, canReach: opt.canReach, approachX: opt.approachX }; const z = { id, btn: b, hot, r, vis: true, lane: opt.lane === undefined ? 'beach' : opt.lane,
       refresh() { const v = z.vis && (!z.lane || z.lane === lane); b.hidden = !v; hot.hidden = !v; },
       off() { z.vis = false; b.remove(); const i = api.hot.indexOf(hot); if (i >= 0) api.hot.splice(i, 1); const k = zones.indexOf(z); if (k >= 0) zones.splice(k, 1); api.render(); },
       hide() { z.vis = false; z.refresh(); api.render(); }, show() { z.vis = true; z.refresh(); api.render(); },
       moveTo(cx, top) { hot.x = cx - r.w / 2; b.style.left = X(hot.x); if (top !== undefined) { hot.y = top / H; b.style.top = Y(top); } } };
-    hot.fn = () => onClick(z); b.addEventListener('click', e => { e.stopPropagation(); hot.fn(); }); b.addEventListener('pointerdown', e => e.stopPropagation()); art.appendChild(b); api.hot.push(hot); zones.push(z); z.refresh(); return z;
+    hot.fn = () => onClick(z); api.bindHotspot(b, hot); art.appendChild(b); api.hot.push(hot); zones.push(z); z.refresh(); return z;
   }
   const bgLayer = art.querySelector('img.layer'); let underTop = bgLayer;   // 疊在底圖上、人物後面的東西（補丁、光）依序接在底圖後面
   const under = el => { underTop.after(el); underTop = el; return el; };
@@ -116,6 +116,10 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   const tea = api.player; const teaH0 = parseFloat(tea.style.height); let hold = 0; const lockOn = () => { hold += 1; api.lock(true); }, lockOff = () => { hold = Math.max(0, hold - 1); if (!hold) api.lock(false); };
   const pose = { y: FEET, k: 1 }; const setPose = (y, k) => { pose.y = y; pose.k = k; tea.style.top = Y(y); tea.style.height = (teaH0 * k) + '%'; };
   const laneOf = l => l === 'beach' ? { feet: FEET, k: 1, x0: M.walk[0], x1: M.walk[1] } : S[l];
+  api.setClickMovement({ bounds: () => {
+    const L = laneOf(lane);
+    return [L.x0, L.x1];
+  } });
   // 自己帶著茶語走一段（引擎鎖住時）：x、腳底 y、縮放一起內插，走路的上下彈照引擎的寫法
   function walkTea(x1, y1, k1, speed = 430) {
     return new Promise(ok => { const x0 = state.x, y0 = pose.y, k0 = pose.k; const dist = Math.hypot(x1 - x0, (y1 - y0) * 1.6); const secs = Math.max(0.12, dist / (speed * (k0 + k1) / 2)); let t = 0; if (Math.abs(x1 - x0) > 3) state.face = x1 > x0 ? 1 : -1;
@@ -131,8 +135,8 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   async function offStage() { if (moving || lane !== 'stage') return; moving = true; lockOn(); const s = S.stage; const x = clamp(state.x, s.steps.x + 40, s.steps.x + s.steps.w - 40); await walkTea(x, s.feet, s.k, 420); for (let i = 0; i < 3; i++) setTimeout(() => sfx.wood(i), i * 150); await walkTea(x, s.foot + 8, 0.80, 300); setLane('beach'); await walkTea(x, FEET, 1); lockOff(); moving = false; }
   async function toShore() { if (moving || lane !== 'beach') return; moving = true; lockOn(); const s = S.shore; const x = clamp(state.x, s.x0 + 20, s.x1 - 20); await walkTea(x, FEET, 1, 520); await walkTea(x, s.feet, s.k); setLane('shore'); lockOff(); moving = false; }
   async function offShore() { if (moving || lane !== 'shore') return; moving = true; lockOn(); const x = state.x; setLane('beach'); await walkTea(x, FEET, 1); lockOff(); moving = false; }
-  zone('stage', () => lane === 'stage' ? '走下舞台' : '走上舞台', S.stage.steps, () => lane === 'stage' ? offStage() : toStage(), { lane: null });
-  zone('shore', () => lane === 'shore' ? '回沙灘' : '走到浪邊', S.shore.zone, () => lane === 'shore' ? offShore() : toShore(), { lane: null });
+  zone('stage', () => lane === 'stage' ? '走下舞台' : '走上舞台', S.stage.steps, () => lane === 'stage' ? offStage() : toStage(), { lane: null, canReach: () => lane !== 'shore' });
+  zone('shore', () => lane === 'shore' ? '回沙灘' : '走到浪邊', S.shore.zone, () => lane === 'shore' ? offShore() : toShore(), { lane: null, canReach: () => lane !== 'stage' });
   // 不在沙灘走道時：左右限位、走路速度照縮放放慢、舞台木板腳步聲、浪邊留腳印
   let prevX = state.x, woodAcc = 0, woodN = 0, printAcc = 0, printN = 0; const stats = { wood: 0, prints: 0, strums: 0, runaways: 0, calls: 0 };
   api.onFrame(() => {
@@ -194,7 +198,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     const el = await sprite(crabSrc, 'crab'); const c = { id: c0.id, el, x: c0.x + (c0.shell && ch4 && on(guardKey) ? 70 : 0), y: c0.y, tx: null, speed: 0, calm: 0, guard: guarding(), shell: c0.shell, told: false };
     place(el, c.x, c.y, CRAB_H); const z = zone('crab_' + c.id, '螃蟹', { x: c.x - 30, w: 60, y: c.y - CRAB_H - 10, h: CRAB_H + 18 }, () => {
       if (c.tx !== null) return; if (c.calm > 0) { const r = pick(['wave', 'hopup', 'heart']); if (r === 'heart') { sfx.heart(); heart(c.x, c.y - CRAB_H - 8); } else { sfx.scuttle(); el.classList.remove(r); void el.offsetWidth; el.classList.add(r); setTimeout(() => el.classList.remove(r), 720); } return; }
-      if (c.guard) { hunker(c); return; } flee(c); }, { lane: null });
+      if (c.guard) { hunker(c); return; } flee(c); }, { lane: null, reach: 185 });
     c.z = z; crabs.push(c);
     callers.push(teaX => { if (!hears(c.x, teaX)) return false; const side = c.x >= teaX ? 1 : -1; c.calm = 16; el.classList.remove('hunker'); if (c.guard) { c.guard = false; save({ [guardKey]: 'true' }); const sh = shells.find(s => s.n === c.shell); if (sh) setTimeout(() => sh.uncover(), 500); }
       go(c, clamp(teaX + side * (58 + crabs.indexOf(c) * 42 + rnd(-6, 6)) * (lane === 'beach' ? 1 : 1.3), 80, W - 90), 170); /* 每隻停的距離不一樣，幾隻一起過來不會疊在一起 */ setTimeout(() => note(c.x, c.y - CRAB_H - 10, 0, 46), 500); return true; });
@@ -221,7 +225,8 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     place(el, s.x, s.y, h); if (crab) art.insertBefore(el, crab.el);   // 螃蟹壓在貝殼上面
     if (s0.hermit && covered()) el.style.display = 'none';
     s.z = zone('shell_' + s.n, '撿起貝殼', { x: s.x - 30, w: 60, y: s.y - h - 10, h: h + 18 }, async z => { if (s.busy) return; s.busy = true; await approach(s.x, 70); z.off(); picked.add(s.n); sfx.shell(s.n - 1); el.classList.add('ring'); sparkle(s.x, s.y - h / 2, 8); note(s.x, s.y - h - 8, 0, 54);
-      save({ shells_c4: [...picked].join(','), s3_shell_count: String(picked.size) }); setQuest(); api.toast(`撿到貝殼　${SOLFA[s.n - 1]}　${picked.size}／7`); setTimeout(() => { el.classList.add('picked'); setTimeout(() => el.remove(), 500); }, 520); const i = shells.indexOf(s); if (i >= 0) shells.splice(i, 1); }, { lane: s0.lane || 'beach' });
+      save({ shells_c4: [...picked].join(','), s3_shell_count: String(picked.size) }); setQuest(); api.toast(`撿到貝殼　${SOLFA[s.n - 1]}　${picked.size}／7`); setTimeout(() => { el.classList.add('picked'); setTimeout(() => el.remove(), 500); }, 520); const i = shells.indexOf(s); if (i >= 0) shells.splice(i, 1); }, { lane: s0.lane || 'beach', reach: 70 });
+    s.z.btn.style.zIndex = '5'; // 貝殼露出後，經過的海鷗不會擋住撿拾熱區。
     s.uncover = () => { el.style.display = ''; el.classList.add('hopup', 'glow'); setTimeout(() => el.classList.remove('hopup'), 460); sparkle(s.x, s.y - h / 2, 5, 0.7); s.z.show(); };
     if (covered()) s.z.hide(); else el.classList.add('glow'); shells.push(s);
   }
@@ -232,7 +237,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   for (const g0 of S.gulls) {
     const el = await sprite('../art/sprites/gull.webp', 'bird gull'); place(el, g0.x, g0.y, GULL_H); const sheet = el.querySelector('.sheet'); const standSrc = sheet.src;
     const g = { id: g0.id, el, x: g0.x, y: g0.y, home: g0, state: 'perch', calm: 0, away: 0, face: g0.id % 2 ? -1 : 1, idleT: rnd(1, 4) }; el.style.setProperty('--facing', g.face);
-    const z = zone('gull' + g.id, '海鷗', { x: g.x - 36, w: 72, y: g.y - GULL_H - 8, h: GULL_H + 16 }, () => { if (g.state === 'fly') return; if (g.calm > 0) { sfx.squawk(); const r = pick(['ruffle', 'hopstep', 'peckonce']); el.classList.add(r); setTimeout(() => el.classList.remove(r), 600); if (Math.random() < 0.4) heart(g.x, g.y - GULL_H - 6); return; } flyOff(); }, { lane: null });
+    const z = zone('gull' + g.id, '海鷗', { x: g.x - 36, w: 72, y: g.y - GULL_H - 8, h: GULL_H + 16 }, () => { if (g.state === 'fly') return; if (g.calm > 0) { sfx.squawk(); const r = pick(['ruffle', 'hopstep', 'peckonce']); el.classList.add(r); setTimeout(() => el.classList.remove(r), 600); if (Math.random() < 0.4) heart(g.x, g.y - GULL_H - 6); return; } flyOff(); }, { lane: null, reach: 200 });
     g.z = z; gulls.push(g); let flapT = 0;
     const frame = (dt, glide) => { if (!gullFly.length) return standSrc; flapT += dt; return glide ? gullFly[2] : gullFly[Math.floor(flapT * 8) % 2]; };
     // 飛一段：每一幀自己算位置（不靠 CSS 過場），到了才把熱區移過去打開
@@ -334,7 +339,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     else if (!on('c4_intro')) setTimeout(() => openDialogue([['', '南邊多了一整片沙灘，沙灘盡頭有一座小小的木頭舞台。'], ['詩', '是黃昏耶。']], [() => save({ c4_intro: 'true' })]), 900);
   } else {
     shiEl.style.display = 'none'; const A = await sitPiece('shi_sit_guitar'); showSit(A, false);
-    shiZ = zone('shi', '跟詩說話', { x: S.sit.x0 - 8, w: S.sit.x1 - S.sit.x0 + 30, y: A.head - 4, h: A.bottom - A.head + 8 }, () => talkShiTrue(), { lane: null });
+    shiZ = zone('shi', '跟詩說話', { x: S.sit.x0 - 8, w: S.sit.x1 - S.sit.x0 + 30, y: A.head - 4, h: A.bottom - A.head + 8 }, () => talkShiTrue(), { lane: null, reach: 110, approachX: () => (S.sit.x0 + S.sit.x1) / 2 });
   }
   const strumRiffs = [[196, 246.9, 293.7, 392, 293.7, 246.9], [220, 261.6, 329.6, 440, 329.6], [164.8, 246.9, 329.6, 392, 493.9, 392]]; let riffN = 0, lastStrum = 0;
   function strum() { const now = performance.now(); if (now - lastStrum < 2500) return; const A = sitPieces.shi_sit_guitar; if (!A || !A.el.isConnected) return; lastStrum = now; stats.strums += 1; const riff = strumRiffs[riffN++ % strumRiffs.length]; riff.forEach((f, i) => sfx.pluck(f, i * 0.17)); A.el.classList.remove('strum', 'sink'); void A.el.offsetWidth; A.el.classList.add('strum'); for (let i = 0; i < 3; i++) note(A.cx + 14, A.head + 10, i * 0.28, 60); }
@@ -397,7 +402,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   zone('fire', '添一根柴', fire.zone, async () => { if (feeding) return; feeding = true; await approach(fire.x, 150); const el = await sprite('../art/sprites/log.webp', 'log flat'); const x0 = state.x + state.face * 14, y0 = pose.y - M.hero_h * H * 0.5; place(el, x0, y0, 15, true); el.style.zIndex = 5; let t = 0; const spin = rnd(260, 420) * state.face;
     const anim = dt => { t += dt / 0.62; const e = Math.min(1, t); el.style.left = X(x0 + (fire.x - x0) * e); el.style.top = Y(y0 + (fire.y - 6 - y0) * e - Math.sin(e * Math.PI) * 54); el.style.setProperty('--rot', (spin * e) + 'deg');
       if (e >= 1) { const k = api.frameHooks.indexOf(anim); if (k >= 0) api.frameHooks.splice(k, 1); el.style.transition = 'opacity .5s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 520); logs += 1; save({ [K('fire_logs')]: String(logs) }); sfx.crackle(7 + Math.floor(rnd(0, 6))); const n = 16 + Math.floor(rnd(0, 14)); for (let i = 0; i < n; i++) setTimeout(() => spark(true), rnd(0, 500)); glow.style.setProperty('--s', '1.6'); setTimeout(glowSize, 700); setTimeout(() => { feeding = false; }, 500); } };
-    api.frameHooks.push(anim); });
+    api.frameHooks.push(anim); }, { reach: 150, approachX: () => fire.x });
 
   // ── 舞台燈串：原畫的燈是亮的，先用一塊暗色把每盞蓋成沒點亮；點一下一盞一盞亮起來（程式畫的光，screen 混色） ──
   const bulbs = S.bulbs.map(([x, y]) => { const dim = document.createElement('div'); dim.className = 'bulbdim'; Object.assign(dim.style, { left: X(x), top: Y(y + 1), width: X(40), height: Y(40) }); const gl = document.createElement('div'); gl.className = 'bulbglow'; Object.assign(gl.style, { left: X(x), top: Y(y + 1), width: X(86), height: Y(86) }); under(dim); under(gl); return { dim, gl }; });
@@ -433,7 +438,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   // ── 木箱、木桶：蓋子掀開的樣子是從原畫局部重畫再對位貼回的補丁（flat.json 的 open_patches），疊上去就是打開；螃蟹跑出來，過幾秒蓋回去 ──
   for (const key of ['crate', 'barrel']) { const P = M.open_patches && M.open_patches[key]; if (!P) continue; const im = document.createElement('img'); im.className = 'easelpatch openpatch ' + key; im.src = P.img; im.alt = ''; im.draggable = false; im.style.opacity = '0'; Object.assign(im.style, { left: X(P.x), top: Y(P.y), width: X(P.w), height: Y(P.h) }); under(im); let busy = false; const c = S[key];
     zone(key, key === 'crate' ? '打開木箱' : '打開木桶', c.zone, async () => { if (busy) return; busy = true; await approach(c.zone.x + c.zone.w / 2, 130); sfx.creak(true); im.style.opacity = '1'; await wait(420); const n = Math.random() < 0.3 ? 2 : 1; for (let i = 0; i < n; i++) { runawayCrab(c.mouth[0], c.mouth[1], c.zone.y + c.zone.h - 6, i ? -1 : (state.x > c.mouth[0] ? -1 : 1)); await wait(260); }
-      await wait(2600); sfx.creak(false); im.style.opacity = '0'; await wait(450); busy = false; }); }
+      await wait(2600); sfx.creak(false); im.style.opacity = '0'; await wait(450); busy = false; }, { reach: 130 }); }
 
   setQuest();
   // 測試與截圖用
@@ -504,7 +509,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
       const el = await sprite('../art/sprites/shell_6.webp', 'shell flat glow'); place(el, x, y, 24); el.classList.add('hopup'); sparkle(x, y - 12, 8, 0.8); setQ();
       pinkZ = zone('c7pink', '粉紅色的貝殼', { x: x - 34, w: 68, y: y - 40, h: 50 }, async z => { if (done()) return; await approach(x, 70); z.off(); sfx.shell(0); el.classList.add('ring'); sparkle(x, y - 12, 10);
         save({ c7s_pink: 'true' }); setQ(); setTimeout(() => { el.classList.add('picked'); setTimeout(() => el.remove(), 500); }, 520);
-        lockOn(); openDialogue([['詩', '這個敲起來是 Do。'], ['晨', '這個是粉紅色的。'], ['明', '二十三個了。'], ['茶語', '全部帶回去，放在長桌上。']], [() => { save({ c7s_done: 'true', chapter7_shell_count: '23' }); CT.completeFreeInteraction(); lockOff(); setQ(); }]); });
+        lockOn(); openDialogue([['詩', '這個敲起來是 Do。'], ['晨', '這個是粉紅色的。'], ['明', '二十三個了。'], ['茶語', '全部帶回去，放在長桌上。']], [() => { save({ c7s_done: 'true', chapter7_shell_count: '23' }); CT.completeFreeInteraction(); lockOff(); setQ(); }]); }, { reach: 70 });
     }
     for (const s0 of TEA_SHELLS) {
       if (d28Picked.has(s0.k)) continue; const el = await sprite(`../art/sprites/shell_${s0.n}.webp`, 'shell flat'); const h = 24 - (s0.n - 1) * 1.6; const s = { ...s0, el, h };
@@ -512,7 +517,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
       place(el, s.x, s.y, h); if (crab) art.insertBefore(el, crab.el);
       s.z = zone('c7shell_' + s.k, '撿起貝殼', { x: s.x - 30, w: 60, y: s.y - h - 10, h: h + 18 }, async z => { if (s.busy) return; s.busy = true; await approach(s.x, 70); z.off(); d28Picked.add(s.k); sfx.shell(s.n - 1); el.classList.add('ring'); sparkle(s.x, s.y - h / 2, 8); note(s.x, s.y - h - 8, 0, 54);
         save({ shells_c7: [...d28Picked].join(',') }); setQ(); api.toast(`撿到貝殼　${total()}／${TOTAL}`); setTimeout(() => { el.classList.add('picked'); setTimeout(() => el.remove(), 500); }, 520); const i = shells.indexOf(s); if (i >= 0) shells.splice(i, 1);
-        await wait(700); crewPick(); }, { lane: 'beach' });
+        await wait(700); crewPick(); }, { lane: 'beach', reach: 70 });
       s.uncover = () => { el.style.display = ''; el.classList.add('hopup', 'glow'); setTimeout(() => el.classList.remove('hopup'), 460); sparkle(s.x, s.y - h / 2, 5, 0.7); s.z.show(); };
       if (covered()) s.z.hide(); else el.classList.add('glow'); shells.push(s);
     }

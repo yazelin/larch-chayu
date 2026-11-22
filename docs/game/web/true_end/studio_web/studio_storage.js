@@ -94,7 +94,7 @@
   function memoryVar(conversation) { return 'studioMem' + SHORT[conversation]; }
   var CARD_KEYS = { studioTurnState: true };
 
-  function larchBackend() {
+  function larchBackend(waitForInit) {
     var vars = {};       // 邏輯欄位現值（各格拼回來的字串）
     var raw = {};        // 實際的劇情變數（一格一格）
     var card = {};       // 這張卡的 larch.storage
@@ -106,6 +106,8 @@
       if (event.source !== window.parent) return;
       var data = event.data || {};
       if (data.type === 'larch:init') {
+        // 工作室每次換卡會重開網頁。這一頁只用首次的存檔快照，以免重送 init 蓋掉進場後的寫入。
+        if (waitForInit && seeded) return;
         var incoming = data.variables || {};
         // 島頁在同一張卡裡換頁時，init 是進卡當時的舊值：這張卡裡寫過的蓋回去
         if (ISLAND && window.IslandBridge) incoming = window.IslandBridge.merge(incoming);
@@ -121,8 +123,9 @@
         card = data.storage && typeof data.storage === 'object' ? data.storage : {};
       }
     });
-    // 編輯器預覽或沒有外殼時不會送 init，2.5 秒後照空的開始。
-    setTimeout(finishSeed, 2500);
+    // 正式外殼會轉送 init。等到存檔進來才允許讀寫，避免載入超時時拿空紀錄開聊天或覆寫存檔。
+    // 沒有轉接外殼的預覽仍可在沒有 init 時使用。
+    if (!waitForInit) setTimeout(finishSeed, 2500);
 
     function post(message) { try { window.parent.postMessage(message, '*'); } catch (error) { /* 外殼不在 */ } }
     function writeVar(name, value) {
@@ -308,7 +311,10 @@
 
   var inLarchFrame = false;
   try { inLarchFrame = window.parent !== window; } catch (error) { inLarchFrame = true; }
-  var baseDB = indexedDbUsable() ? idbBackend() : inLarchFrame ? larchBackend() : memoryBackend();
+  var studioShell = inLarchFrame && !ISLAND && window.PageLoading && window.PageLoading.shell
+    && new URLSearchParams(location.search).get('embed') === '1';
+  var baseDB = studioShell ? larchBackend(true) : indexedDbUsable() ? idbBackend()
+    : inLarchFrame ? larchBackend(false) : memoryBackend();
   function syncRelevantKey(key) { return key === 'anonymousPlayerId' || key === 'progressTable' || key === 'progressUserTasks' || /^chat:(chen|ming|shi|group)$/.test(String(key)) || /^(image|song|drawing):/.test(String(key)); }
   function notifySyncChange(key) { if (syncRelevantKey(key)) window.dispatchEvent(new CustomEvent('studio:db-change', { detail: { key: String(key) } })); }
   window.StudioDB = Object.assign({}, baseDB, {

@@ -27,7 +27,10 @@ export function unlockedIds(ctx) {
     const u = t.unlock || {};
     if (ctx.all) { out.add(t.id); return; }
     if (u.final) { if (ctx.final) out.add(t.id); return; }
-    if (u.birthday) { if ((seen && (seen.has(u.hud) || seen.has(u.birthday))) || day > u.day) out.add(t.id); return; }
+    if (u.birthday) {
+      if (day > u.day || (seen && [u.hud, u.birthday, u.birthdayLegacy].some(key => seen.has(key)))) out.add(t.id);
+      return;
+    }
     if (seen) { if (u.hud && seen.has(u.hud)) out.add(t.id); return; }
     if (u.day !== undefined && day > u.day) out.add(t.id);
   });

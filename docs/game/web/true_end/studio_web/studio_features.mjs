@@ -650,9 +650,9 @@ async function renderChat(character, group, root) {
   });
 }
 
-function setupTabs(tabs, render, initialId) {
+function setupTabs(tabs, render, initialId, label = '工作室活動') {
   const nav = el('nav', 'sf-tabs');
-  nav.setAttribute('aria-label', '工作室活動');
+  nav.setAttribute('aria-label', label);
   const content = el('div', 'sf-stack');
   let current = initialId || tabs[0].id;
   function choose(id) {
@@ -664,14 +664,29 @@ function setupTabs(tabs, render, initialId) {
     const view = el('div');
     content.replaceChildren(view);
     ephemeralUrls.forEach(URL.revokeObjectURL); ephemeralUrls = [];
-    Promise.resolve(render(id, view)).catch(function (error) { view.replaceChildren(el('p', 'sf-status', error.message)); });
+    return Promise.resolve(render(id, view)).catch(function (error) { view.replaceChildren(el('p', 'sf-status', error.message)); });
   }
   tabs.forEach(function (item) {
     const tab = button(item.label, function () { choose(item.id); }, 'sf-tab');
     tab.dataset.tab = item.id; tab.setAttribute('aria-selected', 'false'); nav.appendChild(tab);
   });
   panelBody.append(nav, content);
-  choose(current);
+  return choose(current);
+}
+
+function openRealChat(focus) {
+  panelOpen('開放聊天', focus, 'group');
+  clearBody();
+  addContext(panelBody);
+  const tabs = [{ id: 'group', label: '群聊' }, ...['chen', 'ming', 'shi'].map(id => ({ id, label: CHARACTERS[id].name }))];
+  ensureHelpSeen();
+  return setupTabs(tabs, (id, content) => {
+    const group = id === 'group';
+    panel.dataset.design = group ? 'group' : 'chat';
+    if (group) delete panel.dataset.character;
+    else panel.dataset.character = id;
+    return renderChat(group ? null : id, group, content);
+  }, 'group', '聊天對象');
 }
 
 function openCharacter(character, focus, initialTab, options) {
@@ -3107,7 +3122,7 @@ const studioBgm = (function () {
 })();
 
 // 工作室 AI 功能的說明卡（作者 2026-11-16）：第一次打開聊天、畫架、唱片架、明的電腦時跳一次，
-// 按「我知道了」才關；看過記在 helpSeen（Larch 版是跨週目的 studioMisc，網站版是 IndexedDB），之後在明的電腦「說明」重看。
+// 關閉時把 helpSeen 寫進 Larch 的 studioMisc 或網站版的 IndexedDB，之後在明的電腦「說明」重看。
 function helpItems() {
   return [
     '晨、明、詩在工作室裡說的話、畫的圖、做的歌，都是 AI 當場做出來的，可能會說錯，也可能跟劇情對不上。',
@@ -3161,15 +3176,18 @@ async function ensureHelpSeen() {
       if (previousFocus?.isConnected && previousFocus.getClientRects().length) previousFocus.focus({ preventScroll: true });
       else if (panel.classList.contains('on') && !panel.contains(document.activeElement)) panel.focus({ preventScroll: true });
     }
-    const ok = button('我知道了', async function () {
+    async function acknowledge() {
+      if (ok.disabled) return;
+      ok.disabled = true;
       try { await StudioDB.set('helpSeen', true); } catch (error) { /* 存不下下次再跳 */ }
       dismiss();
-    }, 'primary');
+    }
+    const ok = button('我知道了', acknowledge, 'primary');
     layer.addEventListener('keydown', function (event) {
       if (event.key !== 'Escape') return;
       event.preventDefault();
       event.stopPropagation();
-      dismiss();
+      acknowledge();
     });
     ok.dataset.help = 'ok';
     card.appendChild(ok);
@@ -3197,16 +3215,17 @@ window.STUDIO_FEATURES = {
     if (id === 8) { openCharacter('chen', focus, 'gallery'); ensureHelpSeen(); return true; }
     if (id === 12) { openMingComputer(focus); ensureHelpSeen(); return true; }
     if (id === 13) {
-      panelOpen(realChat ? '開放聊天' : '長桌・四人群聊', focus, 'group');
+      panelOpen('長桌・四人群聊', focus, 'group');
       clearBody();
       addContext(panelBody);
-      if (!realChat) shellRow(panelBody);
+      shellRow(panelBody);
       renderChat(null, true, panelBody);
       ensureHelpSeen();
       return true;
     }
     return false;
   },
+  openChat: openRealChat,
   person: function (character, focus) { const opened = openDirectChat(character, focus); if (opened) ensureHelpSeen(); return opened; },
   help: ensureHelpSeen,
   context: function () { return game; },

@@ -56,15 +56,15 @@ export async function install(api) {
       off() { b.remove(); const i = api.hot.indexOf(hot); if (i >= 0) api.hot.splice(i, 1); api.render(); },
       hide() { b.hidden = true; hot.hidden = true; api.render(); }, show() { b.hidden = false; hot.hidden = false; api.render(); },
       moveTo(cx, y) { hot.x = cx - r.w / 2; b.style.left = X(hot.x); if (y !== undefined) { hot.y = y; b.style.top = y * 100 + '%'; } } };
-    hot.fn = () => onClick(z);
-    b.addEventListener('click', e => { e.stopPropagation(); hot.fn(); }); b.addEventListener('pointerdown', e => e.stopPropagation()); art.appendChild(b); api.hot.push(hot); return z;
+    hot.fn = point => onClick(z, point);
+    api.bindHotspot(b, hot); art.appendChild(b); api.hot.push(hot); return z;
   }
 
   let gray = null, paintAt = () => false;   // 第三章的灰層，下面才建；熱區名牌用函式讀
   // ── 落花瓣 ──
   const petals = createPetals({ stage: document.getElementById('stage'), IMG, camX: api.camX, getScale: api.getScale, canopies: S.cherry }); await petals.ready; api.onFrame(dt => { petals.step(dt); petals.draw(); });
   for (const [i, r] of S.cherry.entries()) zone('cherry' + i, () => gray && gray.on && !gray.painted.has('cherry') ? '上色' : '搖一搖櫻花樹', r, z => { if (gray && gray.on && !gray.painted.has('cherry') && paintAt(r.x + r.w / 2, r.y + r.h * 0.5)) return; z.btn.classList.remove('shake'); void z.btn.offsetWidth; z.btn.classList.add('shake'); petals.rain(r, 10 + Math.floor(rnd(0, 8)), rnd(2.4, 3.6)); sfx.rustle(4 + Math.floor(rnd(0, 3))); });
-  zone('tulips', () => gray && gray.on ? '上色' : '摸摸鬱金香', S.tulips, z => { if (gray && gray.on && paintAt(api.state.x, S.tulips.y + S.tulips.h * 0.55)) return; const sw = document.createElement('div'); sw.className = 'sway'; const seg = rnd(0.15, 0.7); Object.assign(sw.style, { left: X(S.tulips.x + S.tulips.w * seg), top: S.tulips.y * 100 + '%', width: X(S.tulips.w * 0.3), height: S.tulips.h * 100 + '%' }); art.appendChild(sw); setTimeout(() => sw.remove(), 900); petals.rain({ x: S.tulips.x + S.tulips.w * seg, w: S.tulips.w * 0.3, y: S.tulips.y + 0.02, h: S.tulips.h * 0.5 }, 4 + Math.floor(rnd(0, 4)), 1.2, 'tulip'); sfx.rustle(2 + Math.floor(rnd(0, 2))); });
+  zone('tulips', () => gray && gray.on ? '上色' : '摸摸鬱金香', S.tulips, (z, point) => { if (gray && gray.on && paintAt(point?.x ?? api.state.x, point?.y ?? S.tulips.y + S.tulips.h * 0.55)) return; const sw = document.createElement('div'); sw.className = 'sway'; const seg = rnd(0.15, 0.7); Object.assign(sw.style, { left: X(S.tulips.x + S.tulips.w * seg), top: S.tulips.y * 100 + '%', width: X(S.tulips.w * 0.3), height: S.tulips.h * 100 + '%' }); art.appendChild(sw); setTimeout(() => sw.remove(), 900); petals.rain({ x: S.tulips.x + S.tulips.w * seg, w: S.tulips.w * 0.3, y: S.tulips.y + 0.02, h: S.tulips.h * 0.5 }, 4 + Math.floor(rnd(0, 4)), 1.2, 'tulip'); sfx.rustle(2 + Math.floor(rnd(0, 2))); });
 
   // ── 第三章：灰色的花田（作者 2026-11-13 改：撿到哪一色就能塗哪一色）──
   //   灰層：花田帶（幾何多邊形、邊緣羽化，整片均勻灰）＋櫻花樹冠（顏色遮罩）。五色遮罩（粉、白、黃、橘、櫻）只用來決定點下去塗哪一色。
