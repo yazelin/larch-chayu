@@ -29,15 +29,7 @@
     23: [["截止日", "明圈起來的那天"]],
     30: [["比賽結果公布", "試用期最後一天"]]
   };
-  const SONGS = [
-    { title: "主題曲（退件版）", author: "詩", note: "劇情歌曲" },
-    { title: "主題曲（改好版）", author: "詩", note: "劇情歌曲" },
-    { title: "主題曲（貝殼版）", author: "詩", note: "劇情歌曲" },
-    { title: "詩的歌（手機悶聲版）", author: "詩", note: "手機版本" },
-    { title: "詩的歌（耳機完整版）", author: "詩", note: "耳機完整版" },
-    { title: "明天一定寫", author: "詩", note: "劇情歌曲" },
-    { title: "合唱團", author: "合唱團", note: "第三章音樂廳" }
-  ];
+  const SONGS = window.PhoneSongs;
   const state = {
     key: "",
     data: null,
@@ -46,8 +38,6 @@
     filter: "全部",
     selectedDay: 17,
     selectedSong: 0,
-    playing: false,
-    progress: 12,
     game: [0, 0, 1],
     gameWon: false,
     modalPhoto: null,
@@ -101,7 +91,7 @@
     const queryCode = state.pendingCode || new URLSearchParams(location.search).get("c") || "";
     const message = state.busy ? "正在驗證配對碼⋯" : state.error;
     return '<section class="pair-screen"><div class="pair-topline"><span>《夜後明月》</span><time class="clock" data-clock>' + timeNow() + '</time></div>' +
-      '<div class="pair-art"><img src="./assets/phone.png" alt=""></div><h1 class="pair-title">把手機帶在身邊</h1>' +
+      '<div class="pair-art"><img src="./assets/phone.webp" alt=""></div><h1 class="pair-title">把手機帶在身邊</h1>' +
       '<p class="pair-subtitle">用遊戲裡的手機掃配對碼<br>也可以手動輸入 8 碼配對碼。</p>' +
       '<form class="pair-card" data-pair-form><label for="pair-code">遊戲裡顯示的配對碼</label>' +
       '<input class="code-input" id="pair-code" name="code" type="text" inputmode="text" autocomplete="one-time-code" autocapitalize="characters" maxlength="8" placeholder="ABCD2345" value="' + escapeHTML(queryCode.toUpperCase()) + '" aria-label="8 碼配對碼">' +
@@ -217,17 +207,60 @@
     return shell("相簿", photos.length + " 張收藏", content, false);
   }
   function music() {
-    const song = SONGS[state.selectedSong] || SONGS[0];
-    const content = '<div class="player-card"><div class="player-main"><img src="./assets/appicons/shi_music.png" alt=""><span><strong>' + song.title + '</strong><small>' + song.author + '・曲目資料</small></span></div>' +
-      '<div class="progress"><i style="width:' + state.progress + '%"></i></div><div class="player-time"><span>示意進度</span><span>—:—</span></div>' +
-      '<div class="player-controls"><button data-song-step="-1" aria-label="上一首">‹</button><button class="play" data-play aria-label="' + (state.playing ? "暫停" : "播放") + '">' + (state.playing ? "Ⅱ" : "▶") + '</button><button data-song-step="1" aria-label="下一首">›</button></div></div>' +
+    const song = SONGS[state.selectedSong];
+    const content = '<div class="player-card"><audio data-player preload="none" src="' + escapeHTML(song.url) + '"></audio>' +
+      '<div class="player-main"><img src="./assets/appicons/shi_music.png" alt=""><span><strong data-player-title>' + song.title + '</strong><small data-player-author>' + song.author + '</small></span></div>' +
+      '<div class="progress" aria-hidden="true"><i></i></div><div class="player-time" aria-live="off"><span data-elapsed>0:00</span><span data-duration>—:—</span></div>' +
+      '<div class="player-controls"><button data-song-step="-1" aria-label="上一首">‹</button><button class="play" data-play aria-label="播放">▶</button><button data-song-step="1" aria-label="下一首">›</button></div></div>' +
       '<div class="panel"><div class="panel-title"><h2>接下來播放</h2><small>' + SONGS.length + ' 首</small></div><div class="song-list">' +
       SONGS.map(function (item, index) {
-        return '<button class="song-row" data-song="' + index + '"><span class="song-cover">' + appIcon("music", "") + '</span><span class="song-meta"><strong>' + item.title + '</strong><small>' + item.author + '・' + item.note + '</small></span><span class="song-length">—:—</span></button>';
-      }).join("") + '</div>' + (state.data.collections || []).filter(function (item) { return item.type === "song" && item.audioUrl; }).map(function (item) {
-        return '<div class="song-row real-song"><span class="song-cover">' + appIcon("music", "") + '</span><span class="song-meta"><strong>' + escapeHTML(item.title) + '</strong><small>收藏的歌曲</small><audio controls preload="none" src="' + escapeHTML(item.audioUrl) + '"></audio></span></div>';
-      }).join("") + '</div></div><p class="content-note">曲目名稱依劇情與配樂表；已同步到的作品會從作品伺服器載入。</p>';
+        return '<button class="song-row" data-song="' + index + '"><span class="song-cover">' + appIcon("music", "") + '</span><span class="song-meta"><strong>' + item.title + '</strong><small>' + item.author + '・' + item.note + '</small></span></button>';
+      }).join("") + '</div>' + (state.data.collections || []).filter(function (item) { return item.type === "song"; }).map(function (item) {
+        const audio = item.audioUrl ? '<small>收藏的歌曲</small><audio controls preload="none" src="' + escapeHTML(item.audioUrl) + '"></audio>' : '<small>音檔目前無法載入</small>';
+        return '<div class="song-row real-song"><span class="song-cover">' + appIcon("music", "") + '</span><span class="song-meta"><strong>' + escapeHTML(item.title) + '</strong>' + audio + '</span></div>';
+      }).join("") + '</div>';
     return shell("音樂", "劇情歌曲與詩做的歌", content, false);
+  }
+  function songTime(seconds) {
+    if (!Number.isFinite(seconds)) return "—:—";
+    const whole = Math.floor(seconds);
+    return Math.floor(whole / 60) + ":" + String(whole % 60).padStart(2, "0");
+  }
+  function updatePlayer(audio) {
+    const card = audio.parentElement;
+    const play = card.querySelector("[data-play]");
+    const playing = !audio.paused && !audio.ended && !audio.error;
+    const label = playing ? "暫停" : "播放";
+    if (play.getAttribute("aria-label") !== label) {
+      play.setAttribute("aria-label", label);
+      play.textContent = playing ? "Ⅱ" : "▶";
+    }
+    const elapsed = card.querySelector("[data-elapsed]");
+    const duration = card.querySelector("[data-duration]");
+    const time = songTime(audio.currentTime);
+    const length = songTime(audio.duration);
+    if (elapsed.textContent !== time) elapsed.textContent = time;
+    if (duration.textContent !== length) duration.textContent = length;
+    card.querySelector(".progress i").style.width = (Number.isFinite(audio.duration) && audio.duration > 0 ? audio.currentTime / audio.duration * 100 : 0) + "%";
+  }
+  function playAudio(audio) {
+    if (audio.error) audio.load();
+    audio.play().catch(function (error) {
+      if (audio.isConnected && !audio.error && error.name !== "AbortError") toast("無法播放，請再試一次。");
+    });
+  }
+  function selectSong(index) {
+    state.selectedSong = index;
+    if (state.view !== "music") {
+      openPage("music");
+    }
+    const song = SONGS[index];
+    const audio = app.querySelector("[data-player]");
+    audio.parentElement.querySelector("[data-player-title]").textContent = song.title;
+    audio.parentElement.querySelector("[data-player-author]").textContent = song.author;
+    if (audio.getAttribute("src") !== song.url) audio.src = song.url;
+    updatePlayer(audio);
+    playAudio(audio);
   }
   function calendar() {
     const day = trialDay();
@@ -271,10 +304,17 @@
     const who = state.chatWho;
     const p = PEOPLE[who];
     const messages = state.data.chats[who] || [];
+    const photos = new Map((state.data.collections || []).filter(function (item) {
+      return item.type === "photo" && item.workId && item.imageUrl;
+    }).map(function (item) { return [item.workId, item]; }));
     const bubbles = messages.map(function (message) {
       const mine = message.from === "me";
+      const photo = photos.get(message.workId);
+      const image = photo ? '<img class="chat-photo" src="' + escapeHTML(photo.imageUrl) + '" alt="' + escapeHTML(photo.title || "聊天圖片") + '">' : "";
+      const caption = message.text ? '<span>' + escapeHTML(message.text) + '</span>' : "";
       return '<div class="chat-message ' + (mine ? "me" : "") + '">' + (!mine ? '<img data-chat-thread-avatar="' + who + '" src="' + p.portrait + '" alt="">' : "") +
-        '<span class="bubble">' + escapeHTML(message.text) + '</span><time>' + escapeHTML(message.at || "") + '</time></div>';
+        '<span class="bubble">' + (image || (message.workId ? '<span>圖片目前無法載入</span>' : "")) + caption +
+        '</span><time>' + escapeHTML(message.at || "") + '</time></div>';
     }).join("");
     const remaining = Math.max(0, Number(state.data.quota.limit) - Number(state.data.quota.used));
     const content = '<div class="chat-thread" data-thread>' + bubbles + '</div><form class="chat-compose" data-chat-form>' +
@@ -331,6 +371,7 @@
     }
   }
   function render() {
+    app.querySelectorAll("audio").forEach(function (audio) { audio.pause(); });
     app.innerHTML = state.key && state.data ? currentPage() + photoModal() : pairScreen();
     bindDynamic();
     if (state.view === "thread") {
@@ -381,6 +422,16 @@
     state.data = await window.PhoneAPI.fetch(state.key);
   }
   function bindDynamic() {
+    const audio = app.querySelector("[data-player]");
+    if (audio) {
+      ["play", "pause", "ended", "timeupdate", "durationchange", "emptied", "error"].forEach(function (name) {
+        audio.addEventListener(name, function () {
+          if (!audio.isConnected) return;
+          updatePlayer(audio);
+          if (name === "error") toast("音檔載入失敗，請確認網路連線後再試。");
+        });
+      });
+    }
     const code = document.getElementById("pair-code");
     if (code) {
       code.addEventListener("input", function () {
@@ -465,6 +516,11 @@
     render();
   }
   function bindClicks() {
+    app.addEventListener("play", function (event) {
+      app.querySelectorAll("audio").forEach(function (audio) {
+        if (audio !== event.target) audio.pause();
+      });
+    }, true);
     app.addEventListener("click", async function (event) {
       const target = event.target.closest("button, [data-close-modal]");
       if (!target) return;
@@ -474,7 +530,6 @@
       }
       if (target.hasAttribute("data-back")) { state.view = "home"; state.modalPhoto = null; render(); return; }
       if (target.dataset.open) {
-        if (target.dataset.open === "music") state.playing = false;
         openPage(target.dataset.open); return;
       }
       if (target.dataset.chatWho) {
@@ -488,15 +543,17 @@
       if (target.dataset.filter) { state.filter = target.dataset.filter; render(); return; }
       if (target.dataset.day) { state.selectedDay = Number(target.dataset.day); render(); return; }
       if (target.dataset.song) {
-        state.selectedSong = Number(target.dataset.song); state.playing = true; state.progress = 0;
-        if (state.view === "shi") state.view = "music";
-        render(); toast("正在播放：" + SONGS[state.selectedSong].title); return;
+        selectSong(Number(target.dataset.song)); return;
       }
       if (target.dataset.songStep) {
-        state.selectedSong = (state.selectedSong + Number(target.dataset.songStep) + SONGS.length) % SONGS.length;
-        state.playing = true; state.progress = 0; render(); return;
+        selectSong((state.selectedSong + Number(target.dataset.songStep) + SONGS.length) % SONGS.length); return;
       }
-      if (target.hasAttribute("data-play")) { state.playing = !state.playing; render(); return; }
+      if (target.hasAttribute("data-play")) {
+        const audio = app.querySelector("[data-player]");
+        if (audio.paused) playAudio(audio);
+        else audio.pause();
+        return;
+      }
       if (target.dataset.gear != null) {
         if (state.gameWon) return;
         const index = Number(target.dataset.gear);

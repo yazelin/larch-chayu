@@ -648,7 +648,6 @@ img { display: block; max-width: 100%; }
 .song-meta { min-width: 0; flex: 1; }
 .song-meta strong { display: block; font-size: 13px; }
 .song-meta small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
-.song-length { color: var(--muted); font-family: system-ui, sans-serif; font-size: 11px; }
 .player-card {
   margin: 5px 0 18px;
   padding: 18px;
@@ -664,7 +663,7 @@ img { display: block; max-width: 100%; }
 .player-main strong { display: block; font-size: 16px; }
 .player-main small { display: block; margin-top: 3px; color: rgba(255,255,255,.76); font-size: 12px; }
 .progress { height: 4px; margin: 17px 0 7px; border-radius: 5px; background: rgba(255,255,255,.31); }
-.progress i { display: block; width: 15%; height: 100%; border-radius: inherit; background: white; transition: width .3s linear; }
+.progress i { display: block; width: 0; height: 100%; border-radius: inherit; background: white; transition: width .3s linear; }
 .player-time { display: flex; justify-content: space-between; color: rgba(255,255,255,.68); font: 10px system-ui, sans-serif; }
 .player-controls { display: flex; align-items: center; justify-content: center; gap: 22px; margin-top: 9px; }
 .player-controls button { display: grid; width: 44px; height: 44px; place-items: center; border: 0; border-radius: 50%; color: white; background: rgba(255,255,255,.14); cursor: pointer; }
@@ -779,10 +778,12 @@ img { display: block; max-width: 100%; }
   gap: 9px;
   padding: 12px 0;
 }
-.chat-message { display: flex; max-width: 86%; align-items: flex-end; gap: 6px; }
+.chat-message { display: flex; min-width: 0; max-width: 86%; align-self: flex-start; align-items: flex-end; gap: 6px; }
 .chat-message.me { align-self: flex-end; flex-direction: row-reverse; }
-.chat-message img { width: 27px; height: 27px; border-radius: 50%; object-fit: cover; }
+.chat-message > img { width: 27px; height: 27px; flex: none; border-radius: 50%; object-fit: cover; }
 .bubble {
+  min-width: 0;
+  max-width: 100%;
   padding: 9px 12px;
   border: 1px solid rgba(82, 72, 99, .07);
   border-radius: 15px 15px 15px 4px;
@@ -790,10 +791,13 @@ img { display: block; max-width: 100%; }
   color: #514d5b;
   font-size: 13px;
   line-height: 1.55;
+  white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.chat-photo { max-width: 100%; height: auto; border-radius: 8px; }
+.chat-photo + span { display: block; margin-top: 6px; }
 .chat-message.me .bubble { border-color: transparent; border-radius: 15px 15px 4px 15px; color: white; background: #8276ad; }
-.chat-message time { margin-bottom: 2px; color: var(--faint); font: 9px system-ui, sans-serif; white-space: nowrap; }
+.chat-message time { flex: none; margin-bottom: 2px; color: var(--faint); font: 9px system-ui, sans-serif; white-space: nowrap; }
 .chat-compose {
   position: sticky;
   bottom: -28px;
