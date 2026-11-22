@@ -11,11 +11,11 @@ const PX_PER_M = 370 / 1.4, WALK = 3.4 * PX_PER_M;     // 03 的畫架 1.4 公�
 const NEARBY = 0.06;
 // 熱區 x 用畫面寬的比例。左右兩張是從外延圖裁的（左：切掉右 12%；右：切掉左 7%），座標已換算。
 const SCENES = [
-  { key: 'left', name: '朝霞丘・櫻花林', image: '../art/out/scene_left.jpg', walk: [0.05, 0.97], chen: 0.76,
+  { key: 'left', name: '朝霞丘・櫻花林', image: '../art/out/scene_left.webp', walk: [0.05, 0.97], chen: 0.76,
     hotspots: [{ id: 'exit', name: '回全島', x: 0.00, y: 0.55, w: 0.08, h: 0.40 }, { id: 'chen', name: '跟晨說話', x: 0.70, y: 0.42, w: 0.11, h: 0.40 }, { id: 'easel', name: '看畫布', x: 0.79, y: 0.47, w: 0.15, h: 0.34 }] },
-  { key: 'center', name: '朝霞丘', image: '../art/out/scene_03.jpg', fg: '../art/out/fg_03.png', walk: [0.03, 0.97], chen: 0.14,
+  { key: 'center', name: '朝霞丘', image: '../art/out/scene_03.webp', fg: '../art/out/fg_03.webp', walk: [0.03, 0.97], chen: 0.14,
     hotspots: [{ id: 'chen', name: '跟晨說話', x: 0.08, y: 0.40, w: 0.11, h: 0.41 }, { id: 'easel', name: '看畫布', x: 0.19, y: 0.43, w: 0.15, h: 0.37 }, { id: 'bench', name: '坐下看海', x: 0.37, y: 0.68, w: 0.20, h: 0.14 }] },
-  { key: 'right', name: '朝霞丘・海邊', image: '../art/out/scene_right.jpg', walk: [0.03, 0.95], chen: null, hotspots: [] },
+  { key: 'right', name: '朝霞丘・海邊', image: '../art/out/scene_right.webp', walk: [0.03, 0.95], chen: null, hotspots: [] },
 ];
 const TALK = { chen: { title: '晨', text: ['這次是我自己看到的。', '太陽從那邊出來的時候，整片花會先亮一秒。'], note: '正式版接劇本 4-1 那段對話。' },
                easel: { title: '畫架', text: ['畫布上只有一層淡淡的粉橘。'], note: '之後接「一種顏色」。' } };
@@ -39,8 +39,8 @@ function buildLayer(sc) {
   const layer = document.createElement('div'); layer.className = 'scene-layer'; layer.dataset.scene = sc.key;
   const art = document.createElement('div'); art.className = 'art';
   const img = document.createElement('img'); img.className = 'art-image'; img.src = sc.image; img.alt = sc.name; img.draggable = false; art.appendChild(img);
-  if (sc.chen !== null) { const c = person('../../../sprites/chen_3h.png', CHEN_H, 'chen'); c.style.left = (sc.chen * 100) + '%'; c.style.top = (FEET * 100) + '%'; c.style.setProperty('--facing', 1); art.appendChild(c); }
-  const p = person('../../../sprites/tea_side_3h_cut.png', HERO_H, 'tea'); art.appendChild(p);
+  if (sc.chen !== null) { const c = person('../../../sprites/chen_3h.webp', CHEN_H, 'chen'); c.style.left = (sc.chen * 100) + '%'; c.style.top = (FEET * 100) + '%'; c.style.setProperty('--facing', 1); art.appendChild(c); }
+  const p = person('../../../sprites/tea_side_3h_cut.webp', HERO_H, 'tea'); art.appendChild(p);
   if (sc.fg) { const f = document.createElement('img'); f.className = 'fg-image'; f.src = sc.fg; f.alt = ''; f.draggable = false; art.appendChild(f); }   // 前景遮擋：只擋、不動
   for (const h of sc.hotspots) {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'hotspot'; b.dataset.id = h.id; b.dataset.name = h.name; b.setAttribute('aria-label', h.name);
@@ -84,7 +84,7 @@ function openPanel(title, lines, note) {
 }
 function closePanel() { panel.classList.remove('on'); scrim.classList.remove('on'); panelOpen = false; }
 function interact(id) {
-  if (id === 'bench') { document.getElementById('cg-img').src = '../../../garden/concept/03_dawn_hill.jpg'; cg.style.display = 'block'; return; }
+  if (id === 'bench') { document.getElementById('cg-img').src = '../../../garden/concept/03_dawn_hill.webp'; cg.style.display = 'block'; return; }
   if (id === 'exit') { if (inFrame) { parent.postMessage({ type: 'larch:set', variables: { dawn_visited: 'true' } }, '*'); parent.postMessage({ type: 'larch:complete' }, '*'); } else openPanel('回全島', ['（嵌進 Larch 時這裡會回到全島地圖的 (36,9)。）']); return; }
   const t = TALK[id]; if (t) openPanel(t.title, t.text, t.note);
 }

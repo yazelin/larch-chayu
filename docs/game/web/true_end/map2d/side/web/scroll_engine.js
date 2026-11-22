@@ -15,7 +15,7 @@ if (Q.get('hud') === '0') document.body.classList.add('nohud');
 
 function load(src) { return new Promise((ok, bad) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => bad(new Error('載不到 ' + src)); im.src = src; }); }
 const layers = await Promise.all(scene.layers.map(async l => ({ ...l, img: await load(l.src) })));
-const hero = await load('../../../sprites/tea_side_3h_cut.png'); const chen = await load('../../../sprites/chen_3h.png');
+const hero = await load('../../../sprites/tea_side_3h_cut.webp'); const chen = await load('../../../sprites/chen_3h.webp');
 
 const P = scene.points;
 const state = { x: (Number(Q.get('x')) || P.enter_from_island.x) * SW, face: 1, walking: false, phase: 0 };
@@ -59,7 +59,7 @@ function nearest() {
 }
 function interact(k) {
   const h = HOT[k]; if (!h) return;
-  if (h.cg) { document.getElementById('cg-img').src = '../../../garden/concept/03_dawn_hill.jpg'; cg.style.display = 'block'; return; }
+  if (h.cg) { document.getElementById('cg-img').src = '../../../garden/concept/03_dawn_hill.webp'; cg.style.display = 'block'; return; }
   if (h.exit) { if (inFrame) { parent.postMessage({ type: 'larch:set', variables: { dawn_visited: 'true' } }, '*'); parent.postMessage({ type: 'larch:complete' }, '*'); } else openPanel('回全島', ['（嵌進 Larch 時這裡會回到全島地圖的 (36,9)。）']); return; }
   openPanel(h.title, h.text, h.note);
 }

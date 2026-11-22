@@ -12,12 +12,28 @@ export function storyTime(dayValue, chapterValue) {
   return { day: day, chapter: chapter };
 }
 
+const taipeiHour = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Asia/Taipei', hour: 'numeric', hourCycle: 'h23'
+});
+
+export function taipeiWindowTime(date = new Date()) {
+  const hour = Number(taipeiHour.format(date));
+  if (hour < 5 || hour >= 18) return 'night';
+  if (hour < 7) return 'predawn';
+  if (hour < 11) return 'morning';
+  if (hour < 16) return 'day';
+  return 'dusk';
+}
+
 const STORY_BEATS = [
   [1, '第一次進入工作室，茶語和晨、明、詩開始一起製作遊戲。'],
   [2, '茶語哼起音樂劇的歌，詩問她唱的是什麼。'],
   [3, '茶語讀到元稹的茶詩，替 C、M、S 取名為晨、明、詩；明排好進度表。'],
+  [4, '茶語打了又刪，最後傳出第一封訊息。晚上四人在書桌前做事，一起吃宵夜。'],
   [5, '開始製作色之國，晨負責遊戲角色與美術。'],
   [6, '茶語修地圖到凌晨，隔天在課堂上睡著。'],
+  [7, '四人預演色之國，明測完最後一關。'],
+  [8, '茶語整理台詞檔，晚上第一次走進朝霞丘。'],
   [9, '下雨天茶語想起基隆；晨偷偷畫她，被她發現。'],
   [10, '明沒問茶語就挪動進度，她為此和明吵架；晚上茶語和小天去聽合唱團。'],
   [11, '茶語感冒休息；她睡著後，晨、明、詩各自準備一份要送她的東西。'],
@@ -25,6 +41,7 @@ const STORY_BEATS = [
   [13, '茶語的報告拿到 C。'],
   [14, '音之國主題曲繼續修改，三人陪茶語把進度追回來。'],
   [15, '進入時之國；晨重畫鐘塔城市，並在畫裡加上茶語。'],
+  [16, '茶語和晨約好去朝霞丘看日出，晚上四人預演時之國。'],
   [17, '茶語在鐘塔知道三人的試用期限。'],
   [18, '進入考試週，茶語一邊準備考試，一邊想辦法讓三人留下。'],
   [19, '茶語打開「第 30 天」資料夾。'],
@@ -40,6 +57,11 @@ const STORY_BEATS = [
   [29, '四人在長桌聊到深夜，茶語趴在桌上睡著。'],
   [30, '晚上八點公布比賽結果。']
 ];
+
+export function storyDayNote(day, trialKnown) {
+  if (day === 17 && !trialKnown) return '';
+  return STORY_BEATS.find(beat => beat[0] === day)?.[1] || '';
+}
 
 export function storySummary(day, trialKnown) {
   const visibleBeats = STORY_BEATS.filter(function (beat) {

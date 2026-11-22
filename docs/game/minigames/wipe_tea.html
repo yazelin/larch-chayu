@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>擦紅茶</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;touch-action:none;background:#382a2c;color:#f8e9d1;font-family:serif}main{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:12px}h1{font-size:20px;font-weight:400;margin:0}p{margin:0;font-size:15px}#desk{position:relative;width:min(92vw,900px);height:min(72vh,620px);border:10px solid #5d3e30;border-radius:12px;background:repeating-linear-gradient(2deg,#96734f 0px,#96734f 32px,#8b6748 34px,#96734f 37px);box-shadow:0 24px 40px #0006;overflow:hidden}canvas{position:absolute;inset:0;width:100%;height:100%}#paper{position:absolute;left:27%;top:25%;width:54%;height:52%;background:linear-gradient(90deg,#e6d5b5 49%,#b4a184 50%,#eee0c4 52%);transform:rotate(-7deg);box-shadow:3px 8px 12px #30201866;border-radius:3px;pointer-events:none}#tea{position:absolute;left:72%;top:5%;color:#624b38;font-size:clamp(14px,3vw,25px)}#poem{position:absolute;left:52%;top:22%;width:44%;height:72%;overflow:hidden;color:#745a43;text-align:center;font-size:clamp(8px,min(1.25vw,1.8vh),15px);line-height:1.5;filter:blur(1px)}#tissue{position:absolute;width:70px;height:58px;left:12%;top:78%;background:repeating-linear-gradient(35deg,#f1e9d9,#e2d7c6 5px,#f6efe4 9px);transform:rotate(14deg);box-shadow:1px 3px 8px #31251b80;pointer-events:none;border-radius:4px;opacity:.95}progress{width:min(80vw,500px);accent-color:#c6b8a3}#desk:focus-visible{outline:3px solid #fff}
+</style>
+<main><h1>擦紅茶</h1><p id="hint">拖曳衛生紙，慢慢擦桌面。</p><div id="desk" tabindex="0" role="application" aria-label="擦桌面。拖曳衛生紙，或用方向鍵移動衛生紙，按住空白鍵擦拭。"><div id="paper"><span id="tea">茶</span><div id="poem">香葉，嫩芽。<br>慕詩客，愛僧家。<br>碾雕白玉，羅織紅紗。<br>銚煎黃蕊色，碗轉曲塵花。<br>夜後邀陪明月，晨前命對朝霞。<br>洗盡古今人不倦，將知醉後豈堪誇。</div></div><canvas id="stain"></canvas><div id="tissue"></div></div><progress max="100" value="0" aria-label="桌面擦拭進度"></progress></main>
+<script src="../web/true_end/page_loading.js"></script>
+<script>
+(()=>{
+ const desk=document.querySelector('#desk'),canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),tissue=document.querySelector('#tissue'),poem=document.querySelector('#poem'),progress=document.querySelector('progress');
+ const W=900,H=620;canvas.width=W;canvas.height=H;
+ // Fixed logical surface keeps all stains reachable on narrow screens; only table cells count toward completion.
+ const cells=[];for(let y=45;y<H-30;y+=26)for(let x=38;x<W-25;x+=26){if(x>240&&x<745&&y>135&&y<490)continue;if(((x-450)/415)**2+((y-310)/265)**2<1)cells.push({x,y,clean:false});}
+ ctx.fillStyle='rgba(89,40,12,.65)';for(const c of cells){ctx.beginPath();ctx.ellipse(c.x,c.y,31,23,.2,0,7);ctx.fill();}
+ let done=false,down=false,px=100,py=500,smudge=0;
+ function wipe(x,y){if(done)return;px=Math.max(0,Math.min(W,x));py=Math.max(0,Math.min(H,y));tissue.style.left=(px/W*100)+'%';tissue.style.top=(py/H*100)+'%';tissue.style.transform='translate(-50%,-50%) rotate(14deg)';
+ ctx.globalCompositeOperation='destination-out';ctx.beginPath();ctx.arc(px,py,48,0,Math.PI*2);ctx.fill();
+ for(const c of cells)if(Math.hypot(c.x-px,c.y-py)<42)c.clean=true;
+ if(px>240&&px<745&&py>135&&py<490){smudge=Math.min(8,smudge+.14);poem.style.filter=`blur(${1+smudge}px)`;poem.style.opacity=String(1-smudge*.07);}
+ const ratio=cells.filter(c=>c.clean).length/cells.length;progress.value=ratio*100;
+ if(cells.every(c=>c.clean)){ctx.clearRect(0,0,W,H);done=true;document.querySelector('#hint').textContent='桌面擦乾了。';setTimeout(()=>{window.__done={result:'wiped',payload:{}};parent.postMessage({type:'larch:complete',result:'wiped',payload:{}},'*');},900);}}
+ function point(e){const r=desk.getBoundingClientRect();return [(e.clientX-r.left-desk.clientLeft)/(desk.clientWidth)*W,(e.clientY-r.top-desk.clientTop)/(desk.clientHeight)*H];}
+ desk.addEventListener('pointerdown',e=>{if(e.button!==0)return;down=true;desk.setPointerCapture(e.pointerId);wipe(...point(e));});desk.addEventListener('pointermove',e=>{if(down)wipe(...point(e));});for(const type of ['pointerup','pointercancel','lostpointercapture'])desk.addEventListener(type,()=>down=false);
+ desk.addEventListener('keydown',e=>{const moves={ArrowLeft:[-24,0],ArrowRight:[24,0],ArrowUp:[0,-24],ArrowDown:[0,24]};if(moves[e.key]){e.preventDefault();const [x,y]=moves[e.key];wipe(px+x,py+y);}else if(e.key===' '){e.preventDefault();wipe(px,py);}});
+ parent.postMessage({type:'larch:ready'},'*');window.PageLoading.finish();
+})();
+</script></html>

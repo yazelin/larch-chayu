@@ -52,6 +52,13 @@ body { color: var(--paper); font-family: "Iansui", "LXGW WenKai TC", "Kaiti TC",
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition-duration: .01s !important; } }
 </style>
+<script>/* 在 Larch 裡讓開章名膠囊、右上常駐 HUD＋關閉鈕、右下按鈕列（2026-11-22 實量）；網址加 inlarch=1 可在本機模擬 */(function(){try{var a=location.ancestorOrigins,inL=/[?&]inlarch=1/.test(location.search)||/larch\.ink/.test(document.referrer||'');if(a)for(var i=0;i<a.length;i++)if(/larch\.ink/.test(a[i]))inL=true;if(inL)document.documentElement.classList.add('in-larch');}catch(e){}})();</script>
+<style>
+html.in-larch .snd{top:max(124px,env(safe-area-inset-top))}
+html.in-larch #hint{bottom:max(64px,env(safe-area-inset-bottom))}
+html.in-larch #title{top:max(56px,env(safe-area-inset-top))}
+@media(max-width:700px){html.in-larch #title{top:max(120px,env(safe-area-inset-top))}html.in-larch .snd{top:auto;bottom:max(64px,env(safe-area-inset-bottom));right:12px}html.in-larch #hint{bottom:max(104px,env(safe-area-inset-bottom))}}
+</style>
 </head>
 <body>
 <svg id="sv" aria-label="王城廣場上，三個守護者站成三角形" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -128,6 +135,7 @@ var SND = (function () {
     bell(a, o, t + .09, NOTE[keys[keys.length - 1]] * 2, .05, 1, false); };
 })(SND.tone);
 </script>
+<script src="../web/true_end/page_loading.js"></script>
 <script>
 (function () {
 // B3：場景背景（無人、放大兩倍）→ 光影與暗部 → 三人各自重畫的高解析立繪（站姿＋被看著時的反應）→ 名字與點選熱區。效果不會疊在人身上。
@@ -186,7 +194,7 @@ addEventListener('message', function (event) {
 });
 parent.postMessage({ type: 'larch:ready' }, '*');
 setTimeout(boot, parent === window ? 150 : 1500);
-function boot() { if (LARCH.on) return; LARCH.on = true; start(); }
+function boot() { if (LARCH.on) return; LARCH.on = true; start(); window.PageLoading?.finish(); }
 
 SND.bindMute(document.getElementById('snd'));
 var state = { lit: {}, picked: null, layout: '', best: 'C', hover: null, pending: null, pointer: '' }, currentFormat = '';

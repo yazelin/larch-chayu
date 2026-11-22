@@ -1,0 +1,19 @@
+/* Larch 安全區（2026-11-22 實量；作者試玩：島的地名被 Larch 的章名膠囊蓋住）。
+   Larch 播放器蓋在內嵌頁上面的介面：
+   - 左上角章名膠囊「第三章　慕詩客，愛僧家」：上緣 14、高 28，寬隨章名（最長約 320px）。一直顯示。
+   - 右上角常駐 HUD（三顆愛心＋手機）與底下的日期紙卡、再右邊的關閉鈕：框約 272×110（--hud-clear）。
+   - 右下角底部按鈕列（存檔／讀取／歷史…）：離底 13–49px、寬約 600。
+   - 手機直式：HUD 在上緣正中，上緣 112px 整條被蓋；底部操作列整條（離底 54px 內）。
+   自家介面：左上從 --larch-top-left 起排；右上從 --hud-clear 起；貼底的離底至少 --larch-bottom。
+   這份放在所有樣式表最後載入，只動位置。 */
+:root{--larch-top-left:56px;--larch-bottom:64px}
+#wall-label,#scroll-label{top:max(var(--larch-top-left),env(safe-area-inset-top))!important;left:max(16px,env(safe-area-inset-left))!important}
+#tools{top:max(var(--hud-clear),env(safe-area-inset-top))!important}
+#studio-unlock-status{top:calc(max(var(--larch-top-left),env(safe-area-inset-top)) + 48px)!important}
+#scroll-controls,#hint,.sf-toasts{bottom:max(var(--larch-bottom),env(safe-area-inset-bottom))!important}
+.studio-embed-continue{bottom:max(var(--larch-bottom),env(safe-area-inset-bottom))!important}
+@media(max-width:700px){
+  #wall-label,#scroll-label{top:max(var(--hud-clear),env(safe-area-inset-top))!important}
+  #studio-unlock-status{top:calc(var(--hud-clear) + 44px)!important}
+  .studio-embed-card,#decor-toast{top:calc(var(--hud-clear) + 40px)!important}
+}

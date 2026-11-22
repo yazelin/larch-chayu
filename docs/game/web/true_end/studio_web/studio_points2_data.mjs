@@ -22,7 +22,7 @@ export const SKETCH_PICKS = [
   "title": "舞台的草稿",
   "early": false,
   "day": 0,
-  "src": "../../../cg/ch4/ch4_cg_009.webp"
+  "src": "../../../cg/ch4/ch4_cg_011.webp"
  },
  {
   "ch": 7,
@@ -30,7 +30,7 @@ export const SKETCH_PICKS = [
   "title": "晨畫的四個人",
   "early": false,
   "day": 27,
-  "src": "../../../cg/ch7/ch7_cg_022.webp"
+  "src": "../../../cg/ch7/ch7_cg_023.webp"
  }
 ];
 export const TODO_ITEMS = [
@@ -149,6 +149,14 @@ export const TODO_ITEMS = [
   "src": "第六章.md:33、219、665"
  },
  {
+  "id": "t18x",
+  "d": 18,
+  "t": "考試（兩科）",
+  "who": "A",
+  "show": 15,
+  "src": "第六章.md:133：今天考兩科（作者 2026-11-22：進度表要看得到考試週）"
+ },
+ {
   "id": "t19",
   "d": 19,
   "t": "最後一幕",
@@ -156,11 +164,27 @@ export const TODO_ITEMS = [
   "src": "第六章.md:33"
  },
  {
+  "id": "t19x",
+  "d": 19,
+  "t": "考試（一科）",
+  "who": "A",
+  "show": 15,
+  "src": "第六章.md:232：今天考一科（作者 2026-11-22：進度表要看得到考試週）"
+ },
+ {
   "id": "t20",
   "d": 20,
   "t": "最後一幕",
   "who": "A",
   "src": "第六章.md:33"
+ },
+ {
+  "id": "t20x",
+  "d": 20,
+  "t": "考試（最後一科）",
+  "who": "A",
+  "show": 15,
+  "src": "第六章.md:658：下午考完最後一科（作者 2026-11-22：進度表要看得到考試週）"
  },
  {
   "id": "t21",

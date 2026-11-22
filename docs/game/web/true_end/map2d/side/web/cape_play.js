@@ -53,7 +53,7 @@ body.frozen .cglow.errandflick{animation:none;opacity:0}
 #freezetint{position:absolute;inset:0;z-index:9;pointer-events:none;background:#4a73cf;mix-blend-mode:color;opacity:0;transition:opacity .45s ease}
 #freezedim{position:absolute;inset:0;z-index:9;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,rgba(20,40,110,0) 40%,rgba(14,26,80,.42) 100%);opacity:0;transition:opacity .45s ease}
 body.frozen #freezetint{opacity:.9}body.frozen #freezedim{opacity:1}
-#stoptime{position:fixed;z-index:12;right:max(18px,env(safe-area-inset-right));bottom:max(22px,env(safe-area-inset-bottom));padding:.6em 1.6em .65em;color:var(--ink);font:700 19px/1.3 var(--hand);letter-spacing:.16em;cursor:pointer;background:none;rotate:-2deg;
+#stoptime{position:fixed;z-index:12;right:max(18px,env(safe-area-inset-right));bottom:max(var(--larch-bottom,64px),env(safe-area-inset-bottom));padding:.6em 1.6em .65em;color:var(--ink);font:700 19px/1.3 var(--hand);letter-spacing:.16em;cursor:pointer;background:none;rotate:-2deg;
   border-style:solid;border-width:0;border-image:var(--btn) var(--btn-slice) fill / var(--btn-width) stretch;filter:drop-shadow(0 4px 5px rgba(20,24,60,.4));transition:transform .15s}
 #stoptime:hover{transform:translateY(-3px)}#stoptime:active{transform:translateY(1px) scale(.97)}#stoptime[hidden]{display:none}#stoptime small{font-size:13px;font-weight:400;color:var(--dim);margin-left:.5em;letter-spacing:.05em}
 #stoptime u{position:absolute;left:18%;right:18%;bottom:.32em;height:3px;border-radius:2px;background:rgba(90,65,80,.18);overflow:hidden;text-decoration:none;opacity:0}
@@ -86,7 +86,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   const zk = createZukan({ vars: () => Object.assign({}, st, api.vars), set: v => save(v), toast: api.toast }); await zk.ready;   // 全劇小生物圖鑑（zukan.js）
   if (on('gift_ming')) api.gifts.gift_ming = true;
 
-  const FX = await (await fetch('../art/sprites/fx.json')).json(); const FXK = {}; for (const e of FX) (FXK[e.kind] = FXK[e.kind] || []).push(e.file);
+  const FX = await PageLoading.json('../art/sprites/fx.json'); const FXK = {}; for (const e of FX) (FXK[e.kind] = FXK[e.kind] || []).push(e.file);
   const fxImg = (kind, cls = '') => { const pool = FXK[kind] || FXK.star; const im = document.createElement('img'); im.className = 'fx ' + kind + ' ' + cls; im.src = '../art/sprites/' + pool[Math.floor(Math.random() * pool.length)]; im.alt = ''; im.draggable = false; return im; };
   function sparkle(x, y, n = 8, far = 1) { for (let i = 0; i < n; i++) { const s = fxImg(Math.random() < 0.7 ? 'star' : 'glow'); s.style.left = X(x + rnd(-6, 6)); s.style.top = Y(y); s.style.setProperty('--a', (i / n * 360 + rnd(-20, 20)) + 'deg'); s.style.setProperty('--d', rnd(24, 60) * far + 'px'); s.style.setProperty('--sz', rnd(10, 18) + 'px'); s.style.animationDelay = rnd(0, 0.15) + 's'; art.appendChild(s); setTimeout(() => s.remove(), 1500); } }
   function heart(x, y) { const h = fxImg('heart', 'float'); h.style.left = X(x); h.style.top = Y(y); h.style.setProperty('--sz', rnd(14, 20) + 'px'); h.style.setProperty('--dx', rnd(-12, 12) + 'px'); art.appendChild(h); setTimeout(() => h.remove(), 1700); }
@@ -339,7 +339,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   async function flyGear(src, x0, y0, to, secs = 0.6, size = 18, endSize = 12) { const el = await sprite(src, 'gear flat spin', { edge: 4, jitter: 1 }); place(el, x0, y0, size, true); el.style.zIndex = 6; let t = 0; const spin = rnd(300, 480);
     return new Promise(ok => { const anim = dt => { t += dt / secs; const e = Math.min(1, t); const p = to(); el.style.left = X(lerp(x0, p.x, e)); el.style.top = Y(lerp(y0, p.y, e) - Math.sin(e * Math.PI) * 46); el.style.setProperty('--rot', (spin * e) + 'deg'); el.style.height = (lerp(size, endSize, e) / H * 100 / (1 - 2 * Number(el.dataset.pad))) + '%';
       if (e >= 1) { const i = api.frameHooks.indexOf(anim); if (i >= 0) api.frameHooks.splice(i, 1); el.remove(); ok(); } }; api.frameHooks.push(anim); }); }
-  const GEAR_SRC = { a: '../art/sprites/gear_1.png', b: '../art/sprites/gear_3.png', c: '../art/sprites/gear_2.png' };
+  const GEAR_SRC = { a: '../art/sprites/gear_1.webp', b: '../art/sprites/gear_3.webp', c: '../art/sprites/gear_2.webp' };
   async function takeGear(id) {
     if (got.has(id)) return; got.add(id); save({ gears_c5: [...got].join(','), s4_gear_count: String(got.size) }); sfx.gear(); sfx.pick();
     const el = gearEls[id]; let x0 = pose.x, y0 = pose.y - 40; if (el) { x0 = el._x; y0 = el._y; el.remove(); delete gearEls[id]; } if (id === 'b') { x0 = bird.x + bird.face * 18; y0 = bird.y - 8; bird.gear = false; }
@@ -360,8 +360,8 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     if (gearEls.c) { const f = floats[GEAR_STONE - 1]; const el = gearEls.c; el._x = f.cx + 9; el._y = f.cy + 1; el.style.left = X(el._x); el.style.top = Y(el._y); zGearC.moveTo(el._x, el._y - 30); } });
 
   // ── 叼齒輪的小鳥：在鐘塔右邊的坡上繞著飛，飛得很快；停下時間才定在半空 ──
-  const birdSrc = []; for (let i = 0; i < 4; i++) birdSrc.push((await paperize(`../art/sprites/nbird_${i}.png`, { edge: 5, jitter: 2 })).src);
-  const bird = { el: await sprite('../art/sprites/nbird_0.png', 'nbird flat', { edge: 5, jitter: 2 }), x: 1080, y: 430, face: 1, a: rnd(0, 6), gear: ch5 && !got.has('b') && !on('c5_cg'), flap: 0, look: 0 }; const BIRD_H = 40; const birdSheet = bird.el.querySelector('.sheet');
+  const birdSrc = []; for (let i = 0; i < 4; i++) birdSrc.push((await paperize(`../art/sprites/nbird_${i}.webp`, { edge: 5, jitter: 2 })).src);
+  const bird = { el: await sprite('../art/sprites/nbird_0.webp', 'nbird flat', { edge: 5, jitter: 2 }), x: 1080, y: 430, face: 1, a: rnd(0, 6), gear: ch5 && !got.has('b') && !on('c5_cg'), flap: 0, look: 0 }; const BIRD_H = 40; const birdSheet = bird.el.querySelector('.sheet');
   place(bird.el, bird.x, bird.y, BIRD_H, true); bird.el.style.zIndex = 3;
   const birdAt = a => ({ x: 1090 + 330 * Math.sin(a), y: 418 + 62 * Math.sin(2 * a + 0.6) + 14 * Math.sin(3.7 * a) });
   const zBird = zone('bird', () => bird.gear && on('c5_stopped') ? '鳥嘴邊的齒輪' : '小鳥', { x: 0, w: 70, y: 0, h: 60 }, () => {
@@ -407,14 +407,14 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   }
   const CG514 = [['', '〔鐘塔底下，兩個人坐在石頭平台的邊上。月亮就掛在海的上面。〕'], ['', '〔她手上拿著最後一個齒輪。〕'], ['明', '等遊戲做完，我有話跟妳說。'], ['茶語', '好啊。'],
     ['茶語', '（晨在朝霞丘也說過，等遊戲做完，有一件事要跟我說。）'], ['茶語', '（詩在海灘說，等遊戲做完，再把最後一句唱清楚。）'], ['茶語', '（三個人，都要等遊戲做完。）'], ['', '〔她站起來，走到鐘面底下。〕'],
-    ['明', '裝上齒輪以後，時鐘就會開始轉動。'], ['', '〔她把齒輪放進去，轉了一下。齒輪咬住了。〕'], ['', '〔鐘塔裡傳出很重的一聲。〕'], ['', '〔鐘面上的指針動了。〕'], ['', '〔往左邊走。〕'], ['茶語', '……怎麼倒著轉？']];
+    ['明', '裝上齒輪以後，時鐘就會開始轉動。'], ['', '〔她把齒輪放進去，轉了一下。齒輪咬住了。〕'], ['', '〔鐘塔裡傳出很重的一聲。〕'], ['', '〔鐘面上的指針動了。〕'], ['', '〔逆時針走。〕'], ['茶語', '……怎麼倒著轉？']];
   let giveState = 'idle'; let mingGearEl = null;
   async function give() {
     if (giveState !== 'idle') return; giveState = 'handing'; lockOn(); quest.hidden = true; pal.hidden = true; if (tm.frozen) thaw();
     await walkP(PL.x0 + 14); state.face = -1; api.render(); mingLook(1);
     for (const id of ['a', 'b', 'c']) { sfx.gear(); await flyGear(GEAR_SRC[id], pose.x - 8, pose.y - BASE_H * KP * 0.55, () => ({ x: ming.x + 8, y: ming.y - mingHpx() * 0.5 }), 0.45, 12, 10); }
     // 明把前兩個裝上去：換成「舉著齒輪」那一張（人和齒輪同一張紙片），齒輪的光往上到鐘面
-    giveState = 'fitting'; if (!mingGearEl) { const pp = await paperize('../art/sprites/ming_gear.png'); mingGearEl = document.createElement('div'); mingGearEl.className = 'person npc ming_gear'; const sh = document.createElement('img'); sh.className = 'shadow'; sh.src = pp.shadow; sh.alt = ''; const im = document.createElement('img'); im.className = 'sheet'; im.src = pp.src; im.alt = ''; mingGearEl.append(sh, im); mingGearEl._pp = pp; }
+    giveState = 'fitting'; if (!mingGearEl) { const pp = await paperize('../art/sprites/ming_gear.webp'); mingGearEl = document.createElement('div'); mingGearEl.className = 'person npc ming_gear'; const sh = document.createElement('img'); sh.className = 'shadow'; sh.src = pp.shadow; sh.alt = ''; const im = document.createElement('img'); im.className = 'sheet'; im.src = pp.src; im.alt = ''; mingGearEl.append(sh, im); mingGearEl._pp = pp; }
     const pp = mingGearEl._pp; const hpx = mingHpx() * 1.02; const sc = hpx / (pp.height - pp.pad * 2); Object.assign(mingGearEl.style, { left: X(ming.x - 2), top: Y(ming.y), height: (pp.height * sc / H * 100) + '%' }); mingGearEl.style.setProperty('--pad', (pp.pad * sc / H * 100) + '%'); mingGearEl.style.setProperty('--k', KP.toFixed(3));
     for (let n = 0; n < 2; n++) { mingEl.style.visibility = 'hidden'; mingEl.after(mingGearEl); await wait(850); sfx.ratchet(4);
       const hx = ming.x - hpx * 0.2, hy = ming.y - hpx * 0.93; sparkle(hx, hy, 4, 0.5); mingGearEl.remove(); mingEl.style.visibility = ''; mingLook(-1);
@@ -455,7 +455,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   function giftTalk() { openDialogue(S43_B, [() => { api.gifts.gift_ming = true; CT.completeFreeInteraction(); save({ gift_ming: 'true', gifts: String(Object.keys(api.gifts).length) }); viewOverride = null; sfx.heart(); heart(ming.x + 10, ming.y - mingHpx() - 4); setQuest(); }],
     line => { if (line === S43_B[4][1]) { viewOverride = { top: 0.1, h: 0.4, shift: -70 }; clock.a += 6; sfx.tick(); } if (line === S43_B[5][1]) viewOverride = null; if (line.startsWith('（兩個人坐在鐘塔底下')) { clock.a += 6; sfx.tick(); } }); }
   // 真結局：停下時間 → 點鐘面，把最後那個齒輪拿下來、翻面、裝回去
-  const gc = document.createElement('div'); gc.id = 'gearcard'; gc.innerHTML = '<div class="card"><img alt="" src="../art/sprites/gear_3.png"><p></p></div>'; document.body.appendChild(gc); const gcImg = gc.querySelector('img'), gcP = gc.querySelector('p'); let gcStep = 0;
+  const gc = document.createElement('div'); gc.id = 'gearcard'; gc.innerHTML = '<div class="card"><img alt="" src="../art/sprites/gear_3.webp"><p></p></div>'; document.body.appendChild(gc); const gcImg = gc.querySelector('img'), gcP = gc.querySelector('p'); let gcStep = 0;
   function openGearCard() { gcStep = 1; tm.hold += 1; gcImg.className = ''; gcP.textContent = '點一下齒輪，翻面'; gc.style.display = 'block'; sfx.gear(); }
   gc.addEventListener('click', async e => { e.stopPropagation(); if (gcStep === 1) { gcStep = 2; gcImg.classList.add('flipped'); sfx.paper(); gcP.textContent = '再點一下，裝回去'; return; }
     if (gcStep === 2) { gcStep = 3; gcImg.classList.add('back'); sfx.ratchet(6); await wait(520); gc.style.display = 'none'; gcStep = 0; save({ te_flipped: 'true' }); tm.hold -= 1; sparkle(CL.cx, CL.cy, 8, 0.7); setQuest(); thaw(); } });
@@ -466,7 +466,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   }
   zone('clock', '鐘面', { x: CL.cx - 34, w: 68, y: CL.cy - 40, h: 80 }, () => {
     if (te && on('te_talk') && !on('te_flipped') && me.mode === 'plat') { if (!tm.frozen) { tip('指針還在轉。先按「停下時間」'); return; } if (gcStep === 0) openGearCard(); return; }
-    sfx.tick(clock.dir === 'ccw'); tip(clock.dir === 'stop' ? '指針停著' : clock.dir === 'ccw' ? '指針往左邊走' : '指針往右邊走'); });
+    sfx.tick(clock.dir === 'ccw'); tip(clock.dir === 'stop' ? '指針停著' : clock.dir === 'ccw' ? '指針逆時針走' : '指針順時針走'); });
 
   // ── 第五章的劇情觸發 ──
   if (ch5) {
@@ -481,15 +481,15 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
 
   // ── 落葉：松樹上偶爾掉一片，S 形飄到地上（紙片）；停下時間時定在半空 ──
   const leaves = []; const LEAF_FROM = [[930, 380, 905, 668], [1150, 300, 1120, 600], [1500, 250, 1540, 620], [1900, 200, 1860, 790], [2180, 160, 2120, 800], [860, 420, 800, 690]];
-  async function dropLeaf(x0, y0, x1, y1) { const el = await sprite(`../art/sprites/leaf_${Math.random() < 0.5 ? 0 : 1}.png`, 'leaf flat spin', { edge: 3, jitter: 1 }); const size = clamp((y1 - 400) / 30, 9, 20); place(el, x0, y0, size, true); el.style.zIndex = 3; leaves.push({ el, x0, y0, x1, y1, t: 0, secs: rnd(5, 8), ph: rnd(0, 6), sw: rnd(18, 40) }); stats.leaves += 1; }
+  async function dropLeaf(x0, y0, x1, y1) { const kind = Math.random() < 0.5 ? 0 : 1; const el = await sprite(`../art/sprites/leaf_${kind}.webp`, 'leaf flat spin', { edge: 3, jitter: 1 }); const size = clamp((y1 - 400) / 30, 9, 20); place(el, x0, y0, size, true); el.style.zIndex = 3; leaves.push({ el, x0, y0, x1, y1, t: 0, secs: rnd(5, 8), ph: rnd(0, 6), sw: rnd(18, 40) }); stats.leaves += 1; }
   let nextLeaf = rnd(2, 5);
   api.onFrame(dt0 => { const dt = wdt(dt0); nextLeaf -= dt; if (nextLeaf <= 0 && leaves.length < 5) { nextLeaf = rnd(3.5, 7); dropLeaf(...pick(LEAF_FROM)); }
     for (let i = leaves.length - 1; i >= 0; i--) { const l = leaves[i]; l.t += dt / l.secs; const e = Math.min(1, l.t); l.x = lerp(l.x0, l.x1, e) + Math.sin(e * 9 + l.ph) * l.sw * (1 - e * 0.5); l.y = lerp(l.y0, l.y1, e * e * 0.4 + e * 0.6);
       l.el.style.left = X(l.x); l.el.style.top = Y(l.y); l.el.style.setProperty('--rot', (Math.sin(e * 9 + l.ph) * 50 + e * 200) + 'deg'); if (e > 0.9) l.el.style.opacity = String((1 - e) * 10); if (e >= 1) { l.el.remove(); leaves.splice(i, 1); } } });
 
   // ── 海龜：在左下的礁石邊慢慢游，點了抬頭 ──
-  const turSrc = []; for (const k of [0, 1]) turSrc.push((await paperize(`../art/sprites/turtle_${k}.png`, { edge: 5, jitter: 2 })).src);
-  turtle.el = await sprite('../art/sprites/turtle_0.png', 'turtle flat', { edge: 5, jitter: 2 }); const TUR_H = 30; const turSheet = turtle.el.querySelector('.sheet'); place(turtle.el, turtle.x, turtle.y, TUR_H); under(turtle.el); turtle.el.style.zIndex = 1;
+  const turSrc = []; for (const k of [0, 1]) turSrc.push((await paperize(`../art/sprites/turtle_${k}.webp`, { edge: 5, jitter: 2 })).src);
+  turtle.el = await sprite('../art/sprites/turtle_0.webp', 'turtle flat', { edge: 5, jitter: 2 }); const TUR_H = 30; const turSheet = turtle.el.querySelector('.sheet'); place(turtle.el, turtle.x, turtle.y, TUR_H); under(turtle.el); turtle.el.style.zIndex = 1;
   const zTurtle = zone('turtle', '海龜', { x: turtle.x - 34, w: 68, y: turtle.y - TUR_H - 12, h: TUR_H + 18 }, () => { stats.turtle += 1; sfx.splash(); turtle.up = 2.6; turSheet.src = turSrc[1]; turtle.el.style.setProperty('--dip', '8%'); drops(turtle.x, turtle.y - 10, 4); setTimeout(() => heart(turtle.x + turtle.dir * 14, turtle.y - TUR_H - 6), 350); });
   api.onFrame(dt0 => { const dt = wdt(dt0); turtle.t += dt;
     if (turtle.up > 0) { turtle.up -= dt; if (turtle.up <= 0) { turSheet.src = turSrc[0]; turtle.el.style.setProperty('--dip', '26%'); } }
@@ -538,7 +538,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     save({ [K('lantern')]: String(lanternOn) }); z.btn.dataset.name = lanternOn ? '吹熄提燈' : '點亮提燈'; await wait(500); lanternBusy = false; });
 
   // ── 路牌：明貼的便利貼（紙片），角落畫著小笑臉；便利貼上的字用介面顯示 ──
-  const sticky = await sprite('../art/sprites/sticky.png', 'sticky flat spin', { edge: 3, jitter: 1 }); place(sticky, 2196, 512, 30); sticky.style.setProperty('--rot', '5deg'); let signN = 0;
+  const sticky = await sprite('../art/sprites/sticky.webp', 'sticky flat spin', { edge: 3, jitter: 1 }); place(sticky, 2196, 512, 30); sticky.style.setProperty('--rot', '5deg'); let signN = 0;
   zone('sign', '路牌', { x: 2062, w: 180, y: 452, h: 92 }, async () => { if (me.busy) return; if (me.mode === 'route') await approach(2150, 300); signN += 1; sfx.paper(); sticky.style.setProperty('--rot', (signN % 2 ? -4 : 6) + 'deg');
     card('路牌', '（箭頭指向西邊的鐘塔。牌子上貼著一張便利貼，角落畫著一個小笑臉。）', '便利貼'); });
 
@@ -550,7 +550,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   // ── 松樹：搖一下掉松果 ──
   const PINES = [{ id: 0, zone: { x: 2120, w: 184, y: 0, h: 330 }, from: [[2180, 150], [2250, 90]], ground: 742, land: [2140, 2260], size: 26 }, { id: 1, zone: { x: 1740, w: 140, y: 60, h: 250 }, from: [[1800, 170], [1850, 120]], ground: 386, land: [1770, 1880], size: 13 }]; const cones = [];
   for (const p of PINES) { let busy = false; zone('pine' + p.id, '搖一搖松樹', p.zone, async z => { if (busy) return; busy = true; z.btn.classList.remove('shake'); void z.btn.offsetWidth; z.btn.classList.add('shake'); sfx.rustle(5); if (Math.random() < 0.6) dropLeaf(p.from[0][0] - 30, p.from[0][1], p.land[0] - 40, p.ground + 10);
-    const [cx, cy] = pick(p.from); const el = await sprite('../art/sprites/pinecone.png', 'cone flat spin', { edge: 3, jitter: 1 }); const x1 = clamp(cx + rnd(-30, 30), p.land[0], p.land[1]), x2 = clamp(x1 + (Math.random() < 0.5 ? -1 : 1) * rnd(20, 70), p.land[0] - 20, p.land[1] + 20); place(el, cx, cy, p.size); let t = 0, hit = 0; const fall = 0.6; stats.cones += 1;
+    const [cx, cy] = pick(p.from); const el = await sprite('../art/sprites/pinecone.webp', 'cone flat spin', { edge: 3, jitter: 1 }); const x1 = clamp(cx + rnd(-30, 30), p.land[0], p.land[1]), x2 = clamp(x1 + (Math.random() < 0.5 ? -1 : 1) * rnd(20, 70), p.land[0] - 20, p.land[1] + 20); place(el, cx, cy, p.size); let t = 0, hit = 0; const fall = 0.6; stats.cones += 1;
     const anim = dt0 => { const dt = wdt(dt0); t += dt; let x, y, rot;
       if (t < fall) { const e = t / fall; x = lerp(cx, x1, e); y = lerp(cy, p.ground, e * e); rot = e * 240; }
       else { const e = Math.min(1, (t - fall) / 1.2); if (!hit) { hit = 1; sfx.cone(); } if (hit === 1 && e > 0.42) { hit = 2; sfx.cone(); } const hop = Math.abs(Math.sin(e * Math.PI * 2.5)) * p.size * 0.8 * (1 - e) * (1 - e); const ee = 1 - (1 - e) * (1 - e); x = lerp(x1, x2, ee); y = p.ground - hop; rot = 240 + (x2 - x1) * ee * 5;
@@ -580,7 +580,7 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     const zs = (size || 46) / 46; zz = zone('plant_' + id, label, { x: x - 34 * zs, w: 68 * zs, y: y - 62 * zs, h: 70 * zs }, () => { const no = can && can(); if (no) { tip(no); return; } take(); }); return { el, take }; };
   await plantSpot('moss', 742, 566, '石縫裡的苔球');
   // 明的小委託回禮：小松樹放在鐘塔門口、明站的位置旁邊（作者 2026-11-18：盆栽放在他們身邊的東西旁）。平台上的人很小，盆栽也跟著縮
-  const pine = await plantSpot('pine', 568, 508, '鐘塔門口的小松樹', () => '這盆是明種的。', 27);
+  const pine = await plantSpot('pine', 568, 508, '鐘塔門口的小松樹', () => st.errand_ming === 'done' ? '' : on('c5_done') ? '這盆是明種的。問問他吧。' : '這盆是明種的。', 27);
   /* 明的小委託（台詞 2026-11-17 作者定稿，真結局/studio_decor/委託與種樹_提案.md）：第五章做完之後就能接，真結局拿到禮物之後也能補做。
      鐘塔門口右邊那盞燈一直閃；直接點看不清楚，停下時間時點才看得出燈芯歪了。回禮：小松樹盆景 */
   const ERR_MING_ASK = [['明', '鐘塔門口右邊那盞燈，一直閃。'], ['茶語', '所以咧？'], ['明', '幫我看一下。妳每次都從那邊跳下來，太暗會絆到。'], ['茶語', '你怎麼知道我都走那邊？'], ['明', '我每次都有看到。'], ['茶語', '你都在偷偷觀察我喔？'], ['明', '「關心」。'],

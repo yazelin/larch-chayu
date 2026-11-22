@@ -1,15 +1,15 @@
 {
   "version": 1,
   "pagesBase": "https://yazelin.github.io/larch-chayu/game/",
-  "totalFiles": 870,
-  "totalBytes": 157052472,
+  "totalFiles": 887,
+  "totalBytes": 88536121,
   "bytesByCategory": {
     "bgm": 25662250,
-    "cg": 3906884,
-    "img": 347585,
-    "minigames": 14935324,
-    "mv": 15202621,
-    "web": 96997808
+    "cg": 3081222,
+    "img": 203466,
+    "minigames": 10076406,
+    "mv": 15203043,
+    "web": 34309734
   },
   "largestFile": {
     "file": "mv/media/boring_v2.mp3",
@@ -18,7 +18,7 @@
     "sha256": "d6e99b0176da8186897b6b8a7d37cd99f72a8c677907bcbe9413cac56bcf7059",
     "source": "新版/mv/media/boring_v2.mp3"
   },
-  "webDependencyFiles": 870,
+  "webDependencyFiles": 887,
   "cgNameMap": [
     {
       "file": "cg/ch1/ch1_cg_079.webp",
@@ -26,39 +26,39 @@
     },
     {
       "file": "cg/ch2/ch2_cg_004.webp",
-      "source": "新版/cg/art/第二章/2-04_seat-a.jpg"
+      "source": "新版/cg/art/第二章/2-04_seat-a.webp"
     },
     {
       "file": "cg/ch2/ch2_cg_013.webp",
       "source": "新版/cg/art/第二章/2-08.jpg"
     },
     {
-      "file": "cg/ch4/ch4_cg_009.webp",
+      "file": "cg/ch4/ch4_cg_011.webp",
       "source": "新版/cg/art/第四章/4-05.jpg"
     },
     {
       "file": "cg/ch5/ch5_cg_019.webp",
-      "source": "新版/cg/art/第五章/5-16.jpg"
+      "source": "新版/cg/art/第五章/5-16.webp"
     },
     {
-      "file": "cg/ch7/ch7_cg_022.webp",
+      "file": "cg/ch7/ch7_cg_023.webp",
       "source": "新版/cg/art/第七章/7-12.jpg"
     },
     {
-      "file": "cg/ch7/ch7_cg_040.webp",
-      "source": "新版/cg/art/第七章/7-24.jpg"
+      "file": "cg/ch7/ch7_cg_044.webp",
+      "source": "新版/cg/art/第七章/7-24.webp"
     },
     {
       "file": "cg/morning/morning_cg_010.webp",
-      "source": "新版/cg/art/晨線/晨線-07.jpg"
+      "source": "新版/cg/art/晨線/晨線-07.webp"
     },
     {
       "file": "cg/true_end/true_end_cg_014.webp",
-      "source": "新版/cg/art/真結局/真-圖鑑.jpg"
+      "source": "新版/cg/art/真結局/真-圖鑑.webp"
     },
     {
       "file": "cg/true_end/true_end_cg_015.webp",
-      "source": "新版/cg/art/真結局/真-種樹.jpg"
+      "source": "新版/cg/art/真結局/真-種樹.webp"
     }
   ],
   "notes": [],
@@ -143,9 +143,9 @@
     {
       "file": "cg/ch2/ch2_cg_004.webp",
       "category": "cg",
-      "bytes": 427898,
-      "sha256": "b429a4258f531795a213b11ad5f0dd0c7863b6e13bba7e147a22d97b009d8188",
-      "source": "新版/cg/art/第二章/2-04_seat-a.jpg"
+      "bytes": 264312,
+      "sha256": "1c746278123f737094673c73f843127e716b9217007fb9c823c3578f14a37ce6",
+      "source": "新版/cg/art/第二章/2-04_seat-a.webp"
     },
     {
       "file": "cg/ch2/ch2_cg_013.webp",
@@ -155,7 +155,7 @@
       "source": "新版/cg/art/第二章/2-08.jpg"
     },
     {
-      "file": "cg/ch4/ch4_cg_009.webp",
+      "file": "cg/ch4/ch4_cg_011.webp",
       "category": "cg",
       "bytes": 407034,
       "sha256": "a2e5573dcddd99635aa305731180fc73e1812ee361906044da8b661dcb1ab580",
@@ -164,71 +164,85 @@
     {
       "file": "cg/ch5/ch5_cg_019.webp",
       "category": "cg",
-      "bytes": 371658,
-      "sha256": "e1824984f8437f5017133b08c277dfef44e173a65d4505d0b049e010ee851dc8",
-      "source": "新版/cg/art/第五章/5-16.jpg"
+      "bytes": 226672,
+      "sha256": "507d7e97683ddb54958cab51ecfaea0fd1231ac029ed47fb12fb934cee4f4239",
+      "source": "新版/cg/art/第五章/5-16.webp"
     },
     {
-      "file": "cg/ch7/ch7_cg_022.webp",
+      "file": "cg/ch7/ch7_cg_023.webp",
       "category": "cg",
       "bytes": 537136,
       "sha256": "8198dcd483d35cca47700c6c71d62de2e81bbc162607f0363a13574126c96605",
       "source": "新版/cg/art/第七章/7-12.jpg"
     },
     {
-      "file": "cg/ch7/ch7_cg_040.webp",
+      "file": "cg/ch7/ch7_cg_044.webp",
       "category": "cg",
-      "bytes": 101340,
-      "sha256": "a5727a7070aac293d9f379f39c515273c882df05de05254da517efadf68270e8",
-      "source": "新版/cg/art/第七章/7-24.jpg"
+      "bytes": 56150,
+      "sha256": "0bdc0c277576dca4ac01b327ea1799c80c87b3202a1e05c5d941faeea90fe7c1",
+      "source": "新版/cg/art/第七章/7-24.webp"
     },
     {
       "file": "cg/morning/morning_cg_010.webp",
       "category": "cg",
-      "bytes": 318430,
-      "sha256": "14c12594da976c6130f51c3639b4bed99488a3f3070bbd5bd8cb443ec7175d7c",
-      "source": "新版/cg/art/晨線/晨線-07.jpg"
+      "bytes": 184638,
+      "sha256": "3e6bb1ea516d1898ab956ffbcf48fb4f8db06e20cd665becca3d827461ab4e3f",
+      "source": "新版/cg/art/晨線/晨線-07.webp"
     },
     {
       "file": "cg/true_end/true_end_cg_014.webp",
       "category": "cg",
-      "bytes": 549086,
-      "sha256": "bd919e9c548956519d93e9c55d3ffaea43c563068d83ac9d266dbc741c142a81",
-      "source": "新版/cg/art/真結局/真-圖鑑.jpg"
+      "bytes": 373322,
+      "sha256": "ecf4e8ec537010846324ba58f187f595ab7049cd50884beac5018fad13af52cd",
+      "source": "新版/cg/art/真結局/真-圖鑑.webp"
     },
     {
       "file": "cg/true_end/true_end_cg_015.webp",
       "category": "cg",
-      "bytes": 497296,
-      "sha256": "e7c7238bf74367e0e5719075304b907e04fceb25efff8cf785725be4129d3cd8",
-      "source": "新版/cg/art/真結局/真-種樹.jpg"
+      "bytes": 334952,
+      "sha256": "63ee81ad440ac246f72cfea64cd77721cae754ae85b66416b2e1dae70e9d24cc",
+      "source": "新版/cg/art/真結局/真-種樹.webp"
     },
     {
-      "file": "img/ui/challenge/hero_locked.jpg",
+      "file": "img/ui/challenge/hero_locked.webp",
       "category": "img",
-      "bytes": 179171,
-      "sha256": "1d1edcc9141112500a7153589d6d928c79ab9bd06bfa0f15bf0e7308739f3bff",
-      "source": "art/ui/challenge/hero_locked.jpg"
+      "bytes": 108752,
+      "sha256": "7efe2c96ffc0baf785778de460b8c7bc4c4b1ce19b7ded66919b3d0fdc9355eb",
+      "source": "art/ui/challenge/hero_locked.webp"
     },
     {
-      "file": "img/ui/challenge/hero_open.jpg",
+      "file": "img/ui/challenge/hero_open.webp",
       "category": "img",
-      "bytes": 168414,
-      "sha256": "c0522aa996a1f6fa5a71ef2a5450781e78dc1ebb45e78748e19432876bdc9231",
-      "source": "art/ui/challenge/hero_open.jpg"
+      "bytes": 94714,
+      "sha256": "254b8e54fcae496026d443ce9edd1b88f9360a60c26394b7344c7fe98b261892",
+      "source": "art/ui/challenge/hero_open.webp"
+    },
+    {
+      "file": "minigames/chapter_tip.html",
+      "category": "minigames",
+      "bytes": 79637,
+      "sha256": "19fad349a19e9416d7d8f21adb1d04d0e1df45abb96b60f8b0916395476da429",
+      "source": "新版/minigames/chapter_tip.html"
+    },
+    {
+      "file": "minigames/chapter_tip.js",
+      "category": "minigames",
+      "bytes": 3240,
+      "sha256": "e9305889e3c6dac9d13217be39939c6fecb56997905e119121ff9a0f61ee8305",
+      "source": "新版/minigames/chapter_tip.js"
     },
     {
       "file": "minigames/coloring.html",
       "category": "minigames",
-      "bytes": 61699,
-      "sha256": "d9aced1bc209d720860351795306c126b1b2e0dd47fb23b3cd7a97f73a00f8c7",
+      "bytes": 62675,
+      "sha256": "8fa1c9c1defa8469e3de8afa3e036ec92bd8a9633034095c0aa7f8f0b00e55f1",
       "source": "新版/minigames/coloring.html"
     },
     {
       "file": "minigames/gears.html",
       "category": "minigames",
-      "bytes": 81725,
-      "sha256": "36221d7a2c0ab4f574f04b4c4aea46a9523cc5c1260e7d218725e521dedb9529",
+      "bytes": 82708,
+      "sha256": "6bbfcbf81783677851df40dea50d14535b0306c9594ff9ed8229245ea351d7c9",
       "source": "新版/minigames/gears.html"
     },
     {
@@ -267,25 +281,11 @@
       "source": "新版/minigames/img/bird_perch.webp"
     },
     {
-      "file": "minigames/img/chen_concede.png",
-      "category": "minigames",
-      "bytes": 462012,
-      "sha256": "f30526bcb9c434e9c7a1cbb077dc8e1ea0cf39ad778959f87e15c169f1a4e283",
-      "source": "新版/minigames/img/chen_concede.png"
-    },
-    {
       "file": "minigames/img/chen_concede.webp",
       "category": "minigames",
       "bytes": 86676,
       "sha256": "4d3a47a5575671588fa3078874c82ff787fede01d70a49bb7663d833b430b6cd",
       "source": "新版/minigames/img/chen_concede.webp"
-    },
-    {
-      "file": "minigames/img/chen_king.png",
-      "category": "minigames",
-      "bytes": 413150,
-      "sha256": "d0c28d873a2d00a03f15ea058ab417f940bfb608b212d048cabe29c5124fc7b5",
-      "source": "新版/minigames/img/chen_king.png"
     },
     {
       "file": "minigames/img/chen_king.webp",
@@ -295,25 +295,11 @@
       "source": "新版/minigames/img/chen_king.webp"
     },
     {
-      "file": "minigames/img/chen_king_graycape.png",
-      "category": "minigames",
-      "bytes": 440830,
-      "sha256": "23c2c8ba9e72d4a7e73dfea5412f7ecbb1fc602709cd129c584bd374817d9566",
-      "source": "新版/minigames/img/chen_king_graycape.png"
-    },
-    {
       "file": "minigames/img/chen_king_graycape.webp",
       "category": "minigames",
       "bytes": 83080,
       "sha256": "df6f38f3ad177fa8d0b1c36c18176189f0183f66701d44b3e855bb91f980e106",
       "source": "新版/minigames/img/chen_king_graycape.webp"
-    },
-    {
-      "file": "minigames/img/chen_shaken.png",
-      "category": "minigames",
-      "bytes": 441406,
-      "sha256": "9e6f5c55983ffed6127bb4c587ef11b491e32036b7363f6d5084b11d3ef70a97",
-      "source": "新版/minigames/img/chen_shaken.png"
     },
     {
       "file": "minigames/img/chen_shaken.webp",
@@ -323,25 +309,11 @@
       "source": "新版/minigames/img/chen_shaken.webp"
     },
     {
-      "file": "minigames/img/chen_smug.png",
-      "category": "minigames",
-      "bytes": 439199,
-      "sha256": "ce63275bb61de2345074d48d7a16f0f7a08f30f8e9726ebf96ee059357665057",
-      "source": "新版/minigames/img/chen_smug.png"
-    },
-    {
       "file": "minigames/img/chen_smug.webp",
       "category": "minigames",
       "bytes": 79650,
       "sha256": "7f817858660edced37c3f08eb6b741524b9bfba72bc33d7e282ee4307716c706",
       "source": "新版/minigames/img/chen_smug.webp"
-    },
-    {
-      "file": "minigames/img/chen_swing.png",
-      "category": "minigames",
-      "bytes": 684375,
-      "sha256": "79eee4666b54849366af73e9b677f6ce755b775d41139bf2a436782a0b35fac3",
-      "source": "新版/minigames/img/chen_swing.png"
     },
     {
       "file": "minigames/img/chen_swing.webp",
@@ -386,13 +358,6 @@
       "source": "新版/minigames/img/gear_19.webp"
     },
     {
-      "file": "minigames/img/hero.png",
-      "category": "minigames",
-      "bytes": 448607,
-      "sha256": "1c2eaa8fc88e2edfa97f4f7f07fe407af5c4ff86090b08d639c3ec0c4010eef5",
-      "source": "新版/minigames/img/hero.png"
-    },
-    {
       "file": "minigames/img/hero_coloring_aim.webp",
       "category": "minigames",
       "bytes": 125318,
@@ -419,6 +384,13 @@
       "bytes": 143734,
       "sha256": "a92f340948dcea80ef7759eaef646ccd11244ef4943443c0e53e3081081fa2f9",
       "source": "新版/minigames/img/hero_coloring_spray.webp"
+    },
+    {
+      "file": "minigames/img/hero_cut.webp",
+      "category": "minigames",
+      "bytes": 35914,
+      "sha256": "3353aff94ccc8f585ccfd1c257217265703eab054c9cc8ec408d1d8e5a831add",
+      "source": "新版/minigames/img/hero_cut.webp"
     },
     {
       "file": "minigames/img/hero_gears_idle.webp",
@@ -526,13 +498,6 @@
       "source": "新版/minigames/img/ming_hold.webp"
     },
     {
-      "file": "minigames/img/ming_king.png",
-      "category": "minigames",
-      "bytes": 337018,
-      "sha256": "77bfab58085b81801fc62cc46fd06fe9d002963c72738982eacaccad3db82d6b",
-      "source": "新版/minigames/img/ming_king.png"
-    },
-    {
       "file": "minigames/img/ming_king.webp",
       "category": "minigames",
       "bytes": 71120,
@@ -554,13 +519,6 @@
       "source": "新版/minigames/img/ming_smile.webp"
     },
     {
-      "file": "minigames/img/shi_defeat.png",
-      "category": "minigames",
-      "bytes": 490704,
-      "sha256": "0065e5fc0f8afc83e099eb5bc1950f8d8c7ea393551f03d64552e03ff0b173a6",
-      "source": "新版/minigames/img/shi_defeat.png"
-    },
-    {
       "file": "minigames/img/shi_defeat.webp",
       "category": "minigames",
       "bytes": 95350,
@@ -575,25 +533,11 @@
       "source": "新版/minigames/img/shi_groove.webp"
     },
     {
-      "file": "minigames/img/shi_hattilt.png",
-      "category": "minigames",
-      "bytes": 423963,
-      "sha256": "0dc114122cec72fc3c13316d2d892e0b8d1fa4ae477fafdb0f591650a4e1ac1a",
-      "source": "新版/minigames/img/shi_hattilt.png"
-    },
-    {
       "file": "minigames/img/shi_hattilt.webp",
       "category": "minigames",
       "bytes": 70618,
       "sha256": "9bf0cecf602ba124f9567f27f4dc90058669192477a7944ccd9539993df42ad5",
       "source": "新版/minigames/img/shi_hattilt.webp"
-    },
-    {
-      "file": "minigames/img/shi_king.png",
-      "category": "minigames",
-      "bytes": 409366,
-      "sha256": "c9d4d3220e9f1b07f1b84600bcba75b0a1e78c5d1ef3b3037b1cbf7fbc3852ad",
-      "source": "新版/minigames/img/shi_king.png"
     },
     {
       "file": "minigames/img/shi_king.webp",
@@ -871,107 +815,114 @@
     {
       "file": "minigames/message.html",
       "category": "minigames",
-      "bytes": 25884,
-      "sha256": "c6c94e4c789bb87f68ab2d645fb4df5da4783e25f155d73b36c8749f7b5344d3",
+      "bytes": 28089,
+      "sha256": "3a9ddc87fcf415e7a3c104d0778912a20f2350dc3129bbe2f66746019e68acd6",
       "source": "新版/minigames/message.html"
     },
     {
       "file": "minigames/phone_calc_left.html",
       "category": "minigames",
-      "bytes": 65088,
-      "sha256": "db0b131e9f76683046a2f9e9b094cdedd83c88f95561e0cc7b5906bc96b6534f",
+      "bytes": 65174,
+      "sha256": "4a7acd23df2a36e1cdb6881a14897c1c7f208afc83b9c17cd4484557f1e4a721",
       "source": "新版/minigames/phone_calc_left.html"
     },
     {
       "file": "minigames/phone_calc_shifts.html",
       "category": "minigames",
-      "bytes": 64044,
-      "sha256": "31b3a4fbf3e2954d00a384698082fdef437f2dd18436a6947d0721422054a3ae",
+      "bytes": 64130,
+      "sha256": "c59e427e68a0a0d0d04f0f03ef7edf10c6a43859f95a655ec2171b49ff882008",
       "source": "新版/minigames/phone_calc_shifts.html"
     },
     {
       "file": "minigames/phone_call_mom.html",
       "category": "minigames",
-      "bytes": 84822,
-      "sha256": "e8139353353b8112fe11e389998721827551a8cc9aa202e3f2e586ee44bde198",
+      "bytes": 84908,
+      "sha256": "c4cd205f045accac1441a514e65be13355a0f5320bf247d0774907446a8aa070",
       "source": "新版/minigames/phone_call_mom.html"
     },
     {
       "file": "minigames/phone_confirm3.html",
       "category": "minigames",
-      "bytes": 58185,
-      "sha256": "71e52129cff7a404ac0db443c5732b1101d76fd53b6b2ce1db75f317607cd9bd",
+      "bytes": 58271,
+      "sha256": "58c374038569fb602ea4d9330ca25c050cbcd80e7d30e2c08b6b9a1c75e65ba4",
       "source": "新版/minigames/phone_confirm3.html"
     },
     {
       "file": "minigames/phone_mute_off.html",
       "category": "minigames",
-      "bytes": 89860,
-      "sha256": "3bc9245a0eec97e825a373676dafa20acaa9ea0944479a690feeb954fa389a7e",
+      "bytes": 89946,
+      "sha256": "1df53343c5af30aa9bd5ccc6e6b1a80169e8080534a5f9bb306c9d028d51038b",
       "source": "新版/minigames/phone_mute_off.html"
     },
     {
       "file": "minigames/phone_mute_on.html",
       "category": "minigames",
-      "bytes": 65451,
-      "sha256": "9c70d77afaa2c413513c73716945575d8bc12b9e8ea729f559845b604b17f2c5",
+      "bytes": 65537,
+      "sha256": "4cb7182651df4dceb56ad5cebb76bd6577e6529cf19206571cf5a17d57153b1e",
       "source": "新版/minigames/phone_mute_on.html"
     },
     {
       "file": "minigames/phone_photo_bridge.html",
       "category": "minigames",
-      "bytes": 190369,
-      "sha256": "1d7a366bb02a3bbd8948e9f6ba39dc4b502fa02c40d4ed10ce76510986820eb7",
+      "bytes": 190455,
+      "sha256": "f6cef0097241b8e6ce8c5649773bf57ea2220371be0e03f4d381cecf513dc712",
       "source": "新版/minigames/phone_photo_bridge.html"
     },
     {
       "file": "minigames/phone_photo_rain.html",
       "category": "minigames",
-      "bytes": 164912,
-      "sha256": "af6b649ba0745a1495eadc6d4248365e5f5a63468733682db06120c0a35a4e76",
+      "bytes": 164998,
+      "sha256": "ded8a399aa67b6950693b72f20b7e829ace02475d776fbd9cbdf4e91a1e46993",
       "source": "新版/minigames/phone_photo_rain.html"
     },
     {
       "file": "minigames/phone_subsum.html",
       "category": "minigames",
-      "bytes": 57902,
-      "sha256": "649ee5755fbcf2873a6c3cf96f855ca7ef8fc6632062e5e85a0bae7582ac3751",
+      "bytes": 57988,
+      "sha256": "ba1673c704ecbdc631fb9e9f24eb4d6630cbc6d01d087443587252bf92344bc8",
       "source": "新版/minigames/phone_subsum.html"
     },
     {
       "file": "minigames/phone_trial.html",
       "category": "minigames",
-      "bytes": 108053,
-      "sha256": "cb87f65e4ae5b34a4e23064a115b7055e9e9edc0c36f45f91dbc0a0a955399e2",
+      "bytes": 108139,
+      "sha256": "9764297b6e17c84ff5b112e83d6a2718a2581abd49e7e2905094cba2f76a33b9",
       "source": "新版/minigames/phone_trial.html"
     },
     {
       "file": "minigames/rap_battle.html",
       "category": "minigames",
-      "bytes": 53875,
-      "sha256": "248c46fc9d8136b0f8d8c76d032c75ee4cec757f66e78670d6870f1512ef9d87",
+      "bytes": 54872,
+      "sha256": "a12cec5b886b0c86e67438ac48811ef75224ae3b71fe4fe1ec5b2fb46188f512",
       "source": "新版/minigames/rap_battle.html"
     },
     {
       "file": "minigames/triangle.html",
       "category": "minigames",
-      "bytes": 27329,
-      "sha256": "8e7a808a4141c761806bd09a0627f8fd087643aa1fcf7d8348a9bb00e6106956",
+      "bytes": 28297,
+      "sha256": "522db978ebf298fe50ac99f086f5108bbfa602a8b3941415cc725c91b48ceb0f",
       "source": "新版/minigames/triangle.html"
     },
     {
       "file": "minigames/ui/minigame_challenge.html",
       "category": "minigames",
-      "bytes": 24475,
-      "sha256": "cfc69d261e07e9f14074a99e8b9b0dffd16d0813579dbddd00666882195c80a6",
+      "bytes": 24583,
+      "sha256": "e96d7be66c5d22af90435dc7931ec99112c148090392bc8034f6cbb6e3a6c41c",
       "source": "art/ui/minigame_challenge.html"
     },
     {
       "file": "minigames/ui/minigame_link.html",
       "category": "minigames",
-      "bytes": 23705,
-      "sha256": "f8f1b00707ae08ceb26d5357c7c22792ae294caaae5e004d05dac1d93ebcd15d",
+      "bytes": 24652,
+      "sha256": "6c684d7f0c7ed75f6d52bc6cb9771f8a0d2183afb6e05de3f5c78eba043886be",
       "source": "art/ui/minigame_link.html"
+    },
+    {
+      "file": "minigames/wipe_tea.html",
+      "category": "minigames",
+      "bytes": 4877,
+      "sha256": "7eaeab1c5f9f2bd5abf49d30a5f4ea8ac1cf3708e2e41846465e9f4a295ba3c9",
+      "source": "新版/minigames/wipe_tea.html"
     },
     {
       "file": "mv/birthday_mv.css",
@@ -983,15 +934,15 @@
     {
       "file": "mv/birthday_mv.html",
       "category": "mv",
-      "bytes": 3874,
-      "sha256": "f5367a6716285c54fa05e3fa14652970a3db1fce6a7dd659b747d96655f3502d",
+      "bytes": 3930,
+      "sha256": "4de481a402b567c4cdcaa29549e5b18c99ed59e99d2cdea6ee0c6a1e08a79a1a",
       "source": "新版/mv/birthday_mv.html"
     },
     {
       "file": "mv/birthday_mv.js",
       "category": "mv",
-      "bytes": 6666,
-      "sha256": "ff87a1ba6328599ed7f672f3d15b4ef4f0737b80436decd66c31794042b53acd",
+      "bytes": 6707,
+      "sha256": "97962158f6fc512e023ed840c4c65aa6153a9bd987efa8d5170a4914c9a0a5dc",
       "source": "新版/mv/birthday_mv.js"
     },
     {
@@ -1004,15 +955,15 @@
     {
       "file": "mv/credits.html",
       "category": "mv",
-      "bytes": 6938,
-      "sha256": "b3d7c29506fdfcab05de6238977e2a5c85da5ded40c051b0e087ac072d6d0ed6",
+      "bytes": 6994,
+      "sha256": "079fbccd2ff4ef22986b46f32e4e4c5d5abff501eaa7b443cf6e9c02dbae410f",
       "source": "新版/mv/credits.html"
     },
     {
       "file": "mv/credits.js",
       "category": "mv",
-      "bytes": 13303,
-      "sha256": "76365c79df1be3e42177757abed8e155b11845881e9f181970f74765763658db",
+      "bytes": 13476,
+      "sha256": "11a9d9ddd7c71f7ebee22e746dce194ec98f256a818e4ad28801d820c121ac8e",
       "source": "新版/mv/credits.js"
     },
     {
@@ -1172,8 +1123,8 @@
     {
       "file": "mv/media/fonts/iansui-mv.woff2",
       "category": "mv",
-      "bytes": 177696,
-      "sha256": "5b295a2c9d0cfc280a2a1defed32e4c85ba20cd1af1b8b6da4a54d5b5333ffe4",
+      "bytes": 177792,
+      "sha256": "50f96657f13d30b4984b6b30d2808b498ddafa6c4422fadfcafea0acb8694320",
       "source": "新版/mv/media/fonts/iansui-mv.woff2"
     },
     {
@@ -1541,39 +1492,39 @@
       "source": "canon/heads/xiangwan_neutral_512.webp"
     },
     {
-      "file": "web/canon/refs/cg_04C-1_gate_sketch.jpg",
+      "file": "web/canon/refs/cg_04C-1_gate_sketch.webp",
       "category": "web",
-      "bytes": 344319,
-      "sha256": "c4b39246505f754fbeecd2e48720e9703176994f89fc308efe97950f845620cd",
-      "source": "canon/refs/cg_04C-1_gate_sketch.jpg"
+      "bytes": 185812,
+      "sha256": "622762a92c719c15fe488caf453e251b9c89f32e87df7f2cb83b9af82100a214",
+      "source": "canon/refs/cg_04C-1_gate_sketch.webp"
     },
     {
-      "file": "web/canon/refs/cg_1-12_sketch_profile.jpg",
+      "file": "web/canon/refs/cg_1-12_sketch_profile.webp",
       "category": "web",
-      "bytes": 99127,
-      "sha256": "f25e20de9792838d7431959e6a6cc94fadf6aaccd71a44882de5341c1ec5b5cb",
-      "source": "canon/refs/cg_1-12_sketch_profile.jpg"
+      "bytes": 40906,
+      "sha256": "e6a4e27cfa1efdb93ff9ea9b0d27ba48f17734eb36db23139a4313e427bc876b",
+      "source": "canon/refs/cg_1-12_sketch_profile.webp"
     },
     {
-      "file": "web/canon/refs/lantern_chen_drawing.jpg",
+      "file": "web/canon/refs/lantern_chen_drawing.webp",
       "category": "web",
-      "bytes": 136777,
-      "sha256": "aee8c3ed1dc00d633cb7162a710a248a2552dfc8e285684a1b9bb240ce8b53c0",
-      "source": "canon/refs/lantern_chen_drawing.jpg"
+      "bytes": 48690,
+      "sha256": "3e16fb34c9ddbb221cbc0683950b70d51b49c2fd1dca7aa4fa4bc94171f785c3",
+      "source": "canon/refs/lantern_chen_drawing.webp"
     },
     {
-      "file": "web/canon/refs/prop_tea.jpg",
+      "file": "web/canon/refs/prop_tea.webp",
       "category": "web",
-      "bytes": 35718,
-      "sha256": "9fd4c819313d3d3b34c3bf9408a4cc3d248fec1f9dab34a869da5d28f0ccf9e1",
-      "source": "canon/refs/prop_tea.jpg"
+      "bytes": 17340,
+      "sha256": "bb69721ef741da338f9f9c462c11b22fd1d390da78a883b2b51f3891820ade52",
+      "source": "canon/refs/prop_tea.webp"
     },
     {
-      "file": "web/true_end/garden/concept/03_dawn_hill.jpg",
+      "file": "web/true_end/garden/concept/03_dawn_hill.webp",
       "category": "web",
-      "bytes": 309258,
-      "sha256": "7d4ccac0deb733cf199eda0f38a2d1be46338c1b43986ba25604be39fe4c7387",
-      "source": "真結局/garden/concept/03_dawn_hill.jpg"
+      "bytes": 178642,
+      "sha256": "55a0109fffa7c0f75c21161881fc1455118e9fccb6f88a04ee5ec829fe6e5afd",
+      "source": "真結局/garden/concept/03_dawn_hill.webp"
     },
     {
       "file": "web/true_end/map2d/art/out/island_ext_clouds_day.webp",
@@ -1597,312 +1548,298 @@
       "source": "真結局/map2d/art/out/island_ext_clouds_night.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_ext_s1.jpg",
+      "file": "web/true_end/map2d/art/out/island_ext_s1.webp",
       "category": "web",
-      "bytes": 850781,
-      "sha256": "014ae868bc02a5a828736e989202f5805fb0017637faa3163cb0907fc9221cdc",
-      "source": "真結局/map2d/art/out/island_ext_s1.jpg"
+      "bytes": 438354,
+      "sha256": "704321b6c3e33bb0b5c7960f808d5f76e88ef6fdb6ba879f89f9fb984b441309",
+      "source": "真結局/map2d/art/out/island_ext_s1.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_ext_s2.jpg",
+      "file": "web/true_end/map2d/art/out/island_ext_s2.webp",
       "category": "web",
-      "bytes": 902939,
-      "sha256": "af039f6737544ff560a23901336f94402f7d05e4a2cfd83a31a2ba0703600a01",
-      "source": "真結局/map2d/art/out/island_ext_s2.jpg"
+      "bytes": 448992,
+      "sha256": "e1ec61af89538b7b7dbbacd8a9d0a556b78e3831ceb7f02d7e55ced0d0ef0b87",
+      "source": "真結局/map2d/art/out/island_ext_s2.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_ext_s3.jpg",
+      "file": "web/true_end/map2d/art/out/island_ext_s3.webp",
       "category": "web",
-      "bytes": 953131,
-      "sha256": "516a681829e535522b8817b8b47df3f56e1e16c4c431d45262a914705abad9db",
-      "source": "真結局/map2d/art/out/island_ext_s3.jpg"
+      "bytes": 419510,
+      "sha256": "5be637105bc0970541291958a7afd089fbd331707852d083036706de6d690be0",
+      "source": "真結局/map2d/art/out/island_ext_s3.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_ext_s4.jpg",
+      "file": "web/true_end/map2d/art/out/island_ext_s4.webp",
       "category": "web",
-      "bytes": 976815,
-      "sha256": "b5b713f2fb8a440d534209d6723a74c5a15501db540ea05a64ea4b79ad0fce24",
-      "source": "真結局/map2d/art/out/island_ext_s4.jpg"
+      "bytes": 440034,
+      "sha256": "58e5fcf394990947fc37a4ed2a1cb68d03b286d39253555fa84a2109638c6591",
+      "source": "真結局/map2d/art/out/island_ext_s4.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_ext_s5.jpg",
+      "file": "web/true_end/map2d/art/out/island_ext_s5.webp",
       "category": "web",
-      "bytes": 979386,
-      "sha256": "e8616004cf50e76c27b45a867b47a8c6289ff70f3db8374237a45427dde6e05a",
-      "source": "真結局/map2d/art/out/island_ext_s5.jpg"
+      "bytes": 441812,
+      "sha256": "2f0db032c55faf1552faa73ece4bace3f9feff6c80c85616b7d760566317dac7",
+      "source": "真結局/map2d/art/out/island_ext_s5.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_ext_s5_dusk.jpg",
+      "file": "web/true_end/map2d/art/out/island_ext_s5_dusk.webp",
       "category": "web",
-      "bytes": 912361,
-      "sha256": "0a83b03d7f3baa2cc6028901e40df75890fd48b82275d7ae9d4476cbb703ec4d",
-      "source": "真結局/map2d/art/out/island_ext_s5_dusk.jpg"
+      "bytes": 472520,
+      "sha256": "e8b70e5960a4e7588c360fb7462ca5960d90de508bf89fe40a1808df988cc7ba",
+      "source": "真結局/map2d/art/out/island_ext_s5_dusk.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_ext_s5_night.jpg",
+      "file": "web/true_end/map2d/art/out/island_ext_s5_night.webp",
       "category": "web",
-      "bytes": 772410,
-      "sha256": "5af74a4f6bad6fdc3e755a238fc187465d398d30ccced6432b98accd9759dca2",
-      "source": "真結局/map2d/art/out/island_ext_s5_night.jpg"
+      "bytes": 411390,
+      "sha256": "b44a3e2abc919beef45f66688154b18716c77cf5009aa94ea9603c04352cfdf1",
+      "source": "真結局/map2d/art/out/island_ext_s5_night.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_s1.jpg",
+      "file": "web/true_end/map2d/art/out/island_s1.webp",
       "category": "web",
-      "bytes": 1120401,
-      "sha256": "edd41ca427ef09088bc695e4f0f2490a5f04317e7c62777337049e821a96cc9a",
-      "source": "真結局/map2d/art/out/island_s1.jpg"
+      "bytes": 204106,
+      "sha256": "da35461fe922862305327553f5e119cd0286e430f55451967475c5deb2c25a17",
+      "source": "真結局/map2d/art/out/island_s1.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_s2.jpg",
+      "file": "web/true_end/map2d/art/out/island_s2.webp",
       "category": "web",
-      "bytes": 1223135,
-      "sha256": "ba50bc9932188108fd75907329b46f34d50ecc700f0b6d8e5c973c30f1be19c8",
-      "source": "真結局/map2d/art/out/island_s2.jpg"
+      "bytes": 260856,
+      "sha256": "ecbdf34048de025fe63c78a7756b51eb47541f3547ef7bb945fc00f8ae74e58b",
+      "source": "真結局/map2d/art/out/island_s2.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_s3.jpg",
+      "file": "web/true_end/map2d/art/out/island_s3.webp",
       "category": "web",
-      "bytes": 1258481,
-      "sha256": "a2b383a60de1c52552c549307d762dcd4f0d1d9c6bc67a1cd59586cd7d414494",
-      "source": "真結局/map2d/art/out/island_s3.jpg"
+      "bytes": 310780,
+      "sha256": "c6af9efad0a612c9ebb4461ad6c65fd0b7432daa7d5ae25be493df5f7a929afa",
+      "source": "真結局/map2d/art/out/island_s3.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_s4.jpg",
+      "file": "web/true_end/map2d/art/out/island_s4.webp",
       "category": "web",
-      "bytes": 1271676,
-      "sha256": "8463baca8263a65f7fdee1e991be3dc77d68e2f3369b269d3793c19ccc4aadd2",
-      "source": "真結局/map2d/art/out/island_s4.jpg"
+      "bytes": 332896,
+      "sha256": "ce042f4dd22f54196f7250ba1f387522a9400e0e9d6bf409c1df2ff0ef2ecb95",
+      "source": "真結局/map2d/art/out/island_s4.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_s5.jpg",
+      "file": "web/true_end/map2d/art/out/island_s5.webp",
       "category": "web",
-      "bytes": 773369,
-      "sha256": "356596321d1836cd7c3166294429b7e822c80aabfbf5901dfb75fe07f991df17",
-      "source": "真結局/map2d/art/out/island_s5.jpg"
+      "bytes": 333434,
+      "sha256": "b6255f3fa64e672c1c97ea86d7ffd2efa55d4f9a2b0bd0fab2581ceac4cbb5a6",
+      "source": "真結局/map2d/art/out/island_s5.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_s5_dusk.jpg",
+      "file": "web/true_end/map2d/art/out/island_s5_dusk.webp",
       "category": "web",
-      "bytes": 982650,
-      "sha256": "028d95f8413d534e678c4be133e3d4536515a3bed55db3582dcc11700b3205bf",
-      "source": "真結局/map2d/art/out/island_s5_dusk.jpg"
+      "bytes": 376094,
+      "sha256": "0a6775f65f4c96aeb8ac33293f21682b2c97c17f33f6087f1c009efabad01231",
+      "source": "真結局/map2d/art/out/island_s5_dusk.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/island_s5_night.jpg",
+      "file": "web/true_end/map2d/art/out/island_s5_night.webp",
       "category": "web",
-      "bytes": 812241,
-      "sha256": "68deb71fab0ab5af50175645e55171d8d4fbe5923c365f0fd7e6f6f8750e7ea1",
-      "source": "真結局/map2d/art/out/island_s5_night.jpg"
+      "bytes": 311294,
+      "sha256": "92c07c860ccea749ccd7a3aa956373056ddf3c912832a3205c676a2e975748a7",
+      "source": "真結局/map2d/art/out/island_s5_night.webp"
     },
     {
-      "file": "web/true_end/map2d/art/out/tea_walk.png",
+      "file": "web/true_end/map2d/art/out/tea_walk.webp",
       "category": "web",
-      "bytes": 24333,
-      "sha256": "5bc77af9edd7fde279ac42364d12e2cac911abe8a61bcd9f16f3b7814fb3e319",
-      "source": "真結局/map2d/art/out/tea_walk.png"
+      "bytes": 6948,
+      "sha256": "8e60470c1608c072489b095454f4197cb86ca4c27c76ae2d797eca3c1d1093d2",
+      "source": "真結局/map2d/art/out/tea_walk.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/L5.png",
+      "file": "web/true_end/map2d/side/art/out/L5.webp",
       "category": "web",
-      "bytes": 376069,
-      "sha256": "9021dd1d0a3979bbfdf00c02d4667d6a455c72c786605d84ee1b387ba766130b",
-      "source": "真結局/map2d/side/art/out/L5.png"
+      "bytes": 83748,
+      "sha256": "f5aad6119a06ad99063232e238328806bab61c04deba9d8e8acde86710d9e68c",
+      "source": "真結局/map2d/side/art/out/L5.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/beach/cg_412_placeholder.jpg",
+      "file": "web/true_end/map2d/side/art/out/beach/cg_412_placeholder.webp",
       "category": "web",
-      "bytes": 161770,
-      "sha256": "ff1909aaa56d16f969f7a2b14a3c21db91f13ee3cd6191e674e9faf06e33e8f3",
-      "source": "真結局/map2d/side/art/out/beach/cg_412_placeholder.jpg"
-    },
-    {
-      "file": "web/true_end/map2d/side/art/out/beach/flat.jpg",
-      "category": "web",
-      "bytes": 944889,
-      "sha256": "5e6982a32433245a566431781814277c8f1718632f8b2ccd6114dd23eef3e9d7",
-      "source": "真結局/map2d/side/art/out/beach/flat.jpg"
+      "bytes": 57894,
+      "sha256": "b8260e072b4dd6a3a7ac1680ab39b00efa8b61ef33a84cf98aa79b7413bbb48b",
+      "source": "真結局/map2d/side/art/out/beach/cg_412_placeholder.webp"
     },
     {
       "file": "web/true_end/map2d/side/art/out/beach/flat.json",
       "category": "web",
-      "bytes": 1069,
-      "sha256": "4003d214cb8da59feb10d2f84579becbd3f006d43be0f115b4f39422027fae87",
+      "bytes": 1075,
+      "sha256": "d7d00478b6adafb22c006f33e474f807b93f51b0381a13e7370d1a6fb742f5b2",
       "source": "真結局/map2d/side/art/out/beach/flat.json"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/beach/open_barrel.png",
+      "file": "web/true_end/map2d/side/art/out/beach/flat.webp",
       "category": "web",
-      "bytes": 32661,
-      "sha256": "9b0775230fe750419e1864344be317f46a6a98860fb070af2d9cd1aa6208b8b7",
-      "source": "真結局/map2d/side/art/out/beach/open_barrel.png"
+      "bytes": 291968,
+      "sha256": "9539be53572ebf2ffe80f3ba79c8c448d0e4352b6d92dea4d3023685578f5a70",
+      "source": "真結局/map2d/side/art/out/beach/flat.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/beach/open_crate.png",
+      "file": "web/true_end/map2d/side/art/out/beach/open_barrel.webp",
       "category": "web",
-      "bytes": 60979,
-      "sha256": "fc45fbc37f6fa7c6c8b80eadc5482f8672d9db8f07a3d7e7acd846ba38febe7a",
-      "source": "真結局/map2d/side/art/out/beach/open_crate.png"
+      "bytes": 4626,
+      "sha256": "bac2863f04c8fc691a2b837f2ef847843102a292e23f4016a7034b8df0b2e713",
+      "source": "真結局/map2d/side/art/out/beach/open_barrel.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/beach/rock_fg.png",
+      "file": "web/true_end/map2d/side/art/out/beach/open_crate.webp",
       "category": "web",
-      "bytes": 12774,
-      "sha256": "6722a5c17b904a1bb7b5774dd0f504dea78c3641cb5fb5a08282664d2455a7f8",
-      "source": "真結局/map2d/side/art/out/beach/rock_fg.png"
+      "bytes": 7042,
+      "sha256": "92ab6c45a366931f46e03ba66c661c29d8e7d5979121208158749ce1f66b41b7",
+      "source": "真結局/map2d/side/art/out/beach/open_crate.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/cape/cg_514_placeholder.jpg",
+      "file": "web/true_end/map2d/side/art/out/beach/rock_fg.webp",
       "category": "web",
-      "bytes": 133193,
-      "sha256": "bcf670e00b5eae9bc4a183fc2b7740b238b73556faf397de3fa64f5170184de0",
-      "source": "真結局/map2d/side/art/out/cape/cg_514_placeholder.jpg"
+      "bytes": 1682,
+      "sha256": "920fcb0988230f61ad06cbf0d620de010543da03bed588a35ae5aa7ccc037089",
+      "source": "真結局/map2d/side/art/out/beach/rock_fg.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/cape/fg.png",
+      "file": "web/true_end/map2d/side/art/out/cape/cg_514_placeholder.webp",
       "category": "web",
-      "bytes": 230573,
-      "sha256": "7166b7a81db735b4a2fac0e8ff9865096e17d0f4b87c28c88245e2d220570818",
-      "source": "真結局/map2d/side/art/out/cape/fg.png"
+      "bytes": 46672,
+      "sha256": "fd58917406bd06601638eefd57c4c182c7809c6cfb9d8c65f47da6a94d214a34",
+      "source": "真結局/map2d/side/art/out/cape/cg_514_placeholder.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/cape/flat.jpg",
+      "file": "web/true_end/map2d/side/art/out/cape/fg.webp",
       "category": "web",
-      "bytes": 728957,
-      "sha256": "d958e10b9370c72d82fb25c30b088842b944928e91bf9a62cbe92dc40c84dc07",
-      "source": "真結局/map2d/side/art/out/cape/flat.jpg"
+      "bytes": 23948,
+      "sha256": "6df9bfed4df8002ee8b44ffbbb4008a32c203f0bd8a7cca7c279b8034ea5d360",
+      "source": "真結局/map2d/side/art/out/cape/fg.webp"
     },
     {
       "file": "web/true_end/map2d/side/art/out/cape/flat.json",
       "category": "web",
-      "bytes": 3396,
-      "sha256": "de83cb16a085b18be7e7c1ada276746b4d51a4c002a440af60635d5a076bbdf7",
+      "bytes": 3406,
+      "sha256": "4450ad0370010b37f7b41ab67ed27a6d711495fa6856e81738fa6636c3d7650a",
       "source": "真結局/map2d/side/art/out/cape/flat.json"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/cape/lantern_off.png",
+      "file": "web/true_end/map2d/side/art/out/cape/flat.webp",
       "category": "web",
-      "bytes": 160551,
-      "sha256": "d4165d747809d5322879f8969d1498d065c67a51fb810ecd16d45229258537d0",
-      "source": "真結局/map2d/side/art/out/cape/lantern_off.png"
+      "bytes": 228594,
+      "sha256": "06e0d91211e3482d3af62f792dc1792ff8e891b3f7b27152aca862edff59fe04",
+      "source": "真結局/map2d/side/art/out/cape/flat.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/cape/tulip_open.png",
+      "file": "web/true_end/map2d/side/art/out/cape/lantern_off.webp",
       "category": "web",
-      "bytes": 69545,
-      "sha256": "83c920cde072690c0649485457f874071be322cccc2d9f230c0a14cc2c337f27",
-      "source": "真結局/map2d/side/art/out/cape/tulip_open.png"
+      "bytes": 18830,
+      "sha256": "b6a6b1973c2412dea57830fed27acd76f28eb75b5d37559a44303a20f00ac4c4",
+      "source": "真結局/map2d/side/art/out/cape/lantern_off.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/cg_view_one.jpg",
+      "file": "web/true_end/map2d/side/art/out/cape/tulip_open.webp",
       "category": "web",
-      "bytes": 597867,
-      "sha256": "5dfec78959ee4ae36344109232fda9bdb0e5fc96526f2bd593493edb8f83a1be",
-      "source": "真結局/map2d/side/art/out/dawn/cg_view_one.jpg"
+      "bytes": 7558,
+      "sha256": "2302da2f288557982818d51e0ad6672433ea06451472641f4f7db4701a1b1825",
+      "source": "真結局/map2d/side/art/out/cape/tulip_open.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/cg_view_two.jpg",
+      "file": "web/true_end/map2d/side/art/out/dawn/cg_view_one.webp",
       "category": "web",
-      "bytes": 568615,
-      "sha256": "d417569456d5366413e6d2d709dcfe443bceb23b7a62889db81942673c031827",
-      "source": "真結局/map2d/side/art/out/dawn/cg_view_two.jpg"
+      "bytes": 325994,
+      "sha256": "a820c91a6bdf7948f53c18ff406e4b113a62dc24c2c4c9484ce6953b84516d9e",
+      "source": "真結局/map2d/side/art/out/dawn/cg_view_one.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/easel_painted.png",
+      "file": "web/true_end/map2d/side/art/out/dawn/cg_view_two.webp",
       "category": "web",
-      "bytes": 91829,
-      "sha256": "05e5c145d969638a3a29665eecef57101ed857c329e3f13a80e941eb8da38b18",
-      "source": "真結局/map2d/side/art/out/dawn/easel_painted.png"
+      "bytes": 290180,
+      "sha256": "160ecf87aeecc970d347f453f89301ba8a1c2e6a901ecd4dcd2f02cf5e8b9c16",
+      "source": "真結局/map2d/side/art/out/dawn/cg_view_two.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/easel_painting.jpg",
+      "file": "web/true_end/map2d/side/art/out/dawn/easel_painted.webp",
       "category": "web",
-      "bytes": 581519,
-      "sha256": "ef2700c83a4b299564bcef05fe37552d00ffe0d8787f3a5c3deadf94e27e3089",
-      "source": "真結局/map2d/side/art/out/dawn/easel_painting.jpg"
+      "bytes": 11970,
+      "sha256": "be05e68b33f57e929183a4869f5b7da5a0d33ad4ab1405d3ae24a83c83424d3a",
+      "source": "真結局/map2d/side/art/out/dawn/easel_painted.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/easel_sketch.jpg",
+      "file": "web/true_end/map2d/side/art/out/dawn/easel_painting.webp",
       "category": "web",
-      "bytes": 496416,
-      "sha256": "9fa73822c0c3b499ee901e323eae0a3aaa79521efbb8d53474188c3beec4c9fa",
-      "source": "真結局/map2d/side/art/out/dawn/easel_sketch.jpg"
+      "bytes": 317498,
+      "sha256": "b6ab00a12895b42aaa784f83fb186af23ea75806a4fc1fefe32047ee4d5846b3",
+      "source": "真結局/map2d/side/art/out/dawn/easel_painting.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/fg.png",
+      "file": "web/true_end/map2d/side/art/out/dawn/easel_sketch.webp",
       "category": "web",
-      "bytes": 241080,
-      "sha256": "f2299635780469578f4b898b51f6f780676da82ecc357c9a57f042928a59e8ea",
-      "source": "真結局/map2d/side/art/out/dawn/fg.png"
+      "bytes": 263090,
+      "sha256": "ddb2a1d62f5ec0344693626a99f5c6cd9aa5cf01a14e09213b8e436b9872ad26",
+      "source": "真結局/map2d/side/art/out/dawn/easel_sketch.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/flat.jpg",
+      "file": "web/true_end/map2d/side/art/out/dawn/fg.webp",
       "category": "web",
-      "bytes": 1317717,
-      "sha256": "4ddd08a769186ef20b994d9f7376fa9bdcd659be371236bbc8c7f477bb6dadf1",
-      "source": "真結局/map2d/side/art/out/dawn/flat.jpg"
+      "bytes": 52438,
+      "sha256": "2b396ed932109bcf58abaa08b3c98cbf0b774a39389d0f4ac55fe47ee29b81f0",
+      "source": "真結局/map2d/side/art/out/dawn/fg.webp"
     },
     {
       "file": "web/true_end/map2d/side/art/out/dawn/flat.json",
       "category": "web",
-      "bytes": 2614,
-      "sha256": "1b42664d98f81c39a8721008e64ce841758674ff6336f2f1a497dbd3868ec2bf",
+      "bytes": 2618,
+      "sha256": "c17bd0564a97c47d04c7dbaef0788d3d4b3ab676cd29ffdba24067ed7d8771a6",
       "source": "真結局/map2d/side/art/out/dawn/flat.json"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/gray_cherry.png",
+      "file": "web/true_end/map2d/side/art/out/dawn/flat.webp",
       "category": "web",
-      "bytes": 89555,
-      "sha256": "728cb9fb54a93c4be7613263a10d777b8f685e630b7130b81c2d9d098224d503",
-      "source": "真結局/map2d/side/art/out/dawn/gray_cherry.png"
+      "bytes": 469206,
+      "sha256": "4481bd8ae9e95c05ccab07f6f9179d1eb679240a733016194587af2304a6f969",
+      "source": "真結局/map2d/side/art/out/dawn/flat.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/gray_cherry_only.png",
+      "file": "web/true_end/map2d/side/art/out/dawn/gray_cherry.webp",
       "category": "web",
-      "bytes": 89555,
-      "sha256": "728cb9fb54a93c4be7613263a10d777b8f685e630b7130b81c2d9d098224d503",
-      "source": "真結局/map2d/side/art/out/dawn/gray_cherry_only.png"
+      "bytes": 55758,
+      "sha256": "f5524dc1f3ed44e29b836656cffabdc533e99b228e2f1546284f46c73e9e7864",
+      "source": "真結局/map2d/side/art/out/dawn/gray_cherry.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/gray_field.png",
+      "file": "web/true_end/map2d/side/art/out/dawn/gray_field.webp",
       "category": "web",
-      "bytes": 157359,
-      "sha256": "3bc4eb0733497ceb363678ce65959b30a312868e23f54e0c0b89a48e4f4aed38",
-      "source": "真結局/map2d/side/art/out/dawn/gray_field.png"
+      "bytes": 99758,
+      "sha256": "e65bedd2e62d7635d46b6ae32fa6d94134e31b4d46d420adf6f5a17c3e5819aa",
+      "source": "真結局/map2d/side/art/out/dawn/gray_field.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/gray_orange.png",
+      "file": "web/true_end/map2d/side/art/out/dawn/gray_orange.webp",
       "category": "web",
-      "bytes": 112638,
-      "sha256": "65cc513003b5443b01c1d8c15d0f5dbc57455d38604d8399ce75678898cba6f3",
-      "source": "真結局/map2d/side/art/out/dawn/gray_orange.png"
+      "bytes": 86792,
+      "sha256": "1bbbd1949b07fe1a8849a4aa2f6d8b9838bc5e861c831d599591ad4ae334b4bd",
+      "source": "真結局/map2d/side/art/out/dawn/gray_orange.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/gray_pink.png",
+      "file": "web/true_end/map2d/side/art/out/dawn/gray_pink.webp",
       "category": "web",
-      "bytes": 129483,
-      "sha256": "b0cf955abe06730e617675f88b3baf1ad4e8ab5abb8edf7cc7b985dd6b7ea5f8",
-      "source": "真結局/map2d/side/art/out/dawn/gray_pink.png"
+      "bytes": 88668,
+      "sha256": "f264e78d19616948d5dcc145bd6706d1defac30b673b7b1bba86d3c960c6d5db",
+      "source": "真結局/map2d/side/art/out/dawn/gray_pink.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/gray_white.png",
+      "file": "web/true_end/map2d/side/art/out/dawn/gray_white.webp",
       "category": "web",
-      "bytes": 68987,
-      "sha256": "59e28d2ef61b61846ead8f1c7834a95200295352df414f345f9fdb98d5005118",
-      "source": "真結局/map2d/side/art/out/dawn/gray_white.png"
+      "bytes": 52196,
+      "sha256": "5b8b5c1a9519650cb58b37dad3375b87d72f2682968c12f8cf5b61226c700390",
+      "source": "真結局/map2d/side/art/out/dawn/gray_white.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/dawn/gray_yellow.png",
+      "file": "web/true_end/map2d/side/art/out/dawn/gray_yellow.webp",
       "category": "web",
-      "bytes": 166273,
-      "sha256": "e5d9c1fb64db0f0e178c4769404f5496bb38ec4e1513449ffcd8b06fdc983993",
-      "source": "真結局/map2d/side/art/out/dawn/gray_yellow.png"
-    },
-    {
-      "file": "web/true_end/map2d/side/art/out/dive/flat.jpg",
-      "category": "web",
-      "bytes": 532648,
-      "sha256": "96a09928d8376f68901473d3b1ece70a2bbd6917bcf53fd1f30effd62a87d984",
-      "source": "真結局/map2d/side/art/out/dive/flat.jpg"
+      "bytes": 112734,
+      "sha256": "b75e24170a254be57c6d3bd7864a6f0ae54353cdbc85b8676844a0c0c505bb7c",
+      "source": "真結局/map2d/side/art/out/dawn/gray_yellow.webp"
     },
     {
       "file": "web/true_end/map2d/side/art/out/dive/flat.json",
@@ -1912,900 +1849,886 @@
       "source": "真結局/map2d/side/art/out/dive/flat.json"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/fg_03.png",
+      "file": "web/true_end/map2d/side/art/out/dive/flat.webp",
       "category": "web",
-      "bytes": 2395500,
-      "sha256": "3c10f707a9e1aa95673b41de633298e0fe7ed245b4252667fe298547db7c81fa",
-      "source": "真結局/map2d/side/art/out/fg_03.png"
+      "bytes": 155880,
+      "sha256": "63c97f03f9956a69c272d9c502ddac03d0a0a209e5f7a908711a4bd79e40c9fd",
+      "source": "真結局/map2d/side/art/out/dive/flat.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/lantern/flat.jpg",
+      "file": "web/true_end/map2d/side/art/out/fg_03.webp",
       "category": "web",
-      "bytes": 649697,
-      "sha256": "7dc96a3c09387cf1868462b7c9b60ab6dc44a50a30f218ecf8b953ed3ad3f111",
-      "source": "真結局/map2d/side/art/out/lantern/flat.jpg"
+      "bytes": 51516,
+      "sha256": "d8d1eec28ea4c7eb50226f3817c001b923a11693c64252b7724473fb5c3863e5",
+      "source": "真結局/map2d/side/art/out/fg_03.webp"
     },
     {
       "file": "web/true_end/map2d/side/art/out/lantern/flat.json",
       "category": "web",
-      "bytes": 2577,
-      "sha256": "fcfffab744e9ce4ad1afa191564a4ac8924f554fcb2a61f3b8019476600a1729",
+      "bytes": 2585,
+      "sha256": "60892ea3b5cee02df37568e57967bc7269b9401c683e4f44c8b1d215c2e3a8c5",
       "source": "真結局/map2d/side/art/out/lantern/flat.json"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/scene_03.jpg",
+      "file": "web/true_end/map2d/side/art/out/lantern/flat.webp",
       "category": "web",
-      "bytes": 440384,
-      "sha256": "0986ce2cfbad55aba2d6346198328d31fae432ad9c83ee765cea2452d761ed28",
-      "source": "真結局/map2d/side/art/out/scene_03.jpg"
+      "bytes": 192460,
+      "sha256": "2648ecef2d5a4818166fa60d71b9a0b28cce376162c6038d1cdfff0e65061ff4",
+      "source": "真結局/map2d/side/art/out/lantern/flat.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/scene_left.jpg",
+      "file": "web/true_end/map2d/side/art/out/scene_03.webp",
       "category": "web",
-      "bytes": 365579,
-      "sha256": "b5d4b2c652a36f82d7de30459eefd8c13b4661c36dc51d1aa0e21417d27d5282",
-      "source": "真結局/map2d/side/art/out/scene_left.jpg"
+      "bytes": 169140,
+      "sha256": "a4dd73dc227bf5fda713376c510f0e7d40b08a8145a2ff25e6e2ddf492f3ba8f",
+      "source": "真結局/map2d/side/art/out/scene_03.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/out/scene_right.jpg",
+      "file": "web/true_end/map2d/side/art/out/scene_left.webp",
       "category": "web",
-      "bytes": 342801,
-      "sha256": "3b8c1b393cf42649766edd1f62b456c0ae82cc928c38196e3de6973c8c3e7834",
-      "source": "真結局/map2d/side/art/out/scene_right.jpg"
+      "bytes": 167702,
+      "sha256": "99e20b0fc856f05373eb145d52522ed7c9e9754060fed6fcb3efd2130fda1143",
+      "source": "真結局/map2d/side/art/out/scene_left.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/ref/long_house_ref.jpg",
+      "file": "web/true_end/map2d/side/art/out/scene_right.webp",
       "category": "web",
-      "bytes": 103609,
-      "sha256": "77b4f5a777900f53d79357c39632854b7d646d046b9b5b180d48f670eaee3b9c",
-      "source": "真結局/map2d/side/art/ref/long_house_ref.jpg"
+      "bytes": 143268,
+      "sha256": "92bda920d0d3edc898e9c81e33ea18d25dd2547b63341f8994bf7806e6a98e12",
+      "source": "真結局/map2d/side/art/out/scene_right.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/bench_back.png",
+      "file": "web/true_end/map2d/side/art/ref/long_house_ref.webp",
       "category": "web",
-      "bytes": 809974,
-      "sha256": "fd58ce7827d2e78d40c66df41b0da6afaa98928d11d6f7ff34b5397686089237",
-      "source": "真結局/map2d/side/art/sprites/bench_back.png"
+      "bytes": 45420,
+      "sha256": "c8db51d4616914c254e6194bcd924130eeb18eeb83c4fc75fee50773800fc756",
+      "source": "真結局/map2d/side/art/ref/long_house_ref.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/bench_sit_one.png",
+      "file": "web/true_end/map2d/side/art/sprites/bench_sit_one.webp",
       "category": "web",
-      "bytes": 516459,
-      "sha256": "a0be53281b37b5b405358a4c8e49fff19f7ab2b22d247dc06631bc5b4fc42283",
-      "source": "真結局/map2d/side/art/sprites/bench_sit_one.png"
+      "bytes": 75618,
+      "sha256": "8af4cc7d102a43bb3a0d01e16562346e31b9f50de3c0429a549383ee8c6b5de0",
+      "source": "真結局/map2d/side/art/sprites/bench_sit_one.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/bench_sit_two.png",
+      "file": "web/true_end/map2d/side/art/sprites/bench_sit_two.webp",
       "category": "web",
-      "bytes": 718238,
-      "sha256": "462bac9648872cba1bd2c4a1a5b63e3978d35811d57c504c56973ef93682ef2b",
-      "source": "真結局/map2d/side/art/sprites/bench_sit_two.png"
+      "bytes": 117028,
+      "sha256": "00438151c52eafeb24ad1b3122ecae7e42d08c2bf8502957131f7609cb22c60e",
+      "source": "真結局/map2d/side/art/sprites/bench_sit_two.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/bird.png",
+      "file": "web/true_end/map2d/side/art/sprites/bird.webp",
       "category": "web",
-      "bytes": 730433,
-      "sha256": "04163336a110d8562a6d3789264ed86d9e9c7c187ae41dc9cfde9af5ac2b86a2",
-      "source": "真結局/map2d/side/art/sprites/bird.png"
+      "bytes": 22570,
+      "sha256": "3a3c041a9cb1c5b6a4eaa9d77cc00e06a2f6e61f5729596f4e559b46002d7a47",
+      "source": "真結局/map2d/side/art/sprites/bird.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/bird_fly_0.png",
+      "file": "web/true_end/map2d/side/art/sprites/bird_fly_0.webp",
       "category": "web",
-      "bytes": 297829,
-      "sha256": "d6e4838483a18e93123663fdf00efcc7212f26446c86eea16359041d61c06ef7",
-      "source": "真結局/map2d/side/art/sprites/bird_fly_0.png"
+      "bytes": 22778,
+      "sha256": "405390b29a1a4b3dfa9076d53ca2b93c4450f57c8126edbea95d728017d940aa",
+      "source": "真結局/map2d/side/art/sprites/bird_fly_0.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/bird_fly_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/bird_fly_1.webp",
       "category": "web",
-      "bytes": 282786,
-      "sha256": "230d6a923bfea1971a36f4507228cba523e4f971764122af881db754d7a3b02a",
-      "source": "真結局/map2d/side/art/sprites/bird_fly_1.png"
+      "bytes": 21876,
+      "sha256": "fdaa74c8be92a00f348e03e81c447f828efa51fd84eb526573e6e76e2b80c95c",
+      "source": "真結局/map2d/side/art/sprites/bird_fly_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/bird_fly_2.png",
+      "file": "web/true_end/map2d/side/art/sprites/bird_fly_2.webp",
       "category": "web",
-      "bytes": 239456,
-      "sha256": "104ac34c7cf09fb191eaf775a3f5d46fb7b33cbf121535e22c4fbfe821b5e258",
-      "source": "真結局/map2d/side/art/sprites/bird_fly_2.png"
+      "bytes": 24680,
+      "sha256": "be6c8cdcfbce1171f0ec3121a0ba75213db83d24b571dc16addf7d0a2d65fcc9",
+      "source": "真結局/map2d/side/art/sprites/bird_fly_2.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/butterfly.png",
+      "file": "web/true_end/map2d/side/art/sprites/butterfly.webp",
       "category": "web",
-      "bytes": 690519,
-      "sha256": "119944c15d31c16f4e9daaddf49eda2ca508939f6950196038b2c82543e45ad8",
-      "source": "真結局/map2d/side/art/sprites/butterfly.png"
+      "bytes": 30702,
+      "sha256": "f6589dd2c8d4258661829f5c236aae9e71da5761af07abbb3a2a2415b7e66dd4",
+      "source": "真結局/map2d/side/art/sprites/butterfly.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/c7_flower.png",
+      "file": "web/true_end/map2d/side/art/sprites/c7_flower.webp",
       "category": "web",
-      "bytes": 65167,
-      "sha256": "9f70c42786ffe377b9467607a48d3d03e0654ac2cfe133942afebdedec43c30f",
-      "source": "真結局/map2d/side/art/sprites/c7_flower.png"
+      "bytes": 10960,
+      "sha256": "34d2cda8de6c3a589fc8b28ac4e81809131e38fe503ff9d331a32dfe8b6d39fb",
+      "source": "真結局/map2d/side/art/sprites/c7_flower.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/c7_seeds.png",
+      "file": "web/true_end/map2d/side/art/sprites/c7_seeds.webp",
       "category": "web",
-      "bytes": 240493,
-      "sha256": "dc51ce73686484883b5b16a0eb0ce7c85c083a5883ad3ff2b6a637b19dda0d21",
-      "source": "真結局/map2d/side/art/sprites/c7_seeds.png"
+      "bytes": 45608,
+      "sha256": "234d7b15738c7748ab3207678b0457ee267aeac1d9276887862b6b6390da8fd2",
+      "source": "真結局/map2d/side/art/sprites/c7_seeds.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/c7_soil.png",
+      "file": "web/true_end/map2d/side/art/sprites/c7_soil.webp",
       "category": "web",
-      "bytes": 236312,
-      "sha256": "4bbf4a41f105aa0adf10aee07ce19c8d976cb4d4ab02964625fedd42f541a0a1",
-      "source": "真結局/map2d/side/art/sprites/c7_soil.png"
+      "bytes": 42704,
+      "sha256": "f2101f20967145b76f9014938049a34a30a7111f9bc9a7af91f53e26d9406807",
+      "source": "真結局/map2d/side/art/sprites/c7_soil.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/cape_float_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/cape_float_1.webp",
       "category": "web",
-      "bytes": 55278,
-      "sha256": "b7fcffd524b81bb1f91e2fa8caefe843df6d50efba21845b2ff26ef366a5b442",
-      "source": "真結局/map2d/side/art/sprites/cape_float_1.png"
+      "bytes": 4852,
+      "sha256": "df1d03c862be27a78a5dcbd2bb929cd4621b393fc876e97490ee246f2b1d1f0a",
+      "source": "真結局/map2d/side/art/sprites/cape_float_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/cape_float_2.png",
+      "file": "web/true_end/map2d/side/art/sprites/cape_float_2.webp",
       "category": "web",
-      "bytes": 100467,
-      "sha256": "95019df167c8e3d6e1992b201c11c563a7741470a0387f6a1467b1bc50e57ecc",
-      "source": "真結局/map2d/side/art/sprites/cape_float_2.png"
+      "bytes": 7536,
+      "sha256": "6c6eb5c5bea4f28d783617517a8404354c620c806a8ae5bdd38097952302adca",
+      "source": "真結局/map2d/side/art/sprites/cape_float_2.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/cape_float_3.png",
+      "file": "web/true_end/map2d/side/art/sprites/cape_float_3.webp",
       "category": "web",
-      "bytes": 59414,
-      "sha256": "a3993865d2fff2c042649bee61a4bd51ca8009842ddb5414448b32a0e60606e4",
-      "source": "真結局/map2d/side/art/sprites/cape_float_3.png"
+      "bytes": 4994,
+      "sha256": "a56c531e30da8d67c2e62fb1a4b64bf7fb7b118380e3be6940ba3476957a43d7",
+      "source": "真結局/map2d/side/art/sprites/cape_float_3.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/cape_float_4.png",
+      "file": "web/true_end/map2d/side/art/sprites/cape_float_4.webp",
       "category": "web",
-      "bytes": 87422,
-      "sha256": "8979184361afe8e3591edaec7024afa757b0274109ebb50829b1872cac1370b4",
-      "source": "真結局/map2d/side/art/sprites/cape_float_4.png"
+      "bytes": 6858,
+      "sha256": "408d8386f50e0a11797ff708da5422bfea7e58dccbd6d10508a1adae7d1f3b16",
+      "source": "真結局/map2d/side/art/sprites/cape_float_4.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/cape_float_5.png",
+      "file": "web/true_end/map2d/side/art/sprites/cape_float_5.webp",
       "category": "web",
-      "bytes": 49864,
-      "sha256": "349d376f7a8ad236ade002978db40249e9b33b173c7354e5994552f5bb54cdb3",
-      "source": "真結局/map2d/side/art/sprites/cape_float_5.png"
+      "bytes": 4432,
+      "sha256": "61874a8985d799703c9d47e959d7bad4a9642465b8dea02bae9beacae4961fab",
+      "source": "真結局/map2d/side/art/sprites/cape_float_5.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/chen_sit_back.png",
+      "file": "web/true_end/map2d/side/art/sprites/coconut.webp",
       "category": "web",
-      "bytes": 1260147,
-      "sha256": "043059a864391660a2a3037c76f1f95d2c2f68de3d588aa44ee79a1f51a28724",
-      "source": "真結局/map2d/side/art/sprites/chen_sit_back.png"
+      "bytes": 9356,
+      "sha256": "a60d5d250cbfee6f07243402eacf007d121d875f230da5771c4e985e9edc3568",
+      "source": "真結局/map2d/side/art/sprites/coconut.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/coconut.png",
+      "file": "web/true_end/map2d/side/art/sprites/crab.webp",
       "category": "web",
-      "bytes": 49160,
-      "sha256": "0759d26af8218e9d58438bf84181e8503e5ef73d24a52dbce1960c0dab57aac0",
-      "source": "真結局/map2d/side/art/sprites/coconut.png"
+      "bytes": 18538,
+      "sha256": "1823fe2ccae8f1cd6fb6acb9799e19e97ef7006f0d90e0d2a8aa9c23dd8b0150",
+      "source": "真結局/map2d/side/art/sprites/crab.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/coconut_wrong_persimmon.png",
+      "file": "web/true_end/map2d/side/art/sprites/dolphin_0.webp",
       "category": "web",
-      "bytes": 32874,
-      "sha256": "26fc14d96f9b77894c9d2c8e518136240ae4ed71326d2732f59d004b6eac0dca",
-      "source": "真結局/map2d/side/art/sprites/coconut_wrong_persimmon.png"
+      "bytes": 15022,
+      "sha256": "6a6bc92385de0a41204e77316424181a08ef434b2c7796c0791d0708192a7381",
+      "source": "真結局/map2d/side/art/sprites/dolphin_0.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/crab.png",
+      "file": "web/true_end/map2d/side/art/sprites/dolphin_1.webp",
       "category": "web",
-      "bytes": 98617,
-      "sha256": "6737bdb96c649d50c87d1b52deb42af44e5cdbf8da2f6f0d3d94f05cc9dc8c2c",
-      "source": "真結局/map2d/side/art/sprites/crab.png"
+      "bytes": 13988,
+      "sha256": "2215d30845f5a26ca6c1ab4c481b9566207212e64bf29c4322ca856c96d53743",
+      "source": "真結局/map2d/side/art/sprites/dolphin_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/dolphin_0.png",
+      "file": "web/true_end/map2d/side/art/sprites/dv_coral.webp",
       "category": "web",
-      "bytes": 102640,
-      "sha256": "9bd18cf009e3086cd9b2f883ddc4b28fecd25cc0ff6805cfba1145e95a9596d5",
-      "source": "真結局/map2d/side/art/sprites/dolphin_0.png"
+      "bytes": 34906,
+      "sha256": "9d4400838344564118c7991e35ce2c02cd728584b8becec925eb505a5e9233c6",
+      "source": "真結局/map2d/side/art/sprites/dv_coral.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/dolphin_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/dv_fish_0.webp",
       "category": "web",
-      "bytes": 92026,
-      "sha256": "d4afd9efd8a12d5433eb7e92af109699dd2cd2c46f0eef03ee60aab832e4cc87",
-      "source": "真結局/map2d/side/art/sprites/dolphin_1.png"
+      "bytes": 21864,
+      "sha256": "6a16a291a652f0bf897b861bea010c904166fec6234bd3a30d0f6653f788fb25",
+      "source": "真結局/map2d/side/art/sprites/dv_fish_0.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/dv_coral.png",
+      "file": "web/true_end/map2d/side/art/sprites/dv_fish_1.webp",
       "category": "web",
-      "bytes": 266903,
-      "sha256": "8357419798085d8cbc408810b48deb189045f0e57baf77c0467bc73d495bd833",
-      "source": "真結局/map2d/side/art/sprites/dv_coral.png"
+      "bytes": 18384,
+      "sha256": "c94d561fde013d560e3712b23c2ee29c000d8771b0ca199184fb9ee2d04a6470",
+      "source": "真結局/map2d/side/art/sprites/dv_fish_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/dv_fish_0.png",
+      "file": "web/true_end/map2d/side/art/sprites/dv_fish_2.webp",
       "category": "web",
-      "bytes": 175924,
-      "sha256": "de9913c1e59a50f0ed5d7ce0f780454b8419731149cb0135f44c2f9bc3ba9167",
-      "source": "真結局/map2d/side/art/sprites/dv_fish_0.png"
+      "bytes": 22568,
+      "sha256": "17d3ac5271b492232f274709977e603eaafd9a71ad3cf76d4c4111a97edfe398",
+      "source": "真結局/map2d/side/art/sprites/dv_fish_2.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/dv_fish_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/dv_jelly_0.webp",
       "category": "web",
-      "bytes": 140558,
-      "sha256": "f13aa622beb15d9c75ae0f7d3a25a2717aa9d3cf1810a203b80a4aca318c4887",
-      "source": "真結局/map2d/side/art/sprites/dv_fish_1.png"
+      "bytes": 32596,
+      "sha256": "ef1f0df165f7993ee19332fcaafa516e7968f8d7695d45cdcad2aadbd58decdb",
+      "source": "真結局/map2d/side/art/sprites/dv_jelly_0.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/dv_fish_2.png",
+      "file": "web/true_end/map2d/side/art/sprites/dv_jelly_1.webp",
       "category": "web",
-      "bytes": 179548,
-      "sha256": "df064905a7c76f8f8516d806e3a02979ba014030e2b891defbf068ecd455e607",
-      "source": "真結局/map2d/side/art/sprites/dv_fish_2.png"
+      "bytes": 24342,
+      "sha256": "e1069b2530e9db2b37f192536b5300faebbee50416bd41cc40f5b15e8daa8e32",
+      "source": "真結局/map2d/side/art/sprites/dv_jelly_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/dv_jelly_0.png",
+      "file": "web/true_end/map2d/side/art/sprites/dv_tea_float.webp",
       "category": "web",
-      "bytes": 238428,
-      "sha256": "ba1dc372725cfce6c11709971f0f018f13d374eb79adcca9904aa7e45cd37695",
-      "source": "真結局/map2d/side/art/sprites/dv_jelly_0.png"
+      "bytes": 76138,
+      "sha256": "89edf7603f626999b661ff5add1887efe6f21326e9c9b772befc65851c232f9f",
+      "source": "真結局/map2d/side/art/sprites/dv_tea_float.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/dv_jelly_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/dv_tea_swim.webp",
       "category": "web",
-      "bytes": 156137,
-      "sha256": "eee68c3bbd2b1f09f137c7bb77f7a0e57f03a2259d7d9957606322a2c3899746",
-      "source": "真結局/map2d/side/art/sprites/dv_jelly_1.png"
+      "bytes": 75282,
+      "sha256": "e472428b777e552d2480cbf15e61d8b8b329dd0465ac8b3f817404b904d5e123",
+      "source": "真結局/map2d/side/art/sprites/dv_tea_swim.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/dv_tea_float.png",
+      "file": "web/true_end/map2d/side/art/sprites/dv_turtle.webp",
       "category": "web",
-      "bytes": 718151,
-      "sha256": "e8602a8e423b6c59fa457efe46708ab8aec8543b961ca34faaee88ba915f7145",
-      "source": "真結局/map2d/side/art/sprites/dv_tea_float.png"
+      "bytes": 32448,
+      "sha256": "1569ef781a429be3d963fe01622badd172edeed4929cbad24b3587c0ded54216",
+      "source": "真結局/map2d/side/art/sprites/dv_turtle.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/dv_tea_swim.png",
+      "file": "web/true_end/map2d/side/art/sprites/float_pink.webp",
       "category": "web",
-      "bytes": 673630,
-      "sha256": "55d2e012de71e6a02e76e6fd86523aa016ae5a70a377cc45ebe1c18df8f1ebfe",
-      "source": "真結局/map2d/side/art/sprites/dv_tea_swim.png"
+      "bytes": 8024,
+      "sha256": "7af5671cc936bbe0411afb9eade2ace0c631af97c822f6418cc254b19e2fc033",
+      "source": "真結局/map2d/side/art/sprites/float_pink.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/dv_turtle.png",
+      "file": "web/true_end/map2d/side/art/sprites/float_red.webp",
       "category": "web",
-      "bytes": 214756,
-      "sha256": "79a83dc70aabb3d5fffd9a813b3772594763e95ee12041f5638c830119eb55a2",
-      "source": "真結局/map2d/side/art/sprites/dv_turtle.png"
+      "bytes": 10224,
+      "sha256": "7e61323d3faf6b686f30edb0044e3f60d66efaf7d5250b8d33e9fe18a7d910da",
+      "source": "真結局/map2d/side/art/sprites/float_red.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/float_pink.png",
+      "file": "web/true_end/map2d/side/art/sprites/float_white.webp",
       "category": "web",
-      "bytes": 39262,
-      "sha256": "e981ca0bd518f59488cf5cc812aa889596eb42a50f5172a2210434678fabd01e",
-      "source": "真結局/map2d/side/art/sprites/float_pink.png"
+      "bytes": 6888,
+      "sha256": "45789a87fd8a88e7d90e5fe17c86f56b0499eb5146171d8321bffabac88510b4",
+      "source": "真結局/map2d/side/art/sprites/float_white.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/float_red.png",
+      "file": "web/true_end/map2d/side/art/sprites/flower_blue.webp",
       "category": "web",
-      "bytes": 50955,
-      "sha256": "7b0d3c60e808e0d4e11ee5fd3b77251f198ffada7f297a9d9f9f3c052703b767",
-      "source": "真結局/map2d/side/art/sprites/float_red.png"
+      "bytes": 11968,
+      "sha256": "630174135f3d3277eee41a8a08170ade50864650530bdf20a344224b6e1cada4",
+      "source": "真結局/map2d/side/art/sprites/flower_blue.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/float_white.png",
+      "file": "web/true_end/map2d/side/art/sprites/flower_blue_big.webp",
       "category": "web",
-      "bytes": 31863,
-      "sha256": "03e0b346493f3844e0de80d4f63d44d6c1272a0bf65f1e0b0935f3e2bb304137",
-      "source": "真結局/map2d/side/art/sprites/float_white.png"
+      "bytes": 12512,
+      "sha256": "277864989a359b7700980f98718411ddbf433d3343cc4280ba9d45b7ebf33b66",
+      "source": "真結局/map2d/side/art/sprites/flower_blue_big.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/flower_blue.png",
+      "file": "web/true_end/map2d/side/art/sprites/flower_orange.webp",
       "category": "web",
-      "bytes": 149207,
-      "sha256": "8cde345d77880ea2d98ed04c0d18f66c59de231965985cc9b3e7bef1bd5e227e",
-      "source": "真結局/map2d/side/art/sprites/flower_blue.png"
+      "bytes": 11736,
+      "sha256": "106f3213ebbdeb7ab126ddc5117850dedbded2c1ab580c0a43fdef81899da9b8",
+      "source": "真結局/map2d/side/art/sprites/flower_orange.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/flower_blue_big.png",
+      "file": "web/true_end/map2d/side/art/sprites/flower_purple.webp",
       "category": "web",
-      "bytes": 178144,
-      "sha256": "13d975e9de3199ddb0496db9c89dcd7cca8efdc83841c60e91238d3e73a205cc",
-      "source": "真結局/map2d/side/art/sprites/flower_blue_big.png"
+      "bytes": 11662,
+      "sha256": "24b4a17ee50813fdef0cdbf5fc82c3802edf1c9501af1f5b9f261a4feba14cde",
+      "source": "真結局/map2d/side/art/sprites/flower_purple.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/flower_orange.png",
+      "file": "web/true_end/map2d/side/art/sprites/flower_red.webp",
       "category": "web",
-      "bytes": 151572,
-      "sha256": "16faed3fca798c543c191fb432c67d00a4e047c82a432b9d68292c38d3d42dfd",
-      "source": "真結局/map2d/side/art/sprites/flower_orange.png"
+      "bytes": 12648,
+      "sha256": "900d9ebf4f6af8a97a752bf91a4c0a84a9a53665b549d88e0a2ed96b4b292522",
+      "source": "真結局/map2d/side/art/sprites/flower_red.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/flower_purple.png",
+      "file": "web/true_end/map2d/side/art/sprites/flower_yellow.webp",
       "category": "web",
-      "bytes": 146855,
-      "sha256": "f10cc78ab5163b7d3aae87a36404d04134eb204f0777ddefd5a2d721f082e886",
-      "source": "真結局/map2d/side/art/sprites/flower_purple.png"
-    },
-    {
-      "file": "web/true_end/map2d/side/art/sprites/flower_red.png",
-      "category": "web",
-      "bytes": 145581,
-      "sha256": "2bde0369ff9d00774e93f73c75cfc5c4034648ef6b7c10401db01ca41b6e3b02",
-      "source": "真結局/map2d/side/art/sprites/flower_red.png"
-    },
-    {
-      "file": "web/true_end/map2d/side/art/sprites/flower_yellow.png",
-      "category": "web",
-      "bytes": 137082,
-      "sha256": "8d5dabd6f9a0045a0f9f2698fbcc5fbfa116c5a1cbc278263e5c963e42ac1152",
-      "source": "真結局/map2d/side/art/sprites/flower_yellow.png"
+      "bytes": 10340,
+      "sha256": "3dc15d5e383c834833f3c7b93d0e87c213d408696b2f8c53cf5432ba1cecb144",
+      "source": "真結局/map2d/side/art/sprites/flower_yellow.webp"
     },
     {
       "file": "web/true_end/map2d/side/art/sprites/fx.json",
       "category": "web",
-      "bytes": 635,
-      "sha256": "d59a5ee2138f61130bed1feb4627ab9f3cc8824f21ccd6c8cda480aa3961da13",
+      "bytes": 646,
+      "sha256": "f318fb79a9a0dc583ec5026c14671c00402ca63ae29ce99fe4c1fd4e60daf450",
       "source": "真結局/map2d/side/art/sprites/fx.json"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/fx_0.png",
+      "file": "web/true_end/map2d/side/art/sprites/fx_0.webp",
       "category": "web",
-      "bytes": 129382,
-      "sha256": "25ca999d6fa6057d07d5463ef8053678aa356eadf2fde21dcd240673faf90779",
-      "source": "真結局/map2d/side/art/sprites/fx_0.png"
+      "bytes": 6304,
+      "sha256": "51fadcff9d02f16df842e6492cc7dff4142efe94854d5bd00379a1a99436964f",
+      "source": "真結局/map2d/side/art/sprites/fx_0.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/fx_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/fx_1.webp",
       "category": "web",
-      "bytes": 14083,
-      "sha256": "f1315ede0a16c51fb7ce972e183f014a2174bb7102bd59fe34384a8c994a1edd",
-      "source": "真結局/map2d/side/art/sprites/fx_1.png"
+      "bytes": 3592,
+      "sha256": "cbb0bbe92b4a7242da95cfc7abee8232f6cf1c99253c0329dcfc8cf772ce0db7",
+      "source": "真結局/map2d/side/art/sprites/fx_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/fx_10.png",
+      "file": "web/true_end/map2d/side/art/sprites/fx_10.webp",
       "category": "web",
-      "bytes": 15487,
-      "sha256": "e4ed51d65a54f9c0aade6912db44269550df9c766ca695724f78500cbebabe1a",
-      "source": "真結局/map2d/side/art/sprites/fx_10.png"
+      "bytes": 3442,
+      "sha256": "2f129074ba32a95436d1b6db8e115eee82aa95d4b5de794c599ec72eec3e4233",
+      "source": "真結局/map2d/side/art/sprites/fx_10.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/fx_2.png",
+      "file": "web/true_end/map2d/side/art/sprites/fx_2.webp",
       "category": "web",
-      "bytes": 56705,
-      "sha256": "a319a941d8e477276a4674e007d4b38c0fff6bcb99022c396fbde4c6d4fc86b7",
-      "source": "真結局/map2d/side/art/sprites/fx_2.png"
+      "bytes": 4746,
+      "sha256": "45b0b0dc572f6cc3731d96963f4b31a950cc402443ca7747402ad1b6d1b14ef4",
+      "source": "真結局/map2d/side/art/sprites/fx_2.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/fx_3.png",
+      "file": "web/true_end/map2d/side/art/sprites/fx_3.webp",
       "category": "web",
-      "bytes": 40327,
-      "sha256": "7faa1dbbd846b555cf36a5843accff7e3f2b930bdd11b7bb29e3735ba45e71c6",
-      "source": "真結局/map2d/side/art/sprites/fx_3.png"
+      "bytes": 4724,
+      "sha256": "c743d0ec9fb7776878bf03d872fd4766ecb2cc560ebab134046c655e74824296",
+      "source": "真結局/map2d/side/art/sprites/fx_3.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/fx_4.png",
+      "file": "web/true_end/map2d/side/art/sprites/fx_4.webp",
       "category": "web",
-      "bytes": 22903,
-      "sha256": "c52af15976aefcc0840c28e661def6375148dfd9337130b6ee335dcd2dc3ebc7",
-      "source": "真結局/map2d/side/art/sprites/fx_4.png"
+      "bytes": 4688,
+      "sha256": "6b30e64e3628e67311e6784fbd003c6c00a3c7f186ad67bc1a98fdbb44953e75",
+      "source": "真結局/map2d/side/art/sprites/fx_4.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/fx_5.png",
+      "file": "web/true_end/map2d/side/art/sprites/fx_5.webp",
       "category": "web",
-      "bytes": 42772,
-      "sha256": "03697cb10b27f4b8737b3b3f56d5822256729f06825c6cd7409e29498e50d3f1",
-      "source": "真結局/map2d/side/art/sprites/fx_5.png"
+      "bytes": 6122,
+      "sha256": "68bc2e4393a971cb52679671eff298fc98ea5358224b219700f39d14cd1f075e",
+      "source": "真結局/map2d/side/art/sprites/fx_5.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/fx_6.png",
+      "file": "web/true_end/map2d/side/art/sprites/fx_6.webp",
       "category": "web",
-      "bytes": 73655,
-      "sha256": "f03c65198852c9c66211d8bd104a49ae40f2ee3cd317f4ef83ea8bc09267a325",
-      "source": "真結局/map2d/side/art/sprites/fx_6.png"
+      "bytes": 6080,
+      "sha256": "c4443b9ba61abda228081a0fdbc6a34ca485630ae2e3640cfc570aa54b1ef204",
+      "source": "真結局/map2d/side/art/sprites/fx_6.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/fx_7.png",
+      "file": "web/true_end/map2d/side/art/sprites/fx_7.webp",
       "category": "web",
-      "bytes": 43933,
-      "sha256": "df47b9a245f62e6bfe8e122f233cbae375f7c28ae2d38ad4f2ee0868539c9045",
-      "source": "真結局/map2d/side/art/sprites/fx_7.png"
+      "bytes": 4618,
+      "sha256": "c8e52e02b65f2c27658e75d3cb5864d7cb70b792578704be08e92b7d48df36d1",
+      "source": "真結局/map2d/side/art/sprites/fx_7.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/fx_8.png",
+      "file": "web/true_end/map2d/side/art/sprites/fx_8.webp",
       "category": "web",
-      "bytes": 25990,
-      "sha256": "ec245e37b7d18eb7cf06fd90917b8594c7b93c53f9cd5b1b728a81798c0f2af3",
-      "source": "真結局/map2d/side/art/sprites/fx_8.png"
+      "bytes": 3670,
+      "sha256": "9e73092aa127bb51be954386824a8edf578a53e62b4d66f24f4516e3b9bc0ae8",
+      "source": "真結局/map2d/side/art/sprites/fx_8.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/fx_9.png",
+      "file": "web/true_end/map2d/side/art/sprites/fx_9.webp",
       "category": "web",
-      "bytes": 11573,
-      "sha256": "2bc98a3e368b8b00715f62f2bd06156bd74463f8fd4fc71c7a1811372ce1e690",
-      "source": "真結局/map2d/side/art/sprites/fx_9.png"
+      "bytes": 3030,
+      "sha256": "be47cda5299cbcaed753d2c14babf6f6a3bfdef6f6901f22b2142c542ba90031",
+      "source": "真結局/map2d/side/art/sprites/fx_9.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/gear_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/gear_1.webp",
       "category": "web",
-      "bytes": 82348,
-      "sha256": "64f2f30e4c90a55cfe84da2b6aea50b32f50150b146b0a32ae318aed984a9203",
-      "source": "真結局/map2d/side/art/sprites/gear_1.png"
+      "bytes": 17588,
+      "sha256": "122f2dbc2bda403dbc1c380e4ba6cbf291fdac524915ff7e850b2a3f85b44de8",
+      "source": "真結局/map2d/side/art/sprites/gear_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/gear_2.png",
+      "file": "web/true_end/map2d/side/art/sprites/gear_2.webp",
       "category": "web",
-      "bytes": 54501,
-      "sha256": "8ad7f86afe54d6927c000b44c26fc8beba90666257d342c342cb53c2d910bcb4",
-      "source": "真結局/map2d/side/art/sprites/gear_2.png"
+      "bytes": 14254,
+      "sha256": "9347d7fefdbeceb37afed9ec8c0ab2973ae94d6176e1b101c3a8200464c29ede",
+      "source": "真結局/map2d/side/art/sprites/gear_2.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/gear_3.png",
+      "file": "web/true_end/map2d/side/art/sprites/gear_3.webp",
       "category": "web",
-      "bytes": 37910,
-      "sha256": "cad08910c87a8ff7218eac6de382e58f2c81e278353e20f93fd19d3eda09dbe8",
-      "source": "真結局/map2d/side/art/sprites/gear_3.png"
+      "bytes": 7870,
+      "sha256": "732139ea6035b40be1f134e6f886abc255862d1e51572c935749ff384fd44223",
+      "source": "真結局/map2d/side/art/sprites/gear_3.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/gull.png",
+      "file": "web/true_end/map2d/side/art/sprites/gull.webp",
       "category": "web",
-      "bytes": 89174,
-      "sha256": "43d2bcdd151cb01d41a7606f4a3191594fe791387f499492b7bc6879c7db7af4",
-      "source": "真結局/map2d/side/art/sprites/gull.png"
+      "bytes": 12924,
+      "sha256": "e6959f9e4dc58c7d277de5379a447baf7ab3b1a334cd68857ec551d0c27f525a",
+      "source": "真結局/map2d/side/art/sprites/gull.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/gull_fly_0.png",
+      "file": "web/true_end/map2d/side/art/sprites/gull_fly_0.webp",
       "category": "web",
-      "bytes": 51760,
-      "sha256": "f37902fb16733dea0fc80cf8d3f074fa92b6659ba1ae616940110c127a8089dc",
-      "source": "真結局/map2d/side/art/sprites/gull_fly_0.png"
+      "bytes": 8954,
+      "sha256": "9a1d7b512d66597bcc4769c89a92f7483460f93289d63b08838dcfe59c8af6a8",
+      "source": "真結局/map2d/side/art/sprites/gull_fly_0.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/gull_fly_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/gull_fly_1.webp",
       "category": "web",
-      "bytes": 48508,
-      "sha256": "1a685f17ab3873f945681a011c4189da658018a75de60c85b03a00633593135c",
-      "source": "真結局/map2d/side/art/sprites/gull_fly_1.png"
+      "bytes": 8442,
+      "sha256": "035d62735e5293cc53f6a6efbed969ddc4043c46314fc21b43a8214a52f26a5b",
+      "source": "真結局/map2d/side/art/sprites/gull_fly_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/gull_fly_2.png",
+      "file": "web/true_end/map2d/side/art/sprites/gull_fly_2.webp",
       "category": "web",
-      "bytes": 44069,
-      "sha256": "81fdd881fde625bcd2030ccaccc6a4894aabb28d6cdb9162b565b67245c8f5fc",
-      "source": "真結局/map2d/side/art/sprites/gull_fly_2.png"
+      "bytes": 7836,
+      "sha256": "869f08adcfd194abbe975f21873cc37e90bdb4063d881957083b20600628d94e",
+      "source": "真結局/map2d/side/art/sprites/gull_fly_2.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/hermit.png",
+      "file": "web/true_end/map2d/side/art/sprites/hermit.webp",
       "category": "web",
-      "bytes": 97631,
-      "sha256": "6a6debd869a3a8180aeb69c4bb0e74bd41baa69e1888afb0e0d573a477a052e4",
-      "source": "真結局/map2d/side/art/sprites/hermit.png"
+      "bytes": 16224,
+      "sha256": "c8297d49ec02c1dc9941d0917c05fab292c338bbc4b86397a140bed20553c9b5",
+      "source": "真結局/map2d/side/art/sprites/hermit.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/ie_boat.png",
+      "file": "web/true_end/map2d/side/art/sprites/ie_boat.webp",
       "category": "web",
-      "bytes": 299943,
-      "sha256": "f9773c252bc236c72f31ca8ae02a5fa9517b3aaf35952ea82ab8457db273ab14",
-      "source": "真結局/map2d/side/art/sprites/ie_boat.png"
+      "bytes": 50374,
+      "sha256": "51342befd406591b61ba8f386d2133dadb1bc1fb08f67c4ab91c70a2e7740cfa",
+      "source": "真結局/map2d/side/art/sprites/ie_boat.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/ie_dolphin.png",
+      "file": "web/true_end/map2d/side/art/sprites/ie_dolphin.webp",
       "category": "web",
-      "bytes": 380103,
-      "sha256": "346d5608d810e0612df936f239a848e083efa01f427f872e12962ac085cd5775",
-      "source": "真結局/map2d/side/art/sprites/ie_dolphin.png"
+      "bytes": 60516,
+      "sha256": "b9762d9e427cf5285a94bfbb5308ed7f9ca2192282e89d90194c03dadedc05a1",
+      "source": "真結局/map2d/side/art/sprites/ie_dolphin.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/ie_whale_0.png",
+      "file": "web/true_end/map2d/side/art/sprites/ie_whale_0.webp",
       "category": "web",
-      "bytes": 136509,
-      "sha256": "5f82f72d79a705fd02ede1820f508f16288f8e32548ce692ec95d98529a618da",
-      "source": "真結局/map2d/side/art/sprites/ie_whale_0.png"
+      "bytes": 24702,
+      "sha256": "228b8b56e5285ab8077b93e2e7e26f0d0853480c0990c81786b1c2abd9cf4ebb",
+      "source": "真結局/map2d/side/art/sprites/ie_whale_0.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/ie_whale_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/ie_whale_1.webp",
       "category": "web",
-      "bytes": 102606,
-      "sha256": "b3ae2247446cc3bde6eab732c2e81f4580b94003c8304c10ec68754412deaf32",
-      "source": "真結局/map2d/side/art/sprites/ie_whale_1.png"
+      "bytes": 17128,
+      "sha256": "b141d5307d4c4951aa2cdab1b516de8a2e4e2ce22a98cddb0d5859a3ef266a72",
+      "source": "真結局/map2d/side/art/sprites/ie_whale_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/ie_whale_2.png",
+      "file": "web/true_end/map2d/side/art/sprites/ie_whale_2.webp",
       "category": "web",
-      "bytes": 110376,
-      "sha256": "bf45389e4f79f42571af9b76c77b0522cd92f590218591abddfd88c3c54c58f3",
-      "source": "真結局/map2d/side/art/sprites/ie_whale_2.png"
+      "bytes": 21332,
+      "sha256": "2c4a51470388e74035142dd7c8fe0e6bc2f61c3da4101b8af7b51c96347a901e",
+      "source": "真結局/map2d/side/art/sprites/ie_whale_2.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/leaf_0.png",
+      "file": "web/true_end/map2d/side/art/sprites/leaf_0.webp",
       "category": "web",
-      "bytes": 25300,
-      "sha256": "31dbc061e3badc20fd2717389be60c0e199d859c77d784a703dd37dfa78fdf80",
-      "source": "真結局/map2d/side/art/sprites/leaf_0.png"
+      "bytes": 6028,
+      "sha256": "b42447c174f1a000efb488151f56124dad57ed4bca9e908f60d6f0ee1f1054c7",
+      "source": "真結局/map2d/side/art/sprites/leaf_0.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/leaf_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/leaf_1.webp",
       "category": "web",
-      "bytes": 38020,
-      "sha256": "2fb3fa683b0b6a853df4ea14606a56fc2e41b821d79cf9952f0cb5d811be2f0f",
-      "source": "真結局/map2d/side/art/sprites/leaf_1.png"
+      "bytes": 7556,
+      "sha256": "7d67fdeb9b84e32aa22c121c38ec6ca4f43f2b8adfe4f25562f7734cfe01a21c",
+      "source": "真結局/map2d/side/art/sprites/leaf_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/log.png",
+      "file": "web/true_end/map2d/side/art/sprites/log.webp",
       "category": "web",
-      "bytes": 27889,
-      "sha256": "8ac808a22650339a75d7113d89b47ff9f6ef0b6f3063f6e81f2d3c9e89278672",
-      "source": "真結局/map2d/side/art/sprites/log.png"
+      "bytes": 6086,
+      "sha256": "0f5e5014ea6f1ae4a9b07d1f542f0e2b637afd45f56b892bd859cf07ac41c535",
+      "source": "真結局/map2d/side/art/sprites/log.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/lt_chen.png",
+      "file": "web/true_end/map2d/side/art/sprites/lt_chen.webp",
       "category": "web",
-      "bytes": 495769,
-      "sha256": "09a4e53abf4d5b1ab1814af2802dbdf2cfec49036b78229b3e8f24f6cfbd28fd",
-      "source": "真結局/map2d/side/art/sprites/lt_chen.png"
+      "bytes": 80766,
+      "sha256": "cade4ae1d98461efbe4a2fe6a20c5383dc6875db6c95360377cff3331d68abac",
+      "source": "真結局/map2d/side/art/sprites/lt_chen.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/lt_lantern_chen.png",
+      "file": "web/true_end/map2d/side/art/sprites/lt_lantern_chen.webp",
       "category": "web",
-      "bytes": 188033,
-      "sha256": "9486581c9e4e8e5915c234855a58d51609d6781fc5068fa372088590b7715d07",
-      "source": "真結局/map2d/side/art/sprites/lt_lantern_chen.png"
+      "bytes": 34884,
+      "sha256": "d3b28617166affc9c3298d3111bde32b3624f9a09cddaf762c620530d93bad4f",
+      "source": "真結局/map2d/side/art/sprites/lt_lantern_chen.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/lt_lantern_ming.png",
+      "file": "web/true_end/map2d/side/art/sprites/lt_lantern_ming.webp",
       "category": "web",
-      "bytes": 191890,
-      "sha256": "5cc2bcba567a28ba1bba0ed055e8987cc2b093e2605a22120b26a474614ac1bb",
-      "source": "真結局/map2d/side/art/sprites/lt_lantern_ming.png"
+      "bytes": 24924,
+      "sha256": "8190f23e31b5b6dc01e6c8b5fc200f7d363d29c309db90d0cc74e62590157f2c",
+      "source": "真結局/map2d/side/art/sprites/lt_lantern_ming.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/lt_lantern_shi.png",
+      "file": "web/true_end/map2d/side/art/sprites/lt_lantern_shi.webp",
       "category": "web",
-      "bytes": 190041,
-      "sha256": "85e22593b59039a5d2b9d4ddec4713a596322af28a63eecda02a4701697abe44",
-      "source": "真結局/map2d/side/art/sprites/lt_lantern_shi.png"
+      "bytes": 30928,
+      "sha256": "a646e01dafee8df4935f5a821cfbbf3380bc64490be5e199ade37ca2254eb977",
+      "source": "真結局/map2d/side/art/sprites/lt_lantern_shi.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/lt_lantern_tea.png",
+      "file": "web/true_end/map2d/side/art/sprites/lt_lantern_tea.webp",
       "category": "web",
-      "bytes": 187919,
-      "sha256": "cb8af1b4a2d11ac961168a6e83a6a79bbc4da2a5b2664e8a50e57f0df3a5fc1e",
-      "source": "真結局/map2d/side/art/sprites/lt_lantern_tea.png"
+      "bytes": 26546,
+      "sha256": "99f685d86954fdf83d249f0a7915cf7ad7fe5a03bc1668b40898c469c7422a61",
+      "source": "真結局/map2d/side/art/sprites/lt_lantern_tea.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/lt_ming.png",
+      "file": "web/true_end/map2d/side/art/sprites/lt_ming.webp",
       "category": "web",
-      "bytes": 552967,
-      "sha256": "7e1726d26633ed5453ae8b9729300fee28f7bbf87bcfa441011e5e745fc30fc1",
-      "source": "真結局/map2d/side/art/sprites/lt_ming.png"
+      "bytes": 93834,
+      "sha256": "0cc6e4418016a4e35d38d3f77c9a0af1fcf2b3e2c6625ad71ccce9146ba9b42f",
+      "source": "真結局/map2d/side/art/sprites/lt_ming.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/lt_shi.png",
+      "file": "web/true_end/map2d/side/art/sprites/lt_shi.webp",
       "category": "web",
-      "bytes": 487581,
-      "sha256": "667c917a6082c7a18f3670c130da00160ae0492e06165d760215428c866476ca",
-      "source": "真結局/map2d/side/art/sprites/lt_shi.png"
+      "bytes": 83668,
+      "sha256": "77b1ee15e71eb0044fceba82d9a30fe5d600fd5ec730404ca85372ef2affd757",
+      "source": "真結局/map2d/side/art/sprites/lt_shi.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/lt_tea.png",
+      "file": "web/true_end/map2d/side/art/sprites/lt_tea.webp",
       "category": "web",
-      "bytes": 554347,
-      "sha256": "7d3ead8696eb926e8855378e2941dd6a19083b13c8e1f05c4d812e72b96b3e41",
-      "source": "真結局/map2d/side/art/sprites/lt_tea.png"
+      "bytes": 83234,
+      "sha256": "ecb357f09c34d50ac15d601a011d256ccabffa5ba976244308e5e6f20b2aad6c",
+      "source": "真結局/map2d/side/art/sprites/lt_tea.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/ming_gear.png",
+      "file": "web/true_end/map2d/side/art/sprites/ming_gear.webp",
       "category": "web",
-      "bytes": 361075,
-      "sha256": "4ed829808d2943e05f16f9187d1ec3bb994659bb43c8c0923c565b4d23c47a97",
-      "source": "真結局/map2d/side/art/sprites/ming_gear.png"
+      "bytes": 52020,
+      "sha256": "26a9151cf551b4cb9df5432ee5cb0b7463299cf03c700d7886e8f7a9380934b2",
+      "source": "真結局/map2d/side/art/sprites/ming_gear.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/nbird_0.png",
+      "file": "web/true_end/map2d/side/art/sprites/nbird_0.webp",
       "category": "web",
-      "bytes": 36630,
-      "sha256": "b111f3e71a1784136ba9f956322019b8b3ff47fab257fe1116de47bcbf5f76a4",
-      "source": "真結局/map2d/side/art/sprites/nbird_0.png"
+      "bytes": 8174,
+      "sha256": "97364037f3d931bf8389578f5084501e3e6bbabe462012e9061c37b03101825e",
+      "source": "真結局/map2d/side/art/sprites/nbird_0.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/nbird_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/nbird_1.webp",
       "category": "web",
-      "bytes": 33909,
-      "sha256": "682b9bdcf1ce6cdf77a17939c2b33db31aacd9f64453742696b581425ed31db3",
-      "source": "真結局/map2d/side/art/sprites/nbird_1.png"
+      "bytes": 7592,
+      "sha256": "5563ede303871fe7094a3f73e1f4df0902880abf529ae3a8739f0f13b23c2408",
+      "source": "真結局/map2d/side/art/sprites/nbird_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/nbird_2.png",
+      "file": "web/true_end/map2d/side/art/sprites/nbird_2.webp",
       "category": "web",
-      "bytes": 32897,
-      "sha256": "ea749774ac61b79f8ec575c206d23544911b9a2e70683d358c7f30b5be5d490c",
-      "source": "真結局/map2d/side/art/sprites/nbird_2.png"
+      "bytes": 6846,
+      "sha256": "1af8cfb0eaaf4ec8d85efd8c9885eb8e3d10b0139471d1a7828ecc5491d014bf",
+      "source": "真結局/map2d/side/art/sprites/nbird_2.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/nbird_3.png",
+      "file": "web/true_end/map2d/side/art/sprites/nbird_3.webp",
       "category": "web",
-      "bytes": 29828,
-      "sha256": "d85ed6a5ff2e717092d65b4ebecc2d247e36d4881bf709dd1234d255e1c132b3",
-      "source": "真結局/map2d/side/art/sprites/nbird_3.png"
+      "bytes": 6466,
+      "sha256": "cdb35a2f8f8df8550eb34fe32576656acbe2e57e8ab307b2f3da8eb06b37a3cd",
+      "source": "真結局/map2d/side/art/sprites/nbird_3.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/note_0.png",
+      "file": "web/true_end/map2d/side/art/sprites/note_0.webp",
       "category": "web",
-      "bytes": 17272,
-      "sha256": "aeb7a9bf0243cf2b1e7bb16e10bbdd0c7261df0c6f72f4b4e6f2749e5023bc2a",
-      "source": "真結局/map2d/side/art/sprites/note_0.png"
+      "bytes": 4392,
+      "sha256": "9711bd595a1b0964c23d8dedfe0f1c752747aa5e6ffec643571b4760c8a58246",
+      "source": "真結局/map2d/side/art/sprites/note_0.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/note_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/note_1.webp",
       "category": "web",
-      "bytes": 15114,
-      "sha256": "6550581be0a11869ce8f97e8346cea03b2d77b70c34f605492cbde35921cf3e0",
-      "source": "真結局/map2d/side/art/sprites/note_1.png"
+      "bytes": 4252,
+      "sha256": "14a65f3dc19f133f3a0e7acb9d085931fd12da277332e1ad9b49571c0162b3d2",
+      "source": "真結局/map2d/side/art/sprites/note_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/note_2.png",
+      "file": "web/true_end/map2d/side/art/sprites/note_2.webp",
       "category": "web",
-      "bytes": 24724,
-      "sha256": "1174176740004480176b2b450fd77bc87eb6a60587de2e87c3f4c9b88606f350",
-      "source": "真結局/map2d/side/art/sprites/note_2.png"
+      "bytes": 6488,
+      "sha256": "b80d26e7e6d241a514860d671254566910d8195e0d2e77a4d0fd725bb5900fb0",
+      "source": "真結局/map2d/side/art/sprites/note_2.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/note_3.png",
+      "file": "web/true_end/map2d/side/art/sprites/note_3.webp",
       "category": "web",
-      "bytes": 25344,
-      "sha256": "057dab3c37095f92b84b4e025e3e7e68a10c8d623a54795c3ecedb0cb49f590e",
-      "source": "真結局/map2d/side/art/sprites/note_3.png"
+      "bytes": 7040,
+      "sha256": "bf47a8e970b86405fad70957b8181ce25bfabd9b79d994f830ecdd28cb91fa0f",
+      "source": "真結局/map2d/side/art/sprites/note_3.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/note_4.png",
+      "file": "web/true_end/map2d/side/art/sprites/note_4.webp",
       "category": "web",
-      "bytes": 14889,
-      "sha256": "a75c6fb19452548f2dfdf5f6b8a8a9ec2552e68a581dfb702f66fac77af3803d",
-      "source": "真結局/map2d/side/art/sprites/note_4.png"
+      "bytes": 3558,
+      "sha256": "90903d8959f88ad04f7ee60083f78fe32fe073e9cc581220b6383d3673fdd1c1",
+      "source": "真結局/map2d/side/art/sprites/note_4.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/note_5.png",
+      "file": "web/true_end/map2d/side/art/sprites/note_5.webp",
       "category": "web",
-      "bytes": 17102,
-      "sha256": "526f2c8ae415217ae937ecbcd32f9604b5a011407560849ef0e608d93d72a139",
-      "source": "真結局/map2d/side/art/sprites/note_5.png"
+      "bytes": 4812,
+      "sha256": "b43f15b71112ed75ccdfe9252f310294970414f5d59663a047d40416d8e78fac",
+      "source": "真結局/map2d/side/art/sprites/note_5.webp"
     },
     {
       "file": "web/true_end/map2d/side/art/sprites/petal_c.json",
       "category": "web",
-      "bytes": 614,
-      "sha256": "ba9b675d7229615cfac1e8dde307061ac72e96e8562f012ab20bfb8183dc1380",
+      "bytes": 627,
+      "sha256": "6e2d100ce50233972bc339a66169035cf8ae7d536f6e2e6b37ac12d842d978f3",
       "source": "真結局/map2d/side/art/sprites/petal_c.json"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_c_0.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_c_0.webp",
       "category": "web",
-      "bytes": 118778,
-      "sha256": "af0d1e7c1723678aa35ea611d2c39880d8f1bc1b4a7994761617fe388e68a5b8",
-      "source": "真結局/map2d/side/art/sprites/petal_c_0.png"
+      "bytes": 8042,
+      "sha256": "6dc678881a8a4f718b24f9115158cefb5760eda9d374af16b85403210c4b6a85",
+      "source": "真結局/map2d/side/art/sprites/petal_c_0.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_c_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_c_1.webp",
       "category": "web",
-      "bytes": 48046,
-      "sha256": "544091931e1e6bc6fc69b7cd5540cd5c893f465ac978972e7cc9ff5644152ead",
-      "source": "真結局/map2d/side/art/sprites/petal_c_1.png"
+      "bytes": 6590,
+      "sha256": "d8cbf7a193ee68340c2a404346a5071128a0925e6545c7751337c5786049eabd",
+      "source": "真結局/map2d/side/art/sprites/petal_c_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_c_10.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_c_10.webp",
       "category": "web",
-      "bytes": 23156,
-      "sha256": "5de411cd96802e7bea7799d60011919c712ee235b4c306f92886cb96ac3b978b",
-      "source": "真結局/map2d/side/art/sprites/petal_c_10.png"
+      "bytes": 3762,
+      "sha256": "8b2a979068aee5f06a9a5bd99e5464fde4f530afc8f7962cbf48b04a7de73941",
+      "source": "真結局/map2d/side/art/sprites/petal_c_10.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_c_11.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_c_11.webp",
       "category": "web",
-      "bytes": 128168,
-      "sha256": "11d5c5e7b38320b76e78d143af9a36f647e2a1435e13982f19f0de00cfa329e2",
-      "source": "真結局/map2d/side/art/sprites/petal_c_11.png"
+      "bytes": 7988,
+      "sha256": "92ff2fa0a0933eea9798a6528e8efb6454e0badf92c1cfd4eb943fa24b094446",
+      "source": "真結局/map2d/side/art/sprites/petal_c_11.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_c_12.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_c_12.webp",
       "category": "web",
-      "bytes": 32619,
-      "sha256": "9a5687367eefbb058a85571c69d0872dde144d3eca96ae84a285b0ce2821f600",
-      "source": "真結局/map2d/side/art/sprites/petal_c_12.png"
+      "bytes": 4446,
+      "sha256": "af9dee80566cdc481717af771009c9f9458e1fa7b007ed6b782c5608b01c9134",
+      "source": "真結局/map2d/side/art/sprites/petal_c_12.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_c_2.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_c_2.webp",
       "category": "web",
-      "bytes": 28374,
-      "sha256": "d5a879f923df65d0089287aed6e5af9c9522639f481a8d5f5db88e0c056007de",
-      "source": "真結局/map2d/side/art/sprites/petal_c_2.png"
+      "bytes": 4386,
+      "sha256": "c1984e3453ce905a7d7933e86e1ae17157ee02a746aa2482355901b4a9b6ac30",
+      "source": "真結局/map2d/side/art/sprites/petal_c_2.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_c_3.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_c_3.webp",
       "category": "web",
-      "bytes": 45903,
-      "sha256": "ba96d4f60741ed53a99bbebf8326cc3ee03de7d76ae4be442e54e5f28c57ebf4",
-      "source": "真結局/map2d/side/art/sprites/petal_c_3.png"
+      "bytes": 5180,
+      "sha256": "211c436f940e9db8fcc6a24e0749d41c026e69d6965b726ee1c314559bf6bbcd",
+      "source": "真結局/map2d/side/art/sprites/petal_c_3.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_c_4.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_c_4.webp",
       "category": "web",
-      "bytes": 126884,
-      "sha256": "46bd8791f0bcd0599840533e191fee3bb41b3a24d07181df712dbaa252c1b757",
-      "source": "真結局/map2d/side/art/sprites/petal_c_4.png"
+      "bytes": 8158,
+      "sha256": "0444a5bf0eaf8444602ff4bf68cef8714c6cfdcf87213abdd0ab2a41ca47e7d1",
+      "source": "真結局/map2d/side/art/sprites/petal_c_4.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_c_5.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_c_5.webp",
       "category": "web",
-      "bytes": 46777,
-      "sha256": "b9e79e2dc25f350acfd0c9c95e82efbebbcd5b80894fda14485a05d176113b99",
-      "source": "真結局/map2d/side/art/sprites/petal_c_5.png"
+      "bytes": 6454,
+      "sha256": "223ffed4178b0365746df440049d14b631aa7b16b00af048606370eded450ab9",
+      "source": "真結局/map2d/side/art/sprites/petal_c_5.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_c_6.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_c_6.webp",
       "category": "web",
-      "bytes": 28926,
-      "sha256": "bc88a5f663591b5be5407c2b1b55849ac89a1066c28634186cf9b2135329bbbd",
-      "source": "真結局/map2d/side/art/sprites/petal_c_6.png"
+      "bytes": 4294,
+      "sha256": "e45f27df3e2d482cf3e11d0b98954139d4140fea089d55d8665a57f6a818e1a9",
+      "source": "真結局/map2d/side/art/sprites/petal_c_6.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_c_7.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_c_7.webp",
       "category": "web",
-      "bytes": 40262,
-      "sha256": "9ab7e493b6ad65fdd12595473e7d9239b25f9db96e646b6d23c581422b0af77c",
-      "source": "真結局/map2d/side/art/sprites/petal_c_7.png"
+      "bytes": 5936,
+      "sha256": "6ccd4e9fbaf9e728300d1449786f20c9dfcb50482b4dc22b3c1b3248a1e1d017",
+      "source": "真結局/map2d/side/art/sprites/petal_c_7.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_c_8.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_c_8.webp",
       "category": "web",
-      "bytes": 40341,
-      "sha256": "eb47e078f1f3103d83e4d798881028e1b07dd8f38b6ed42b3cb1e30bb14ea3e4",
-      "source": "真結局/map2d/side/art/sprites/petal_c_8.png"
+      "bytes": 5848,
+      "sha256": "1be874625879902ff6207eaa7fb1588cd9348d594dada10d59755b48a4e05dad",
+      "source": "真結局/map2d/side/art/sprites/petal_c_8.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_c_9.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_c_9.webp",
       "category": "web",
-      "bytes": 30927,
-      "sha256": "f86e57416d510730fb91c8d128c23af060d71e9738f8d57d392d5a7ba3bf9c52",
-      "source": "真結局/map2d/side/art/sprites/petal_c_9.png"
+      "bytes": 4604,
+      "sha256": "a8039c492c75d8916c3a227eb93ee0aa08345c664aba23c1908111359a6690cf",
+      "source": "真結局/map2d/side/art/sprites/petal_c_9.webp"
     },
     {
       "file": "web/true_end/map2d/side/art/sprites/petal_t.json",
       "category": "web",
-      "bytes": 376,
-      "sha256": "4901f482759f08ca4f7faa3ca77ccecfb7b2639b55cbafaf4fe321e730b2173c",
+      "bytes": 384,
+      "sha256": "54865615d8aa87a0d7486682babb04ccf4791b0b2a7afc84986d84a7652c7b9d",
       "source": "真結局/map2d/side/art/sprites/petal_t.json"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_t_0.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_t_0.webp",
       "category": "web",
-      "bytes": 115588,
-      "sha256": "05a3cfb0c64fe19e4fb49b2d3f84a48e3acdc4e682d80f0f6ccf75a305120c75",
-      "source": "真結局/map2d/side/art/sprites/petal_t_0.png"
+      "bytes": 7620,
+      "sha256": "d47641063f8317fac76bcf7185e5903a7f712c9b4127fae670b4171f1910aaae",
+      "source": "真結局/map2d/side/art/sprites/petal_t_0.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_t_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_t_1.webp",
       "category": "web",
-      "bytes": 97329,
-      "sha256": "f89f184e4d708be903518f6e7ff7932d86cf108687df8fc78b86eaca36d57a4a",
-      "source": "真結局/map2d/side/art/sprites/petal_t_1.png"
+      "bytes": 7820,
+      "sha256": "7804800c85fadb5ff8e98251bead130e9b6bfd8a30d8d34d23a39f5e5d564ce1",
+      "source": "真結局/map2d/side/art/sprites/petal_t_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_t_2.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_t_2.webp",
       "category": "web",
-      "bytes": 92782,
-      "sha256": "c16efb918c9fe7a20528628aae0ffcc70e86e70cb227afc41c3fd29fb3f98c52",
-      "source": "真結局/map2d/side/art/sprites/petal_t_2.png"
+      "bytes": 6652,
+      "sha256": "3ca0deadf3c3f97fde7a0abae8da7652f0ede06cc8bb7881a6e865bf3c5b6392",
+      "source": "真結局/map2d/side/art/sprites/petal_t_2.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_t_3.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_t_3.webp",
       "category": "web",
-      "bytes": 96621,
-      "sha256": "6313b4cc388fd67413dff83c72af4550e01e9c10d4eec589e7c4fbfc9877244b",
-      "source": "真結局/map2d/side/art/sprites/petal_t_3.png"
+      "bytes": 7556,
+      "sha256": "e9e670edcb8d58f3ba1cfc5f74cbc2d91d857adb3ee116a1ef35a95f6d05ca6f",
+      "source": "真結局/map2d/side/art/sprites/petal_t_3.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_t_4.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_t_4.webp",
       "category": "web",
-      "bytes": 117625,
-      "sha256": "cc8a04c3a2c5fd349956b29c098a7e7cfb9ca2bf1869165baf5f138ddec29210",
-      "source": "真結局/map2d/side/art/sprites/petal_t_4.png"
+      "bytes": 7008,
+      "sha256": "c5d4e76cd9a5181051eeb2d15de626b148ac30dfb5151c063f5392b5e919a2f7",
+      "source": "真結局/map2d/side/art/sprites/petal_t_4.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_t_5.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_t_5.webp",
       "category": "web",
-      "bytes": 79262,
-      "sha256": "7b4afc87676e137d9871f0c28bb3f79fb01925dcf549d8b6dcc5b645fa3bcc6f",
-      "source": "真結局/map2d/side/art/sprites/petal_t_5.png"
+      "bytes": 6812,
+      "sha256": "ed442da7cff045d6dd42138f34cb1f83df44a9081c4066d40de0c361a7cc646f",
+      "source": "真結局/map2d/side/art/sprites/petal_t_5.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_t_6.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_t_6.webp",
       "category": "web",
-      "bytes": 103501,
-      "sha256": "93532da19a5677adb00a8346a05c6892ff830e0f610ba5781d2561fbf8f895e6",
-      "source": "真結局/map2d/side/art/sprites/petal_t_6.png"
+      "bytes": 7106,
+      "sha256": "b9e905757aaa971f0633148d1625923aca55bbc9a8d9a1fe531abed283b39ff1",
+      "source": "真結局/map2d/side/art/sprites/petal_t_6.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/petal_t_7.png",
+      "file": "web/true_end/map2d/side/art/sprites/petal_t_7.webp",
       "category": "web",
-      "bytes": 101184,
-      "sha256": "b945a9a6d72cf87078bfd2d912d038c3f5bd602a1e72baacfba5b0d4bd97a7da",
-      "source": "真結局/map2d/side/art/sprites/petal_t_7.png"
+      "bytes": 7416,
+      "sha256": "0392158bb48ed68f9e567519adb77b723147070c6c59df34fee9725f63fb1fb3",
+      "source": "真結局/map2d/side/art/sprites/petal_t_7.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/pinecone.png",
+      "file": "web/true_end/map2d/side/art/sprites/pinecone.webp",
       "category": "web",
-      "bytes": 43616,
-      "sha256": "60f22c82d025f2531271fc32c86c232ff8e6d82dcaf98a74118d5d8141493b3a",
-      "source": "真結局/map2d/side/art/sprites/pinecone.png"
+      "bytes": 9076,
+      "sha256": "810e5f049353c360fa164933fa684ff73c2cf51b07ced40c7efcf94a25f4c322",
+      "source": "真結局/map2d/side/art/sprites/pinecone.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/pot.png",
+      "file": "web/true_end/map2d/side/art/sprites/pot.webp",
       "category": "web",
-      "bytes": 1141668,
-      "sha256": "7a16937d500a17cdfffe0dc1f7f163e2c7d6250de4f7dec3495bc8b80dffa077",
-      "source": "真結局/map2d/side/art/sprites/pot.png"
+      "bytes": 78108,
+      "sha256": "e36498d00374dac71787ffe045d6b253ba36f013682379c5d0d184d24b755a61",
+      "source": "真結局/map2d/side/art/sprites/pot.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/rabbit.png",
+      "file": "web/true_end/map2d/side/art/sprites/rabbit.webp",
       "category": "web",
-      "bytes": 717167,
-      "sha256": "9dbb8c2936b4126268abdcc8323f5005eedcbb592c78c439c3a932621f5e7d6f",
-      "source": "真結局/map2d/side/art/sprites/rabbit.png"
+      "bytes": 13374,
+      "sha256": "c29d960882e758b76f8e7684c48c299ac60ec315d715ce472b55b73d7386483a",
+      "source": "真結局/map2d/side/art/sprites/rabbit.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/scroll.png",
+      "file": "web/true_end/map2d/side/art/sprites/scroll.webp",
       "category": "web",
-      "bytes": 633476,
-      "sha256": "f775c0f6a340f874e5bb041ed533038fa83a19c496f777192eb6d87770bfd485",
-      "source": "真結局/map2d/side/art/sprites/scroll.png"
+      "bytes": 51248,
+      "sha256": "a68d8ef64810fd590ccc1f1ad3e4fc6973a77621b2cf8d4c97710e55a914f302",
+      "source": "真結局/map2d/side/art/sprites/scroll.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/shell_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/shell_1.webp",
       "category": "web",
-      "bytes": 37571,
-      "sha256": "a9101f27699b4daa17adebff22e99e16712738283ffedffa53fcfe6371894b16",
-      "source": "真結局/map2d/side/art/sprites/shell_1.png"
+      "bytes": 5996,
+      "sha256": "d96b0e6125514be4e1efb55daf92ef6f1b42e50e81bce356df3e512f0decb0e3",
+      "source": "真結局/map2d/side/art/sprites/shell_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/shell_2.png",
+      "file": "web/true_end/map2d/side/art/sprites/shell_2.webp",
       "category": "web",
-      "bytes": 21608,
-      "sha256": "b8efee0c10dc7e43dd49a2d4477963b496746a37e69ccb6ca8b82226d374e374",
-      "source": "真結局/map2d/side/art/sprites/shell_2.png"
+      "bytes": 4782,
+      "sha256": "5635febd85f1ece600d7ef8c4472a01b1f896bf6137db1b01bba5c15a16726e9",
+      "source": "真結局/map2d/side/art/sprites/shell_2.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/shell_3.png",
+      "file": "web/true_end/map2d/side/art/sprites/shell_3.webp",
       "category": "web",
-      "bytes": 18416,
-      "sha256": "9674012f02719b8e70269f1ce53efdf7f4d829b6de37c666598ec114b28ef00b",
-      "source": "真結局/map2d/side/art/sprites/shell_3.png"
+      "bytes": 4218,
+      "sha256": "3986be086a1cf875fb2a88e201515d76ba9816dbf2be2d99cb7258a80167eded",
+      "source": "真結局/map2d/side/art/sprites/shell_3.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/shell_4.png",
+      "file": "web/true_end/map2d/side/art/sprites/shell_4.webp",
       "category": "web",
-      "bytes": 21013,
-      "sha256": "bb1c1733ad2a7d21962f017ff523ffcf5da0bad1cfa0401fa3a5f745c9745551",
-      "source": "真結局/map2d/side/art/sprites/shell_4.png"
+      "bytes": 4802,
+      "sha256": "acd03375cdb99fab9e401487a13e8b195f63cc4b840019b5593ada3be9c49f22",
+      "source": "真結局/map2d/side/art/sprites/shell_4.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/shell_5.png",
+      "file": "web/true_end/map2d/side/art/sprites/shell_5.webp",
       "category": "web",
-      "bytes": 11130,
-      "sha256": "b07a3bb3612bc0f62937fc288f8a77aedc3a614883c6d093a03f15a76d51a6ff",
-      "source": "真結局/map2d/side/art/sprites/shell_5.png"
+      "bytes": 3014,
+      "sha256": "5f7ece652da671c9714a09d68b48c2f18e221e023a695b0b319530e27dc43ad1",
+      "source": "真結局/map2d/side/art/sprites/shell_5.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/shell_6.png",
+      "file": "web/true_end/map2d/side/art/sprites/shell_6.webp",
       "category": "web",
-      "bytes": 11797,
-      "sha256": "6b89faf6b3d1ce2471c6980d0f2905f68f985e20cacb016bd24c1d61250395d7",
-      "source": "真結局/map2d/side/art/sprites/shell_6.png"
+      "bytes": 3040,
+      "sha256": "6df6c474cb501b005f7689f3c22f591cf81a82f784a69a3dd294b9511e51b90b",
+      "source": "真結局/map2d/side/art/sprites/shell_6.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/shell_7.png",
+      "file": "web/true_end/map2d/side/art/sprites/shell_7.webp",
       "category": "web",
-      "bytes": 8672,
-      "sha256": "dfde1f0b4f21056143522a6175fe1feb0918ef8a24213a7231895dce94468ef0",
-      "source": "真結局/map2d/side/art/sprites/shell_7.png"
+      "bytes": 2188,
+      "sha256": "6e2389e72f103802dfbb0205a2ca2a14847efd44206d4aa94de6ccdd9c2df4d5",
+      "source": "真結局/map2d/side/art/sprites/shell_7.webp"
     },
     {
       "file": "web/true_end/map2d/side/art/sprites/shi_sit_guitar.json",
@@ -2815,11 +2738,11 @@
       "source": "真結局/map2d/side/art/sprites/shi_sit_guitar.json"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/shi_sit_guitar.png",
+      "file": "web/true_end/map2d/side/art/sprites/shi_sit_guitar.webp",
       "category": "web",
-      "bytes": 314450,
-      "sha256": "76c44b39e075f682691ad2faf78268ad9f6271bfd36243dda2b62cf2fcb9a3ef",
-      "source": "真結局/map2d/side/art/sprites/shi_sit_guitar.png"
+      "bytes": 47386,
+      "sha256": "fd984c1645da9360e988124d7c8e5aa0ad8a80faf80ef72c959e81e75e68b3af",
+      "source": "真結局/map2d/side/art/sprites/shi_sit_guitar.webp"
     },
     {
       "file": "web/true_end/map2d/side/art/sprites/shi_tea_sit.json",
@@ -2829,60 +2752,53 @@
       "source": "真結局/map2d/side/art/sprites/shi_tea_sit.json"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/shi_tea_sit.png",
+      "file": "web/true_end/map2d/side/art/sprites/shi_tea_sit.webp",
       "category": "web",
-      "bytes": 438781,
-      "sha256": "ee6fb773ab8e21be454cffbd914906d3d93b375a3775bfab954136adcef709ee",
-      "source": "真結局/map2d/side/art/sprites/shi_tea_sit.png"
+      "bytes": 73216,
+      "sha256": "aa93d84670c810361dc3bb57d8de05243009190a498597e6690c2daba8a242a6",
+      "source": "真結局/map2d/side/art/sprites/shi_tea_sit.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/sticky.png",
+      "file": "web/true_end/map2d/side/art/sprites/sticky.webp",
       "category": "web",
-      "bytes": 37781,
-      "sha256": "0681df40950a3428bdf761a09e8e598669713314c52d7549f9b70b254ace6a30",
-      "source": "真結局/map2d/side/art/sprites/sticky.png"
+      "bytes": 5026,
+      "sha256": "9e45ec2096297c465501b4b65dc2f5189993fca0f814650f3a09e25298b20b3a",
+      "source": "真結局/map2d/side/art/sprites/sticky.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/tea_sit_back.png",
+      "file": "web/true_end/map2d/side/art/sprites/turtle_0.webp",
       "category": "web",
-      "bytes": 1457465,
-      "sha256": "b83152f30754ad8471f578a82631f4c24d03424b041286bba854194724b4010a",
-      "source": "真結局/map2d/side/art/sprites/tea_sit_back.png"
+      "bytes": 10858,
+      "sha256": "475cf5b48bb6eb16d9e4027c1a015c1020725508b9a26777ca945a6aedcf348f",
+      "source": "真結局/map2d/side/art/sprites/turtle_0.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/turtle_0.png",
+      "file": "web/true_end/map2d/side/art/sprites/turtle_1.webp",
       "category": "web",
-      "bytes": 66790,
-      "sha256": "b4e698eaeff8be4594c8fbc25a0cafe9d9f9d84aaa88966d3bfc9f802f5df712",
-      "source": "真結局/map2d/side/art/sprites/turtle_0.png"
+      "bytes": 11974,
+      "sha256": "ccc872bb04090861d67815822167d6117e1729a78c5cf618f5d6fb13ddecd69f",
+      "source": "真結局/map2d/side/art/sprites/turtle_1.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/turtle_1.png",
+      "file": "web/true_end/map2d/side/art/sprites/zk_cat_sleep.webp",
       "category": "web",
-      "bytes": 74138,
-      "sha256": "400e704ee327ce71b6950f2c7c8bc7395ca78b6fb0721e0741cf166f513868c8",
-      "source": "真結局/map2d/side/art/sprites/turtle_1.png"
+      "bytes": 21652,
+      "sha256": "4763678d8a492ad3fe33641ed4826108e17dc427d9351c7b8296cc34abf004ad",
+      "source": "真結局/map2d/side/art/sprites/zk_cat_sleep.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/zk_cat_sleep.png",
+      "file": "web/true_end/map2d/side/art/sprites/zk_cat_walk.webp",
       "category": "web",
-      "bytes": 273568,
-      "sha256": "16f649ed6a07ffbf109740d5104e39e01d292feafb1b21ef2ee68504225e4463",
-      "source": "真結局/map2d/side/art/sprites/zk_cat_sleep.png"
+      "bytes": 28184,
+      "sha256": "0180637cc007fde90e7cbc6c428bded45b25a212c7aea85ff8479bb0abba56e6",
+      "source": "真結局/map2d/side/art/sprites/zk_cat_walk.webp"
     },
     {
-      "file": "web/true_end/map2d/side/art/sprites/zk_cat_walk.png",
+      "file": "web/true_end/map2d/side/art/sprites/zk_firefly.webp",
       "category": "web",
-      "bytes": 339471,
-      "sha256": "20866f976c45c58d5bfa9024fcde5351a6fb7928df7432786af05d21b898de6c",
-      "source": "真結局/map2d/side/art/sprites/zk_cat_walk.png"
-    },
-    {
-      "file": "web/true_end/map2d/side/art/sprites/zk_firefly.png",
-      "category": "web",
-      "bytes": 245132,
-      "sha256": "14ee08c0ff86ff8dd309cd4e46c45c89b844d6e50cc7d3f5904d07e708ffd1fa",
-      "source": "真結局/map2d/side/art/sprites/zk_firefly.png"
+      "bytes": 19410,
+      "sha256": "696adcf66f5fd743ed0ad1b5acc437592f1e4d8df25b7aba2aef2f1ac26b3940",
+      "source": "真結局/map2d/side/art/sprites/zk_firefly.webp"
     },
     {
       "file": "web/true_end/map2d/side/art/ui/ui.json",
@@ -2922,57 +2838,57 @@
     {
       "file": "web/true_end/map2d/side/web/beach_play.js",
       "category": "web",
-      "bytes": 79223,
-      "sha256": "3a0985f6d221b4774b755d273ca6999fb6f6a692ad4b45dfec814282e5577110",
+      "bytes": 79340,
+      "sha256": "cf002f40349fcf57c0a9338e9eb614bfb9fdf3314b71c3668542bb8f0f0a1865",
       "source": "真結局/map2d/side/web/beach_play.js"
     },
     {
       "file": "web/true_end/map2d/side/web/c7_play.js",
       "category": "web",
-      "bytes": 5153,
-      "sha256": "7a83c983546523e1f5200459576eed0cd89ef9d27bba6d9d302874c9ff1ed387",
+      "bytes": 5060,
+      "sha256": "e6478a147911367b614e2f2ac4af80c974986039aa7e8ec688eb879ea11a0881",
       "source": "真結局/map2d/side/web/c7_play.js"
     },
     {
       "file": "web/true_end/map2d/side/web/cape_play.js",
       "category": "web",
-      "bytes": 82336,
-      "sha256": "4f3efcf4b5a167df58324e0604dead20a1d5f048bc328bc6d51f8341c57942cb",
+      "bytes": 82473,
+      "sha256": "bb62e938392c800d3f7f115d03233e47db033b0c7368629831a4ce8702153e6b",
       "source": "真結局/map2d/side/web/cape_play.js"
     },
     {
       "file": "web/true_end/map2d/side/web/dawn_play.js",
       "category": "web",
-      "bytes": 58769,
-      "sha256": "1fb6ddc70b5bef22eb42a0cca0766d0672a0cdd4461899553118cbee4d6b7820",
+      "bytes": 58848,
+      "sha256": "71d8cbb3cf3b0e3f421f57d3d9da590f9925b86f62ff628d85f9050e1d629c13",
       "source": "真結局/map2d/side/web/dawn_play.js"
     },
     {
       "file": "web/true_end/map2d/side/web/dive.html",
       "category": "web",
-      "bytes": 8628,
-      "sha256": "7847cb2c51b37455a131e73f4373875f7ad1b596e4b961bf8bd901473d60db88",
+      "bytes": 103071,
+      "sha256": "8eaa10bf070ee618978aea8f6da33b6d66b3e6effd2413b67235ae764343407d",
       "source": "真結局/map2d/side/web/dive.html"
     },
     {
       "file": "web/true_end/map2d/side/web/dive_play.js",
       "category": "web",
-      "bytes": 28165,
-      "sha256": "384e841007f167ed846b553b9f8322c448df1346e48389b00240b3f663d00add",
+      "bytes": 29065,
+      "sha256": "b9b14d4bf351f707bc73b1b9679c05cf0c1ccc1216ea05cc953cb4efcc7c3893",
       "source": "真結局/map2d/side/web/dive_play.js"
     },
     {
       "file": "web/true_end/map2d/side/web/flat.html",
       "category": "web",
-      "bytes": 21613,
-      "sha256": "4567ccb5a17c4bb8a21a7344f10721dab3917f0ce48a55fdb383bce84682b23b",
+      "bytes": 140697,
+      "sha256": "d1f4c06c495aa811f7fdf4d26630420032e055ec1fc0633e3c03c605f4fd827f",
       "source": "真結局/map2d/side/web/flat.html"
     },
     {
       "file": "web/true_end/map2d/side/web/flat_engine.js",
       "category": "web",
-      "bytes": 24512,
-      "sha256": "5160cb60291609ef9f2d4c4ea9dc516e99e4f0b17c5e529e55179912c151aa78",
+      "bytes": 25735,
+      "sha256": "1ed7abd46232891a406d64d57d694796c28deb3986e64ee21527cbfcec60362b",
       "source": "真結局/map2d/side/web/flat_engine.js"
     },
     {
@@ -2985,8 +2901,8 @@
     {
       "file": "web/true_end/map2d/side/web/island.html",
       "category": "web",
-      "bytes": 12662,
-      "sha256": "2d138fb71c5718c2eccda99eba91c0b3f07d00b16a27bc5284387c7c527c8a83",
+      "bytes": 78877,
+      "sha256": "62a73c5c41e0b9305d6ec1f2a33c891c85d276003e49b02f98bd88c7e1c5bc8b",
       "source": "真結局/map2d/side/web/island.html"
     },
     {
@@ -3006,15 +2922,15 @@
     {
       "file": "web/true_end/map2d/side/web/island_config.json",
       "category": "web",
-      "bytes": 9577,
-      "sha256": "8b4cff988aabf197764999ef0e615e6621b46b55a4518387caf69d91ab35c462",
+      "bytes": 9592,
+      "sha256": "025701487930659634875932784b1c76f6116cfc83a784878b22638ce3ec00a6",
       "source": "真結局/map2d/side/web/island_config.json"
     },
     {
       "file": "web/true_end/map2d/side/web/island_play.js",
       "category": "web",
-      "bytes": 48873,
-      "sha256": "d509bfe5913e1a24d27d2971d87d810c2b8ca064de77d7ccd8a800fc5237cf98",
+      "bytes": 49954,
+      "sha256": "9f1309b4d8d0652a83afb3a95d1aef6119bef8b5a40df3de234a40eef8cbca31",
       "source": "真結局/map2d/side/web/island_play.js"
     },
     {
@@ -3027,22 +2943,22 @@
     {
       "file": "web/true_end/map2d/side/web/lantern.html",
       "category": "web",
-      "bytes": 3149,
-      "sha256": "50310bdcdc068a296ae945b751eb64bcfac762593246bb335fe54261a91a1aa5",
+      "bytes": 81521,
+      "sha256": "549aaecae884edf36794cbfa6358402c9642035a3ffa4b8582b4c9eb8db15b10",
       "source": "真結局/map2d/side/web/lantern.html"
     },
     {
       "file": "web/true_end/map2d/side/web/lantern_play.js",
       "category": "web",
-      "bytes": 13975,
-      "sha256": "b04acfbf913dd1d56ccce122836c9f953440d0db621f348aa2a0e7750c199be8",
+      "bytes": 13992,
+      "sha256": "b136c8d34b36495114f3124701ba381d62e6678d56bafcd266eb3617db487872",
       "source": "真結局/map2d/side/web/lantern_play.js"
     },
     {
       "file": "web/true_end/map2d/side/web/paper.js",
       "category": "web",
-      "bytes": 3969,
-      "sha256": "f2c9689c79abd9dd642b488a7416462e69c0e7431fed8378f4373410450dcbf2",
+      "bytes": 4700,
+      "sha256": "30c2ce93a9947d3365108d179c4cdce4852ef272552bfe7efe947dadcc8f821e",
       "source": "真結局/map2d/side/web/paper.js"
     },
     {
@@ -3055,8 +2971,8 @@
     {
       "file": "web/true_end/map2d/side/web/petals.js",
       "category": "web",
-      "bytes": 6772,
-      "sha256": "6c63abcba1b2951d80c3222fc2b91f65b0bd59a7f655e5cc7c6c2b4fb191e724",
+      "bytes": 6821,
+      "sha256": "f89862112aa2c7c88e779445e967fea367e1ebe62404449463b8d49bed3b5786",
       "source": "真結局/map2d/side/web/petals.js"
     },
     {
@@ -3069,8 +2985,8 @@
     {
       "file": "web/true_end/map2d/side/web/scene_engine.js",
       "category": "web",
-      "bytes": 12040,
-      "sha256": "7e39a9083355e7cdf296138137e76e17504a620552fc47d110bd5487b7a78684",
+      "bytes": 12047,
+      "sha256": "0967951b048d6be102d2eb7bb9b16c2a33b83f41aa2f1e68e2b7f060bd78965a",
       "source": "真結局/map2d/side/web/scene_engine.js"
     },
     {
@@ -3083,8 +2999,8 @@
     {
       "file": "web/true_end/map2d/side/web/scroll_engine.js",
       "category": "web",
-      "bytes": 9157,
-      "sha256": "1cfffca09180a5ecdba3c7468bb941ce370d3619903f2c4fe1e10e800ed1e2ea",
+      "bytes": 9160,
+      "sha256": "9f93a1eb3158a2b6ae5c20751679c0ec306886c2c8c73aea225b3b769be372e4",
       "source": "真結局/map2d/side/web/scroll_engine.js"
     },
     {
@@ -3111,37 +3027,44 @@
     {
       "file": "web/true_end/map2d/side/web/zukan.js",
       "category": "web",
-      "bytes": 16311,
-      "sha256": "0463c01de9222ee5e133e792653b5da9aaa6562eb81c35961cf50548043fd423",
+      "bytes": 16502,
+      "sha256": "049dd3f4151b5e7086384885fa5089c1bf347903053f83c46502aa7b8f48152c",
       "source": "真結局/map2d/side/web/zukan.js"
     },
     {
-      "file": "web/true_end/sprites/chen_3h.png",
+      "file": "web/true_end/page_loading.js",
       "category": "web",
-      "bytes": 1248434,
-      "sha256": "5d7941dfc302ca6c4f7301849e8578fadbfe12f89f86239857ce62e16682bddd",
-      "source": "真結局/sprites/chen_3h.png"
+      "bytes": 9122,
+      "sha256": "59c224d93535e2219a16e8e3d4f45aeadd6d3b5917d034314897b960778e460c",
+      "source": "真結局/page_loading.js"
     },
     {
-      "file": "web/true_end/sprites/ming_3h.png",
+      "file": "web/true_end/sprites/chen_3h.webp",
       "category": "web",
-      "bytes": 1204109,
-      "sha256": "d4ec2c757a1c9735d7b1cfb4b3db90fd8a621a25a9754e910cd81d14013af468",
-      "source": "真結局/sprites/ming_3h.png"
+      "bytes": 104682,
+      "sha256": "42d3c518d0f724453ef9df6478a06ff616dfd90df3c74c9479dcf3dfe8e73907",
+      "source": "真結局/sprites/chen_3h.webp"
     },
     {
-      "file": "web/true_end/sprites/shi_3h.png",
+      "file": "web/true_end/sprites/ming_3h.webp",
       "category": "web",
-      "bytes": 1479674,
-      "sha256": "d684eb9d47018f4d49c5fc85d0ddb08dfb2e9751c2a8a454f01d06d84baea30a",
-      "source": "真結局/sprites/shi_3h.png"
+      "bytes": 101302,
+      "sha256": "dc1cf44fef0cabdf50aa656b943708fbb5de7be65ab851238fa1d9fd63599506",
+      "source": "真結局/sprites/ming_3h.webp"
     },
     {
-      "file": "web/true_end/sprites/tea_side_3h_cut.png",
+      "file": "web/true_end/sprites/shi_3h.webp",
       "category": "web",
-      "bytes": 1162793,
-      "sha256": "495a33bd0fcf7a1977ead4316c6c83687dfc37869abce51d93a2b0a5aff53836",
-      "source": "真結局/sprites/tea_side_3h_cut.png"
+      "bytes": 126996,
+      "sha256": "618385ea4debe914300397f5df6f2642df8bbbf972b99556462242f000154b5d",
+      "source": "真結局/sprites/shi_3h.webp"
+    },
+    {
+      "file": "web/true_end/sprites/tea_side_3h_cut.webp",
+      "category": "web",
+      "bytes": 112100,
+      "sha256": "79c00fceb7c71782eae4de6d1990936845c8b42bb6ababa89b292519b061cfaf",
+      "source": "真結局/sprites/tea_side_3h_cut.webp"
     },
     {
       "file": "web/true_end/studio_decor/art/acc_blazer.webp",
@@ -4532,8 +4455,8 @@
     {
       "file": "web/true_end/studio_web/fonts/iansui-studio.woff2",
       "category": "web",
-      "bytes": 422308,
-      "sha256": "fb8a43622fbda725c42390f98d1523967ac4d8ce2813bc7c5afeda547ea9e9ae",
+      "bytes": 424068,
+      "sha256": "cbe7b5c8bba242a1aaeaa9153f6c70be9a4aba5dedc6a8658ceb01b6feaf9101",
       "source": "真結局/studio_web/fonts/iansui-studio.woff2"
     },
     {
@@ -4577,6 +4500,20 @@
       "bytes": 7769,
       "sha256": "4a9b4a1408313c6d698e8ea6bcaa7c9d5b48195f562e54dd58783b528e8bb9ce",
       "source": "真結局/studio_web/guitar_songs_data.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/hud_seen.mjs",
+      "category": "web",
+      "bytes": 1401,
+      "sha256": "6ad8b64a5bece319417cf2c0559eaddc762cdc2d038d9560bc5190029b98ee3d",
+      "source": "真結局/studio_web/hud_seen.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/hud_seen_keys.mjs",
+      "category": "web",
+      "bytes": 5874,
+      "sha256": "0291e08b39f1ec2975fc86a8e689589d8d728d02772f3fa091cf3330c31dcb36",
+      "source": "真結局/studio_web/hud_seen_keys.mjs"
     },
     {
       "file": "web/true_end/studio_web/icons/A/box.webp",
@@ -5792,8 +5729,8 @@
     {
       "file": "web/true_end/studio_web/index.html",
       "category": "web",
-      "bytes": 59828,
-      "sha256": "45e82a7191761e09973f49d6e60d0438a962086be063b93efb3b6a165dcb1f34",
+      "bytes": 140802,
+      "sha256": "6d22e698b7939970fd8531b901e581e5abe4e4982beef09bbae8eeaf174dcce8",
       "source": "真結局/studio_web/index.html"
     },
     {
@@ -5834,8 +5771,8 @@
     {
       "file": "web/true_end/studio_web/story_time.mjs",
       "category": "web",
-      "bytes": 2874,
-      "sha256": "19db85aad89e0877733c9a11ab12147386a387e397c656cb72c5c25b38bbce08",
+      "bytes": 3744,
+      "sha256": "3485e4670c6adf48951f411fc5af42527419589a16081dc876cb12130d5c2170",
       "source": "真結局/studio_web/story_time.mjs"
     },
     {
@@ -5848,15 +5785,15 @@
     {
       "file": "web/true_end/studio_web/studio_album.mjs",
       "category": "web",
-      "bytes": 32381,
-      "sha256": "f631613c42e68b21c26408e38e6d728775bbea180f512dcfbbe9ce82eebe118f",
+      "bytes": 32495,
+      "sha256": "ccff95f1678eec4a71943bb94ecc2a825445476f9ae5cad6884fbdf64040554c",
       "source": "真結局/studio_web/studio_album.mjs"
     },
     {
       "file": "web/true_end/studio_web/studio_album_data.mjs",
       "category": "web",
-      "bytes": 16931,
-      "sha256": "3230af9563c1388ea0aebeb3361077751a473d0323c83d82f63328a135e660da",
+      "bytes": 16961,
+      "sha256": "7690e0844121b920f2d8ca00af58131d948bbed87e1f0ad06f4d287265759bfa",
       "source": "真結局/studio_web/studio_album_data.mjs"
     },
     {
@@ -5869,22 +5806,22 @@
     {
       "file": "web/true_end/studio_web/studio_collection_data.mjs",
       "category": "web",
-      "bytes": 4174,
-      "sha256": "a8176f6478dc6a109559006874bc496978cd843698624c97da5bfa2735308073",
+      "bytes": 6223,
+      "sha256": "f7e9ff3056ff4d27e518c3738fd4f893893fcea804fa69944efb9cc94f9f2bed",
       "source": "真結局/studio_web/studio_collection_data.mjs"
     },
     {
       "file": "web/true_end/studio_web/studio_computer.css",
       "category": "web",
-      "bytes": 45505,
-      "sha256": "d8dd4312b46239fbf804710773827a25aa8caf1aced1735fe5b28fe670c39468",
+      "bytes": 45842,
+      "sha256": "df64e18f297276faaee12150b09218ecc11efd433d42f320e0f56848296cbd50",
       "source": "真結局/studio_web/studio_computer.css"
     },
     {
       "file": "web/true_end/studio_web/studio_core.mjs",
       "category": "web",
-      "bytes": 23422,
-      "sha256": "21d78880071d6de1a5c2745082dc8dea441139b4d623cfa1328467be44800fd9",
+      "bytes": 23480,
+      "sha256": "228c8e2042b14dc3f4de748999e2ac048b3273737b3866b3fb9b607bb54a8ec2",
       "source": "真結局/studio_web/studio_core.mjs"
     },
     {
@@ -5897,8 +5834,8 @@
     {
       "file": "web/true_end/studio_web/studio_decor.mjs",
       "category": "web",
-      "bytes": 30557,
-      "sha256": "ff50ff741b8be3150d2b82400e2433eb23f4163fe89944c5204871d146a88d72",
+      "bytes": 31121,
+      "sha256": "0eadcab411a36fc90e28c1626d7852d7766542a8295cac01ab85cd0c04a19963",
       "source": "真結局/studio_web/studio_decor.mjs"
     },
     {
@@ -5911,22 +5848,22 @@
     {
       "file": "web/true_end/studio_web/studio_embed.mjs",
       "category": "web",
-      "bytes": 9148,
-      "sha256": "5dcd487b99f457fd960750931a6401d42e222e2f3ed2b4a4b394cb5281ed9292",
+      "bytes": 13021,
+      "sha256": "b9735a52c0ce1104dc64f99283b84f7a42d41bd921541c4b1a22bbcb700ca11f",
       "source": "真結局/studio_web/studio_embed.mjs"
     },
     {
       "file": "web/true_end/studio_web/studio_features.css",
       "category": "web",
-      "bytes": 13867,
-      "sha256": "943ee396b021e08c9faf6b60e6be4f0cbb9df6633ad80e67468c7eebf514ca98",
+      "bytes": 13871,
+      "sha256": "520d31e3c0c4cc9c9578ef5c9e478761a5c54659b72d9e400b89fc8061b3b63f",
       "source": "真結局/studio_web/studio_features.css"
     },
     {
       "file": "web/true_end/studio_web/studio_features.mjs",
       "category": "web",
-      "bytes": 185598,
-      "sha256": "6fe6d7e727d4617e1545d3a44011620e632e0dada8fcec96d07dca1a92997d80",
+      "bytes": 189841,
+      "sha256": "260932b0b2394668aa16b2263c149794000daa382cc4af7c842968bdc8d6e901",
       "source": "真結局/studio_web/studio_features.mjs"
     },
     {
@@ -5953,30 +5890,37 @@
     {
       "file": "web/true_end/studio_web/studio_paper.css",
       "category": "web",
-      "bytes": 44167,
-      "sha256": "bdebb4c11230315fcefcea082fa9661fd73416d9a1c2d3df5f502a49f203115f",
+      "bytes": 44053,
+      "sha256": "59d98aee468653410ba7a4ffd88bc5712d76cdd5202acfb72421609567151e59",
       "source": "真結局/studio_web/studio_paper.css"
     },
     {
       "file": "web/true_end/studio_web/studio_points.mjs",
       "category": "web",
-      "bytes": 25776,
-      "sha256": "d9bed6288f1fc080c1e189bdde83d9cb0651e4fc7e7a85739f7549ed0f377083",
+      "bytes": 26605,
+      "sha256": "a8c27899b6b4b70a77838da47d7339cd1c3613cbb7d9ce22c7647ff9e00664d7",
       "source": "真結局/studio_web/studio_points.mjs"
     },
     {
       "file": "web/true_end/studio_web/studio_points2.mjs",
       "category": "web",
-      "bytes": 38986,
-      "sha256": "e83b0d5e030e202a190ee3e99a068292cfdb1c23db4862ca3e03b015345460fb",
+      "bytes": 40249,
+      "sha256": "404e9e54e9e9fbb7ca8d93623d75c8400736989a12bcff70a0eeb70c8508615d",
       "source": "真結局/studio_web/studio_points2.mjs"
     },
     {
       "file": "web/true_end/studio_web/studio_points2_data.mjs",
       "category": "web",
-      "bytes": 3365,
-      "sha256": "4f9d76f973d3db77d29aa6550c74d305e96c323c6721fb64a60a661ec7474aed",
+      "bytes": 3959,
+      "sha256": "a0e5de6ccb8035d80ad9d72cdda2f5beb0efc26aea711109bb24b0b30f7ae11e",
       "source": "真結局/studio_web/studio_points2_data.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/studio_safe.css",
+      "category": "web",
+      "bytes": 1665,
+      "sha256": "18b21da2b2e3367848aad46dcaf985435fc53ef3686e4defc1bcf452f6070e59",
+      "source": "真結局/studio_web/studio_safe.css"
     },
     {
       "file": "web/true_end/studio_web/studio_storage.js",
@@ -6000,11 +5944,11 @@
       "source": "真結局/studio_web/studio_wait.mjs"
     },
     {
-      "file": "web/true_end/studio_web/tea_side.png",
+      "file": "web/true_end/studio_web/tea_side.webp",
       "category": "web",
-      "bytes": 516249,
-      "sha256": "5ad6eeb0832ab6374d15833a9526b8a3854ca22971db958b5aae12b3fff9f130",
-      "source": "真結局/studio_web/tea_side.png"
+      "bytes": 80580,
+      "sha256": "6778ce182d42a80cd303b7fbe03dd55a643dde4836e11cb7dd4488b013a5a4f6",
+      "source": "真結局/studio_web/tea_side.webp"
     },
     {
       "file": "web/true_end/studio_web/walk_sway.js",
@@ -6014,144 +5958,319 @@
       "source": "真結局/studio_web/walk_sway.js"
     },
     {
-      "file": "web/新版/canon_new/island_v2/BEACH-A_afternoon.jpg",
+      "file": "web/新版/canon_new/island_v2/BEACH-A_afternoon.webp",
       "category": "web",
-      "bytes": 507846,
-      "sha256": "0ea8fbb5fb51f75f73e01fae0dc49dc3646e2194a8e7129c616f36a886537a1c",
-      "source": "新版/canon_new/island_v2/BEACH-A_afternoon.jpg"
+      "bytes": 284536,
+      "sha256": "6762abc6b823f94c7e127e86902db6a879debd88140fbacff1b6b0fe88a81252",
+      "source": "新版/canon_new/island_v2/BEACH-A_afternoon.webp"
     },
     {
-      "file": "web/新版/canon_new/island_v2/CAPE-A_afternoon.jpg",
+      "file": "web/新版/canon_new/island_v2/CAPE-A_afternoon.webp",
       "category": "web",
-      "bytes": 448682,
-      "sha256": "6b5a4bc0aa7efc0157236ee44178f9eae5a22408bdbeef6ffd1b35a3e7ae466d",
-      "source": "新版/canon_new/island_v2/CAPE-A_afternoon.jpg"
+      "bytes": 237180,
+      "sha256": "05e7027babc302a1f1f750d8f46257232bb0713ee860851f3bd6bce286fb65e6",
+      "source": "新版/canon_new/island_v2/CAPE-A_afternoon.webp"
     },
     {
-      "file": "web/新版/canon_new/island_v2/DOCK-A_dusk.jpg",
+      "file": "web/新版/canon_new/island_v2/DOCK-A_dusk.webp",
       "category": "web",
-      "bytes": 552098,
-      "sha256": "d6553587df10cda8cb3e4a8e4eb792458509b9ecdeab7c980ca03b7aecd17395",
-      "source": "新版/canon_new/island_v2/DOCK-A_dusk.jpg"
+      "bytes": 277052,
+      "sha256": "67277011422cf0b790fcea45f327e7221a8da28cb536233d46e9063c7967e78a",
+      "source": "新版/canon_new/island_v2/DOCK-A_dusk.webp"
     },
     {
-      "file": "web/新版/canon_new/island_v2/HILL-A_morning.jpg",
+      "file": "web/新版/canon_new/island_v2/HILL-A_morning.webp",
       "category": "web",
-      "bytes": 579063,
-      "sha256": "ebb0ad95938ed769403815a9d62886146d4cb53511ef4d7e33bcdee959ed2351",
-      "source": "新版/canon_new/island_v2/HILL-A_morning.jpg"
+      "bytes": 370460,
+      "sha256": "b08f2129ec3b861f33a7e84bc471997dd0d61e62d625e56ae898b542d7742356",
+      "source": "新版/canon_new/island_v2/HILL-A_morning.webp"
     },
     {
-      "file": "web/新版/canon_new/island_v2/HILL-A_sunrise.jpg",
+      "file": "web/新版/canon_new/island_v2/HILL-A_sunrise.webp",
       "category": "web",
-      "bytes": 519750,
-      "sha256": "0941d48edd700201dfcba957fa096e567a21c3aab354bbd2d75885a5e95eb63d",
-      "source": "新版/canon_new/island_v2/HILL-A_sunrise.jpg"
+      "bytes": 308820,
+      "sha256": "f49193e6b1ec5b437420553a8931a20a2f8761954bcf995f0632e388b44a0ec0",
+      "source": "新版/canon_new/island_v2/HILL-A_sunrise.webp"
     },
     {
-      "file": "web/新版/canon_new/props/sketchbook.jpg",
+      "file": "web/新版/canon_new/props/painting_four.webp",
       "category": "web",
-      "bytes": 117048,
-      "sha256": "4b1fd0c22fda2192ed4b7db546a0573285f4319a0906de5b48162fd03f01ec53",
-      "source": "新版/canon_new/props/sketchbook.jpg"
+      "bytes": 209160,
+      "sha256": "8da24fa9eecc6344401e8bf25aa5457372d57da6e8fdddfa74a37c846217eca5",
+      "source": "新版/canon_new/props/painting_four.webp"
     },
     {
-      "file": "web/新版/canon_new/props/ticket_musical.jpg",
+      "file": "web/新版/canon_new/props/sketchbook.webp",
       "category": "web",
-      "bytes": 271976,
-      "sha256": "5eb341107712e895e624b4ec15d37866eb5eec715b8dcfd6c361734605b64475",
-      "source": "新版/canon_new/props/ticket_musical.jpg"
+      "bytes": 46810,
+      "sha256": "b1c9ab5c0cb3794b648c6f7e95a1dab919c393331924f43959812b65a1257574",
+      "source": "新版/canon_new/props/sketchbook.webp"
     },
     {
-      "file": "web/新版/canon_new/studio/A.jpg",
+      "file": "web/新版/canon_new/props/sky/day05.webp",
       "category": "web",
-      "bytes": 448337,
-      "sha256": "b9a89321ed72d2d6b729e4a8ac7ea00595bca3d628f7855bbb4ebd635a5e2c2a",
-      "source": "新版/canon_new/studio/A.jpg"
+      "bytes": 74050,
+      "sha256": "38c26464890f46c203b8cb74eed25363e0a76f08dcab440c29171b8fcc2e5d20",
+      "source": "新版/canon_new/props/sky/day05.webp"
     },
     {
-      "file": "web/新版/canon_new/studio/A.png",
+      "file": "web/新版/canon_new/props/sky/day06.webp",
       "category": "web",
-      "bytes": 3025671,
-      "sha256": "7e201e0caeeb78f671d08bbcc0b2aa3ef073565bfced9cd8d628bd0bfa82975c",
-      "source": "新版/canon_new/studio/A.png"
+      "bytes": 45040,
+      "sha256": "1aeca802e6857ce7f0ede796214fb51f5ec70692a32df92d663aa6d450d50a4b",
+      "source": "新版/canon_new/props/sky/day06.webp"
     },
     {
-      "file": "web/新版/canon_new/studio/A_night.jpg",
+      "file": "web/新版/canon_new/props/sky/day07.webp",
       "category": "web",
-      "bytes": 198752,
-      "sha256": "bc513af9391a1514ca482846b98a0dcb95fe0548d40cacc4bf2180741e7a1b3a",
-      "source": "新版/canon_new/studio/A_night.jpg"
+      "bytes": 46912,
+      "sha256": "11ef4d400a42721f7e2924f634b265faecae1bc31eadf4174f8bf40d9d783e51",
+      "source": "新版/canon_new/props/sky/day07.webp"
     },
     {
-      "file": "web/新版/canon_new/studio/A_night.png",
+      "file": "web/新版/canon_new/props/sky/day08.webp",
       "category": "web",
-      "bytes": 3001036,
-      "sha256": "5bb0444472c3996d803a9fb7676faa71337a5d021a3bedb8f271063fa3875b55",
-      "source": "新版/canon_new/studio/A_night.png"
+      "bytes": 59772,
+      "sha256": "ee2ec38dddbd6c258a67c506d9699a3f511a22e5c9345baadc849a66cea2f34a",
+      "source": "新版/canon_new/props/sky/day08.webp"
     },
     {
-      "file": "web/新版/canon_new/studio/A_s4_morning.jpg",
+      "file": "web/新版/canon_new/props/sky/day09.webp",
       "category": "web",
-      "bytes": 393436,
-      "sha256": "2bf0155e3c1d8bd5e4e941c3104ec3ea2e1f51b6e28bb3266c464020a22c7dee",
-      "source": "新版/canon_new/studio/A_s4_morning.jpg"
+      "bytes": 87952,
+      "sha256": "c484c448ea69de797231ceba9b3e3e6a0986dd938f73c16d36386323501ba72a",
+      "source": "新版/canon_new/props/sky/day09.webp"
     },
     {
-      "file": "web/新版/canon_new/studio/A_s4_predawn.jpg",
+      "file": "web/新版/canon_new/props/sky/day10.webp",
       "category": "web",
-      "bytes": 454273,
-      "sha256": "aba89c5c6ac2470b3d74770a8dbc0ebc296b1d68593d9c037a4d8e367bb785bc",
-      "source": "新版/canon_new/studio/A_s4_predawn.jpg"
+      "bytes": 93652,
+      "sha256": "d802b324e1f1f0369778a2eaef8d82b3ef1a447b59eb602bac5c986dd0d7448a",
+      "source": "新版/canon_new/props/sky/day10.webp"
     },
     {
-      "file": "web/新版/canon_new/studio/G.png",
+      "file": "web/新版/canon_new/props/sky/day11.webp",
       "category": "web",
-      "bytes": 3116082,
-      "sha256": "2443e13dcf936f61fe44aaa89159f935cc621a74839a13ab8e87a72218e040e6",
-      "source": "新版/canon_new/studio/G.png"
+      "bytes": 36522,
+      "sha256": "bb64456f129659e0f2ecde41478c6c08727bf5e14d66614c16209be9b849142a",
+      "source": "新版/canon_new/props/sky/day11.webp"
     },
     {
-      "file": "web/新版/canon_new/studio/H.png",
+      "file": "web/新版/canon_new/props/sky/day12.webp",
       "category": "web",
-      "bytes": 2948523,
-      "sha256": "8ae3b357e53dd4d0db89f8d078033528bf3a6e5a37496208c832d25f05bfb644",
-      "source": "新版/canon_new/studio/H.png"
+      "bytes": 27842,
+      "sha256": "a6d11b9fb7e690f98867c37503f2f6084d0ebd937754c0319252b2b1d27ed9eb",
+      "source": "新版/canon_new/props/sky/day12.webp"
     },
     {
-      "file": "web/新版/canon_new/studio/I.png",
+      "file": "web/新版/canon_new/props/sky/day13.webp",
       "category": "web",
-      "bytes": 2851972,
-      "sha256": "42d6016b7f464986bf215abbb52e0d4ddbb1e7d58182e5c808352d4a14b80ddb",
-      "source": "新版/canon_new/studio/I.png"
+      "bytes": 67196,
+      "sha256": "011a6e50bc6608c63753303b1d3d904a8cbef198a803d8f4bca0a09dac198ae0",
+      "source": "新版/canon_new/props/sky/day13.webp"
     },
     {
-      "file": "web/新版/canon_new/studio/flat/E.png",
+      "file": "web/新版/canon_new/props/sky/day14.webp",
       "category": "web",
-      "bytes": 1182723,
-      "sha256": "42eb5376df4e13af644888bed6083f85f483f53f405e35905e8be062611df544",
-      "source": "新版/canon_new/studio/flat/E.png"
+      "bytes": 27626,
+      "sha256": "b1898a0c4c992281c72b0fd5d4e516556688e2510a555b261de2cf6c4c172214",
+      "source": "新版/canon_new/props/sky/day14.webp"
     },
     {
-      "file": "web/新版/canon_new/studio/flat/N.png",
+      "file": "web/新版/canon_new/props/sky/day15.webp",
       "category": "web",
-      "bytes": 1484999,
-      "sha256": "ffd654ae2ad0592b05be6a9d3ab53d9610312aa1d610a1a1fc33730b78f0d31f",
-      "source": "新版/canon_new/studio/flat/N.png"
+      "bytes": 28498,
+      "sha256": "5aaded20469473ad10816f2cb046289363e28cf56d9e61630cb7c88ef353cc6b",
+      "source": "新版/canon_new/props/sky/day15.webp"
     },
     {
-      "file": "web/新版/canon_new/studio/flat/S.png",
+      "file": "web/新版/canon_new/props/sky/day16.webp",
       "category": "web",
-      "bytes": 1371617,
-      "sha256": "b44605fa8d978e9b340e7487da74488c4b0f4665bb6d2abf256da95d98914b4d",
-      "source": "新版/canon_new/studio/flat/S.png"
+      "bytes": 44190,
+      "sha256": "445a1c5398161a6dbadf5b34100c914b31511040a003ed84e0f8cda08e6c11b0",
+      "source": "新版/canon_new/props/sky/day16.webp"
     },
     {
-      "file": "web/新版/canon_new/studio/flat/W.png",
+      "file": "web/新版/canon_new/props/sky/day17.webp",
       "category": "web",
-      "bytes": 1175698,
-      "sha256": "5ed48fa1927aa5b8f3cf72c8f42839137ed098fc89f50bcd7da1ea81a48be681",
-      "source": "新版/canon_new/studio/flat/W.png"
+      "bytes": 66398,
+      "sha256": "46a19441a10d616acc37bb4f42ad8bd7197aa2704ec960d5a8b88c26a170e290",
+      "source": "新版/canon_new/props/sky/day17.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/sky/day18.webp",
+      "category": "web",
+      "bytes": 55218,
+      "sha256": "0d1e947795dd82b3eaf35732c76e667618da42c433d7d5185ab0104e8c7c7563",
+      "source": "新版/canon_new/props/sky/day18.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/sky/day19.webp",
+      "category": "web",
+      "bytes": 27194,
+      "sha256": "3aa64da46d103b15a35e8c65ad85f5d2770c766ab841e36b2ed24cbbc9d85f45",
+      "source": "新版/canon_new/props/sky/day19.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/sky/day20.webp",
+      "category": "web",
+      "bytes": 67572,
+      "sha256": "8675a776db9cd21cd078a8f42af2dc3ca97347fa13ee01e9d7a4925330676729",
+      "source": "新版/canon_new/props/sky/day20.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/sky/day21.webp",
+      "category": "web",
+      "bytes": 61210,
+      "sha256": "b716719b32040b95db49987e5f566acb339dbca95ac1424bc8c57922fe00edcb",
+      "source": "新版/canon_new/props/sky/day21.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/sky/day22.webp",
+      "category": "web",
+      "bytes": 70870,
+      "sha256": "71fc956645c2242c4740ea47feafe39ec5c92b2c9656e188b99e0dbf2fc27331",
+      "source": "新版/canon_new/props/sky/day22.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/sky/day23.webp",
+      "category": "web",
+      "bytes": 53496,
+      "sha256": "a291aa6f381e02ae338c1816a1cf8431284e31cdb2857d249c66a5d1daeaea50",
+      "source": "新版/canon_new/props/sky/day23.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/sky/day24.webp",
+      "category": "web",
+      "bytes": 51370,
+      "sha256": "62165af0b40056cfd3a22710032931c52d7ddba5c534b211e900c91f507093e6",
+      "source": "新版/canon_new/props/sky/day24.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/sky/day25.webp",
+      "category": "web",
+      "bytes": 99642,
+      "sha256": "3fbb91da523290606b5585d4d2887d7b8e51b1effc98ee9c26bebfd6bc03db70",
+      "source": "新版/canon_new/props/sky/day25.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/sky/day26.webp",
+      "category": "web",
+      "bytes": 92470,
+      "sha256": "9bc45d531ae0c836176daacc9f7ee4cf175c883a5ef8ebc95f9086dd34ad11a0",
+      "source": "新版/canon_new/props/sky/day26.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/sky/day27.webp",
+      "category": "web",
+      "bytes": 50488,
+      "sha256": "0de88f4d83cdc90d694d8b453ec75d5e4df9f334b04d6c4080eba1f22b7b365d",
+      "source": "新版/canon_new/props/sky/day27.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/sky/day28.webp",
+      "category": "web",
+      "bytes": 66452,
+      "sha256": "12af7441654cf2111c4f8b487ee0c229939d2b3aa3e57e064a79e50ba968d83c",
+      "source": "新版/canon_new/props/sky/day28.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/sky/day29.webp",
+      "category": "web",
+      "bytes": 55930,
+      "sha256": "3c85ef466b090d1ea8237e695b923a9294e4d89f49395d897de891538dd6a960",
+      "source": "新版/canon_new/props/sky/day29.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/sky/day30.webp",
+      "category": "web",
+      "bytes": 77048,
+      "sha256": "b5a1cf3a9acf251d827521339900c3d666557f0bf29af70fa3cbbfe7da20a24b",
+      "source": "新版/canon_new/props/sky/day30.webp"
+    },
+    {
+      "file": "web/新版/canon_new/props/ticket_musical.webp",
+      "category": "web",
+      "bytes": 125158,
+      "sha256": "907f5b1ee6d73a6181108954fb8820fbe60a3b9ee8df708130bacf1295b9acaf",
+      "source": "新版/canon_new/props/ticket_musical.webp"
+    },
+    {
+      "file": "web/新版/canon_new/studio/A.webp",
+      "category": "web",
+      "bytes": 264528,
+      "sha256": "ace4de93588e97435c7fa476ca3c277b026727c0edca3712025c0d253ef9b00e",
+      "source": "新版/canon_new/studio/A.webp"
+    },
+    {
+      "file": "web/新版/canon_new/studio/A_night.webp",
+      "category": "web",
+      "bytes": 239398,
+      "sha256": "d2cd95c8150ef8f2cfeb17f94bf140a151d90c7176c68190fc9c6967eac534f7",
+      "source": "新版/canon_new/studio/A_night.webp"
+    },
+    {
+      "file": "web/新版/canon_new/studio/A_night_window.webp",
+      "category": "web",
+      "bytes": 115666,
+      "sha256": "1fb952e8244de2edd4a182eb7b4bdd5894776adba19867233da1912423cb397d",
+      "source": "新版/canon_new/studio/A_night_window.webp"
+    },
+    {
+      "file": "web/新版/canon_new/studio/A_window.webp",
+      "category": "web",
+      "bytes": 267100,
+      "sha256": "949ce819fd48cd02cfa58996d42237e868a19e6a2105ad8b06651ce321457447",
+      "source": "新版/canon_new/studio/A_window.webp"
+    },
+    {
+      "file": "web/新版/canon_new/studio/G.webp",
+      "category": "web",
+      "bytes": 297330,
+      "sha256": "cf7562d46a5ae34f75c3cc946a13fd17e90290c494afecbf39e402aae86bf4ff",
+      "source": "新版/canon_new/studio/G.webp"
+    },
+    {
+      "file": "web/新版/canon_new/studio/H.webp",
+      "category": "web",
+      "bytes": 240654,
+      "sha256": "163344cc6324ea31c1d535a2a9732f80d9b611f59df8bb4e288de433a347313e",
+      "source": "新版/canon_new/studio/H.webp"
+    },
+    {
+      "file": "web/新版/canon_new/studio/I.webp",
+      "category": "web",
+      "bytes": 185806,
+      "sha256": "ebac4eb0dcd8dd29dd3dc549ebe05c19a8f5846bc69edf5c44b8c5ec111decf1",
+      "source": "新版/canon_new/studio/I.webp"
+    },
+    {
+      "file": "web/新版/canon_new/studio/flat/E.webp",
+      "category": "web",
+      "bytes": 98394,
+      "sha256": "3d85a1dde6098e9c20e7bb4dc64c10f70993b934068cf6592143b2ae32ea9beb",
+      "source": "新版/canon_new/studio/flat/E.webp"
+    },
+    {
+      "file": "web/新版/canon_new/studio/flat/N.webp",
+      "category": "web",
+      "bytes": 123122,
+      "sha256": "03fed033dee8db9ffce92f4bfb145e96d4ab4d29284a8373fef25419a60a0389",
+      "source": "新版/canon_new/studio/flat/N.webp"
+    },
+    {
+      "file": "web/新版/canon_new/studio/flat/S.webp",
+      "category": "web",
+      "bytes": 83872,
+      "sha256": "dcc4e858b472f8aa283b794ad68d0cd5972102d2de5af4dec74a75f4f4c59e95",
+      "source": "新版/canon_new/studio/flat/S.webp"
+    },
+    {
+      "file": "web/新版/canon_new/studio/flat/W.webp",
+      "category": "web",
+      "bytes": 97618,
+      "sha256": "a4eeda34e72bb42cf315e7af51f3ee4699f0d6459dd099a3e3ffb88f75f11dec",
+      "source": "新版/canon_new/studio/flat/W.webp"
     }
   ]
 }

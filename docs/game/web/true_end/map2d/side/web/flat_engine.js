@@ -7,9 +7,9 @@ import { createIslandAffinity } from './island_affinity.mjs';
 import { CHARACTERS } from '../../../studio_web/studio_core.mjs';
 import { paperize } from './paper.js';
 const Q = new URLSearchParams(location.search); const SCENE = Q.get('scene') || 'dawn';
-const META = await (await fetch(`../art/out/${SCENE}/flat.json`)).json();
+const META = await PageLoading.json(`../art/out/${SCENE}/flat.json`);
 try {   // 紙感介面的九宮格（art/cut_ui.py 量的）：素材照原比例，顯示寬度＝原圖的 0.45 倍
-  const UI = await (await fetch('../art/ui/ui.json')).json(); const R = document.documentElement.style, K = 0.45;
+  const UI = await PageLoading.json('../art/ui/ui.json'); const R = document.documentElement.style, K = 0.45;
   const set = (k, v) => { const s = UI[v]; if (!s) return; R.setProperty(`--${k}-slice`, s.slice.join(' ')); R.setProperty(`--${k}-width`, s.slice.map(n => (n * K).toFixed(0) + 'px').join(' ')); R.setProperty(`--${k}-bx`, ((s.slice[1] + s.slice[3]) * K).toFixed(0) + 'px'); R.setProperty(`--${k}-by`, ((s.slice[0] + s.slice[2]) * K).toFixed(0) + 'px'); };
   set('panel', 'ui_panel'); set('tag', 'ui_tag'); set('btn', 'ui_btn'); set('frame', 'ui_frame');
   // 紙框例外：九宮格切在透明開口的邊上（ui.json 的切法比開口寬，左右會多切進開口、上下會把開口邊的金線切掉，只剩轉角兩小段）。
@@ -23,7 +23,7 @@ const VIEW = Q.get('view') === 'full' ? { top: 0, h: 1 } : Object.assign({ top: 
 const FEET = META.feet_y, HERO_H = META.hero_h, NEARBY = 90;
 const PX_PER_M = 370 / 1.4, WALK = 2.2 * PX_PER_M;    // 2.2 公尺每秒＝約 580 px/s，跟工作室畫面上的速度一樣
 const WALK_X = META.walk;
-const TEA = { still: '../../../sprites/tea_side_3h_cut.png' };   // 長畫的茶語紙人：三頭身原圖 674×1439（跟晨、明、詩的 3h 紙人同一套）。fad982b 換成 81×160 的 tea_walk.png 是因為原圖沒進版控、乾淨的 checkout 找不到；縮小圖放大後糊、白邊（paperize 的 14 px）相對變粗，2026-11-16 原圖進版控後換回
+const TEA = { still: '../../../sprites/tea_side_3h_cut.webp' };   // 長畫的茶語紙人：三頭身原圖 674×1439（跟晨、明、詩的 3h 紙人同一套）。fad982b 換成 81×160 的 tea_walk.png 是因為原圖沒進版控、乾淨的 checkout 找不到；縮小圖放大後糊、白邊（paperize 的 14 px）相對變粗，2026-11-16 原圖進版控後換回
 const stage = document.getElementById('stage'), art = document.getElementById('art'), panel = document.getElementById('panel'), scrim = document.getElementById('scrim'), cg = document.getElementById('cg');
 if (Q.get('hud') === '0') document.body.classList.add('nohud');
 if (META.night) document.body.classList.add('night');
@@ -42,17 +42,17 @@ async function person(src, hFrac, cls, face) {
   const im = document.createElement('img'); im.className = 'sheet'; im.src = pp.src; im.alt = ''; im.draggable = false; d.append(sh, im); return d;
 }
 async function build() {
-  const bg = document.createElement('img'); bg.className = 'layer'; bg.src = `../art/out/${SCENE}/flat.jpg`; bg.alt = META.name; bg.draggable = false; art.appendChild(bg);
+  const bg = document.createElement('img'); bg.className = 'layer'; bg.src = `../art/out/${SCENE}/flat.webp`; bg.alt = META.name; bg.draggable = false; art.appendChild(bg);
   for (const n of META.npcs) { const p = await person(n.img, n.h, 'npc ' + n.id, n.face); p.style.left = (n.x / IMG.width * 100) + '%'; art.appendChild(p); }
   player = await person(TEA.still, HERO_H, 'tea', state.face); art.appendChild(player);
-  if (META.fg) { const fg = document.createElement('img'); fg.id = 'fg'; fg.className = 'layer'; fg.src = `../art/out/${SCENE}/fg.png`; fg.alt = ''; fg.draggable = false; art.appendChild(fg); }
+  if (META.fg) { const fg = document.createElement('img'); fg.id = 'fg'; fg.className = 'layer'; fg.src = `../art/out/${SCENE}/fg.webp`; fg.alt = ''; fg.draggable = false; art.appendChild(fg); }
   for (const h of META.hot) {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'hotspot'; b.dataset.id = h.id; b.dataset.name = h.name; b.setAttribute('aria-label', h.name);
     Object.assign(b.style, { left: h.x / IMG.width * 100 + '%', top: h.y * 100 + '%', width: h.w / IMG.width * 100 + '%', height: h.h * 100 + '%' });
     b.addEventListener('click', e => { e.stopPropagation(); interact(h.id); }); b.addEventListener('pointerdown', e => e.stopPropagation()); art.appendChild(b); hotEls.push(b);
   }
 }
-async function plainSprite(src) { const im = await new Promise(ok => { const i = new Image(); i.onload = () => ok(i); i.src = src; }); document.body.classList.add('flatpaper'); return { src, shadow: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', pad: 0, width: im.width, height: im.height }; }
+async function plainSprite(src) { const im = await PageLoading.preload(src); document.body.classList.add('flatpaper'); return { src, shadow: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', pad: 0, width: im.width, height: im.height }; }
 function resize() { scale = innerHeight / (IMG.height * VIEW.h); art.style.width = (IMG.width * scale) + 'px'; art.style.height = (100 / VIEW.h) + '%'; art.style.top = (-VIEW.top / VIEW.h * 100) + '%'; render(); }
 function camX() { const vw = innerWidth / scale; return Math.max(0, Math.min(IMG.width - vw, state.x + camShift - vw / 2)); }
 function render() {
@@ -73,13 +73,29 @@ function onCgClosed(f) { cgClosedHooks.push(f); }
 let camShift = 0, camShiftTarget = 0, locked = false;
 function setCamShift(px) { camShiftTarget = px; }
 function lock(v) { locked = v; document.body.classList.toggle('locked', v); if (v) { keyDir = pointerDir = 0; targetX = null; } }
-let sfxPaper = () => {}; import('./sfx.js').then(m => { sfxPaper = () => m.sfx.paper(); }).catch(() => {});
+let sfxPaper = () => {}; PageLoading.prepare('sfx.js', import('./sfx.js').then(m => { sfxPaper = () => m.sfx.paper(); }));
 function showScroll(who, text) { const sc = document.getElementById('scroll'); sc.querySelector('b').textContent = who; sc.querySelector('p').textContent = text; sc.style.display = 'block'; sc.classList.remove('open'); void sc.offsetWidth; sc.classList.add('open'); }
 function toast(text) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = text; document.body.appendChild(t); setTimeout(() => t.classList.add('on'), 20); setTimeout(() => { t.classList.remove('on'); setTimeout(() => t.remove(), 400); }, 1800); }
 const BR = window.IslandBridge;
 const freeAffinity = createIslandAffinity(BR, Q, () => larchVars, () => ctl.chapter);
 const scenePerson = { dawn: 'chen', cape: 'ming', beach: 'shi' }[SCENE];
-function larchSet(vars) { Object.assign(larchVars, vars); if (inFrame) BR.set(vars); }
+// 場景內的道具、動畫和關卡暫存由 ctl.store 寫到 islandSave，換白板時才需要獨立的劇情變數。
+const LOCAL_SCENE_KEYS = new Set([
+  'c4_call', 'c4_called', 'c4_dolphin', 'c4_done', 'c4_intro', 'c4_melody', 'chapter4_beach_done',
+  'hermit_out_c4', 'hermit_out_c7', 'hermit_out_te', 's3_shell_count', 's3_shells_submitted', 'shells_c4',
+  'c5_cg', 'c5_done', 'c5_intro', 'c5_stopped', 'c5_taught', 'chapter5_cape_done', 'clock_dir',
+  'gears_c5', 's4_gear_count', 's4_gears_submitted', 'lantern_c5', 'lantern_c7', 'lantern_te', 'te_flipped', 'te_stopped', 'te_talk',
+  'c7_chen', 'c7_ming', 'c7_shi', 'accompanied_chen', 'accompanied_ming', 'accompanied_shi',
+  'c7g_1', 'c7g_2', 'c7g_3', 'c7g_done', 'c7s_done', 'c7s_pink', 'shells_c7', 'shells_c7_auto'
+]);
+function larchSet(vars) {
+  Object.assign(larchVars, vars);
+  if (inFrame) {
+    BR.note(vars);
+    const story = Object.fromEntries(Object.entries(vars).filter(([key]) => !LOCAL_SCENE_KEYS.has(key)));
+    if (Object.keys(story).length) BR.set(story);
+  }
+}
 function nearest() { let best = null; for (const h of META.hot) { if (h.hidden) continue; const d = Math.abs(h.x + h.w / 2 - state.x); if (d < NEARBY + h.w / 2 && (!best || d < best.d)) best = { id: h.id, d }; } return best && best.id; }
 // 對話：照劇本一句句推進（點對話框或 Enter），{choice} 出選項泡泡，選完接共通句。拿過禮物後再講就是 done 那幾句
 const dlg = { steps: [], i: 0, after: [], onLine: null };
@@ -176,8 +192,9 @@ function up(e) {
 stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
 addEventListener('resize', resize);
 // larch:init：變數放進同一個物件（各場景拿的是這個物件），同一張卡裡換頁前寫過的值蓋回去；場景要等它到了才裝
+let sceneAssembled = false;
 let initArrived; const initWait = new Promise(ok => { initArrived = ok; });
-addEventListener('message', e => { const d = e.data || {}; if (d.type === 'larch:init') { Object.assign(larchVars, BR.merge(d.variables || {})); initArrived(); if (document.body.dataset.ready) freeAffinity.refresh(); } });
+addEventListener('message', e => { const d = e.data || {}; if (d.type === 'larch:init') { Object.assign(larchVars, BR.merge(d.variables || {})); initArrived(); if (sceneAssembled) freeAffinity.refresh(); } });
 if (inFrame) parent.postMessage({ type: 'larch:ready' }, '*');
 // 這一頁是哪一章、第幾步（island_bridge.js；規格在 ../_島段步驟清單.md）。cut()：做到要切回 Larch 對話卡的那一步
 const C7_KEYS = ['chen', 'shi', 'ming'];
@@ -211,16 +228,18 @@ async function start() {
   if (inFrame) await Promise.race([initWait, new Promise(ok => setTimeout(ok, 2500))]);
   Object.assign(ctl, BR.context(inFrame ? larchVars : Object.assign({}, larchVars, Object.fromEntries(Q))));
   freeAffinity.refresh();
-  if (SCENE === 'dawn') { try { const m = await import('./dawn_play.js'); await m.install({ art, IMG, META, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, lock }); } catch (e) { console.error('dawn_play', e); } }
-  if (SCENE === 'beach') { try { const m = await import('./beach_play.js'); await m.install({ art, IMG, META, VIEW, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, lock, isLocked: () => locked, panelOpen: () => panelOpen }); } catch (e) { console.error('beach_play', e); } }
-  if (SCENE === 'cape') { try { const m = await import('./cape_play.js'); await m.install({ art, IMG, META, VIEW, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, lock, isLocked: () => locked, panelOpen: () => panelOpen }); } catch (e) { console.error('cape_play', e); } }
-  document.body.dataset.ready = '1';
+  if (SCENE === 'dawn') { try { const m = await PageLoading.track('dawn_play.js', import('./dawn_play.js')); await m.install({ art, IMG, META, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, lock }); } catch (e) { console.error('dawn_play', e); } }
+  if (SCENE === 'beach') { try { const m = await PageLoading.track('beach_play.js', import('./beach_play.js')); await m.install({ art, IMG, META, VIEW, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, lock, isLocked: () => locked, panelOpen: () => panelOpen }); } catch (e) { console.error('beach_play', e); } }
+  if (SCENE === 'cape') { try { const m = await PageLoading.track('cape_play.js', import('./cape_play.js')); await m.install({ art, IMG, META, VIEW, state, paperize, openDialogue, hot: META.hot, larchSet, vars: larchVars, gifts, player, render, ctl, showCg, hideCg, cgOpen, onCgClosed, showScroll, toast, runHot, camX, getScale: () => scale, onFrame: f => frameHooks.push(f), frameHooks, setCamShift, lock, isLocked: () => locked, panelOpen: () => panelOpen }); } catch (e) { console.error('cape_play', e); } }
+  sceneAssembled = true;
+  PageLoading.shown.then(() => { document.body.dataset.ready = '1'; });
   if (window.StudioDB && !Q.has('x')) { try { const v = await StudioDB.get('flat_x_' + SCENE); if (Number.isFinite(v)) state.x = v; } catch {} }
   if (ctl.startX !== null) { state.x = ctl.startX; ctl.startX = null; }   // 回接：站回那個人旁邊
   ctl.c7Note();
   const savePos = () => window.StudioDB ? StudioDB.set('flat_x_' + SCENE, state.x).catch(() => {}) : null;
   resize(); setInterval(() => { if (!BR.done) savePos(); }, 2000); BR.beforeComplete(savePos); requestAnimationFrame(frame);
 }
-start();
+const sceneReady = start();
+PageLoading.track(`長畫組裝：${SCENE}`, sceneReady).then(() => PageLoading.finish()).catch(console.error);
 window.dawnHill = { ctl, get x() { return state.x / IMG.width; }, set x(v) { state.x = v * IMG.width; targetX = null; render(); }, interact, runHot, gifts, characters: CHARACTERS,
   closeAll() { closePanel(); hideCg(); document.getElementById('scroll').style.display = 'none'; lock(false); } };

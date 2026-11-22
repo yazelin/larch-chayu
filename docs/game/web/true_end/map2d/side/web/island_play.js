@@ -7,7 +7,7 @@ import { createZukan, openPanel, closePanel, panelOpen, TOTAL as ZK_TOTAL } from
 import { createPlants, openPlantPanel, plantPanelOpen, playScene, sceneOpen, TREE_LINES, TREE_CG, TOTAL as PL_TOTAL } from './plants.js';
 
 const Q = new URLSearchParams(location.search);
-const CFG = await (await fetch('./island_config.json')).json();
+const CFG = await PageLoading.json('./island_config.json');
 const W = CFG.size[0], H = CFG.size[1];
 const world = document.getElementById('map-area'), map = document.getElementById('map');
 const personRoot = document.getElementById('person'), zones = document.getElementById('zones');
@@ -80,7 +80,7 @@ if (Q.get('debug') === '1') document.body.classList.add('debug');
 function post(message) { if (inFrame && !(BR && BR.done && message.type === 'larch:set')) window.parent.postMessage(message, '*'); }
 function updateReady() {
   state.ready = state.initApplied && state.mapReady;
-  document.body.dataset.ready = state.ready ? '1' : '0';
+  document.body.dataset.ready = state.ready && !PageLoading.loading ? '1' : '0';
   if (state.ready) {
     for (const resolve of state.readyWaiters.splice(0)) resolve();
   }
@@ -96,7 +96,7 @@ function loadMap(src) {
   let decoded;
   if (typeof map.decode === 'function') {
     map.src = src;
-    decoded = Promise.resolve().then(() => map.decode());
+    decoded = PageLoading.image(map);
   } else {
     decoded = new Promise((resolve, reject) => {
       map.addEventListener('load', resolve, { once: true });
@@ -195,6 +195,10 @@ function applyVariables(vars = {}) {
   document.getElementById('progress').textContent = state.stage === 5
     ? `禮物 ${Number(state.vars.gifts || 0)}／3　回憶 ${Number(state.vars.memories || 0)}／7`
     : `第 ${state.stage} 階段`;
+  // 晚到的 larch:init（存檔裡已撿過）不會換階段，上面不會重畫；這裡每次都把已撿過的回憶捲軸拿掉（作者 2026-11-22：碼頭旁的卷撿過還在、點不起來）
+  if (truth(state.vars.memory1)) document.getElementById('memory1-scroll')?.remove();
+  if (truth(state.vars.memory7)) document.getElementById('memory7-scroll')?.remove();
+  updateZukanBtn();
   updateNote();
   updateActions();
   return state.mapPromise;
@@ -207,8 +211,7 @@ async function makePaperPerson(src, edge = 8) {
     img.style.height = '10%'; personRoot.append(img); return img;
   } catch (err) { console.error('紙人素材載入失敗', err); return null; }
 }
-const tea = await makePaperPerson(CFG.sprites.tea);
-const shi = await makePaperPerson(CFG.sprites.shi, 7);
+const [tea, shi] = await Promise.all([makePaperPerson(CFG.sprites.tea), makePaperPerson(CFG.sprites.shi, 7)]);
 if (shi) { shi.style.display = 'none'; shi.style.height = '8%'; }
 if (tea) { tea.style.zIndex = '2'; }
 
@@ -388,7 +391,7 @@ dialog.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '
 function collectMemory1() {
   if (!state.ready) return false;
   if (distance(state, CFG.memory1) > 86) { toast('再靠近一點'); return; }
-  if (truth(state.vars.memory1)) return;
+  if (truth(state.vars.memory1)) { document.getElementById('memory1-scroll')?.remove(); return; }
   const updates = memoryUpdates(state.vars, 'memory1');
   const memories = Number(updates.memories);
   setVars(updates);
@@ -400,7 +403,7 @@ function collectMemory7() {
   if (!state.ready) return false;
   const p = CFG.memory7;
   if (distance(state, p) > 86) { toast('再靠近一點'); return; }
-  if (truth(state.vars.memory7)) return;
+  if (truth(state.vars.memory7)) { document.getElementById('memory7-scroll')?.remove(); return; }
   const updates = memoryUpdates(state.vars, 'memory7');
   const memories = Number(updates.memories);
   setVars(updates);
@@ -663,6 +666,7 @@ function frame(now) {
     requestAnimationFrame(frame);
     return;
   }
+  if (PageLoading.loading) { render(0); requestAnimationFrame(frame); return; }
   const walkFrom = { x: state.x, y: state.y };
   if (state.landingTick) {
     if (state.landingTick(dt)) {
@@ -743,12 +747,16 @@ function startDive() {
   location.href = url.href; return true;
 }
 if (Q.get('at') === 'dock') waitUntilReady().then(() => { const p = { x: CFG.landing.shore[0], y: CFG.landing.shore[1] }; state.x = p.x; state.y = p.y; state.target = null; render(0, true);
-  if (Q.get('diveDone') === '1') { const got = ['memory6', 'memories', 'creatures', 'zukan_complete', 'coral_dive', 'dive_done'].filter(k => Q.has(k)); if (got.length) post({ type: 'larch:set', variables: Object.fromEntries(got.map(k => [k, Q.get(k)])) }); render(); } });
+  if (Q.get('diveDone') === '1') { const got = ['memory6', 'memories', 'creatures', 'zukan_complete', 'coral_dive', 'dive_done'].filter(k => Q.has(k)); if (got.length) setVars(Object.fromEntries(got.map(k => [k, state.vars[k] ?? Q.get(k)]))); zk.refresh(); render(); } });
 addEventListener('message', event => {
   const data = event.data || {};
   if (data.type === 'larch:init') {
     // 新舊順序：進卡當時的 init ＜ 這張卡裡寫過的（window.name）＜ 換頁帶回來的網址參數（下潛、長畫回來時最新）
     const fromUrl = queryVariables(); for (const k of ['chapter', 'day', 'time']) delete fromUrl[k];
+    if (fromUrl.creatures !== undefined) {
+      const existing = BR.merge(data.variables || {}).creatures;
+      fromUrl.creatures = [...new Set([existing, fromUrl.creatures].flatMap(value => String(value || '').split(',')).filter(Boolean))].join(',');
+    }
     BR.note(fromUrl);
     const vars = BR.merge(data.variables || {});
     if (Q.has('chapter')) vars.chapter = Q.get('chapter');   // Larch 的 chapter 變數預設是 true、不代表現在第幾章；以網址為準（新版/build/_島段切卡規格.md）
@@ -793,15 +801,18 @@ if (!inFrame) setTimeout(() => {
 if (Q.get('ride') === 'dolphin') waitUntilReady().then(() => startOrbit('dolphin'));
 if (Q.get('ride') === 'boat') waitUntilReady().then(() => startOrbit('boat'));
 buildWhale(); render(0, true); requestAnimationFrame(frame);
+PageLoading.prepare('地圖與進場資料', Promise.all([waitUntilReady(), zk.ready, pl.ready]));
+PageLoading.shown.then(updateReady);
+PageLoading.finish();
 
 window.islandMap = {
   config: CFG,
   get state() { return { stage: state.stage, time: state.time, x: state.x, y: state.y,
     vars: Object.assign({}, state.vars), orbit: state.orbit?.kind || null,
     passed: [...state.passed], openEntrances: entrances().map(e => e.id), nearby: updateNearby(), landing: state.landing,
-    ready: state.ready, mapReady: state.mapReady, initApplied: state.initApplied }; },
-  get ready() { return state.ready; },
-  whenReady: waitUntilReady,
+    ready: this.ready, mapReady: state.mapReady, initApplied: state.initApplied }; },
+  get ready() { return state.ready && !PageLoading.loading; },
+  async whenReady() { await PageLoading.shown; await waitUntilReady(); },
   setPosition, moveTo(p) { return moveTarget(p); }, interact,
   startOrbit, routePoint,
   trips: TRIPS,

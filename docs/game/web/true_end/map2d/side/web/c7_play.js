@@ -1,6 +1,6 @@
 // 第七章第 27 天種花（朝霞丘）、第 28 天撿貝殼（海灘）共用的小工具。玩法照 ../_第七章27_28天_提案.md（2026-11-18 作者同意）。
 // 三個小紙人（晨、明、詩）排成一列跟在茶語後面走；她停下來，三個人站到旁邊。紙人用現有的三頭身圖，不另外畫。
-const SPRITES = { chen: '../../../sprites/chen_3h.png', ming: '../../../sprites/ming_3h.png', shi: '../../../sprites/shi_3h.png' };
+const SPRITES = { chen: '../../../sprites/chen_3h.webp', ming: '../../../sprites/ming_3h.webp', shi: '../../../sprites/shi_3h.webp' };
 export const NAMES = { chen: '晨', ming: '明', shi: '詩' };
 
 // api：flat_engine 給的那一包；feet：腳底（長畫高的比例）；hFrac：人物高（長畫高的比例）；gap：每個人往後隔多少 px；bounds：能走的範圍 [左, 右]
@@ -49,7 +49,7 @@ export async function makeFollowers(api, { feet, hFrac, gap = 105, bounds, order
 
 // 把近白色的花瓣染成指定顏色（綠色的莖、葉、黃色花心不動），回傳 data URL。小花素材只有一張白的，淡紫、粉紅照這裡染
 export async function tintPetals(src, hex) {
-  const im = await new Promise((ok, no) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => ok(i); i.onerror = no; i.src = src; });   // 嵌在 Larch 時頁面是 Origin null，不帶 crossOrigin 讀回像素會被擋
+  const im = await PageLoading.preload(src, 'anonymous');   // 嵌在 Larch 時頁面是 Origin null，不帶 crossOrigin 讀回像素會被擋
   const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const g = c.getContext('2d'); g.drawImage(im, 0, 0);
   if (!hex) return c.toDataURL();
   const d = g.getImageData(0, 0, c.width, c.height), a = d.data;

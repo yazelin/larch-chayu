@@ -5,6 +5,8 @@
 // 播放時：工作室頁自己的配樂（網址 bgm=）由 studio_features.mjs 的 studioBgm 聽 <audio> 的 play／pause 自動淡出淡回（所以音檔元素要放在頁面裡）；
 // 嵌在 Larch 時另送 larch:hud:music（pause:true／false），寫法照 新版/hud/src/_apps.js 的 holdBgm：停下 400 毫秒後還沒接著播才放回故事配樂。
 import { ALBUM_TRACKS, HUD_SONG_ORDER, HEADPHONE_TRACKS } from './studio_album_data.mjs';
+import { decodeHudSeen } from './hud_seen.mjs';
+import { HUD_SEEN_KEYS } from './hud_seen_keys.mjs';
 
 export { ALBUM_TRACKS, HUD_SONG_ORDER, HEADPHONE_TRACKS };
 
@@ -16,16 +18,16 @@ function btn(text, cls, onClick) { const b = el('button', cls, text); b.type = '
 // ── 解鎖 ──
 // ctx：{ all（網址 unlock=all）, hudSeen（字串；undefined＝沒有常駐介面資料，例如網站版）, day, final（夥伴結局那張卡打開過）, saved（以前解鎖過的 id 陣列） }
 // 規則：hud 鍵在 hudSeen 裡；沒有 hudSeen 時看「第幾天之後」（day 欄位，當天還沒聽到所以要過了那一天）；
-// 生日歌 hudSeen 沒收：看第六章生日歌後那張 CG 的鍵，或過了第 20 天；最後一格只看夥伴結局。以前解鎖過的（saved）一直算。
+// 生日歌看 MV 卡的解鎖鍵；舊存檔也可用第六章生日歌後那張 CG，或過了第 20 天；最後一格只看夥伴結局。以前解鎖過的（saved）一直算。
 export function unlockedIds(ctx) {
   const out = new Set(Array.isArray(ctx.saved) ? ctx.saved : []);
-  const seen = ctx.hudSeen === undefined || ctx.hudSeen === null ? null : new Set(String(ctx.hudSeen).split(',').filter(Boolean));
+  const seen = ctx.hudSeen == null ? null : (decodeHudSeen(ctx.hudSeen, HUD_SEEN_KEYS)?.keys ?? new Set());
   const day = Number(ctx.day) || 0;
   ALBUM_TRACKS.forEach(t => {
     const u = t.unlock || {};
     if (ctx.all) { out.add(t.id); return; }
     if (u.final) { if (ctx.final) out.add(t.id); return; }
-    if (u.birthday) { if ((seen && seen.has(u.birthday)) || day > u.day) out.add(t.id); return; }
+    if (u.birthday) { if ((seen && (seen.has(u.hud) || seen.has(u.birthday))) || day > u.day) out.add(t.id); return; }
     if (seen) { if (u.hud && seen.has(u.hud)) out.add(t.id); return; }
     if (u.day !== undefined && day > u.day) out.add(t.id);
   });

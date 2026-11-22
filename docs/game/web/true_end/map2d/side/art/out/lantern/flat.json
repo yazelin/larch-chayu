@@ -64,28 +64,28 @@
  "people": [
   {
    "id": "ming",
-   "img": "../art/sprites/lt_ming.png",
+   "img": "../art/sprites/lt_ming.webp",
    "x": 1055,
    "feet_y": 2781,
    "h": 455
   },
   {
    "id": "chen",
-   "img": "../art/sprites/lt_chen.png",
+   "img": "../art/sprites/lt_chen.webp",
    "x": 765,
    "feet_y": 2811,
    "h": 460
   },
   {
    "id": "shi",
-   "img": "../art/sprites/lt_shi.png",
+   "img": "../art/sprites/lt_shi.webp",
    "x": 1195,
    "feet_y": 2811,
    "h": 455
   },
   {
    "id": "tea",
-   "img": "../art/sprites/lt_tea.png",
+   "img": "../art/sprites/lt_tea.webp",
    "x": 925,
    "feet_y": 2811,
    "h": 404
@@ -99,10 +99,10 @@
    "shi"
   ],
   "imgs": {
-   "chen": "../art/sprites/lt_lantern_chen.png",
-   "tea": "../art/sprites/lt_lantern_tea.png",
-   "ming": "../art/sprites/lt_lantern_ming.png",
-   "shi": "../art/sprites/lt_lantern_shi.png"
+   "chen": "../art/sprites/lt_lantern_chen.webp",
+   "tea": "../art/sprites/lt_lantern_tea.webp",
+   "ming": "../art/sprites/lt_lantern_ming.webp",
+   "shi": "../art/sprites/lt_lantern_shi.webp"
   },
   "keys": [
    {

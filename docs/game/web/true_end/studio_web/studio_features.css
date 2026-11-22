@@ -30,10 +30,10 @@
 .sf-day{color:#887569;font-size:12px;text-align:center}.sf-table-input{padding:7px 8px;font-size:13px}
 .sf-computer{--computer-accent:#eadfda;padding:12px;border-radius:14px;background-color:var(--computer-accent);background-size:cover;background-position:center;transition:background-color .2s}
 .sf-computer.wp-moonlight{background-image:linear-gradient(rgba(25,34,68,.3),rgba(25,34,68,.3)),url('../../../cg/ch5/ch5_cg_019.webp')}
-.sf-computer.wp-north{background-image:linear-gradient(rgba(255,250,242,.78),rgba(255,250,242,.78)),url('../../新版/canon_new/studio/flat/N.png')}
-.sf-computer.wp-east{background-image:linear-gradient(rgba(255,250,242,.76),rgba(255,250,242,.76)),url('../../新版/canon_new/studio/flat/E.png')}
-.sf-computer.wp-south{background-image:linear-gradient(rgba(255,250,242,.76),rgba(255,250,242,.76)),url('../../新版/canon_new/studio/flat/S.png')}
-.sf-computer.wp-west{background-image:linear-gradient(rgba(255,250,242,.78),rgba(255,250,242,.78)),url('../../新版/canon_new/studio/flat/W.png')}
+.sf-computer.wp-north{background-image:linear-gradient(rgba(255,250,242,.78),rgba(255,250,242,.78)),url('../../新版/canon_new/studio/flat/N.webp')}
+.sf-computer.wp-east{background-image:linear-gradient(rgba(255,250,242,.76),rgba(255,250,242,.76)),url('../../新版/canon_new/studio/flat/E.webp')}
+.sf-computer.wp-south{background-image:linear-gradient(rgba(255,250,242,.76),rgba(255,250,242,.76)),url('../../新版/canon_new/studio/flat/S.webp')}
+.sf-computer.wp-west{background-image:linear-gradient(rgba(255,250,242,.78),rgba(255,250,242,.78)),url('../../新版/canon_new/studio/flat/W.webp')}
 .sf-widgets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .sf-widget{border:1px solid #d8c4ab;border-radius:10px;padding:9px;background:rgba(255,253,248,.78);color:#382c2b;font-size:12px}
 .sf-widget.pos-top,.sf-widget.pos-bottom{grid-column:1 / -1}

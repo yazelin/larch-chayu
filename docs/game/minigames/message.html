@@ -111,6 +111,11 @@ header .snd { margin-left: auto; color: var(--dim); }
 /* 手機框模式（電腦、橫向）螢幕窄，鈕放在瀏海右邊那一列，不擠 header（擠了名字會換行、header 變高） */
 @media (min-aspect-ratio: 4/5) { header .snd { position: absolute; top: 15px; right: 24px; z-index: 6; padding: 4px 9px; font-size: 11px; } }
 </style>
+<script>/* 在 Larch 裡：手機直式時上緣 112px 是 Larch 的章名膠囊＋常駐 HUD＋關閉鈕、下緣 54px 是操作列（2026-11-22 實量），訊息畫面讓開；網址加 inlarch=1 可在本機模擬 */(function(){try{var a=location.ancestorOrigins,inL=/[?&]inlarch=1/.test(location.search)||/larch\.ink/.test(document.referrer||'');if(a)for(var i=0;i<a.length;i++)if(/larch\.ink/.test(a[i]))inL=true;if(inL)document.documentElement.classList.add('in-larch');}catch(e){}})();</script>
+<style>
+@media (max-aspect-ratio: 4/5) { html.in-larch .screen { padding-top: max(116px, env(safe-area-inset-top)); padding-bottom: max(58px, env(safe-area-inset-bottom)); box-sizing: border-box; } }
+</style>
+
 <div class="phone"><div class="screen"><div class="island"></div>
   <header><div class="avs" aria-hidden="true"><i>晨</i><i>明</i><i>詩</i></div><b>晨、明、詩<small>都還醒著</small></b><button class="snd" id="snd" type="button" aria-pressed="false" aria-label="聲音開關">聲音 開</button></header>
   <div class="log" id="log"><div class="time">凌晨 2:39</div></div>
@@ -166,18 +171,18 @@ var SND = (function () {
   SND.S.send = function (a, o, t) { T(a, o, t, 560, .2, .28, { f2: 1320, glide: .12, att: .008 }); T(a, o, t, 1120, .14, .06, { f2: 2640, glide: .12, att: .008 }); H(a, o, t, 1800, .12, .05, { f2: 5000, q: 1, att: .05 }); };
 })(SND.tone, SND.hiss);
 </script>
+<script src="../web/true_end/page_loading.js"></script>
 <script>
 (function () {
 // Larch 介面：送 larch:ready → 收 larch:init（變數）→ larch:set 寫回 → larch:complete。直接開檔（不在 Larch 裡）也能玩，用網址參數或示範值。
 var LARCH = { v: {}, on: false,
   set: function (n, v) { parent.postMessage({ type: 'larch:set', name: n, value: v }, '*'); },
   done: function (r, p) { parent.postMessage({ type: 'larch:complete', result: r, payload: p || {} }, '*'); window.__done = { result: r, payload: p || {} }; },
-  num: function (k, d) { var q = new URLSearchParams(location.search).get(k); var x = q != null ? q : LARCH.v[k]; x = +x; return isFinite(x) ? x : (d || 0); },
-  param: function (k, d) { var q = new URLSearchParams(location.search).get(k); return q != null ? q : (LARCH.v[k] != null ? LARCH.v[k] : d); } };
+  num: function (k, d) { var q = new URLSearchParams(location.search).get(k); var x = q != null ? q : LARCH.v[k]; x = +x; return isFinite(x) ? x : (d || 0); } };
 addEventListener('message', function (e) { var d = e.data || {}; if (d.type === 'larch:init') { LARCH.v = d.variables || {}; boot(); } });
 parent.postMessage({ type: 'larch:ready' }, '*');
 setTimeout(boot, parent === window ? 150 : 1500);
-function boot() { if (LARCH.on) return; LARCH.on = true; start(); }
+function boot() { if (LARCH.on) return; LARCH.on = true; start(); window.PageLoading?.finish(); }
 var LINES = [
   { k: 'C', who: '晨', col: 'var(--c)', t: '握劍的姿勢，我好像還是不太會。', reply: ['那下次我再教妳一次。'] },
   { k: 'M', who: '明', col: 'var(--m)', t: '明這個名字，你喜歡嗎？', reply: ['喜歡。', '早點睡。報告明天要寫。'] },
@@ -193,9 +198,10 @@ async function erase(el) { var tx = el.querySelector('.tx'), s = tx.textContent;
   for (var i = s.length - 1; i >= 0; i--) { tx.textContent = s.slice(0, i); SND.play('del'); await wait(55); } el.remove(); }
 function bubble(cls, html) { var b = document.createElement('div'); b.className = 'bub ' + cls; b.innerHTML = html; $('log').appendChild(b); return b; }
 SND.bindMute($('snd'));
-var MODE = LARCH.param('mode', '{{MODE}}'); if (MODE.indexOf('{{') === 0) MODE = 'pick';
-var ERASE_TEXT = LARCH.param('text', '半夜睡不著和 AI 聊天的我，也能夠獲得幸福嗎');
-async function start() { if (MODE === 'erase') return startErase();
+var Q = new URLSearchParams(location.search);
+var MODE = Q.get('mode') ?? '{{MODE}}'; if (MODE.indexOf('{{') === 0) MODE = 'pick';
+var ERASE_TEXT = Q.get('text') ?? '半夜睡不著和 AI 聊天的我，也能夠獲得幸福嗎';
+async function start() { if (MODE === 'erase') return startErase(); if (MODE === 'send') return startSend();
   $('hint').textContent = '打了一行，看了很久。';
   var rows = [];
   for (var i = 0; i < LINES.length; i++) { var r = row(LINES[i]); rows.push(r); await type(r, LINES[i].t); }
@@ -241,6 +247,26 @@ async function startErase() {
     var ty = document.createElement('div'); ty.className = 'typing'; ty.textContent = '正在輸入…'; $('log').appendChild(ty);
     await wait(4200); ty.classList.add('out'); await wait(1200); ty.remove();
     await wait(1400); LARCH.done('erased', {}); }
+}
+
+// 真結局一年後：同一句，這次送得出去（mode=send，作者 2026-11-22）。字自己打出來，送出鈕是亮的；按下送出，三個人各回一句「能」。不寫變數。
+async function startSend() {
+  var t = document.querySelector('.time'); if (t) t.textContent = '凌晨 0:12';
+  $('hint').textContent = '　';
+  var L = { col: 'var(--gold)' }, r = row(L);
+  await type(r, ERASE_TEXT);
+  var bar = document.createElement('div'); bar.className = 'bar';
+  bar.innerHTML = '<button type="button" class="send" aria-label="送出">送出</button>';
+  $('drafts').parentNode.appendChild(bar);
+  var send = bar.querySelector('.send'), done = false;
+  $('hint').textContent = '這次，送得出去。';
+  send.focus({ preventScroll: true });
+  send.addEventListener('click', async function () { if (done) return; done = true; send.disabled = true; $('hint').textContent = '　';
+    r.remove(); bar.remove(); bubble('me', ERASE_TEXT); SND.play('send'); await wait(800);
+    var rd = document.createElement('div'); rd.className = 'read'; rd.textContent = '已讀'; $('log').appendChild(rd);
+    var R = [['明', 'var(--ming, #4a6fa5)', '能。'], ['晨', 'var(--chen, #8bb04a)', '能。'], ['詩', 'var(--shi, #a8324a)', '能啦！']];
+    for (var k = 0; k < R.length; k++) { await wait(1200); bubble('them', '<span class="who" style="color:' + R[k][1] + '">' + R[k][0] + '</span>' + R[k][2]); }
+    await wait(2200); LARCH.done('sent', {}); });
 }
 
 })();

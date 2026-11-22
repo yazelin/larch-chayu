@@ -161,6 +161,13 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
     deck.setAttribute('aria-hidden', 'true');
     instrument.append(deck, wrap);
     panelBody.append(instrument, el('p', 'sp-cap', '白鍵：A S D F G H J K。黑鍵：W E T Y U。')); bindKeys({ wrap, keys });
+    // 彈電子琴時配樂也讓開（同吉他，作者 2026-11-22），面板關掉或換內容就淡回。
+    window.STUDIO_FEATURES?.bgm?.hold?.('piano', true);
+    const pianoWatch = new MutationObserver(() => {
+      if (!panel.classList.contains('on') || !instrument.isConnected) { pianoWatch.disconnect(); window.STUDIO_FEATURES?.bgm?.hold?.('piano', false); }
+    });
+    pianoWatch.observe(panel, { attributes: true, attributeFilter: ['class'] });
+    pianoWatch.observe(panelBody, { childList: true });
   }
 
   // ── 吉他（7）：作者 2026-11-21 第二版：弦是直的（左低音 Mi → 右高音 Mi），四排鍵是第 1～4 格：
@@ -172,6 +179,8 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
   function openGuitar(focus) {
     closeGuitar?.();
     openPanel('吉他', focus, 'guitar');
+    // 彈吉他時工作室配樂讓開（作者 2026-11-22：背景音太吵），關掉吉他再淡回。Larch 內嵌版的配樂也是工作室頁自己放（網址 bgm=），同一條路。
+    window.STUDIO_FEATURES?.bgm?.hold?.('guitar', true);
     const layout = el('div', 'sp-guitar-layout');
     const wrap = el('section', 'sp-guitar');
     wrap.setAttribute('aria-label', '指板與和弦');
@@ -445,6 +454,7 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
       for (const timer of flashes) clearTimeout(timer);
       practice.dispose();
       arranger.dispose();
+      window.STUDIO_FEATURES?.bgm?.hold?.('guitar', false);
       closeGuitar = null;
     };
   }

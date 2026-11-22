@@ -105,8 +105,8 @@ footer { padding: 18px 22px 60px; font-size: 12px; color: #8d8299; letter-spacin
   <div class="scroll" id="page">
     <div class="bar"><div class="bar-in"><b>創作者挑戰</b><span class="right"><span>報名中</span><button class="snd" id="snd" type="button" aria-pressed="false" aria-label="聲音開關">聲音 開</button></span></div></div>
     <div class="hero" id="hero">
-      <img class="locked" src="https://yazelin.github.io/larch-chayu/game/img/ui/challenge/hero_locked.jpg" alt="雲海裡四朵雲被鐵鍊鎖住，中央掛著一把大鎖">
-      <img class="open" src="https://yazelin.github.io/larch-chayu/game/img/ui/challenge/hero_open.jpg" alt="鎖彈開了，鐵鍊散成金色光點，一朵雲飄走">
+      <img class="locked" src="https://yazelin.github.io/larch-chayu/game/img/ui/challenge/hero_locked.webp" alt="雲海裡四朵雲被鐵鍊鎖住，中央掛著一把大鎖">
+      <img class="open" src="https://yazelin.github.io/larch-chayu/game/img/ui/challenge/hero_open.webp" alt="鎖彈開了，鐵鍊散成金色光點，一朵雲飄走">
       <canvas id="fx"></canvas>
       <div class="title"><small>第三屆主題</small><h1>自由與限制</h1></div>
       <button class="lock" id="lock" type="button" aria-label="敲中央的鎖（要敲三下）"><span class="ring" id="ring"></span></button>
@@ -278,4 +278,6 @@ var SND = (function () {
     if (r.height > H * 0.96) p.style.zoom = z * H * 0.94 / r.height; } }
   addEventListener('resize', fit); fit(); })();
 </script>
+<script src="../../web/true_end/page_loading.js"></script>
+<script>window.PageLoading?.finish();</script>
 </body></html>

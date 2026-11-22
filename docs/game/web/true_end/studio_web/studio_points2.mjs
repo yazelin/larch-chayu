@@ -1,4 +1,5 @@
 import { preparePanel } from './studio_panel.mjs';
+import { taipeiWindowTime } from './story_time.mjs';
 import { TODO_ITEMS } from './studio_points2_data.mjs';
 import { CHEN_ART, GROUP_PHOTO, MUSICAL_TICKET, SKY_DIARY } from './studio_collection_data.mjs';
 import { islandTimeFromVars } from '../map2d/side/web/island_rules.mjs';
@@ -38,7 +39,17 @@ import { islandTimeFromVars } from '../map2d/side/web/island_rules.mjs';
 .sp2-vp.circle{width:min(100%,420px,60vh);aspect-ratio:1;margin:0 auto;border-radius:50%;border:10px solid #8b6a45;box-shadow:inset 0 0 28px rgba(0,0,0,.45),0 6px 16px rgba(70,50,30,.35);background:#10202e;box-sizing:border-box}
 .sp2-crop{display:block;position:relative;overflow:hidden;width:100%;background:#dfd6c6}
 .sp2-crop img{position:absolute;max-width:none;pointer-events:none}
-.sp2-window .sp2-crop{max-width:520px;margin:auto;border:7px solid #a88262;border-radius:4px;box-shadow:0 4px 12px #50301942}
+.sp2-window .sp2-crop{max-width:none;margin:auto;border:7px solid #a88262;border-radius:4px;box-shadow:0 4px 12px #50301942}
+.sp2-window[data-sky="predawn"] img{filter:brightness(.72) saturate(.78) hue-rotate(12deg)}
+.sp2-window[data-sky="morning"] img{filter:brightness(1.08) saturate(.77) sepia(.12)}
+.sp2-window[data-sky="dusk"] img{filter:brightness(.86) sepia(.48) saturate(1.32) hue-rotate(-15deg)}
+body[data-window-time] .wall-piece[data-wall="north"] .ring-image{filter:none}
+body[data-window-time="night"] .wall-piece[data-wall="north"] .ring-image{filter:brightness(.62) saturate(.76)}
+body[data-window-time] .night-window{opacity:0}
+body[data-window-time="predawn"] .night-window{background:#6e79ab;opacity:.56}
+body[data-window-time="morning"] .night-window{background:#f5d6ac;opacity:.26}
+body[data-window-time="dusk"] .night-window{background:#ce805e;opacity:.52}
+body[data-window-time="night"] .night-window{opacity:.82}
 .sp2-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 12px}
 .sp2-slot{min-width:0;display:grid;gap:7px;align-content:start}
 .sp2-slot button{white-space:normal}
@@ -50,7 +61,7 @@ import { islandTimeFromVars } from '../map2d/side/web/island_rules.mjs';
 .sp2-group .sp2-date{position:absolute;left:10%;right:10%;bottom:4%;margin:0;color:#574337}
 .sp2-photo-large{width:min(100%,560px);margin:0 auto}
 .room-photo-wall{position:absolute;z-index:1;pointer-events:none;container-type:inline-size}
-.room-sky-pins{width:66%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px 7%;padding-top:5%;margin-left:5%}
+.room-sky-pins{width:66%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px 7%;padding-top:5%;margin-left:5%;align-items:start}
 .room-photo-wall.has-memory .room-sky-pins{width:55%}
 .room-photo{position:relative;padding:7% 7% 21%;background:#fffdf5;box-shadow:1px 2px 3px #513b3299;transform:rotate(var(--rot,0deg))}
 .room-photo::after{content:"";position:absolute;width:14%;height:25%;top:-10%;left:45%;border-radius:1px;background:#b08557;box-shadow:1px 1px 1px #4e3a29a0}
@@ -115,10 +126,10 @@ import { islandTimeFromVars } from '../map2d/side/web/island_rules.mjs';
     { id: 'cape', name: '月光岬', stage: 4, visited: 'cape_visited', done: 'ch5_done', firstDay: 17 },
     { id: 'dock', name: '碼頭', stage: 5, visited: 'island_landed' }
   ];
-  const MAPS = [null, '../map2d/art/out/island_s1.jpg', '../map2d/art/out/island_s2.jpg',
-    '../map2d/art/out/island_s3.jpg', '../map2d/art/out/island_s4.jpg', '../map2d/art/out/island_s5.jpg'];
+  const MAPS = [null, '../map2d/art/out/island_s1.webp', '../map2d/art/out/island_s2.webp',
+    '../map2d/art/out/island_s3.webp', '../map2d/art/out/island_s4.webp', '../map2d/art/out/island_s5.webp'];
   const MAP_SRC = stage => MAPS[stage];
-  const MAP_S5 = { day: MAP_SRC(5), dusk: '../map2d/art/out/island_s5_dusk.jpg', night: '../map2d/art/out/island_s5_night.jpg' };
+  const MAP_S5 = { day: MAP_SRC(5), dusk: '../map2d/art/out/island_s5_dusk.webp', night: '../map2d/art/out/island_s5_night.webp' };
   const TIME = {
     day: 'day', 白天: 'day', 中午: 'day', 下午: 'day',
     morning: 'morning', 早上: 'morning',
@@ -128,7 +139,9 @@ import { islandTimeFromVars } from '../map2d/side/web/island_rules.mjs';
   };
   const defaultWindowTime = { 5: 'dusk', 6: 'morning', 7: 'night', 8: 'morning', 12: 'night',
     13: 'dusk', 14: 'night', 15: 'night', 17: 'morning', 18: 'predawn', 20: 'dusk', 30: 'dusk' };
-  const actualTime = p => TIME[p.timeOfDay] || defaultWindowTime[p.day] || (p.day >= 21 ? 'night' : 'day');
+  const usesRealTime = p => p.day > 30 && !p.timeOfDay;
+  const actualTime = p => TIME[p.timeOfDay] || (usesRealTime(p) ? taipeiWindowTime() :
+    defaultWindowTime[p.day] || (p.day >= 21 ? 'night' : 'day'));
   const islandTime = (p, stage) => TIME[p.timeOfDay] || (p.oneYear ? 'night' : TIME[islandTimeFromVars({
     chapter: p.chapter, day: p.day, gift_chen: p.value('gift_chen'), gift_ming: p.value('gift_ming'),
     gift_shi: p.value('gift_shi'), trueEnding_island_step: p.value('trueEnding_island_step')
@@ -237,34 +250,34 @@ import { islandTimeFromVars } from '../map2d/side/web/island_rules.mjs';
     return frame;
   }
 
-  // 北窗中央的玻璃取景，避開兩側的島岸。早期窗景沒有清晨和傍晚的定稿，沿用接近的天色。
+  // 北窗用工作室的日夜窗景，通關後再依台灣時間調整天色。
   const SEA_VIEW = {
-    day: ['../../新版/canon_new/studio/A.jpg', [.516, .055, .173, .238], '白天'],
-    morning: ['../../新版/canon_new/studio/A_s4_morning.jpg', [.518, .049, .173, .245], '早上'],
-    predawn: ['../../新版/canon_new/studio/A_s4_predawn.jpg', [.518, .048, .173, .247], '天亮前'],
-    night: ['../../新版/canon_new/studio/A_night.jpg', [.517, .052, .173, .242], '夜晚']
+    day: '../../新版/canon_new/studio/A_window.webp',
+    night: '../../新版/canon_new/studio/A_night_window.webp'
   };
+  const SEA_LABEL = { predawn: '清晨', morning: '早上', day: '白天', dusk: '傍晚', night: '夜晚' };
+  function studioNight() {
+    try { if (window.__studio && window.__studio.state && window.__studio.state.night) return true; } catch (error) { /* 當成白天 */ }
+    return document.body.classList.contains('is-night');
+  }
   function openWindow(focus) {
     openPanel('北窗的海與天', focus, 'window');
     const p = progress();
-    const time = actualTime(p);
-    const sky = time === 'dusk' ? 'morning' : time;
-    const [file, box, title] = SEA_VIEW[sky];
-    const view = el('div', 'sp2-window'); view.dataset.sky = time;
-    const label = time === 'dusk' ? '傍晚' : title;
-    const picture = crop(file, '北窗外的' + label + '與海面', box);
-    if (time === 'dusk') picture.classList.add('sp2-sunset');
-    view.append(picture);
+    const sky = usesRealTime(p) ? actualTime(p) : (studioNight() ? 'night' : 'day');
+    const file = SEA_VIEW[sky === 'night' ? 'night' : 'day'];
+    const label = SEA_LABEL[sky];
+    const view = el('div', 'sp2-window'); view.dataset.sky = sky;
+    view.append(crop(file, '北窗外的' + label + '與海面', [.42, .03, .38, .30]));
     panelBody.append(view, el('p', 'sp2-cap', label + '的海面。'));
   }
 
   const DAWN_MASKS = {
-    field: '../map2d/side/art/out/dawn/gray_field.png',
-    pink: '../map2d/side/art/out/dawn/gray_pink.png',
-    white: '../map2d/side/art/out/dawn/gray_white.png',
-    yellow: '../map2d/side/art/out/dawn/gray_yellow.png',
-    orange: '../map2d/side/art/out/dawn/gray_orange.png',
-    cherry: '../map2d/side/art/out/dawn/gray_cherry.png'
+    field: '../map2d/side/art/out/dawn/gray_field.webp',
+    pink: '../map2d/side/art/out/dawn/gray_pink.webp',
+    white: '../map2d/side/art/out/dawn/gray_white.webp',
+    yellow: '../map2d/side/art/out/dawn/gray_yellow.webp',
+    orange: '../map2d/side/art/out/dawn/gray_orange.webp',
+    cherry: '../map2d/side/art/out/dawn/gray_cherry.webp'
   };
   function scopeView(area, p, time) {
     const night = time === 'night' || time === 'predawn';
@@ -275,8 +288,8 @@ import { islandTimeFromVars } from '../map2d/side/web/island_rules.mjs';
       const flowers = p.trueEnd ? 'bloom' : afterPlanting ? 'planted' : '';
       const sunrise = time === 'predawn' && painted && !flowers;
       const daylight = (time === 'day' || time === 'morning') && painted && !flowers;
-      const src = sunrise ? '../../新版/canon_new/island_v2/HILL-A_sunrise.jpg' :
-        daylight ? '../../新版/canon_new/island_v2/HILL-A_morning.jpg' : '../map2d/side/art/out/dawn/flat.jpg';
+      const src = sunrise ? '../../新版/canon_new/island_v2/HILL-A_sunrise.webp' :
+        daylight ? '../../新版/canon_new/island_v2/HILL-A_morning.webp' : '../map2d/side/art/out/dawn/flat.webp';
       const restored = String(p.value('painted_c3') || '').split(',').filter(Boolean);
       const gray = painted ? [] : restored.length ? Object.keys(DAWN_MASKS)
         .filter(key => key !== 'field' && !restored.includes(key)) : ['field', 'cherry'];
@@ -284,11 +297,11 @@ import { islandTimeFromVars } from '../map2d/side/web/island_rules.mjs';
       return { src, tone, gray, flowers };
     }
     if (area.id === 'beach') return night || late ?
-      { src: '../map2d/side/art/out/beach/flat.jpg', tone: night ? 'night' : '' } :
-      { src: '../../新版/canon_new/island_v2/BEACH-A_afternoon.jpg' };
-    if (area.id === 'cape') return { src: night ? '../map2d/side/art/out/cape/flat.jpg' : '../../新版/canon_new/island_v2/CAPE-A_afternoon.jpg', tone: late ? 'dusk' : '' };
-    if (area.id === 'dock') return { src: '../../新版/canon_new/island_v2/DOCK-A_dusk.jpg', tone: night ? 'night' : late ? '' : 'day' };
-    return { src: '../map2d/side/art/ref/long_house_ref.jpg', tone: night ? 'night' : late ? 'dusk' : '' };
+      { src: '../map2d/side/art/out/beach/flat.webp', tone: night ? 'night' : '' } :
+      { src: '../../新版/canon_new/island_v2/BEACH-A_afternoon.webp' };
+    if (area.id === 'cape') return { src: night ? '../map2d/side/art/out/cape/flat.webp' : '../../新版/canon_new/island_v2/CAPE-A_afternoon.webp', tone: late ? 'dusk' : '' };
+    if (area.id === 'dock') return { src: '../../新版/canon_new/island_v2/DOCK-A_dusk.webp', tone: night ? 'night' : late ? '' : 'day' };
+    return { src: '../map2d/side/art/ref/long_house_ref.webp', tone: night ? 'night' : late ? 'dusk' : '' };
   }
 
   function scopeLayers(art, scene) {
@@ -300,12 +313,12 @@ import { islandTimeFromVars } from '../map2d/side/web/island_rules.mjs';
     if (!scene.flowers) return;
     const blooming = scene.flowers === 'bloom';
     [560, 840, 1180].forEach((x, row) => {
-      const soil = el('img', 'sp2-flower'); soil.alt = ''; soil.src = '../map2d/side/art/sprites/c7_soil.png';
+      const soil = el('img', 'sp2-flower'); soil.alt = ''; soil.src = '../map2d/side/art/sprites/c7_soil.webp';
       soil.style.left = (x - 106) / 4178 * 100 + '%'; soil.style.top = '73.8%';
       soil.style.width = '5.1%'; soil.style.height = '3.1%'; art.append(soil);
       const offsets = blooming ? [-96, -60, -24, 12, 48, 84] : [-78, -26, 26, 78];
       offsets.forEach(dx => {
-        const flower = el('img', 'sp2-flower'); flower.alt = ''; flower.src = '../map2d/side/art/sprites/c7_flower.png';
+        const flower = el('img', 'sp2-flower'); flower.alt = ''; flower.src = '../map2d/side/art/sprites/c7_flower.webp';
         flower.style.left = (x + dx) / 4178 * 100 + '%';
         flower.style.top = blooming ? '66.6%' : '71%'; flower.style.height = blooming ? '8%' : '3.6%';
         flower.style.filter = ['hue-rotate(34deg)', 'saturate(.2) brightness(1.12)', 'none'][row];
@@ -560,14 +573,14 @@ import { islandTimeFromVars } from '../map2d/side/web/island_rules.mjs';
     const pr = progress(); const tabs = el('div', 'sp2-row'); tabs.setAttribute('role', 'tablist'); const stage = el('div');
     let tab = 'book', page = startPage;
     const focusBookNav = name => (stage.querySelector('.' + name + ':enabled') || stage.querySelector('.sp2-page'))?.focus();
-    const pages = [{ title: '素描本', src: '../../新版/canon_new/props/sketchbook.jpg', note: '封面、攤開的一頁、側面。' }]
+    const pages = [{ title: '素描本', src: '../../新版/canon_new/props/sketchbook.webp', note: '封面、攤開的一頁、側面。' }]
       .concat(CHEN_ART.slice(0, 3).filter(work => pr.chapter >= work.chapter && (!work.day || pr.day >= work.day))
         .map(work => ({ ...work, note: work.title })));
     const draw = () => {
       tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
       stage.replaceChildren();
       if (tab === 'tea') {
-        const w = el('div', 'sp2-tea'); const img = el('img'); img.alt = '桌上的冰紅茶'; img.src = '../../canon/refs/prop_tea.jpg'; w.append(img); stage.append(w, el('p', 'sp2-cap', '紅椅前，桌上的冰紅茶。')); return;
+        const w = el('div', 'sp2-tea'); const img = el('img'); img.alt = '桌上的冰紅茶'; img.src = '../../canon/refs/prop_tea.webp'; w.append(img); stage.append(w, el('p', 'sp2-cap', '紅椅前，桌上的冰紅茶。')); return;
       }
       const pg = pages[page]; const book = el('div', 'sp2-book'); book.dataset.page = String(page);
       const a = el('button', 'sp2-page'); a.type = 'button'; a.setAttribute('aria-label', pg.title + '，點一下放大'); const img = el('img'); img.alt = pg.title; img.src = pg.src; a.append(img);
@@ -601,7 +614,12 @@ import { islandTimeFromVars } from '../map2d/side/web/island_rules.mjs';
       const i = f.querySelector('img'); if (i.getAttribute('src') !== src) i.src = src; f.dataset.stage = String(stage);
     });
   }
-  function redrawRoom() { ensureFrames(); ensurePhotos(); }
+  function updateRoomWindow() {
+    const p = progress();
+    if (usesRealTime(p)) document.body.dataset.windowTime = actualTime(p);
+    else delete document.body.dataset.windowTime;
+  }
+  function redrawRoom() { updateRoomWindow(); ensureFrames(); ensurePhotos(); }
   const roomObserver = new MutationObserver(() => {
     if (window.STUDIO_FEATURES) redrawRoom();
   });
@@ -619,5 +637,11 @@ import { islandTimeFromVars } from '../map2d/side/web/island_rules.mjs';
     return true;
   }
   window.STUDIO_POINTS2 = { frames: redrawRoom, refresh, ids: Object.keys(OPEN).map(Number), stage: () => stageOf(progress()) };
-  (async function () { for (let i = 0; i < 400 && !hook(); i += 1) await new Promise(r => setTimeout(r, 50)); if (hook()) await refresh(); })();
+  (async function () {
+    for (let i = 0; i < 400 && !hook(); i += 1) await new Promise(r => setTimeout(r, 50));
+    if (hook()) {
+      await refresh();
+      if (usesRealTime(progress())) setInterval(updateRoomWindow, 60_000);
+    }
+  })();
 }

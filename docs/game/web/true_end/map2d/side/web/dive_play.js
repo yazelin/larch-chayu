@@ -19,13 +19,13 @@ const inFrame = (() => { try { return window.parent !== window; } catch (e) { re
 const send = m => { if (inFrame) try { parent.postMessage(m, '*'); } catch (e) {} };
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), rnd = (a, b) => a + Math.random() * (b - a), truth = v => v === true || v === 1 || v === '1' || v === 'true';
 const play = (name, ...a) => { try { sfx[name](...a); } catch (e) {} };
-const loadImg = src => new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => bad(new Error('載不到 ' + src)); i.src = src; });
+const loadImg = src => PageLoading.preload(src);
 
 // 紙片圖檔（全部是模型畫好白紙邊的紙片，照全島大地圖的鯨魚、小船的做法直接用，不再加一圈白邊）
 const IMG = {
-  swim: '../art/sprites/dv_tea_swim.png', float: '../art/sprites/dv_tea_float.png', turtle: '../art/sprites/dv_turtle.png', coral: '../art/sprites/dv_coral.png', scroll: '../art/sprites/scroll.png',
-  fish: ['../art/sprites/dv_fish_0.png', '../art/sprites/dv_fish_1.png', '../art/sprites/dv_fish_2.png'], jelly: ['../art/sprites/dv_jelly_0.png', '../art/sprites/dv_jelly_1.png'],
-  notes: ['../art/sprites/note_0.png', '../art/sprites/note_1.png', '../art/sprites/note_2.png', '../art/sprites/note_3.png', '../art/sprites/note_4.png', '../art/sprites/note_5.png'],
+  swim: '../art/sprites/dv_tea_swim.webp', float: '../art/sprites/dv_tea_float.webp', turtle: '../art/sprites/dv_turtle.webp', coral: '../art/sprites/dv_coral.webp', scroll: '../art/sprites/scroll.webp',
+  fish: ['../art/sprites/dv_fish_0.webp', '../art/sprites/dv_fish_1.webp', '../art/sprites/dv_fish_2.webp'], jelly: ['../art/sprites/dv_jelly_0.webp', '../art/sprites/dv_jelly_1.webp'],
+  notes: ['../art/sprites/note_0.webp', '../art/sprites/note_1.webp', '../art/sprites/note_2.webp', '../art/sprites/note_3.webp', '../art/sprites/note_4.webp', '../art/sprites/note_5.webp'],
 };
 const MEMORY6 = { title: '第六章　茶語', text: '對，我就是喜歡待在這裡。' };   // 真結局.md 157 行，原文
 
@@ -35,8 +35,9 @@ const setState = s => { S.state = s; document.body.dataset.state = s; };
 send({ type: 'larch:ready' });
 
 // ── 狀態：Larch 變數 → 網址參數 → 本機 ──
-const vars = {};
-for (const k of ['chapter', 'memories', 'memory6', 'creatures', 'dive_seen', 'coral_dive']) if (Q.has(k)) vars[k] = Q.get(k);
+const vars = {}, fromUrl = {};
+for (const k of ['chapter', 'memories', 'memory6', 'creatures', 'dive_seen', 'coral_dive']) if (Q.has(k)) fromUrl[k] = Q.get(k);
+Object.assign(vars, fromUrl);
 const local = {};
 async function loadLocal() {
   if (!window.StudioDB) return;
@@ -53,15 +54,19 @@ let D, W, H, L, cam = { s: 1, Vw: 1536, Vh: 864, vx: 0, vy: 0, cx: null, cy: nul
 const tea = { el: null, swim: null, float: null, h: 210, face: 1, ang: 0, pose: 'float' };
 const schools = [], jellies = []; let turtle = null, coral = null, scroll = null, raysCv, raysG;
 async function boot() {
-  D = await (await fetch('../art/out/dive/flat.json')).json(); W = D.width; H = D.height; L = D.layers;
+  D = await PageLoading.json('../art/out/dive/flat.json'); W = D.width; H = D.height; L = D.layers;
   Object.assign(bg.style, { width: W + 'px', height: H + 'px' }); Object.assign(art.style, { width: W + 'px', height: H + 'px' });
-  await Promise.all([loadImg(bg.src), loadLocal()]);
+  await Promise.all([PageLoading.image(bg), PageLoading.track('下潛存檔', loadLocal())]);
   await new Promise(ok => { if (S.inited || !inFrame) return ok(); const t = setTimeout(ok, 700); addEventListener('message', function on(e) { if ((e.data || {}).type === 'larch:init') { clearTimeout(t); ok(); } }); });
   S.chapter = String(get('chapter') || 'true'); S.ch4 = S.chapter === '4';
   S.limitY = S.ch4 ? L.mid_limit : L.floor_tea;
   zk = createZukan({ vars: () => Object.assign({}, local, vars), set: setVars, toast }); await zk.ready; S.seen = DIVE_KINDS.filter(k => zk.has(k)); S.coral = truth(get('coral_dive')); S.memory6 = truth(get('memory6'));
   // 光：水面下幾道黃昏的斜光，畫在一張小 canvas 上慢慢晃（只蓋上面那一段）
   raysCv = $('rays'); raysCv.width = W / 4; raysCv.height = L.rays_h / 4; Object.assign(raysCv.style, { width: W + 'px', height: L.rays_h + 'px' }); raysG = raysCv.getContext('2d');
+  const sprites = [IMG.swim, IMG.float, ...IMG.fish, ...IMG.jelly, ...IMG.notes];
+  if (!S.ch4) sprites.push(IMG.turtle, IMG.coral, ...(!S.memory6 ? [IMG.scroll] : []));
+  // 先並行讀圖，組裝時沿用同一批 decode 結果。
+  PageLoading.prepare('海底精靈圖', Promise.allSettled(sprites.map(loadImg)));
   // 茶語
   const [sw, fl] = await Promise.all([loadImg(IMG.swim), loadImg(IMG.float)]);
   tea.el = mk('tea'); tea.swim = addImg(tea.el, IMG.swim); tea.float = addImg(tea.el, IMG.float);
@@ -100,12 +105,16 @@ async function boot() {
   }
   art.append(tea.el);   // 茶語畫在最上面
   layout(); addEventListener('resize', layout);
-  bindInput();
-  setState('ready'); requestAnimationFrame(() => { fade.style.opacity = '0'; });
-  play('splash');
   if (matchMedia('(pointer: coarse)').matches) hint.textContent = '按住往下潛，放開慢慢浮上來；按住往左右拖可以游過去';   // 手機沒有方向鍵
-  setTimeout(() => hint.classList.add('off'), 7000);
-  last = performance.now(); requestAnimationFrame(frame);
+  follow(cam, W, H, S.x - cam.Vw / 2, S.y - cam.Vh * 0.42, 0);
+  render(performance.now() / 1000);
+  PageLoading.shown.then(() => {
+    bindInput();
+    setState('ready');
+    play('splash');
+    setTimeout(() => hint.classList.add('off'), 7000);
+    last = performance.now(); requestAnimationFrame(frame);
+  });
 }
 function mk(cls) { const d = document.createElement('div'); d.className = 'sp ' + cls; art.append(d); return d; }
 function addImg(el, src) { const im = new Image(); im.src = src; im.alt = ''; im.draggable = false; el.append(im); return im; }
@@ -321,7 +330,9 @@ function finish(reason) {
   if (S.state === 'done' || S.state === 'leaving') return;
   setState('leaving'); S.reason = reason; play('splash');
   const done = S.ch4 ? { c4_dive: 'true' } : { dive_done: 'true' }; setVars(done);
-  const payload = { reason, seen: S.seen.slice(), memory6: S.memory6, coral: S.coral, writes: Object.assign({}, S.writes) };
+  const creatures = zk.list().join(',');
+  if (creatures) setVars({ creatures });
+  const payload = { reason, creatures, seen: S.seen.slice(), memory6: S.memory6, coral: S.coral, writes: Object.assign({}, S.writes) };
   if (!Q.get('back')) { if (window.IslandBridge) window.IslandBridge.complete('surfaced', payload); else send({ type: 'larch:complete', result: 'surfaced', payload }); }   // 從全島或海灘換頁進來的（有 back）：浮上來是回那一頁，這張卡還沒演完，不送完成
   window.__done = { result: 'surfaced', payload };
   fade.style.opacity = '1';
@@ -336,5 +347,8 @@ function finish(reason) {
   }, 1000);
 }
 
-addEventListener('message', e => { const d = e.data || {}; if (d.type === 'larch:init') { S.inited = true; S.vars = d.variables || {}; Object.assign(vars, S.vars); } });
-boot().catch(err => { console.error(err); setState('error'); S.error = String(err && err.message || err); fade.style.opacity = '0'; });
+addEventListener('message', e => { const d = e.data || {}; if (d.type === 'larch:init') { S.inited = true; S.vars = d.variables || {}; const received = window.IslandBridge ? window.IslandBridge.merge(S.vars) : S.vars;
+  const creatures = [...new Set([received.creatures, fromUrl.creatures, S.writes.creatures].flatMap(value => String(value || '').split(',')).filter(Boolean))].join(',');
+  Object.assign(vars, received, fromUrl, S.writes, { creatures });
+  if (zk) S.seen = DIVE_KINDS.filter(k => zk.has(k)); } });
+PageLoading.track('海底場景組裝', boot()).then(() => PageLoading.finish()).catch(err => { console.error(err); setState('error'); S.error = String(err && err.message || err); fade.style.opacity = '0'; });

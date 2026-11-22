@@ -11,12 +11,12 @@
   3878
  ],
  "exit": "left",
- "cg": "../art/out/dawn/cg_view_two.jpg",
+ "cg": "../art/out/dawn/cg_view_two.webp",
  "night": false,
  "npcs": [
   {
    "id": "chen",
-   "img": "../../../sprites/chen_3h.png",
+   "img": "../../../sprites/chen_3h.webp",
    "x": 1751,
    "h": 0.46,
    "face": 1
@@ -153,13 +153,13 @@
   "right2"
  ],
  "easel": {
-  "patch": "../art/out/dawn/easel_painted.png",
+  "patch": "../art/out/dawn/easel_painted.webp",
   "x": 1831,
   "y": 482,
   "w": 206,
   "h": 194
  },
- "cg_one": "../art/out/dawn/cg_view_one.jpg",
+ "cg_one": "../art/out/dawn/cg_view_one.webp",
  "sun": {
   "x": 2798,
   "y": 293,

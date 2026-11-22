@@ -10,7 +10,14 @@ export function createPetals({ stage, IMG, camX, getScale, canopies, feetY = 0.8
   const ctx = cv.getContext('2d'); const P = []; let next = 1.0, wind = 10, windT = 0, grayMode = false;   // 第三章樹還是灰的時候花瓣也灰（降飽和，灰階不會髒）
   const rnd = (a, b) => a + Math.random() * (b - a);
   const IMGS = { cherry: [], tulip: [] };
-  const load = async (pre, key) => { const meta = await (await fetch(base + pre + '.json')).json(); for (const m of meta) { const im = new Image(); im.src = base + m.file; await new Promise(ok => { im.onload = ok; im.onerror = ok; }); IMGS[key].push({ im, w: m.w, h: m.h, flower: key === 'cherry' && m.w > 0 && Math.abs(m.w - m.h) < m.w * 0.25 }); } };
+  async function load(pre, key) {
+    const meta = await PageLoading.json(base + pre + '.json');
+    const layers = await Promise.all(meta.map(async m => {
+      const im = await PageLoading.preload(base + m.file).catch(() => null);
+      return im && { im, w: m.w, h: m.h, flower: key === 'cherry' && m.w > 0 && Math.abs(m.w - m.h) < m.w * 0.25 };
+    }));
+    IMGS[key] = layers.filter(Boolean);
+  }
   const ready = Promise.all([load('petal_c', 'cherry'), load('petal_t', 'tulip')]);
   function pickImg(kind) { const arr = IMGS[kind]; if (!arr.length) return null; if (kind === 'cherry') { const flowers = arr.filter(a => a.flower), petals = arr.filter(a => !a.flower); const pool = Math.random() < 0.08 && flowers.length ? flowers : (petals.length ? petals : arr); return pool[Math.floor(Math.random() * pool.length)]; } return arr[Math.floor(Math.random() * arr.length)]; }
   function make(x, y, kind = 'cherry') {

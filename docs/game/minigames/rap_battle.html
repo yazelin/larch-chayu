@@ -186,7 +186,13 @@ body.on::after { content:""; position:fixed; inset:0; pointer-events:none; backg
 .opt.right::before { background:rgba(233,207,154,.96); }
 .banner { color:#8c642b; text-shadow:0 1px 0 rgba(243,236,223,.9); }
 @media (orientation:portrait) { .frame { width:100%; } }
-</style></head>
+</style><script>/* 在 Larch 裡（播放器把章名膠囊放左上、常駐 HUD＋關閉鈕放右上、按鈕列放右下，2026-11-22 實量）就讓開那幾塊；網址加 inlarch=1 可在本機模擬 */(function(){try{var a=location.ancestorOrigins,inL=/[?&]inlarch=1/.test(location.search)||/larch\.ink/.test(document.referrer||'');if(a)for(var i=0;i<a.length;i++)if(/larch\.ink/.test(a[i]))inL=true;if(inL)document.documentElement.classList.add('in-larch');}catch(e){}})();</script>
+<style>
+html.in-larch .app{padding-top:max(56px,env(safe-area-inset-top))!important;padding-bottom:max(64px,env(safe-area-inset-bottom))!important}
+html.in-larch .app>.bar{padding-right:258px}
+@media(max-width:700px){html.in-larch .app{padding-top:max(120px,env(safe-area-inset-top))!important;padding-bottom:max(58px,env(safe-area-inset-bottom))!important}html.in-larch .app>.bar{padding-right:0}}
+</style>
+</head>
 <body>
 <div class="app" id="app">
   <div class="bar"><p class="kicker">第四章．音之國</p><i class="rule"></i><span class="count">回合 <b id="n">1</b>／<b>2</b></span><button class="mute" id="mute" aria-pressed="false">聲音 開</button></div>
@@ -208,6 +214,7 @@ body.on::after { content:""; position:fixed; inset:0; pointer-events:none; backg
   <p>他唱一句，畫面跳出三句。挑句尾跟他押同一個韻的那句接上去。接錯了就再挑一次。</p>
   <button class="go" id="go">上台</button></div></div>
 
+<script src="../web/true_end/page_loading.js"></script>
 <script>
 /* ===== 素材（之後換正式圖只改這裡）=====
    每一項空字串＝用下面程式畫的暫時素材（SVG）。換成圖片網址（建置時可寫 {{ASSET:檔名}}）就改用圖。
@@ -216,7 +223,7 @@ body.on::after { content:""; position:fixed; inset:0; pointer-events:none; backg
    boss：說唱大魔王（詩）站姿，不含帽子（腳底在圖下緣中間，約 200×230）；hat：帽子另一張（會照回合歪，旋轉中心在圖下緣中間，約 180×90）。
    hero：勇者背影或側身（腳底在圖下緣中間，約 70×110）。
    defeat：魔王完敗立繪（跌坐、帽子與麥克風在地上；底邊是鞋底，約 230×152）。 */
-var ASSETS = { city: './img/sound_city.webp', stage: '', boss: './img/shi_king.png', hat: '', hero: './img/hero.png', defeat: './img/shi_defeat.png', tilt: '' };
+var ASSETS = { city: './img/sound_city.webp', stage: '', boss: './img/shi_king.webp', hat: '', hero: './img/hero_cut.webp', defeat: './img/shi_defeat.webp', tilt: '' };
 /* 隨進度換的姿勢（作者 11-17：勇者與魔王都要自然、隨進度換）。每組圖排在同一畫布（900×1150、站直身高 1100、兩腳中心在下緣中間，canon_new/outfits/poses/normalize.py），
    同一個框疊放、交叉淡入，腳底不跳位；身高與腳底對齊原本的 hero.png、shi_king.png。帽子歪掉那一下改用 shi_stunned（取代 shi_hattilt）。 */
 var POSES = { hero: { box: [288, 113.6, 184, 235.1], keys: ['nervous', 'groove', 'point', 'oops', 'win'], src: './img/hero_rap_' },
@@ -465,7 +472,7 @@ function drawHero(g) {
 }
 // 麥克風發出的聲波圈、接對時飄上去的音符
 function ring(k) { if (still || !fx || finished || defeated) return; var r = el('circle', { class: 'ring', cx: mic.x, cy: mic.y, r: 10, 'stroke-width': 2, opacity: .7 * k }, fx), t = performance.now();
-  (function s(n) { var p = Math.min(1, (n - t) / 900); r.setAttribute('r', 10 + 70 * p); r.setAttribute('opacity', (.7 * k * (1 - p)).toFixed(3)); if (p < 1) requestAnimationFrame(s); else r.remove(); })(t); }
+  (function s(n) { var p = Math.max(0, Math.min(1, (n - t) / 900)); r.setAttribute('r', 10 + 70 * p); r.setAttribute('opacity', (.7 * k * (1 - p)).toFixed(3)); if (p < 1) requestAnimationFrame(s); else r.remove(); })(t); }
 function notes() { if (still) return; for (var i = 0; i < 7; i++) (function (i) {
   var g = el('g', { class: 'note' }, fx), x0 = mic.x - 60 + Math.random() * 120, col = ['#c8d45a', '#8aa2ea', '#e07a8c', '#e9cf9a'][i % 4];
   el('ellipse', { cx: 0, cy: 0, rx: 7, ry: 5, fill: col, transform: 'rotate(-20)' }, g); el('path', { d: 'M6,-2 V-24 q8,4 10,10', stroke: col, 'stroke-width': 2.5, fill: 'none' }, g);
@@ -554,7 +561,7 @@ function fitView() { var tall = innerWidth < innerHeight, box = document.querySe
   var w = Math.min(box.width, box.height * aspect), h = w / aspect; frameBox.style.width = Math.floor(w) + 'px'; frameBox.style.height = Math.floor(h) + 'px'; }
 function boot() { if (booted) return; booted = true;
   if (still) document.documentElement.classList.add('reduce');
-  document.body.classList.add('on'); drawScene(); fitView(); addEventListener('resize', fitView); $('go').focus(); }
+  document.body.classList.add('on'); drawScene(); fitView(); addEventListener('resize', fitView); $('go').focus(); window.PageLoading?.finish(); }
 $('go').addEventListener('click', function () { if (started) return; SND.unlock(); started = true; $('intro').classList.add('gone'); startBeat(); play(); });
 $('mute').addEventListener('click', function () { var m = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', m); this.textContent = m ? '聲音 關' : '聲音 開'; SND.setMute(m); });
 // 測試用：目前狀態（自動化試玩用，不影響遊戲）

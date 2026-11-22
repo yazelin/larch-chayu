@@ -1,0 +1,70 @@
+{
+  "id": "./",
+  "name": "夜後明月・手機",
+  "short_name": "夜後明月",
+  "description": "《夜後明月》的手機延伸 App。",
+  "start_url": "./?source=installed",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#ece7f3",
+  "background_color": "#f2eef6",
+  "icons": [
+    {
+      "src": "./assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "晨・畫圖",
+      "short_name": "晨",
+      "url": "./?app=chen",
+      "icons": [
+        {
+          "src": "./assets/appicons/chen_draw.png",
+          "sizes": "256x256",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "明・寫程式",
+      "short_name": "明",
+      "url": "./?app=ming",
+      "icons": [
+        {
+          "src": "./assets/appicons/ming_os_logo.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "詩・做音樂",
+      "short_name": "詩",
+      "url": "./?app=shi",
+      "icons": [
+        {
+          "src": "./assets/appicons/shi_music.png",
+          "sizes": "256x256",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}

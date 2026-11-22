@@ -60,7 +60,8 @@ export function readGameState(search, variables) {
   const rawSeat = String(vars.seat !== undefined ? vars.seat : (query.get('seat') || ''));
   const seat = ['a', 'b', 'c'].includes(rawSeat) ? rawSeat : '';
   const clearedTrue = [true, 1, 'true', '1'].includes(vars.clearedTrue ?? query.get('clearedTrue'));
-  return { day: day, chapter: chapter, seat: seat, affinity: affinity, trialKnown: trialKnown, summary: summary, clearedTrue: clearedTrue };
+  const trialEnded = day > 30 || [true, 1, 'true', '1'].includes(vars.trialEnded ?? query.get('trialEnded'));
+  return { day, chapter, seat, affinity, trialKnown, trialEnded, summary, clearedTrue };
 }
 
 // 群聊回覆 → 有順序的 [{speaker, content, mood}]（1～3 人）。新格式 {replies:[{speaker,text}]}（或直接是陣列），

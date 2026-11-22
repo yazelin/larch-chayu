@@ -40,7 +40,7 @@ body.beach .thing.flat .shadow{opacity:0}
 .bulbglow.on{opacity:1;animation:bbulb 3.2s ease-in-out infinite}@keyframes bbulb{50%{opacity:.78}}.bulbglow.flash{animation:bflash .5s ease-out}@keyframes bflash{30%{opacity:1;transform:translate(-50%,-50%) scale(1.5)}}
 .fireglow{position:absolute;z-index:1;pointer-events:none;border-radius:50%;mix-blend-mode:screen;transform:translate(-50%,-50%) scale(var(--s,1));transition:transform .5s ease-out;background:radial-gradient(closest-side,rgba(255,196,110,.5),rgba(255,150,80,.2) 45%,rgba(255,140,80,0) 100%);animation:bfire 1.7s steps(7) infinite}@keyframes bfire{0%{opacity:.82}14%{opacity:1}28%{opacity:.7}42%{opacity:.95}57%{opacity:.76}71%{opacity:1}85%{opacity:.84}100%{opacity:.82}}
 .beachcv{position:absolute;pointer-events:none;z-index:1}
-#call{position:fixed;z-index:12;right:max(18px,env(safe-area-inset-right));bottom:max(22px,env(safe-area-inset-bottom));padding:.6em 1.6em .65em;color:var(--ink);font:700 19px/1.3 var(--hand);letter-spacing:.16em;cursor:pointer;background:none;rotate:-2deg;
+#call{position:fixed;z-index:12;right:max(18px,env(safe-area-inset-right));bottom:max(var(--larch-bottom,64px),env(safe-area-inset-bottom));padding:.6em 1.6em .65em;color:var(--ink);font:700 19px/1.3 var(--hand);letter-spacing:.16em;cursor:pointer;background:none;rotate:-2deg;
   border-style:solid;border-width:0;border-image:var(--btn) var(--btn-slice) fill / var(--btn-width) stretch;filter:drop-shadow(0 4px 5px rgba(90,50,60,.3));transition:transform .15s}
 #call:hover{transform:translateY(-3px)}#call:active{transform:translateY(1px) scale(.97)}#call[hidden]{display:none}#call small{font-size:13px;font-weight:400;color:var(--dim);margin-left:.5em;letter-spacing:.05em}
 body.panel-open #call,body.locked #call,body.nohud #call{opacity:.0;pointer-events:none}
@@ -81,12 +81,12 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     dolphin: { far: [3120, 262], near: [2326, 356], len: 112 },
   };
   const SOLFA = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'], SHELLC = ['#f6a58c', '#f3c08a', '#ecd38c', '#e9a39a', '#b9b3e6', '#ef8573', '#cfe0f0'];
-  const FX = await (await fetch('../art/sprites/fx.json')).json(); const FXK = {}; for (const e of FX) (FXK[e.kind] = FXK[e.kind] || []).push(e.file);
+  const FX = await PageLoading.json('../art/sprites/fx.json'); const FXK = {}; for (const e of FX) (FXK[e.kind] = FXK[e.kind] || []).push(e.file);
   const fxImg = (kind, cls = '') => { const pool = FXK[kind] || FXK.star; const im = document.createElement('img'); im.className = 'fx ' + kind + ' ' + cls; im.src = '../art/sprites/' + pool[Math.floor(Math.random() * pool.length)]; im.alt = ''; im.draggable = false; return im; };
   function sparkle(x, y, n = 8, far = 1) { for (let i = 0; i < n; i++) { const s = fxImg(Math.random() < 0.7 ? 'star' : 'glow'); s.style.left = X(x + rnd(-10, 10)); s.style.top = Y(y); s.style.setProperty('--a', (i / n * 360 + rnd(-20, 20)) + 'deg'); s.style.setProperty('--d', rnd(30, 80) * far + 'px'); s.style.setProperty('--sz', rnd(12, 22) + 'px'); s.style.animationDelay = rnd(0, 0.15) + 's'; art.appendChild(s); setTimeout(() => s.remove(), 1500); } }
   function heart(x, y) { const h = fxImg('heart', 'float'); h.style.left = X(x); h.style.top = Y(y); h.style.setProperty('--sz', rnd(18, 24) + 'px'); h.style.setProperty('--dx', rnd(-14, 14) + 'px'); art.appendChild(h); setTimeout(() => h.remove(), 1700); }
   function drops(x, y, n = 6) { for (let i = 0; i < n; i++) { const d = fxImg('drop', 'falling'); d.style.left = X(x + rnd(-26, 26)); d.style.top = Y(y - rnd(4, 26)); d.style.setProperty('--sz', rnd(7, 12) + 'px'); d.style.setProperty('--dy', rnd(24, 46) + 'px'); d.style.animationDelay = rnd(0, 0.25) + 's'; art.appendChild(d); setTimeout(() => d.remove(), 1400); } }
-  const NOTES = []; for (let i = 0; i < 6; i++) NOTES.push(`../art/sprites/note_${i}.png`);
+  const NOTES = []; for (let i = 0; i < 6; i++) NOTES.push(`../art/sprites/note_${i}.webp`);
   function note(x, y, delay = 0, up = 70) { const im = document.createElement('img'); im.className = 'fx mnote'; im.src = pick(NOTES); im.alt = ''; im.draggable = false; im.style.left = X(x + rnd(-10, 10)); im.style.top = Y(y); im.style.setProperty('--sz', rnd(16, 24) + 'px'); im.style.setProperty('--dx', rnd(-26, 26) + 'px'); im.style.setProperty('--up', up + 'px'); im.style.animationDelay = delay + 's'; art.appendChild(im); setTimeout(() => im.remove(), 2100 + delay * 1000); }
 
   // ── 小紙片、熱區（做法照 dawn_play.js） ──
@@ -188,7 +188,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   // ── 螃蟹 ──
   let shyTold = on('c4_call'); function sawShy() { if (!ch4 || shyTold || on('c4_call')) return; shyTold = true; setTimeout(() => teachCall(), 700); }
   const d28Picked = new Set((st.shells_c7 || '').split(',').filter(Boolean));   // 第 28 天茶語撿過的貝殼（下面那段用）
-  const crabSrc = '../art/sprites/crab.png'; const CRAB_H = 34, CRAB_W = CRAB_H * 989 / 689; const crabs = [];
+  const crabSrc = '../art/sprites/crab.webp'; const CRAB_H = 34, CRAB_W = CRAB_H * 989 / 689; const crabs = [];
   for (const c0 of S.crabs) {
     const guardKey = K('crab_' + c0.id + '_off'); const guarding = () => !!c0.shell && (ch4 || (d28 && c0.shell !== 7)) && !on(guardKey) && !(d28 ? d28Picked.has('s' + c0.shell) : picked.has(c0.shell));
     const el = await sprite(crabSrc, 'crab'); const c = { id: c0.id, el, x: c0.x + (c0.shell && ch4 && on(guardKey) ? 70 : 0), y: c0.y, tx: null, speed: 0, calm: 0, guard: guarding(), shell: c0.shell, told: false };
@@ -216,7 +216,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   // ── 貝殼 ──
   const shells = [];
   if (ch4 && !on('c4_melody')) for (const s0 of S.shells) {
-    if (picked.has(s0.n)) continue; const el = await sprite(`../art/sprites/shell_${s0.n}.png`, 'shell flat'); const h = 24 - (s0.n - 1) * 1.6; const s = { ...s0, el, h };
+    if (picked.has(s0.n)) continue; const el = await sprite(`../art/sprites/shell_${s0.n}.webp`, 'shell flat'); const h = 24 - (s0.n - 1) * 1.6; const s = { ...s0, el, h };
     const crab = s0.crab && crabs.find(c => c.id === s0.crab); const covered = () => (crab && crab.guard) || (s0.hermit && !on('hermit_out_c4'));
     place(el, s.x, s.y, h); if (crab) art.insertBefore(el, crab.el);   // 螃蟹壓在貝殼上面
     if (s0.hermit && covered()) el.style.display = 'none';
@@ -227,10 +227,10 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   }
 
   // ── 海鷗（站姿 gull.png；飛行 gull_fly_0..2：翅上、翅下、滑翔，做法照朝霞丘的小鳥） ──
-  const gullFly = []; for (let k = 0; k < 3; k++) { try { gullFly.push((await paperize(`../art/sprites/gull_fly_${k}.png`, { edge: 7, jitter: 2 })).src); } catch { break; } }
+  const gullFly = []; for (let k = 0; k < 3; k++) { try { gullFly.push((await paperize(`../art/sprites/gull_fly_${k}.webp`, { edge: 7, jitter: 2 })).src); } catch { break; } }
   const GULL_H = 46; const gulls = [];
   for (const g0 of S.gulls) {
-    const el = await sprite('../art/sprites/gull.png', 'bird gull'); place(el, g0.x, g0.y, GULL_H); const sheet = el.querySelector('.sheet'); const standSrc = sheet.src;
+    const el = await sprite('../art/sprites/gull.webp', 'bird gull'); place(el, g0.x, g0.y, GULL_H); const sheet = el.querySelector('.sheet'); const standSrc = sheet.src;
     const g = { id: g0.id, el, x: g0.x, y: g0.y, home: g0, state: 'perch', calm: 0, away: 0, face: g0.id % 2 ? -1 : 1, idleT: rnd(1, 4) }; el.style.setProperty('--facing', g.face);
     const z = zone('gull' + g.id, '海鷗', { x: g.x - 36, w: 72, y: g.y - GULL_H - 8, h: GULL_H + 16 }, () => { if (g.state === 'fly') return; if (g.calm > 0) { sfx.squawk(); const r = pick(['ruffle', 'hopstep', 'peckonce']); el.classList.add(r); setTimeout(() => el.classList.remove(r), 600); if (Math.random() < 0.4) heart(g.x, g.y - GULL_H - 6); return; } flyOff(); }, { lane: null });
     g.z = z; gulls.push(g); let flapT = 0;
@@ -256,7 +256,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   }
 
   // ── 寄居蟹：躲在石頭後面（石頭那一塊從原畫剪出來疊在牠前面，像素跟底圖一樣），呼喚才出來 ──
-  const hermit = { el: await sprite('../art/sprites/hermit.png', 'hermit'), x: S.hermit.hide[0], y: S.hermit.hide[1], out: false, t: 0, moving: false }; const HERMIT_H = 30;
+  const hermit = { el: await sprite('../art/sprites/hermit.webp', 'hermit'), x: S.hermit.hide[0], y: S.hermit.hide[1], out: false, t: 0, moving: false }; const HERMIT_H = 30;
   place(hermit.el, hermit.x, hermit.y, HERMIT_H); hermit.el.style.setProperty('--facing', 1);
   if (M.rock_fg) { const r = M.rock_fg; const im = document.createElement('img'); im.className = 'easelpatch rockfg'; im.src = r.img; im.alt = ''; im.draggable = false; Object.assign(im.style, { left: X(r.x), top: Y(r.y), width: X(r.w), height: Y(r.h), zIndex: 2 }); hermit.el.after(im); }
   const hermitZ = zone('hermit', '寄居蟹', { x: S.hermit.out[0] - 34, w: 68, y: S.hermit.out[1] - HERMIT_H - 10, h: HERMIT_H + 18 }, () => { if (hermit.moving) return; sfx.scuttle(); const r = pick(['tuck', 'hopup']); hermit.el.classList.add(r); setTimeout(() => hermit.el.classList.remove(r), r === 'tuck' ? 1100 : 460); if (r === 'hopup' && Math.random() < 0.5) heart(hermit.x, hermit.y - HERMIT_H - 6); hermit.t = 18; }, { lane: null }); hermitZ.hide();
@@ -268,8 +268,8 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   api.onFrame(dt => { if (!hermit.out || hermit.moving) return; hermit.t -= dt; if (hermit.t <= 0 && Math.abs(state.x - hermit.x) > 200) { hermit.out = false; hermitMove(S.hermit.hide, () => {}); } });
 
   // ── 海豚：在浪邊對著海呼喚才來（第四章要等詩敲完旋律） ──
-  const dolSrc = []; for (const k of [0, 1]) dolSrc.push((await paperize(`../art/sprites/dolphin_${k}.png`, { edge: 7, jitter: 2 })).src);
-  const dol = { el: await sprite('../art/sprites/dolphin_1.png', 'dolphin flat'), here: false, busy: false, x: S.dolphin.far[0], y: S.dolphin.far[1], t: 0 }; const DOL_H = S.dolphin.len * 307 / 406; /* 兩格墊成同樣大的畫布 406×307，海豚身長等於畫布寬 */ const dolSheet = dol.el.querySelector('.sheet');
+  const dolSrc = []; for (const k of [0, 1]) dolSrc.push((await paperize(`../art/sprites/dolphin_${k}.webp`, { edge: 7, jitter: 2 })).src);
+  const dol = { el: await sprite('../art/sprites/dolphin_1.webp', 'dolphin flat'), here: false, busy: false, x: S.dolphin.far[0], y: S.dolphin.far[1], t: 0 }; const DOL_H = S.dolphin.len * 307 / 406; /* 兩格墊成同樣大的畫布 406×307，海豚身長等於畫布寬 */ const dolSheet = dol.el.querySelector('.sheet');
   place(dol.el, dol.x, dol.y, DOL_H); dol.el.style.display = 'none'; dol.el.style.zIndex = 1; under(dol.el);   // 在浪的那張 canvas 上面、人物後面
   const dolphinAllowed = () => !ch4 || on('c4_melody');
   const dolZ = zone('dolphin', '海豚', { x: S.dolphin.near[0] - 74, w: 148, y: S.dolphin.near[1] - 62, h: 76 }, () => { if (dol.busy) return; sfx.squeak(); dolHop();
@@ -317,7 +317,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     const anim = dt => { t += dt / secs; const e = Math.min(1, t); shiPose(x0 + (x1 - x0) * e, y0 + (y1 - y0) * e, k0 + (k1 - k0) * e); shiEl.style.setProperty('--bob', (-window.WalkSway.pose(t * secs, true).lift * 100) + '%'); shiEl.style.setProperty('--rock', window.WalkSway.pose(t * secs, true).tilt + 'deg'); if (e >= 1) { shiEl.style.setProperty('--bob', '0%'); shiEl.style.setProperty('--rock', '0deg'); const k = api.frameHooks.indexOf(anim); if (k >= 0) api.frameHooks.splice(k, 1); ok(); } }; api.frameHooks.push(anim); }); }
   // 坐在舞台邊的紙片（人和舞台前緣那一段同一張）：照 sprites/<鍵>.json 量好的矮牆左右緣與前緣，縮放到蓋住原畫柱腳到台階那一段
   const sitPieces = {};
-  async function sitPiece(key) { if (sitPieces[key]) return sitPieces[key]; const m = await (await fetch(`../art/sprites/${key}.json`)).json(); const el = await sprite(`../art/sprites/${key}.png`, 'sit stagepiece ' + key, { edge: 6, jitter: 2 });
+  async function sitPiece(key) { if (sitPieces[key]) return sitPieces[key]; const m = await PageLoading.json(`../art/sprites/${key}.json`); const el = await sprite(`../art/sprites/${key}.webp`, 'sit stagepiece ' + key, { edge: 6, jitter: 2 });
     const s = (S.sit.x1 - S.sit.x0) / (m.wall_x1 - m.wall_x0); const left = S.sit.x0 - m.wall_x0 * s, top = S.sit.lip - m.lip * s; sitPieces[key] = { el, cx: left + m.w * s / 2, bottom: top + m.h * s, h: m.h * s, head: top }; return sitPieces[key]; }
   function showSit(p, sink = true) { p.el.classList.remove('sink', 'rise'); place(p.el, p.cx, p.bottom, p.h); art.insertBefore(p.el, firstPerson); if (sink) { void p.el.offsetWidth; p.el.classList.add('sink'); } }
   let shiZ = null, teachCall = () => {};
@@ -358,7 +358,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     const sg_ = S.stage; const walkT = walkTea(clamp(sg_.cx + 40, M.walk[0], M.walk[1]), FEET, 1, 520).then(() => { state.face = -1; api.render(); });
     await walkShi(sg_.steps.x + 60, FEET, 1, 520); await walkShi(sg_.steps.x + 60, sg_.foot + 8, 0.80); for (let i = 0; i < 3; i++) setTimeout(() => sfx.wood(i), i * 150); await walkShi(sg_.steps.x + 60, sg_.feet, sg_.k, 300); await walkShi(1400, sg_.feet + 2, sg_.k, 300); shiLook(1); await walkT;
     // 貝殼一個一個擺上舞台前緣
-    melodyState = 'laying'; const row = []; for (let i = 0; i < 7; i++) { const el = await sprite(`../art/sprites/shell_${i + 1}.png`, 'shell flat'); const h = 20 - i * 1.3; const x = 1352 + i * 15.5; place(el, x, S.sit.lip + 5, h); el.classList.add('hopup'); sfx.click(true); row.push({ el, x, h }); await wait(170); }
+    melodyState = 'laying'; const row = []; for (let i = 0; i < 7; i++) { const el = await sprite(`../art/sprites/shell_${i + 1}.webp`, 'shell flat'); const h = 20 - i * 1.3; const x = 1352 + i * 15.5; place(el, x, S.sit.lip + 5, h); el.classList.add('hopup'); sfx.click(true); row.push({ el, x, h }); await wait(170); }
     await wait(350); melodyState = 'playing';
     for (const n of TUNE) { if (n >= 0) { const r = row[n]; sfx.shell(n, 0.5); r.el.classList.remove('ring', 'hopup'); void r.el.offsetWidth; r.el.classList.add('ring'); note(r.x, S.sit.lip - 12, 0, 58); shiEl.classList.remove('knock'); void shiEl.offsetWidth; shiEl.classList.add('knock'); } await wait(n >= 0 ? 300 : 260); }
     await wait(500); melodyState = 'cg';
@@ -394,7 +394,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     nextSpark -= dt; if (nextSpark <= 0) { spark(); nextSpark = rnd(0.5, 1.6) / (1 + Math.min(logs, 5) * 0.25); } if (!sparks.length && !fireCv.dataset.dirty) return; fg.clearRect(0, 0, FCV.w, FCV.h); fireCv.dataset.dirty = sparks.length ? '1' : '';
     for (let i = sparks.length - 1; i >= 0; i--) { const p = sparks[i]; p.age += dt; if (p.age > p.life) { sparks.splice(i, 1); continue; } p.x += (p.vx + Math.sin(p.age * 5 + p.ph) * 10) * dt; p.y += p.vy * dt; p.vy *= 1 - dt * 0.5; const al = Math.sin(Math.min(1, p.age / p.life) * Math.PI) * 0.95; const g = fg.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3); g.addColorStop(0, `rgba(255,236,170,${al})`); g.addColorStop(0.4, `rgba(255,170,80,${al * 0.6})`); g.addColorStop(1, 'rgba(255,120,60,0)'); fg.fillStyle = g; fg.beginPath(); fg.arc(p.x, p.y, p.r * 3, 0, 6.283); fg.fill(); } });
   let feeding = false;
-  zone('fire', '添一根柴', fire.zone, async () => { if (feeding) return; feeding = true; await approach(fire.x, 150); const el = await sprite('../art/sprites/log.png', 'log flat'); const x0 = state.x + state.face * 14, y0 = pose.y - M.hero_h * H * 0.5; place(el, x0, y0, 15, true); el.style.zIndex = 5; let t = 0; const spin = rnd(260, 420) * state.face;
+  zone('fire', '添一根柴', fire.zone, async () => { if (feeding) return; feeding = true; await approach(fire.x, 150); const el = await sprite('../art/sprites/log.webp', 'log flat'); const x0 = state.x + state.face * 14, y0 = pose.y - M.hero_h * H * 0.5; place(el, x0, y0, 15, true); el.style.zIndex = 5; let t = 0; const spin = rnd(260, 420) * state.face;
     const anim = dt => { t += dt / 0.62; const e = Math.min(1, t); el.style.left = X(x0 + (fire.x - x0) * e); el.style.top = Y(y0 + (fire.y - 6 - y0) * e - Math.sin(e * Math.PI) * 54); el.style.setProperty('--rot', (spin * e) + 'deg');
       if (e >= 1) { const k = api.frameHooks.indexOf(anim); if (k >= 0) api.frameHooks.splice(k, 1); el.style.transition = 'opacity .5s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 520); logs += 1; save({ [K('fire_logs')]: String(logs) }); sfx.crackle(7 + Math.floor(rnd(0, 6))); const n = 16 + Math.floor(rnd(0, 14)); for (let i = 0; i < n; i++) setTimeout(() => spark(true), rnd(0, 500)); glow.style.setProperty('--s', '1.6'); setTimeout(glowSize, 700); setTimeout(() => { feeding = false; }, 500); } };
     api.frameHooks.push(anim); });
@@ -411,7 +411,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   // ── 椰子樹：搖一下掉一顆椰子，落在沙上彈兩下、滾一段 ──
   const coconuts = [];
   for (const p of S.palms) { let busy = false; zone('palm' + p.id, '搖一搖椰子樹', p.zone, async z => { if (busy) return; busy = true; z.btn.classList.remove('shake'); void z.btn.offsetWidth; z.btn.classList.add('shake'); sfx.rustle(4 + Math.floor(rnd(0, 3)));
-    const [cx, cy] = pick(p.crowns); const el = await sprite('../art/sprites/coconut.png', 'coconut flat'); const size = rnd(20, 25); const x1 = clamp(cx + rnd(-30, 30), p.land[0], p.land[1]), roll = (Math.random() < 0.5 ? -1 : 1) * rnd(50, 130); const x2 = clamp(x1 + roll, p.land[0] - 40, p.land[1] + 60); place(el, cx, cy, size); let t = 0, bounced = 0; const fall = 0.55;
+    const [cx, cy] = pick(p.crowns); const el = await sprite('../art/sprites/coconut.webp', 'coconut flat'); const size = rnd(20, 25); const x1 = clamp(cx + rnd(-30, 30), p.land[0], p.land[1]), roll = (Math.random() < 0.5 ? -1 : 1) * rnd(50, 130); const x2 = clamp(x1 + roll, p.land[0] - 40, p.land[1] + 60); place(el, cx, cy, size); let t = 0, bounced = 0; const fall = 0.55;
     const anim = dt => { t += dt; let x, y, rot;
       if (t < fall) { const e = t / fall; x = cx + (x1 - cx) * e; y = cy + (p.ground - cy) * e * e; rot = e * 200; }
       else { const e = Math.min(1, (t - fall) / 1.5); if (!bounced) { bounced = 1; sfx.thud(); } const hop = Math.abs(Math.sin(e * Math.PI * 2.5)) * 22 * (1 - e) * (1 - e); if (bounced === 1 && e > 0.4) { bounced = 2; sfx.thud(); } const ee = 1 - (1 - e) * (1 - e); x = x1 + (x2 - x1) * ee; y = p.ground - hop; rot = 200 + (x2 - x1) * ee * 4.5; if (e >= 1) { const k = api.frameHooks.indexOf(anim); if (k >= 0) api.frameHooks.splice(k, 1); busy = false; coconuts.push(el); if (coconuts.length > 5) { const old = coconuts.shift(); old.style.transition = 'opacity .8s'; old.style.opacity = '0'; setTimeout(() => old.remove(), 820); } } }
@@ -420,7 +420,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
 
   // ── 漁網架的浮球：原畫的浮球已經局部重畫拿掉（art/beach_patch.py），這三顆是掛在橫桿上的紙片；點了晃起來，互相碰到就響 ──
   const FSRC = { red: 'float_red', white: 'float_white', pink: 'float_pink' }; const floats = [];
-  for (const f0 of S.net.floats) { const pp = await paperize(`../art/sprites/${FSRC[f0.k]}.png`, { edge: 6, jitter: 2 }); const d = document.createElement('div'); d.className = 'bfloat'; const rope = document.createElement('i'); const im = document.createElement('img'); im.src = pp.src; im.alt = ''; im.draggable = false;
+  for (const f0 of S.net.floats) { const pp = await paperize(`../art/sprites/${FSRC[f0.k]}.webp`, { edge: 6, jitter: 2 }); const d = document.createElement('div'); d.className = 'bfloat'; const rope = document.createElement('i'); const im = document.createElement('img'); im.src = pp.src; im.alt = ''; im.draggable = false;
     const hpx = f0.w * pp.height / pp.width; Object.assign(d.style, { left: X(f0.x), top: Y(S.net.bar), width: X(f0.w * 1.2), height: Y(f0.len + hpx) }); rope.style.height = (f0.len / (f0.len + hpx) * 100) + '%'; im.style.width = '100%'; d.append(rope, im); art.insertBefore(d, firstPerson);
     floats.push({ ...f0, el: d, a: 0, v: 0, L: f0.len + hpx * 0.6, r: f0.w * 0.5 }); }
   let netHits = 0;
@@ -450,7 +450,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
   // 第四章的島段主線做完才能離開（作者 2026-11-17 定；小委託、收集、圖鑑可做可不做）。沒做完走到出口：提示還有什麼沒做，人退回來一步
   { const exitHot = api.hot.find(h => h.id === 'exit'); if (exitHot && ch4) { const go = exitHot.fn || (() => api.runHot(exitHot)); let last = 0;
     exitHot.fn = () => { if (on('c4_done')) return go(); const now = performance.now(); if (now - last > 1800) { last = now; api.toast('還不能離開：' + (on('c4_dolphin') ? '海豚在岸邊等，騎上去' : (questText() || '先找詩說話'))); } window.dawnHill.exitBlocked = (window.dawnHill.exitBlocked || 0) + 1; }; } }
-  const morning = await plantSpot('morning', 1262, 452, '舞台邊的馬鞍藤', () => '這盆是詩種的。');
+  const morning = await plantSpot('morning', 1262, 452, '舞台邊的馬鞍藤', () => st.errand_shi === 'done' ? '' : on('c4_done') ? '這盆是詩種的。問問他吧。' : '這盆是詩種的。');
   // 詩的小委託（台詞 2026-11-17 作者定稿，真結局/studio_decor/委託與種樹_提案.md）：第四章做完之後就能接，真結局拿到禮物之後也能補做。
   // 接下後走到浪邊，等浪打上來時點浪花錄下來，再回去找詩。回禮：馬鞍藤
   const ERR_SHI_ASK = [['詩', '欸，妳等一下有空嗎？'], ['茶語', '蛤？又要幹嘛。'], ['詩', '幫我錄一段海浪。我半夜寫歌的時候太安靜，想放著聽。'], ['茶語', '你自己不會錄喔？'], ['詩', '我自己錄的都只有浪啦。我想要裡面有妳的聲音。'], ['茶語', '我才不要對著手機講話。'], ['詩', '不用講話。妳去錄就好。'],
@@ -491,7 +491,7 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
       const want = Math.min(AUTO_MAX, Math.round(AUTO_MAX * d28Picked.size / TEA_SHELLS.length));
       while (auto() < want) {
         const p = crew.people[turn++ % crew.people.length]; save({ shells_c7_auto: String(auto() + 1) });
-        const n = 1 + (auto() % 7); const el = await sprite(`../art/sprites/shell_${n}.png`, 'shell flat'); place(el, p.x + p.face * 26, FEET + 4, 18, true);
+        const n = 1 + (auto() % 7); const el = await sprite(`../art/sprites/shell_${n}.webp`, 'shell flat'); place(el, p.x + p.face * 26, FEET + 4, 18, true);
         crew.bend(p); sfx.shell(n - 1, 0.3); note(p.x, FEET - SHI_HPX - 6, 0, 46); setTimeout(() => { el.classList.add('picked'); setTimeout(() => el.remove(), 500); }, 450);
         api.toast(`${NAMES[p.id]}也撿到一個　${total()}／${TOTAL}`); setQ(); await wait(520);
       }
@@ -501,13 +501,13 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     let pinkZ = null;
     async function showPink() {
       if (pinkZ) return; const x = clamp(state.x + state.face * 150, M.walk[0] + 80, M.walk[1] - 80), y = FEET + 8;
-      const el = await sprite('../art/sprites/shell_6.png', 'shell flat glow'); place(el, x, y, 24); el.classList.add('hopup'); sparkle(x, y - 12, 8, 0.8); setQ();
+      const el = await sprite('../art/sprites/shell_6.webp', 'shell flat glow'); place(el, x, y, 24); el.classList.add('hopup'); sparkle(x, y - 12, 8, 0.8); setQ();
       pinkZ = zone('c7pink', '粉紅色的貝殼', { x: x - 34, w: 68, y: y - 40, h: 50 }, async z => { if (done()) return; await approach(x, 70); z.off(); sfx.shell(0); el.classList.add('ring'); sparkle(x, y - 12, 10);
         save({ c7s_pink: 'true' }); setQ(); setTimeout(() => { el.classList.add('picked'); setTimeout(() => el.remove(), 500); }, 520);
         lockOn(); openDialogue([['詩', '這個敲起來是 Do。'], ['晨', '這個是粉紅色的。'], ['明', '二十三個了。'], ['茶語', '全部帶回去，放在長桌上。']], [() => { save({ c7s_done: 'true', chapter7_shell_count: '23' }); CT.completeFreeInteraction(); lockOff(); setQ(); }]); });
     }
     for (const s0 of TEA_SHELLS) {
-      if (d28Picked.has(s0.k)) continue; const el = await sprite(`../art/sprites/shell_${s0.n}.png`, 'shell flat'); const h = 24 - (s0.n - 1) * 1.6; const s = { ...s0, el, h };
+      if (d28Picked.has(s0.k)) continue; const el = await sprite(`../art/sprites/shell_${s0.n}.webp`, 'shell flat'); const h = 24 - (s0.n - 1) * 1.6; const s = { ...s0, el, h };
       const crab = s0.crab && crabs.find(c => c.id === s0.crab); const covered = () => !!(crab && crab.guard);
       place(el, s.x, s.y, h); if (crab) art.insertBefore(el, crab.el);
       s.z = zone('c7shell_' + s.k, '撿起貝殼', { x: s.x - 30, w: 60, y: s.y - h - 10, h: h + 18 }, async z => { if (s.busy) return; s.busy = true; await approach(s.x, 70); z.off(); d28Picked.add(s.k); sfx.shell(s.n - 1); el.classList.add('ring'); sparkle(s.x, s.y - h / 2, 8); note(s.x, s.y - h - 8, 0, 54);

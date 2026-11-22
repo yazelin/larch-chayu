@@ -36,7 +36,7 @@ export async function install(api) {
     bfArea: { x: 2380, w: 1100, y: 0.42, h: 0.22 },
     flowers: [['red', 520, 0.86, 'pink'], ['orange', 1120, 0.90, 'orange'], ['yellow', 2440, 0.86, 'yellow'], ['blue', 3120, 0.88, 'white'], ['purple', 3760, 0.84, 'cherry']], blueBig: { x: 2900, feet: 0.72 },
   };
-  const FX = await (await fetch('../art/sprites/fx.json')).json(); const FXK = {}; for (const e of FX) (FXK[e.kind] = FXK[e.kind] || []).push(e.file);   // 照名稱（kind）拿圖，不照編號：star 星光、glow 光點、heart 愛心、drop 水滴
+  const FX = await PageLoading.json('../art/sprites/fx.json'); const FXK = {}; for (const e of FX) (FXK[e.kind] = FXK[e.kind] || []).push(e.file);   // 照名稱（kind）拿圖，不照編號：star 星光、glow 光點、heart 愛心、drop 水滴
   const fxImg = (kind, cls = '') => { const pool = FXK[kind] || FXK.star; const im = document.createElement('img'); im.className = 'fx ' + kind + ' ' + cls; im.src = '../art/sprites/' + pool[Math.floor(Math.random() * pool.length)]; im.alt = ''; im.draggable = false; return im; };
   function sparkle(x, y, n = 10) { for (let i = 0; i < n; i++) { const s = fxImg(Math.random() < 0.7 ? 'star' : 'glow'); s.style.left = X(x + rnd(-30, 30)); s.style.top = (y * 100) + '%'; s.style.setProperty('--a', (i / n * 360 + rnd(-20, 20)) + 'deg'); s.style.setProperty('--d', rnd(60, 150) + 'px'); s.style.setProperty('--sz', rnd(18, 34) + 'px'); s.style.animationDelay = rnd(0, 0.15) + 's'; art.appendChild(s); setTimeout(() => s.remove(), 1500); } }
   function heart(x, y) { const h = fxImg('heart', 'float'); h.style.left = X(x); h.style.top = (y * 100) + '%'; h.style.setProperty('--sz', rnd(26, 34) + 'px'); h.style.setProperty('--dx', rnd(-18, 18) + 'px'); art.appendChild(h); setTimeout(() => h.remove(), 1700); }
@@ -75,8 +75,12 @@ export async function install(api) {
   async function buildGray() {
     // 遮罩由 art/gray_masks.py 預先做好（走進原畫的外框法：生圖把櫻花樹冠、花田塗綠，只拿綠色當遮罩、像素用原畫的；花田內再照原畫顏色分五排）
     const W = IMG.width, H = IMG.height; gray.W = W; gray.H = H; const mk = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return c; };
-    const load = src => new Promise(ok => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => ok(i); i.onerror = () => ok(null); i.src = src; });
-    const bg = await load('../art/out/dawn/flat.jpg'); const ms = {}; for (const k of KEYS5) ms[k] = await load(`../art/out/dawn/gray_${k}.png`); const fieldM = await load('../art/out/dawn/gray_field.png');
+    const load = src => PageLoading.preload(src, 'anonymous').catch(() => null);
+    const [bg, fieldM, ...masks] = await Promise.all([
+      load('../art/out/dawn/flat.webp'), load('../art/out/dawn/gray_field.webp'),
+      ...KEYS5.map(k => load(`../art/out/dawn/gray_${k}.webp`)),
+    ]);
+    const ms = Object.fromEntries(KEYS5.map((key, i) => [key, masks[i]]));
     if (!bg || !fieldM || KEYS5.some(k => !ms[k])) { gray.on = false; return; }
     const toMask = img => { const c = mk(); const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0, W, H); const d = ctx.getImageData(0, 0, W, H); const px = d.data; for (let i = 0; i < px.length; i += 4) { px[i + 3] = px[i]; px[i] = px[i + 1] = px[i + 2] = 0; } ctx.putImageData(d, 0, 0); return c; };   // 灰階圖 → alpha
     for (const k of KEYS5) gray.masks[k] = toMask(ms[k]);
@@ -131,7 +135,7 @@ export async function install(api) {
   let note = null;
   zone('mailbox', '看信箱', S.mailbox, () => { if (note) { sfx.click(false); note.classList.add('out'); const n = note; note = null; setTimeout(() => n.remove(), 350); return; } sfx.click(true); note = document.createElement('div'); note.className = 'note'; note.style.left = X(S.mailbox.x - 60); note.style.top = (S.mailbox.y - 0.16) * 100 + '%'; note.innerHTML = '<b>茶語</b><b>晨</b><b>明</b><b>詩</b>'; art.appendChild(note); const n = note; const close = () => { if (note !== n) return; note = null; sfx.click(false); n.classList.add('out'); setTimeout(() => n.remove(), 350); }; n.addEventListener('click', close); setTimeout(close, 5000); });
   // ── 盆栽 ──
-  const potEl = await sprite('../art/sprites/pot.png', 'pot'); place(potEl, S.pot.x + S.pot.w / 2, 0.79, 0.17); let watered = Number(st.pot_watered || 0); let watering = false;
+  const potEl = await sprite('../art/sprites/pot.webp', 'pot'); place(potEl, S.pot.x + S.pot.w / 2, 0.79, 0.17); let watered = Number(st.pot_watered || 0); let watering = false;
   const growPot = () => { potEl.style.opacity = watered ? '1' : '0'; potEl.style.setProperty('--grow', (1 + Math.min(watered, 4) * 0.12).toFixed(2)); }; growPot();
   zone('pot', '澆水', S.pot, () => { if (watering) return; watering = true; sfx.water(); api.player.classList.add('pouring'); const can = { remove() { api.player.classList.remove('pouring'); } };
     for (let i = 0; i < 7; i++) { const d = fxImg('drop', 'falling'); d.style.left = X(S.pot.x + 40 + rnd(0, 30)); d.style.top = (S.pot.y * 100) + '%'; d.style.setProperty('--sz', rnd(10, 16) + 'px'); d.style.setProperty('--dy', rnd(50, 90) + 'px'); d.style.animationDelay = rnd(0.15, 0.7) + 's'; art.appendChild(d); setTimeout(() => d.remove(), 1600); }
@@ -142,7 +146,7 @@ export async function install(api) {
   const bench = api.hot.find(h => h.id === 'bench'); let wind = null, benchPick = null;
   // 坐下用的紙片：人和長凳畫在同一張紙上（two＝茶語與晨、one＝只有茶語）。x 是紙片中心、feet 是紙片底緣、h 是紙片高（都由 art/bench_sit_fit.py 對著原畫長凳量出來）
   const SITPIECE = { two: { x: 2248.5, feet: 0.833, h: 0.3357 }, one: { x: 2248.7, feet: 0.8252, h: 0.3329 } };
-  const sitImgs = {}; for (const k of ['two', 'one']) { try { sitImgs[k] = await sprite(`../art/sprites/bench_sit_${k}.png`, 'sit bench ' + k); } catch { sitImgs[k] = null; } }
+  const sitImgs = {}; for (const k of ['two', 'one']) { try { sitImgs[k] = await sprite(`../art/sprites/bench_sit_${k}.webp`, 'sit bench ' + k); } catch { sitImgs[k] = null; } }
   bench.fn = () => { if (!sitting) sit(); };
   const walkTo = (el, fromX, toX, secs) => new Promise(ok => { let t = 0; el.classList.add('walking'); el.style.setProperty('--facing', toX > fromX ? 1 : -1); const anim = dt => { t += dt / secs; const e = Math.min(1, t); el.style.left = X(fromX + (toX - fromX) * e); window.WalkSway.css(el, window.WalkSway.pose(t * secs, e < 1)); if (e >= 1) { el.classList.remove('walking'); window.WalkSway.css(el, window.WalkSway.pose(0, false)); const k = api.frameHooks.indexOf(anim); if (k >= 0) api.frameHooks.splice(k, 1); ok(); } }; api.frameHooks.push(anim); });
   // 坐下流程（作者 2026-11-13 定案：只有一個「坐下」）：茶語走到椅前、晨照劇情條件走過來，站姿藏起來，換上「人和長凳畫在一起」的那一張紙片，疊在原畫長凳的位置把它蓋住（作者同日：坐下時人要和椅子一起畫才完整）、
@@ -174,14 +178,14 @@ export async function install(api) {
 
   // ── 兔子（照章節：灰 → 上色 → 跳到旁邊，之後點牠有小反應）與回憶捲軸（真結局） ──
   const rabbitColoredNow = () => st[K('rabbit_colored')] === 'true'; const rabbitColored = rabbitColoredNow(); let rabX = Number(st[K('rabbit_x')]) || (rabbitColored ? S.rabbit.aside : S.rabbit.x);
-  const rabC = await sprite('../art/sprites/rabbit.png', 'rabbit'); place(rabC, rabX, S.rabbit.feet, S.rabbit.h); rabC.style.setProperty('--facing', 1); rabC.classList.add('idle');
+  const rabC = await sprite('../art/sprites/rabbit.webp', 'rabbit'); place(rabC, rabX, S.rabbit.feet, S.rabbit.h); rabC.style.setProperty('--facing', 1); rabC.classList.add('idle');
   const reactions = ['hop', 'look', 'heart']; let lastReact = -1;
   const rabZone = zone('rabbit', () => rabbitColoredNow() ? '兔子' : '上色', { x: rabX - 70, w: 140, y: S.rabbit.feet - .10, h: .11 }, z => { if (!rabbitColoredNow()) return paintRabbit(z); let i; do { i = Math.floor(Math.random() * reactions.length); } while (i === lastReact); lastReact = i; const r = reactions[i];
     if (r === 'hop') { sfx.boing(); rabC.classList.remove('hopx'); void rabC.offsetWidth; rabC.classList.add('hopx'); }
     if (r === 'look') { const f = api.state.x < rabX ? -1 : 1; rabC.style.setProperty('--facing', f); rabC.classList.add('look', 'eartwitch'); setTimeout(() => { rabC.classList.remove('look', 'eartwitch'); rabC.style.setProperty('--facing', 1); }, 1400); }
     if (r === 'heart') { sfx.heart(); heart(rabX + 10, S.rabbit.feet - S.rabbit.h - 0.02); } });
   let rabG = null;
-  if (!rabbitColored) { rabC.style.display = 'none'; rabG = await sprite('../art/sprites/rabbit.png', 'rabbit', { gray: true }); place(rabG, rabX, S.rabbit.feet, S.rabbit.h); rabG.classList.add('idle'); }
+  if (!rabbitColored) { rabC.style.display = 'none'; rabG = await sprite('../art/sprites/rabbit.webp', 'rabbit', { gray: true }); place(rabG, rabX, S.rabbit.feet, S.rabbit.h); rabG.classList.add('idle'); }
   function paintRabbit(z) {
     sfx.sparkle(); sparkle(rabX, S.rabbit.feet - .04, 12); rabG.classList.add('fade'); z.hide();
     setTimeout(() => { rabG.remove(); rabC.style.display = ''; rabC.classList.add('pop'); save({ [K('rabbit_colored')]: 'true' });
@@ -193,14 +197,14 @@ export async function install(api) {
   }
   let scrollZ = null;
   if (te && st.memory3 !== 'true') {
-    const scroll = await sprite('../art/sprites/scroll.png', 'scroll'); place(scroll, S.scroll.x, S.scroll.feet, S.scroll.h);
+    const scroll = await sprite('../art/sprites/scroll.webp', 'scroll'); place(scroll, S.scroll.x, S.scroll.feet, S.scroll.h);
     scrollZ = zone('scroll', '撿起捲軸', { x: S.scroll.x - 50, w: 100, y: S.scroll.feet - .06, h: .07 }, z => { z.off(); sfx.pick(); scroll.classList.add('picked'); sparkle(S.scroll.x, S.scroll.feet - .03, 6); setTimeout(() => scroll.remove(), 500); save({ memory3: 'true', memories: String(Number(st.memories || 0) + 1) }); setTimeout(() => { sfx.paper(); api.showScroll('第三章　彩色大魔王（晨）', '妳是第一個把顏色帶進來的人。'); }, 350); });
     if (!rabbitColored) scrollZ.hide();   // 兔子還擋著
   }
 
   // ── 蝴蝶 ──
   const bfColored = !ch3 || st[K('bf_colored')] === 'true';
-  const bfC = await sprite('../art/sprites/butterfly.png', 'butterfly'); const bfG = bfColored ? null : await sprite('../art/sprites/butterfly.png', 'butterfly', { gray: true });
+  const bfC = await sprite('../art/sprites/butterfly.webp', 'butterfly'); const bfG = bfColored ? null : await sprite('../art/sprites/butterfly.webp', 'butterfly', { gray: true });
   const bf = { x: S.bfArea.x + S.bfArea.w * 0.3, y: S.bfArea.y + 0.1, tx: 0, ty: 0, t: 0, rest: 0, el: bfG || bfC, colored: bfColored };
   for (const b of [bfC, bfG]) if (b) { place(b, bf.x, bf.y, 0.06); b.style.display = 'none'; } bf.el.style.display = '';
   const newTarget = () => { bf.tx = rnd(S.bfArea.x, S.bfArea.x + S.bfArea.w); bf.ty = rnd(S.bfArea.y, S.bfArea.y + S.bfArea.h); }; newTarget();
@@ -220,9 +224,9 @@ export async function install(api) {
   });
 
   // ── 小鳥三隻（飛行用 art/sprites/bird_fly_0..2：翅膀上、翅膀下、滑翔；拍翅每秒約 9 次，遠了偶爾滑翔；往左飛鏡射；降落用拍翅格，落地換回站姿收翅） ──
-  const birdFly = []; for (let k = 0; k < 3; k++) { try { birdFly.push((await paperize(`../art/sprites/bird_fly_${k}.png`, { edge: 9, jitter: 3 })).src); } catch { break; } }
+  const birdFly = []; for (let k = 0; k < 3; k++) { try { birdFly.push((await paperize(`../art/sprites/bird_fly_${k}.webp`, { edge: 9, jitter: 3 })).src); } catch { break; } }
   for (const [i, bd] of S.birds.entries()) {
-    const el = await sprite('../art/sprites/bird.png', 'bird'); place(el, bd.x, bd.feet, bd.h); el.style.setProperty('--facing', bd.face); const sheet = el.querySelector('.sheet'); const standSrc = sheet.src;
+    const el = await sprite('../art/sprites/bird.webp', 'bird'); place(el, bd.x, bd.feet, bd.h); el.style.setProperty('--facing', bd.face); const sheet = el.querySelector('.sheet'); const standSrc = sheet.src;
     const z = zone('bird' + i, '小鳥', { x: bd.x - 40, w: 80, y: bd.feet - bd.h - .02, h: bd.h + .03 }, () => fly());
     let idleT = rnd(1, 4), flying = false, face = bd.face, last = -1;
     const idle = () => { let r; do { r = Math.floor(Math.random() * (bd.ground ? 4 : 3)); } while (r === last); last = r; if (r === 0) { face = -face; el.style.setProperty('--facing', face); } else if (r === 1) { el.classList.add('hopstep'); setTimeout(() => el.classList.remove('hopstep'), 420); } else if (r === 2) { el.classList.add('ruffle'); setTimeout(() => el.classList.remove('ruffle'), 500); } else { el.classList.add('peckonce'); setTimeout(() => el.classList.remove('peckonce'), 600); } };
@@ -248,17 +252,17 @@ export async function install(api) {
   // ── 顏料花（第三章）：撿一朵，那一色的花從灰滲回來 ──
   if (ch3 && st.ch3_done !== 'true') for (const [c, x, feet, fieldKey] of S.flowers) {
     if (picked.has(c)) continue;
-    const f = await sprite(`../art/sprites/flower_${c}.png`, 'flower'); place(f, x, feet, 0.07); f.classList.add('bloom');
+    const f = await sprite(`../art/sprites/flower_${c}.webp`, 'flower'); place(f, x, feet, 0.07); f.classList.add('bloom');
     zone('flower_' + c, '撿起顏料花', { x: x - 40, w: 80, y: feet - .08, h: .09 }, z => { z.off(); sfx.pick(); picked.add(c); f.classList.add('picked'); sparkle(x, feet - .04, 7); setTimeout(() => f.remove(), 500); palette.add(COLOR_OF[c]); save({ [K('flowers_picked')]: [...picked].join(','), s2_flower_count: String(picked.size), palette_c3: [...palette].join(',') }); drawPalette(); setQuest(questText()); api.toast(`拿到顏色　${picked.size}／5`); });
   }
   // ── 晨的小委託（真結局，拿到禮物後） ──
-  const big = await sprite('../art/sprites/flower_blue_big.png', 'flower big'); place(big, S.blueBig.x, S.blueBig.feet, 0.09); big.classList.add('bloom'); big.style.display = 'none';
+  const big = await sprite('../art/sprites/flower_blue_big.webp', 'flower big'); place(big, S.blueBig.x, S.blueBig.feet, 0.09); big.classList.add('bloom'); big.style.display = 'none';
   const showBig = () => { big.style.display = ''; big.classList.add('pop'); zone('bluebig', '摘下藍色的花', { x: S.blueBig.x - 50, w: 100, y: S.blueBig.feet - .10, h: .11 }, z => { z.off(); sfx.pick(); save({ errand_chen: 'found' }); big.classList.add('picked'); sparkle(S.blueBig.x, S.blueBig.feet - .05, 7); setTimeout(() => big.remove(), 500); api.toast('拿到藍色的花'); }); };
   if (st.errand_chen === 'accepted') showBig();
   // ── 畫布：晨把五個顏色畫進畫裡（第三章） ──
   // 畫架上的畫（作者 2026-11-13：「畫架是晨正在畫的」「把畫架跟圖一起重畫，然後再貼回來」）：畫和畫架一起局部重畫，貼回來的補丁 easel_painted.png（art/easel_paste.py 產，位置在 flat.json 的 easel，長圖 px）
   // 疊在原畫同位置、人物後面。第三章演完前不疊（畫布是原畫的空白）；演完後與真結局一進場就疊。點畫架放大看：演完前是鉛筆稿，之後是完成版，用看圖的紙框。
-  const EASEL = api.META.easel, EASEL_IMG = { sketch: '../art/out/dawn/easel_sketch.jpg', painting: '../art/out/dawn/easel_painting.jpg' }, EASEL_PX = [1249, 1191], EASEL_EDGE = 18, EASEL_AR = (EASEL_PX[0] - 2 * EASEL_EDGE) / (EASEL_PX[1] - 2 * EASEL_EDGE), EASEL_TRIM = [EASEL_EDGE / EASEL_PX[1], EASEL_EDGE / EASEL_PX[0], EASEL_EDGE / EASEL_PX[1], EASEL_EDGE / EASEL_PX[0]];   // 兩張畫的圖檔四邊各有一圈畫紙留白（量到 12 到 17 px），放大時藏到紙框底下
+  const EASEL = api.META.easel, EASEL_IMG = { sketch: '../art/out/dawn/easel_sketch.webp', painting: '../art/out/dawn/easel_painting.webp' }, EASEL_PX = [1249, 1191], EASEL_EDGE = 18, EASEL_AR = (EASEL_PX[0] - 2 * EASEL_EDGE) / (EASEL_PX[1] - 2 * EASEL_EDGE), EASEL_TRIM = [EASEL_EDGE / EASEL_PX[1], EASEL_EDGE / EASEL_PX[0], EASEL_EDGE / EASEL_PX[1], EASEL_EDGE / EASEL_PX[0]];   // 兩張畫的圖檔四邊各有一圈畫紙留白（量到 12 到 17 px），放大時藏到紙框底下
    let easelEl = null;
   const easelPainted = () => !ch3 || st.ch3_done === 'true'; const easelView = () => easelPainted() ? EASEL_IMG.painting : EASEL_IMG.sketch;
   function easelPatch(hidden) {
@@ -305,7 +309,7 @@ export async function install(api) {
   // ── 小屋門口的貓（設計.md 118 行「中央工作室門口睡覺的貓（摸了會跟著走一小段）」；劇本真結局 59、71 行「貓睡在朝霞丘長畫左端的小屋門口」）──
   // 平常睡在門口左邊的草地上（遠處，小小的）；摸了醒來，沿小路走到她旁邊（照遠近慢慢變大），跟著她走一小段（7 秒），坐下來睡一會兒（12 秒），再走回門口睡
   const CAT = { door: { x: 1912, feet: 0.397, h: 0.04 }, near: { feet: 0.80, h: 0.08 } };
-  const catSleep = await sprite('../art/sprites/zk_cat_sleep.png', 'cat sleep'), catWalk = await sprite('../art/sprites/zk_cat_walk.png', 'cat walk');
+  const catSleep = await sprite('../art/sprites/zk_cat_sleep.webp', 'cat sleep'), catWalk = await sprite('../art/sprites/zk_cat_walk.webp', 'cat walk');
   for (const el of [catSleep, catWalk]) { el.style.transition = 'none'; art.insertBefore(el, api.player); }
   const cat = { mode: 'sleep', x: CAT.door.x, feet: CAT.door.feet, h: CAT.door.h, t: 0, face: 1, pets: 0 };
   const catDraw = () => { const walking = cat.mode === 'come' || cat.mode === 'follow' || cat.mode === 'home'; const el = walking ? catWalk : catSleep, other = walking ? catSleep : catWalk;
@@ -336,7 +340,7 @@ export async function install(api) {
   await plantSpot('sakura', 960, 0.60, '櫻花樹下的小苗', () => ch3 && st.ch3_done !== 'true' ? '小苗還是灰的，先把顏色找回來' : '');
   // 五色顏料花：第三章把花交給晨之後（之後再來也算）
   // 晨的小委託回禮：小番茄苗放在畫架旁（作者 2026-11-18：三個人的盆栽都放在他們身邊的東西旁，像詩的馬鞍藤放舞台邊）。委託做完才拿得走
-  const tomato = await plantSpot('tomato', 2086, 0.815, '畫架旁的小番茄苗', () => st.errand_chen === 'done' ? '' : '這盆是晨種的。');
+  const tomato = await plantSpot('tomato', 2086, 0.815, '畫架旁的小番茄苗', () => st.errand_chen === 'done' ? '' : st.ch3_done === 'true' ? '這盆是晨種的。問問他吧。' : '這盆是晨種的。');
   const plantGifts = () => { if (st.ch3_done === 'true' || !ch3) pl.got('paint'); if (st.errand_chen === 'done' && !pl.has('tomato')) setTimeout(() => { if (pl.has('tomato')) return; if (tomato && tomato.el.isConnected) tomato.take(); else pl.got('tomato'); }, 1200); };
   plantGifts(); setInterval(plantGifts, 1500);
   // ── 第七章第 27 天：種花（玩法照 ../_第七章27_28天_提案.md，2026-11-18 作者同意；對話泡泡照劇本第七章 904～908 行，一字不改）──
@@ -348,15 +352,15 @@ export async function install(api) {
     // 三排土壟、四袋種子都放在坡下那片空草地（櫻花樹與畫架之間）；每排四株，第一排淡紫、第二排白、第三排粉紅（作者 2026-11-18：照提案建議）
     const ROWS = [{ x: 560, color: '#c8a6e8', name: '淡紫' }, { x: 840, color: null, name: '白' }, { x: 1180, color: '#f3a3c2', name: '粉紅' }];
     const ROW_FEET = 0.745, FL_H = 0.06, OFFS = [-78, -26, 26, 78];
-    const seeds = await sprite('../art/sprites/c7_seeds.png', 'c7seeds'); place(seeds, 360, 0.775, 0.075);
+    const seeds = await sprite('../art/sprites/c7_seeds.webp', 'c7seeds'); place(seeds, 360, 0.775, 0.075);
     const rowState = i => st['c7g_' + (i + 1)] || '';
     const doneRows = () => ROWS.filter((r, i) => rowState(i) === 'colored' || rowState(i) === 'called').length;
     const allDone = () => st.c7g_done === 'true';
     const questText = () => allDone() ? '往左走到出口' : rowState(2) === 'colored' ? '按「呼喚」，叫蝴蝶過來' : `種花　${doneRows()}／3 排`;
-    const flowerSrc = {}; for (const r of ROWS) flowerSrc[r.name] = await tintPetals('../art/sprites/c7_flower.png', r.color);
+    const flowerSrc = {}; for (const r of ROWS) flowerSrc[r.name] = await tintPetals('../art/sprites/c7_flower.webp', r.color);
     const rows = [];
     for (const [i, r] of ROWS.entries()) {
-      const soil = await sprite('../art/sprites/c7_soil.png', 'c7soil'); place(soil, r.x, ROW_FEET + 0.012, 0.05);
+      const soil = await sprite('../art/sprites/c7_soil.webp', 'c7soil'); place(soil, r.x, ROW_FEET + 0.012, 0.05);
       const row = { ...r, i, gray: [], color: [] };
       row.addFlowers = async (instant) => { for (const [k, dx] of OFFS.entries()) {
         const g = await sprite(flowerSrc[r.name], 'flower c7flower', { gray: true }); place(g, r.x + dx, ROW_FEET, FL_H);
@@ -393,7 +397,7 @@ export async function install(api) {
       }
       if (row.i === 2 && s0 === 'colored') {   // 呼喚：蝴蝶飛來停在花上
         busy = true; sfx.hum && sfx.hum(3); const shi = crew.get('shi'); crew.bend(shi);
-        const bf = await sprite('../art/sprites/butterfly.png', 'butterfly c7bf'); const tx = row.x + OFFS[2], ty = ROW_FEET - FL_H * 0.92; place(bf, row.x + 700, 0.25, 0.04);
+        const bf = await sprite('../art/sprites/butterfly.webp', 'butterfly c7bf'); const tx = row.x + OFFS[2], ty = ROW_FEET - FL_H * 0.92; place(bf, row.x + 700, 0.25, 0.04);
         let t = 0; const from = [row.x + 700, 0.25]; const fly = dt => { t += dt / 2.2; const e = Math.min(1, t), k = e * e * (3 - 2 * e);
           bf.style.left = X(from[0] + (tx - from[0]) * k); bf.style.top = ((from[1] + (ty - from[1]) * k - Math.sin(e * Math.PI * 3) * 0.03) * 100) + '%';
           if (e >= 1) { const j = api.frameHooks.indexOf(fly); if (j >= 0) api.frameHooks.splice(j, 1); bf.classList.add('landed'); sparkle(tx, ty, 6); } };
@@ -402,7 +406,7 @@ export async function install(api) {
         return;
       }
     }
-    if (rowState(2) === 'called') { const bf = await sprite('../art/sprites/butterfly.png', 'butterfly c7bf landed'); place(bf, rows[2].x + OFFS[2], ROW_FEET - FL_H * 0.92, 0.04); }
+    if (rowState(2) === 'called') { const bf = await sprite('../art/sprites/butterfly.webp', 'butterfly c7bf landed'); place(bf, rows[2].x + OFFS[2], ROW_FEET - FL_H * 0.92, 0.04); }
     // 主線做完才能離開（比照第三～五章）
     { const exitHot = api.hot.find(h => h.id === 'exit'); if (exitHot) { const go = exitHot.fn || (() => api.runHot(exitHot)); let last = 0;
       exitHot.fn = () => { if (allDone()) return go(); const now = performance.now(); if (now - last > 1800) { last = now; api.toast('還不能離開：' + questText()); } window.dawnHill.exitBlocked = (window.dawnHill.exitBlocked || 0) + 1; }; } }
@@ -415,11 +419,11 @@ export async function install(api) {
     const ROWS = [{ x: 560, color: '#c8a6e8' }, { x: 840, color: null }, { x: 1180, color: '#f3a3c2' }], ROW_FEET = 0.745;
     const OFFS = [-96, -60, -24, 12, 48, 84];   // 開花之後長密了：每排六株，比剛種下時高一點
     for (const r of ROWS) {
-      const src = await tintPetals('../art/sprites/c7_flower.png', r.color);
-      const soil = await sprite('../art/sprites/c7_soil.png', 'c7soil'); place(soil, r.x, ROW_FEET + 0.012, 0.05);
+      const src = await tintPetals('../art/sprites/c7_flower.webp', r.color);
+      const soil = await sprite('../art/sprites/c7_soil.webp', 'c7soil'); place(soil, r.x, ROW_FEET + 0.012, 0.05);
       for (const [k, dx] of OFFS.entries()) { const f = await sprite(src, 'flower c7flower colored c7bloom'); place(f, r.x + dx, ROW_FEET + (k % 2 ? 0.006 : 0), 0.075 + (k % 3) * 0.006); }
     }
-    const bf = await sprite('../art/sprites/butterfly.png', 'butterfly c7bf landed'); place(bf, ROWS[2].x + 12, ROW_FEET - 0.085, 0.04);
+    const bf = await sprite('../art/sprites/butterfly.webp', 'butterfly c7bf landed'); place(bf, ROWS[2].x + 12, ROW_FEET - 0.085, 0.04);
     window.dawnHill.c7bloom = () => document.querySelectorAll('.thing.c7bloom').length;
   }
   window.dawnHill.petals = petals; window.dawnHill.hot = api.hot; window.dawnHill.state = st; window.dawnHill.reveal = reveal; window.dawnHill.gray = gray;

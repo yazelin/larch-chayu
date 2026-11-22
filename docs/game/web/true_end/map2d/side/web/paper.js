@@ -3,15 +3,31 @@
 //                  紙面淡紙紋＋微光影（迎光的右側稍亮、左側稍暗、略帶彎曲的光澤，像紙片微微翹起）。
 //   作者同日澄清「加影不是地面人影，是要紙感立體」：紙片背後的投影用 CSS drop-shadow（在 flat.html，跟著翻面、傾斜一起變），
 //   這裡回的 shadow 只是一小塊很淡的接地影。
+// 剪紙的邊距以換成 WebP 前的立繪像素為基準，依實際圖高換算。
+const ORIGINAL_HEIGHTS = {
+  bird: 682, bird_fly_0: 436, bird_fly_1: 427, bird_fly_2: 346,
+  butterfly: 601, c7_flower: 440, flower_blue: 405, flower_blue_big: 526,
+  flower_orange: 405, flower_purple: 405, flower_red: 405, flower_yellow: 405,
+  lt_chen: 1000, lt_ming: 1000, lt_shi: 1000, lt_tea: 1000,
+  ming_gear: 900, pot: 1045, rabbit: 872, shell_1: 142,
+  zk_cat_sleep: 397, zk_cat_walk: 424, chen_3h: 1463, ming_3h: 1476,
+  shi_3h: 1464, tea_side_3h_cut: 1439,
+};
 export async function paperize(src, opt = {}) {
-  const edge = opt.edge ?? 14, jitter = opt.jitter ?? 4, tex = opt.texture ?? 0.09;
-  let im = await new Promise((ok, bad) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => ok(i); i.onerror = () => bad(new Error('載不到 ' + src)); i.src = src; });
+  const source = new Image();
+  source.crossOrigin = 'anonymous';
+  source.src = src;
+  await (window.PageLoading ? PageLoading.image(source) : source.decode());
+  let im = source;
+  const name = src.split('/').pop().replace(/\.webp$/, '');
+  const scale = im.height / (ORIGINAL_HEIGHTS[name] || im.height);
+  const edge = (opt.edge ?? 14) * scale, jitter = (opt.jitter ?? 4) * scale, tex = opt.texture ?? 0.09;
   if (opt.gray) { const gc = document.createElement('canvas'); gc.width = im.width; gc.height = im.height; const gg = gc.getContext('2d'); gg.filter = 'grayscale(1) brightness(1.08) contrast(.9)'; gg.drawImage(im, 0, 0); im = gc; }
-  const pad = edge + jitter + 8, W = im.width + pad * 2, H = im.height + pad * 2;
+  const pad = Math.ceil(edge + jitter + 8 * scale), W = im.width + pad * 2, H = im.height + pad * 2;
   const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'); const rnd = mulberry(7);
   const dirs = []; for (let k = 0; k < 28; k++) dirs.push([rnd() * Math.PI * 2, edge * (0.55 + rnd() * 0.45) + (rnd() - 0.5) * jitter * 2]);
   // 1 切口厚度：白邊外再一圈暗線（往光的反方向、左下偏一點）
-  for (const [a, r] of dirs) { g.filter = `drop-shadow(${(Math.cos(a) * r - 1.2).toFixed(1)}px ${(Math.sin(a) * r + 1.4).toFixed(1)}px 0 rgba(110,78,88,0.55))`; g.drawImage(im, pad, pad); }
+  for (const [a, r] of dirs) { g.filter = `drop-shadow(${(Math.cos(a) * r - 1.2 * scale).toFixed(1)}px ${(Math.sin(a) * r + 1.4 * scale).toFixed(1)}px 0 rgba(110,78,88,0.55))`; g.drawImage(im, pad, pad); }
   // 2 不規則白邊：很多個隨機偏移的影子疊出來（剪刀剪出來的邊不會是等距的）
   for (const [a, r] of dirs) { g.filter = `drop-shadow(${(Math.cos(a) * r).toFixed(1)}px ${(Math.sin(a) * r).toFixed(1)}px 0 #fbf7ef)`; g.drawImage(im, pad, pad); }
   g.filter = 'none';

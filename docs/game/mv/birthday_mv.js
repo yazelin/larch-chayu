@@ -21,7 +21,7 @@
 
   const au = new Audio(); au.preload = 'auto'; au.src = MV.audio;
   Object.defineProperty(state, 'au', { value: au, enumerable: false });   // 測試用：框模式下跳到尾段
-  MV.shots.forEach(s => { const im = new Image(); im.src = s.img; });
+  MV.shots.slice(1).forEach(s => { const im = new Image(); im.src = s.img; });
 
   /* ── 畫面：一鏡一張，交叉淡化，推鏡方向照分鏡表；以 focus 為中心縮放 ── */
   const MOVES = {
@@ -67,6 +67,7 @@
   function tick() { if (state.phase === 'play') frame(); requestAnimationFrame(tick); }
   requestAnimationFrame(tick);
   showShot(0, 0);
+  window.PageLoading?.finish();
 
   /* ── 播放、略過、結束 ── */
   let endTimer = 0;

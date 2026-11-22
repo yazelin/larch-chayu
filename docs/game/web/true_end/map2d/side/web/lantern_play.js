@@ -32,8 +32,14 @@ const S = window.lantern = { state: 'loading', u: 0, taps: 0, cam: {}, lanterns:
 const setState = s => { S.state = s; document.body.dataset.state = s; };
 
 // ── Larch 協定 ──
-let startAt = performance.now() + 2000;   // 不在 Larch 裡、或編輯器預覽沒送 init：2 秒後自己開始
-addEventListener('message', e => { const d = e.data || {}; if (d.type === 'larch:init') { S.vars = d.variables || {}; S.inited = true; startAt = Math.min(startAt, performance.now() + 600); } });
+let startAt;
+addEventListener('message', e => {
+  const d = e.data || {};
+  if (d.type !== 'larch:init') return;
+  S.vars = d.variables || {};
+  S.inited = true;
+  if (S.state === 'ready') startAt = Math.min(startAt, performance.now() + 600);
+});
 send({ type: 'larch:ready' });
 
 // ── 數學 ──
@@ -51,7 +57,7 @@ function monotone(xs, ys) {   // Fritsch–Carlson 單調三次內插：路線�
 }
 // 紙片白邊要讀像素；放在沒有 CORS 的 opaque origin 框裡讀不到時，退回原圖（少了白邊，但照樣能播）
 async function paperOr(src, im, opt) { try { return await paperize(src, opt); } catch (e) { console.warn('紙片白邊失敗，用原圖', e); return { src, shadow: '', pad: 0, width: im.width, height: im.height }; } }
-const loadImg = src => new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => bad(new Error('載不到 ' + src)); i.src = src; });
+const loadImg = src => PageLoading.preload(src);
 
 function glowSprite() {   // 天燈外圍的暖光暈：程式畫的徑向漸層（暖黃→橘→透明）
   const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
@@ -64,9 +70,9 @@ function glowSprite() {   // 天燈外圍的暖光暈：程式畫的徑向漸層
 let data, W, H, people = [], lts = [], routes = [];
 const H0 = 110;   // 天燈紙片的基準高度（長畫 px）；之後用 scale 變大小
 async function boot() {
-  data = await (await fetch('../art/out/lantern/flat.json')).json();
+  data = await PageLoading.json('../art/out/lantern/flat.json');
   W = data.width; H = data.height;
-  await loadImg($('bg').src);
+  await PageLoading.image($('bg'));
   const byId = Object.fromEntries(data.people.map(p => [p.id, p]));
   const glow = glowSprite();
   // 四人背影紙人
@@ -82,6 +88,7 @@ async function boot() {
   }
   // 四盞天燈（左到右＝order：晨、茶語、明、詩）
   const L = data.lanterns, keys = L.keys, ts = keys.map(k => k.t);
+  PageLoading.prepare('天燈圖', Promise.all(Object.values(L.imgs).map(loadImg)));
   const speed = [-0.03, 0.02, -0.012, 0.035];      // 四盞速度略不同（頭尾仍對齊關鍵點）
   const period = [3.4, 3.9, 3.1, 3.7], phase = [0.3, 2.1, 4.0, 5.2];
   for (let i = 0; i < L.order.length; i++) {
@@ -97,9 +104,12 @@ async function boot() {
   S.people = people.map(({ el, ...p }) => p);
   layout(); addEventListener('resize', layout);
   stage.addEventListener('pointerdown', onTap);
-  setState('ready');
-  requestAnimationFrame(() => { fade.style.opacity = '0'; });
-  last = performance.now(); requestAnimationFrame(frame);
+  last = performance.now();
+  PageLoading.shown.then(() => {
+    startAt = performance.now() + (S.inited ? 600 : 2000);
+    setState('ready');
+  });
+  requestAnimationFrame(frame);
 }
 
 // ── 鏡頭：寬度撐滿畫面（最寬看整條 1536 寬）；直式手機把可見寬度收到 900 左右，讓四人與天燈夠大 ──
@@ -179,4 +189,4 @@ function finish(now) {
   window.__done = { result: 'lanternsUp', writes };
 }
 
-boot().catch(err => { console.error(err); setState('error'); S.error = String(err && err.message || err); fade.style.opacity = '0'; });
+PageLoading.track('天燈場景組裝', boot()).then(() => PageLoading.finish()).catch(err => { console.error(err); setState('error'); S.error = String(err && err.message || err); fade.style.opacity = '0'; });

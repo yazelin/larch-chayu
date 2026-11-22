@@ -1,6 +1,6 @@
 // 由 make_album_data.py 產生，不要手改。詩的唱片架（工作室互動點 5）的劇情曲：順序＝唱片架上的順序，最後一首由夥伴結局解鎖。
 // 音檔路徑從 真結局/studio_web/ 算起，寫成完整字串給 新版/build/export_pages.py 掃描與改寫。
-export const HUD_SONG_ORDER = ["最終決戰", "主題曲（退件版）", "主題曲（改好版）", "主題曲（貝殼版）", "明天一定寫", "下雨天", "合唱團", "詩的歌（手機悶聲版）", "詩的歌（耳機完整版）", "島的主題曲"];
+export const HUD_SONG_ORDER = ["最終決戰", "主題曲（退件版）", "主題曲（改好版）", "主題曲（貝殼版）", "明天一定寫", "下雨天", "合唱團", "詩的歌（手機悶聲版）", "詩的歌（耳機完整版）", "島的主題曲", "生日歌"];
 export const ALBUM_TRACKS = [
  {
   "id": "final-battle",
@@ -235,6 +235,7 @@ export const ALBUM_TRACKS = [
   "duration": 27.92,
   "note": "",
   "unlock": {
+   "hud": "s10",
    "birthday": "ch6_cg_026",
    "day": 20
   },

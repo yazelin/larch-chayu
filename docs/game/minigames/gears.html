@@ -174,7 +174,13 @@ body.on::after { content:""; position:fixed; inset:0; pointer-events:none; backg
 .mute:hover { border:0; color:var(--ink); filter:brightness(1.04); }
 .hint { color:var(--ink); }
 @media (orientation:portrait) { .frame { max-width:100%; } }
-</style></head>
+</style><script>/* 在 Larch 裡（播放器把章名膠囊放左上、常駐 HUD＋關閉鈕放右上、按鈕列放右下，2026-11-22 實量）就讓開那幾塊；網址加 inlarch=1 可在本機模擬 */(function(){try{var a=location.ancestorOrigins,inL=/[?&]inlarch=1/.test(location.search)||/larch\.ink/.test(document.referrer||'');if(a)for(var i=0;i<a.length;i++)if(/larch\.ink/.test(a[i]))inL=true;if(inL)document.documentElement.classList.add('in-larch');}catch(e){}})();</script>
+<style>
+html.in-larch .app{padding-top:max(56px,env(safe-area-inset-top))!important;padding-bottom:max(64px,env(safe-area-inset-bottom))!important}
+html.in-larch .app>.bar{padding-right:258px}
+@media(max-width:700px){html.in-larch .app{padding-top:max(120px,env(safe-area-inset-top))!important;padding-bottom:max(58px,env(safe-area-inset-bottom))!important}html.in-larch .app>.bar{padding-right:0}}
+</style>
+</head>
 <body>
 <div class="app">
   <div class="bar"><p class="kicker">第五章．時之國</p><i class="rule"></i><span class="count">齒輪 <b id="n">0</b>／<b>5</b></span><button class="mute" id="mute" aria-pressed="false">聲音 開</button></div>
@@ -199,13 +205,14 @@ body.on::after { content:""; position:fixed; inset:0; pointer-events:none; backg
   <filter id="ink" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".08" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.5"/><feGaussianBlur stdDeviation=".3"/></filter>
 </defs></svg>
 
+<script src="../web/true_end/page_loading.js"></script>
 <script>
 /* ===== 素材（之後換正式圖只改這裡）=====
    每一項空字串＝用下面程式畫的暫時素材（SVG）。換成圖片網址（建置時可寫 {{ASSET:檔名}}）就改用圖。
    cityBg：整座城的背景（800×560，不含會動的水、鳥、葉子、鐘的指針與齒輪；鐘面圓心位置見 CLOCKS）。
    boss：時間大魔王（明）站姿，腳底在圖下緣中間，約 90×130。hero：勇者站姿，約 60×78。
    bird：鳥（約 40×24，朝右飛）。leaf：葉子（約 20×14）。gear：一個齒輪的透明 PNG（正方形，路上與齒輪袋共用；鐘面上的齒輪仍用程式畫，才能算咬合）。 */
-var ASSETS = { cityBg: './img/time_city_v3.webp', boss: './img/ming_king.png', hero: './img/hero.png', bird: './img/bird_', leaf: './img/leaf_1.webp', gear: './img/gear_12.webp' };
+var ASSETS = { cityBg: './img/time_city_v3.webp', boss: './img/ming_king.webp', hero: './img/hero_cut.webp', bird: './img/bird_', leaf: './img/leaf_1.webp', gear: './img/gear_12.webp' };
 /* 隨進度換的姿勢（作者 11-17：勇者要自然、隨進度換；明也要有反應，像上色的晨那樣）。每組圖排在同一畫布（900×1300，舉齒輪過頭所以比其他遊戲的 1150 高；站直身高 1100、兩腳中心在下緣中間，
    canon_new/outfits/poses/normalize.py CANVAS_H=1300），同一個框疊放、交叉淡入，腳底不跳位；身高與腳底對齊原本的 hero.png、ming_king.png（明 188：茶語 157）。
    勇者：閒逛（預設）→ 走路兩張交替（移動中）→ 蹲下撿齒輪 → 把齒輪舉高放上鐘 → 看鐘走起來；明：抱臂看懷錶（預設）→ 她撿到齒輪挑眉 → 咬住時動容看鐘塔 → 那一分鐘重來時按住懷錶 → 時間走起來淡淡地笑。 */
@@ -770,7 +777,7 @@ function layout() { var st = $('stage'), a = st.getBoundingClientRect(), tall = 
 function boot() { if (booted) return; booted = true;
   if (still) document.documentElement.classList.add('reduce');
   document.body.classList.add('on'); buildCity(); buildFace(); buildBag(); layout(); addEventListener('resize', layout);
-  t0 = performance.now(); requestAnimationFrame(frame); $('go').focus(); }
+  t0 = performance.now(); requestAnimationFrame(frame); $('go').focus(); window.PageLoading?.finish(); }
 $('go').addEventListener('click', function () { SND.unlock(); started = true; $('intro').classList.add('gone'); idleReset(); SND.appear(); });
 $('mute').addEventListener('click', function () { var m = this.getAttribute('aria-pressed') !== 'true'; this.setAttribute('aria-pressed', m); this.textContent = m ? '聲音 關' : '聲音 開'; SND.setMute(m); });
 // 測試用鉤子（不影響遊戲）

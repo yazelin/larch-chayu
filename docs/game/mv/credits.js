@@ -32,6 +32,7 @@
     state.vars = d.variables || {};
     state.seen = truthy(state.vars[C.seen_var]);
     fillRecords();
+    if (window.PageLoading?.shell) window.PageLoading?.finish();
     if (state.seen && state.phase !== 'done') $('skip').hidden = false;   // 看過了：從開場紙卡就能略過
   });
   post({ type: 'larch:ready' });
@@ -128,6 +129,8 @@
     }
   }
   measure(); place(0); fillRecords();
+  if (window.PageLoading?.shell) setTimeout(PageLoading.finish, 1500);
+  else window.PageLoading?.finish();
   addEventListener('resize', () => { measure(); place(state.progress); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { measure(); place(state.progress); });
 

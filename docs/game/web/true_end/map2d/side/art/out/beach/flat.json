@@ -11,12 +11,12 @@
   2992
  ],
  "exit": "left",
- "cg": "../art/out/beach/cg_412_placeholder.jpg",
+ "cg": "../art/out/beach/cg_412_placeholder.webp",
  "night": false,
  "npcs": [
   {
    "id": "shi",
-   "img": "../../../sprites/shi_3h.png",
+   "img": "../../../sprites/shi_3h.webp",
    "x": 300,
    "h": 0.21,
    "face": 1
@@ -48,17 +48,17 @@
   "horizon": 154,
   "band_bottom": 300
  },
- "cg_412": "../art/out/beach/cg_412_placeholder.jpg",
+ "cg_412": "../art/out/beach/cg_412_placeholder.webp",
  "open_patches": {
   "crate": {
-   "img": "../art/out/beach/open_crate.png",
+   "img": "../art/out/beach/open_crate.webp",
    "x": 1983,
    "y": 320,
    "w": 171,
    "h": 207
   },
   "barrel": {
-   "img": "../art/out/beach/open_barrel.png",
+   "img": "../art/out/beach/open_barrel.webp",
    "x": 869,
    "y": 360,
    "w": 109,
@@ -66,7 +66,7 @@
   }
  },
  "rock_fg": {
-  "img": "../art/out/beach/rock_fg.png",
+  "img": "../art/out/beach/rock_fg.webp",
   "x": 2420,
   "y": 414,
   "w": 94,

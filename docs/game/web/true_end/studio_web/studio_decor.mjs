@@ -1,10 +1,11 @@
 import { preparePanel } from './studio_panel.mjs';
+import { taipeiDay } from './studio_draw.mjs';
 // 工作室佈置：5 個常駐位（寵物或植物）、澆水長大、落地鏡換裝（6 套衣服＋8 件配件）與穿著走路、換上三人私人物品時的一句話。
 // 方案與作者定案：真結局/studio_decor_plan.md；素材與疊圖規則：真結局/studio_decor/（art/wear/wear.json、wear.py 同一套規則）。
 // 存檔：StudioDB 的 studio_slots、plant_growth、plant_watered、outfit、accessories（Larch 卡裡會進 persistent 的 studioMisc，跨週目保留）。
 // 解鎖：衣服與配件看章節（或小遊戲完成變數）；寵物看圖鑑 creatures／zukan_seen；植物看 plants／plants_seen。測試用網址參數 unlock=all。
 const query = new URLSearchParams(location.search);
-if (query.get('mode') !== 'turn') boot();
+if (query.get('mode') !== 'turn' && !document.documentElement.classList.contains('studio-real-chat')) boot();
 
 function boot() {
   const DB = window.StudioDB;
@@ -16,7 +17,11 @@ function boot() {
   window.addEventListener('message', function (event) {
     if (event.source !== window.parent) return;
     const data = event.data || {};
-    if (data.type === 'larch:init') { variables = data.variables || {}; refreshAll(); }
+    if (data.type === 'larch:init') {
+      variables = data.variables || {};
+      const ready = refreshAll();
+      if (ready) window.PageLoading?.prepare('工作室佈置與換裝', ready);
+    }
   });
   function game() { return (window.STUDIO_FEATURES && window.STUDIO_FEATURES.context()) || { chapter: 1, day: 1 }; }
   function flag(name) { const v = variables[name] !== undefined ? variables[name] : query.get(name); return v === true || v === 1 || v === 'true' || v === '1'; }
@@ -124,7 +129,8 @@ function boot() {
   }
   function grown(id) { return (st.growth[id] || 0) >= 3; }
   function water(id) {
-    const day = game().day;
+    // 劇情中照遊戲天數；通關後（第 31 天以後劇情天數不再前進）改用現實日期，隔天回來還能再澆（作者 2026-11-22 問「週目過完是否就不再有明天」）
+    const day = Number(game().day) > 30 ? 'real-' + taipeiDay() : game().day;
     if (grown(id)) return '已經長大了。';
     if (st.watered[id] === day) return '今天澆過了，明天再來。';
     st.watered[id] = day; st.growth[id] = (st.growth[id] || 0) + 1;
@@ -135,7 +141,12 @@ function boot() {
   // ── 換裝：疊圖（跟 wear.py 同一套規則） ──
   const images = new Map();
   function img(src) {
-    if (!images.has(src)) images.set(src, new Promise(function (resolve, reject) { const i = new Image(); i.onload = function () { resolve(i); }; i.onerror = function () { reject(new Error('載入失敗 ' + src)); }; i.src = src; }));
+    if (!images.has(src)) {
+      const image = new Image();
+      image.src = src;
+      const decoded = window.PageLoading ? PageLoading.image(image) : image.decode();
+      images.set(src, decoded.then(() => image));
+    }
     return images.get(src);
   }
   function layerName(acc, outfit, accs) {
@@ -367,7 +378,7 @@ function boot() {
   }
 
   // ── 接到工作室 ──
-  function refreshAll() { if (!st.loaded) return; recompute(); renderSlots(); applyPlayer(); }
+  function refreshAll() { if (!st.loaded) return; recompute(); renderSlots(); return applyPlayer(); }
   function hook() {
     const features = window.STUDIO_FEATURES;
     if (features && !features.__decor) {
@@ -380,8 +391,9 @@ function boot() {
     get state() { return { slots: SLOTS.map(function (s, i) { const o = occupant(i); return o ? o.id : '-'; }), growth: st.growth, outfit: st.outfit, accessories: st.accs.slice(), loaded: st.loaded }; },
     openMirror: openMirror, openSlot: function (i) { openSlot(i, document.body); }
   };
-  (async function () {
+  const ready = (async function () {
     for (let i = 0; i < 40 && !window.STUDIO_FEATURES; i += 1) await new Promise(function (r) { setTimeout(r, 50); });
-    hook(); await load(); refreshAll();
+    hook(); await load(); await refreshAll();
   })();
+  window.PageLoading?.prepare('工作室佈置與換裝', ready);
 }

@@ -11,12 +11,12 @@
   2224
  ],
  "exit": "right",
- "cg": "../art/out/cape/cg_514_placeholder.jpg",
+ "cg": "../art/out/cape/cg_514_placeholder.webp",
  "night": true,
  "npcs": [
   {
    "id": "ming",
-   "img": "../../../sprites/ming_3h.png",
+   "img": "../../../sprites/ming_3h.webp",
    "x": 600,
    "h": 0.3252,
    "face": 1
@@ -49,7 +49,7 @@
  "floats": [
   {
    "id": 1,
-   "img": "../art/sprites/cape_float_1.png",
+   "img": "../art/sprites/cape_float_1.webp",
    "x": 844,
    "y": 654,
    "w": 46,
@@ -64,7 +64,7 @@
   },
   {
    "id": 2,
-   "img": "../art/sprites/cape_float_2.png",
+   "img": "../art/sprites/cape_float_2.webp",
    "x": 808,
    "y": 623,
    "w": 58,
@@ -79,7 +79,7 @@
   },
   {
    "id": 3,
-   "img": "../art/sprites/cape_float_3.png",
+   "img": "../art/sprites/cape_float_3.webp",
    "x": 772,
    "y": 592,
    "w": 46,
@@ -94,7 +94,7 @@
   },
   {
    "id": 4,
-   "img": "../art/sprites/cape_float_4.png",
+   "img": "../art/sprites/cape_float_4.webp",
    "x": 736,
    "y": 561,
    "w": 54,
@@ -109,7 +109,7 @@
   },
   {
    "id": 5,
-   "img": "../art/sprites/cape_float_5.png",
+   "img": "../art/sprites/cape_float_5.webp",
    "x": 700,
    "y": 530,
    "w": 44,
@@ -250,17 +250,17 @@
   "horizon": 474,
   "band_bottom": 700
  },
- "cg_514": "../art/out/cape/cg_514_placeholder.jpg",
+ "cg_514": "../art/out/cape/cg_514_placeholder.webp",
  "over_patches": {
   "lantern_off": {
-   "img": "../art/out/cape/lantern_off.png",
+   "img": "../art/out/cape/lantern_off.webp",
    "x": 1907,
    "y": 459,
    "w": 273,
    "h": 294
   },
   "tulip_open": {
-   "img": "../art/out/cape/tulip_open.png",
+   "img": "../art/out/cape/tulip_open.webp",
    "x": 1593,
    "y": 774,
    "w": 211,

@@ -1,7 +1,8 @@
-import { CHEN_ART } from './studio_collection_data.mjs';
+import { TODO_ITEMS } from './studio_points2_data.mjs';
+import { CHEN_ART, SKY_DIARY } from './studio_collection_data.mjs';
 import { preparePanel } from './studio_panel.mjs';
 import { affinityChapter, AFFINITY_MAX, createFreeAffinity } from './free_affinity.mjs';
-import { storyTime } from './story_time.mjs';
+import { storyDayNote, storyTime } from './story_time.mjs';
 import { renderDraw, taipeiDay, LOOK_DAILY_LIMIT } from './studio_draw.mjs';
 import { mountAlbum, unlockedIds, ALBUM_TRACKS, HEADPHONE_TRACKS } from './studio_album.mjs';
 import { waitingIndicator, chatStages, lookStages, jobStages, CHARACTER_STAGE_COLORS } from './studio_wait.mjs';
@@ -15,6 +16,8 @@ const scrim = $('#scrim');
 const closeButton = $('#panel-close');
 const query = new URLSearchParams(location.search);
 const mockMode = query.get('mock') === '1';
+const phoneStoryKeys = ['ch2Msg', 'ch3SkyFirst', 'ch4Apology', 'ch4AssetsFirst', 'ch5PassFirst', 'ch7Route', 'trueEndMsg'];
+const realChat = document.documentElement.classList.contains('studio-real-chat');
 // larch:init 常比這支模組早到（index.html 先收）：有的話先用那一份，天數才不會停在預設的第 1 天
 let larchVariables = (window.__studio && window.__studio.variables) || {};
 let game = readGameState(location.search, larchVariables);
@@ -75,10 +78,11 @@ function panelOpen(title, focus, design, character) {
   panel.classList.add('studio-feature-panel', 'on');
   panel.setAttribute('aria-hidden', 'false');
   scrim.classList.add('on');
-  closeButton.focus({ preventScroll: true });
+  (realChat ? panel : closeButton).focus({ preventScroll: true });
 }
 
 function closeFeature() {
+  if (realChat) return;
   disposeMingComputer();
   panel.classList.remove('sf-wide');
   if (!panel.classList.contains('studio-feature-panel')) return;
@@ -381,7 +385,7 @@ async function phoneSnapshot() {
     return { title: item.task, day: item.day, done: item.status === 'done', fixed: true, status: item.status };
   }).concat(personal.map(function (item) { return { title: String(item.title || ''), day: Number(item.day) || game.day, done: item.status === 'done', fixed: false, status: item.status || 'planned' }; })).slice(0, 80);
   const route = String(larchVariables.ch7Route || '').toUpperCase();
-  const ended = game.day > 30 || truthy(larchVariables.trialEnded);
+  const ended = game.trialEnded;
   return {
     playerId: String(larchVariables.studioPlayerId || await playerId()), day: game.day, chapter: game.chapter,
     trialKnown: game.trialKnown, tier: studioTier(), affection: game.affinity, plotSummary: game.summary,
@@ -530,7 +534,8 @@ async function renderChat(character, group, root) {
   input.setAttribute('aria-label', '訊息');
   input.rows = 2;
   input.maxLength = 1200;
-  input.placeholder = group ? '在長桌邊說點什麼……' : '跟' + CHARACTERS[character].name + '說點什麼……';
+  if (!group) input.placeholder = '跟' + CHARACTERS[character].name + '說點什麼……';
+  else if (!realChat) input.placeholder = '在長桌邊說點什麼……';
   const send = button('送出', null, 'primary');
   const status = el('div', 'sf-status');
   composer.append(input, send);
@@ -578,6 +583,7 @@ async function renderChat(character, group, root) {
     send.disabled = true;
     status.textContent = '';
     const scene = game;
+    const phoneStory = Object.fromEntries(phoneStoryKeys.map(key => [key, larchVariables[key]]));
     const timing = storyTime(scene.day, scene.chapter);
     const userMessage = { role: 'user', content: content, ts: Date.now(), ...timing };
     history.push(userMessage);
@@ -590,7 +596,7 @@ async function renderChat(character, group, root) {
     try {
       const base = await workerContext(group ? 'group' : character, scene);
       const payload = Object.assign({}, base, {
-        mode: 'chat', character: character || 'group', group: !!group,
+        mode: 'chat', character: character || 'group', group: !!group, phoneStory: phoneStory,
         messages: history.slice(-16).map(function (message) { return messageLine(message, group); })
       });
       const result = await callWorker('/chat', payload);
@@ -1354,7 +1360,7 @@ const SHELL_ROW = [3, 1, 5, 6, 2, 7, 4];   // 6＝珊瑚粉，第 28 天的第 2
 function shellRow(root) {
   if (!(game.day >= 29)) return;
   const row = el('div', 'sf-shell-row'); row.setAttribute('aria-label', '長桌上，花瓶旁邊一排貝殼'); row.dataset.shells = String(SHELL_ROW.length);
-  SHELL_ROW.forEach(function (n, i) { const img = el('img', 'sf-shell' + (n === 6 ? ' pink' : '')); img.src = '../map2d/side/art/sprites/shell_' + n + '.png'; img.alt = ''; img.style.setProperty('--tilt', ((i % 3) - 1) * 6 + 'deg'); row.appendChild(img); });
+  SHELL_ROW.forEach(function (n, i) { const img = el('img', 'sf-shell' + (n === 6 ? ' pink' : '')); img.src = '../map2d/side/art/sprites/shell_' + n + '.webp'; img.alt = ''; img.style.setProperty('--tilt', ((i % 3) - 1) * 6 + 'deg'); row.appendChild(img); });
   root.appendChild(row);
 }
 
@@ -1607,7 +1613,9 @@ function addComputerWidgetList(container, settings) {
 
 // 試用期第 30 天到期：第 1 天剩 30 天（字卡「試用期剩 N 天」同一套算法）；過了第 30 天就不再倒數。
 const TRIAL_LAST_DAY = 30;
-function trialDaysLeft() { return game.day <= TRIAL_LAST_DAY ? TRIAL_LAST_DAY + 1 - game.day : null; }
+function trialDaysLeft() { return game.trialEnded ? null : TRIAL_LAST_DAY + 1 - game.day; }
+function trialStatus() { return game.trialEnded ? (storyRoute() ? '已續訂' : '試用期已結束') : ''; }
+function trialLine() { return trialStatus() || '試用期剩 ' + trialDaysLeft() + ' 天'; }
 
 function osBar() {
   // 作業系統「明」的上方列：右上角日期，旁邊的小圖示寫剩幾天（新版/設計.md「倒數出現的地方」）。
@@ -1699,10 +1707,10 @@ function updateMingStageScale(state) {
 
 const MING_WALLPAPERS = {
   moonlight: '../../../cg/ch5/ch5_cg_019.webp',
-  north: '../../新版/canon_new/studio/flat/N.png',
-  east: '../../新版/canon_new/studio/flat/E.png',
-  south: '../../新版/canon_new/studio/flat/S.png',
-  west: '../../新版/canon_new/studio/flat/W.png'
+  north: '../../新版/canon_new/studio/flat/N.webp',
+  east: '../../新版/canon_new/studio/flat/E.webp',
+  south: '../../新版/canon_new/studio/flat/S.webp',
+  west: '../../新版/canon_new/studio/flat/W.webp'
 };
 
 function updateMingWallpaper(state, key) {
@@ -1805,7 +1813,7 @@ function mingIcon(id, size) {
   icon.setAttribute('aria-hidden', 'true');
   if (app.icon === 'calendar') {
     icon.style.fontSize = dimension / 100 + 'px';
-    icon.append(el('b', '', '試用期'), el('i', '', String(game.day)));
+    icon.append(el('b', game.trialEnded ? 'ended' : '', trialStatus() || '試用期'), el('i', '', String(game.day)));
     return icon;
   }
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -1833,7 +1841,7 @@ function updateMingClock(state) {
   if (clock) clock.textContent = new Date().toLocaleTimeString('zh-TW', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Taipei' });
   if (date) {
     const left = trialDaysLeft();
-    date.textContent = '第 ' + game.day + ' 天｜' + (left === null ? '試用期已結束' : '剩 ' + left + ' 天');
+    date.textContent = '第 ' + game.day + ' 天｜' + (trialStatus() || '剩 ' + left + ' 天');
   }
   if (tier) {
     const label = studioTier() === 'owned' ? '完整版' : '試玩';
@@ -1973,7 +1981,10 @@ function buildMingWidgets(state) {
     const circumference = 2 * Math.PI * 33;
     const percent = Math.max(0, Math.min(TRIAL_LAST_DAY, game.day)) / TRIAL_LAST_DAY;
     ring.innerHTML = '<svg viewBox="0 0 78 78" width="70" height="70" aria-hidden="true"><circle cx="39" cy="39" r="33" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="8"/><circle cx="39" cy="39" r="33" fill="none" stroke="#f3d999" stroke-width="8" stroke-linecap="round" stroke-dasharray="' + (circumference * percent).toFixed(1) + ' ' + circumference.toFixed(1) + '" transform="rotate(-90 39 39)"/></svg>';
-    const ringLabel = el('b'); ringLabel.append(el('span', '', String(game.day)), el('small', '', '／30 天')); ring.appendChild(ringLabel);
+    const ringLabel = el('b');
+    ringLabel.append(el('span', '', String(game.day)));
+    if (!game.trialEnded) ringLabel.append(el('small', '', '／30 天'));
+    ring.appendChild(ringLabel);
     const copy = el('span', 'tx'); copy.append(el('b', '', '明的進度表'), el('small', 'ming-progress-task', '讀取進度表……'));
     progress.append(ring, copy);
     state.widgets.appendChild(progress);
@@ -1987,7 +1998,7 @@ function buildMingWidgets(state) {
   if (enabled.calendar.enabled) {
     const calendar = el('button', 'mwidget mw-cal mwidget-button ming-calendar-widget pos-' + enabled.calendar.position);
     calendar.type = 'button'; calendar.dataset.osapp = 'calendar'; calendar.setAttribute('aria-label', '打開試用期月曆');
-    const heading = el('div', 'hd'); heading.append(el('span', '', '試用期'), el('b', '', '30 天'));
+    const heading = el('div', 'hd'); heading.append(el('span', '', trialStatus() || '試用期'), el('b', '', game.trialEnded ? '第 ' + game.day + ' 天' : '30 天'));
     const days = el('div', 'g');
     for (let day = 1; day <= TRIAL_LAST_DAY; day += 1) {
       const cell = el('span', (day === game.day ? 'today' : '') + (day < game.day ? ' dim' : '') + (day === 23 ? ' circ' : ''), String(day));
@@ -2006,12 +2017,11 @@ function buildMingWidgets(state) {
 
 async function renderMingDesktopWidgets(state) {
   const progressWidget = state.widgets.querySelector('.ming-progress-widget');
-  const raw = await StudioDB.get('progressTable').catch(function () { return null; });
-  const progress = sanitizeProgress(raw || { days: [] });
-  const saved = progress.days[game.day - 1];
+  const { days } = await readProgress();
+  const saved = days.find(item => item.day === game.day);
   if (progressWidget) {
     const hasTask = saved && saved.task && saved.task !== '待安排';
-    progressWidget.querySelector('.ming-progress-task').textContent = hasTask ? saved.task : '今天尚無進度資料';
+    progressWidget.querySelector('.ming-progress-task').textContent = trialStatus() || (hasTask ? saved.task : '今天尚無進度資料');
   }
   const favoritesWidget = state.widgets.querySelector('.ming-favorites-widget');
   if (favoritesWidget) {
@@ -2021,7 +2031,7 @@ async function renderMingDesktopWidgets(state) {
     favoritesWidget.querySelector('.ming-favorites-count').textContent = count ? count + ' 項收藏' : '收藏資料夾還是空的';
   }
   const calendar = state.widgets.querySelector('.ming-calendar-widget');
-  if (calendar) calendar.setAttribute('aria-label', '試用期 30 天，第 ' + game.day + ' 天；第 23 天為截止日。');
+  if (calendar) calendar.setAttribute('aria-label', '第 ' + game.day + ' 天・' + (trialStatus() || '試用期 30 天，第 23 天為截止日'));
 }
 
 function buildMingDock(state) {
@@ -2185,9 +2195,9 @@ function buildMingWindowSidebar(id) {
   const group = function (label) { side.appendChild(el('div', 'sh', label)); };
   if (id === 'progress') {
     group('清單');
-    side.append(mingSidebarButton('今天', 'progress:today', true, '#45628f'), mingSidebarButton('第 ' + game.day + ' 天', 'progress:day', false, '#e09a5e'), mingSidebarButton('全部', 'progress:all', false, '#8a7fb8'));
+    side.append(mingSidebarButton('今天', 'progress:today', !game.trialEnded, '#45628f'), mingSidebarButton('第 ' + game.day + ' 天', 'progress:day', false, '#e09a5e'), mingSidebarButton('全部', 'progress:all', false, '#8a7fb8'));
     group('分類');
-    side.append(mingSidebarButton('明排的項目', 'progress:planned', false, '#97bd56'), mingSidebarButton('自己加的', 'progress:personal', false, '#9a536a'));
+    side.append(mingSidebarButton('明排的項目', 'progress:planned', game.trialEnded, '#97bd56'), mingSidebarButton('自己加的', 'progress:personal', false, '#9a536a'));
   } else if (id === 'phone') {
     side.append(el('div', '', ''));
     side.append(mingSidebarButton('我的手機', '', true, '#8a7fb8', '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M10 6h4m-2 12h.01"/>'), mingSidebarButton('休息提醒', 'open:settings', false, '#e09a5e'));
@@ -2195,8 +2205,12 @@ function buildMingWindowSidebar(id) {
     group('清單');
     side.append(mingSidebarButton('明做的', 'games:done', true, '#45628f'), mingSidebarButton('明試做的', 'games:pending', false, '#e09a5e'), mingSidebarButton('劇情裡的小遊戲', 'open:story-games', false, '#8a7fb8'));
   } else if (id === 'timeline') {
-    group('這幾天');
-    side.append(mingSidebarButton('第 ' + game.day + ' 天', 'timeline:today', true, '#e09a5e'));
+    group('每天的記錄');
+    const lastDay = Math.min(game.day, TRIAL_LAST_DAY);
+    for (let day = lastDay; day >= 1; day -= 1) {
+      side.append(mingSidebarButton('第 ' + day + ' 天', 'timeline:' + day, day === lastDay, '#e09a5e',
+        '<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>'));
+    }
   } else if (id === 'favorites') {
     group('收藏');
     side.append(mingSidebarButton('全部項目', 'favorites:all', true, '#8a7fb8'), mingSidebarButton('畫作', 'favorites:image', false, '#97bd56'), mingSidebarButton('歌曲', 'favorites:song', false, '#9a536a'));
@@ -2299,7 +2313,7 @@ function openMingApp(state, id, options) {
   });
   searchInput.addEventListener('input', function () {
     const needle = searchInput.value.trim().toLocaleLowerCase();
-    content.querySelectorAll('.sf-card,.ming-progress-row,.sf-message').forEach(function (row) {
+    content.querySelectorAll('.sf-card,.ming-progress-row,.sf-message,.ming-timeline-entry').forEach(function (row) {
       row.hidden = !!needle && !row.textContent.toLocaleLowerCase().includes(needle);
     });
   });
@@ -2310,6 +2324,10 @@ function openMingApp(state, id, options) {
     if (key.startsWith('open:')) { openMingApp(state, key.slice(5)); return; }
     sidebar.querySelectorAll('button').forEach(function (buttonNode) { buttonNode.classList.toggle('on', buttonNode === action); });
     if (id === 'progress') content.dispatchEvent(new CustomEvent('ming-progress-filter', { detail: key.slice(9) }));
+    if (id === 'timeline') {
+      const entry = content.querySelector('.ming-timeline-entry[data-day="' + Number(key.slice(9)) + '"]');
+      if (entry) { entry.open = true; entry.scrollIntoView({ block: 'nearest' }); }
+    }
     if (id === 'favorites') content.dispatchEvent(new CustomEvent('ming-favorites-filter', { detail: key.slice(10) }));
     if (id === 'games' && key.startsWith('games:')) content.dispatchEvent(new CustomEvent('ming-game-filter', { detail: key.slice(6) }));
     if (id === 'files') {
@@ -2341,9 +2359,7 @@ async function renderMingApp(id, root) {
     return;
   }
   if (id === 'timeline') {
-    const left = trialDaysLeft();
-    root.append(el('h2', 'ming-timeline-day', '第 ' + game.day + ' 天'), el('p', 'ming-trial-line', left === null ? '試用期已結束' : '試用期剩 ' + left + ' 天'));
-    root.appendChild(el('div', 'ming-empty-panel', '目前沒有可顯示的時光記錄。'));
+    await renderTimeline(root);
     return;
   }
   if (id === 'favorites') { await renderFavorites(root); return; }
@@ -2403,18 +2419,53 @@ function renderMingWebsite(root) {
   loadSite();
 }
 
+async function renderTimeline(root) {
+  const progress = await readProgress();
+  const personal = await StudioDB.get('progressUserTasks').catch(() => []);
+  const lastDay = Math.min(game.day, TRIAL_LAST_DAY);
+  const doneTasks = progress.days.concat(Array.isArray(personal) ? personal : [])
+    .filter(item => item.status === 'done' && item.task !== '待安排');
+  root.append(el('h2', 'ming-timeline-day', '時光記錄'), el('p', 'ming-trial-line', '第 ' + game.day + ' 天・' + trialLine()));
+  for (let day = lastDay; day >= 1; day -= 1) {
+    const entry = el('details', 'ming-timeline-entry');
+    entry.dataset.day = String(day);
+    entry.open = day === lastDay;
+    entry.appendChild(el('summary', '', '第 ' + day + ' 天'));
+    const summary = storyDayNote(day, game.trialKnown);
+    if (summary) entry.appendChild(el('p', '', summary));
+    const photo = SKY_DIARY.find(item => item.day === day);
+    if (photo) {
+      const [x, y, width, height] = photo.box;
+      const sky = el('div', 'ming-timeline-sky');
+      sky.setAttribute('role', 'img');
+      sky.setAttribute('aria-label', '第 ' + day + ' 天的天空');
+      sky.style.aspectRatio = String(width * 1024 / (height * 683));
+      sky.style.backgroundImage = 'url("' + photo.src + '")';
+      sky.style.backgroundSize = 100 / width + '% ' + 100 / height + '%';
+      sky.style.backgroundPosition = 100 * x / (1 - width) + '% ' + 100 * y / (1 - height) + '%';
+      entry.appendChild(sky);
+    }
+    const done = doneTasks.filter(item => item.day === day);
+    if (done.length) {
+      const list = el('ul', 'ming-timeline-tasks');
+      done.forEach(item => list.appendChild(el('li', '', item.title || item.task)));
+      entry.appendChild(list);
+    }
+    if (!summary && !photo && !done.length) entry.appendChild(el('p', '', '這天沒有留下記錄。'));
+    root.appendChild(entry);
+  }
+}
+
 async function renderCalendar(root) {
-  const saved = sanitizeProgress(await StudioDB.get('progressTable').catch(function () { return null; }) || { days: [] });
-  const heading = el('h2', 'mh', '試用期月曆');
-  const left = trialDaysLeft();
-  const summary = el('p', '', left === null ? '第 ' + game.day + ' 天・試用期已結束' : '第 ' + game.day + ' 天・試用期剩 ' + left + ' 天');
+  const saved = await readProgress();
+  const heading = el('h2', 'mh', '月曆');
+  const summary = el('p', '', '第 ' + game.day + ' 天・' + trialLine());
   const calendar = el('div', 'mcal');
   const note = el('p', 'mcal-note');
   function updateNote(day) {
-    const item = saved.days[day - 1];
-    const hasTask = item && item.task && item.task !== '待安排';
+    const tasks = saved.days.filter(item => item.day === day && item.task !== '待安排');
     const event = day === 23 ? '截止日' : day === 30 ? '試用期公布日' : '';
-    const task = hasTask ? item.task : '這一天尚無進度資料。';
+    const task = tasks.map(item => item.task).join('、') || '這一天尚無進度資料。';
     note.textContent = '第 ' + day + ' 天' + (event ? '・' + event : '') + '：' + task;
   }
   for (let day = 1; day <= TRIAL_LAST_DAY; day += 1) {
@@ -2625,11 +2676,25 @@ function statusSelect(value) {
   return select;
 }
 
+async function readProgress() {
+  const saved = await StudioDB.get('progressTable').catch(() => null);
+  const progress = sanitizeProgress(saved);
+  if (progress.days.some(item => item.task !== '待安排')) return progress;
+  const overrides = await StudioDB.get('progressStoryOverrides').catch(() => null) || {};
+  const days = TODO_ITEMS.filter(item => (item.show || 3) <= game.day && item.d <= game.day + 3).map(item => {
+    const late = item.red && game.day >= item.red[0] && game.day <= item.red[1];
+    const done = (game.trialEnded && item.d >= 30) || game.day > (item.red ? item.red[1] : item.d);
+    const status = done ? 'done' : late ? 'late' : 'planned';
+    return { day: item.d, task: item.t, status, ...overrides[item.id], id: item.id };
+  });
+  return { ...progress, days, story: true, overrides };
+}
+
 async function renderProgress(root) {
-  let progress = sanitizeProgress(await StudioDB.get('progressTable') || { days: [] });
+  let progress = await readProgress();
   let personal = await StudioDB.get('progressUserTasks').catch(function () { return []; });
   if (!Array.isArray(personal)) personal = [];
-  let filter = 'today';
+  let filter = game.trialEnded ? 'planned' : 'today';
   const heading = el('h2', 'mh', '今天');
   const count = el('p', 'ming-progress-count');
   const list = el('div', 'ming-progress-list');
@@ -2647,8 +2712,13 @@ async function renderProgress(root) {
   function statusLabel(value) {
     return ({ planned: '待開始', doing: '進行中', done: '完成', late: '落後' })[value] || '待開始';
   }
-  async function saveProgress(hasTask) {
-    await StudioDB.set('progressTable', progress);
+  async function saveProgress(hasTask, item, change) {
+    if (item && progress.story) {
+      progress.overrides[item.id] = { ...progress.overrides[item.id], ...change };
+      await StudioDB.set('progressStoryOverrides', progress.overrides);
+    } else {
+      await StudioDB.set('progressTable', progress);
+    }
     if (hasTask) freeAffinity.award('ming');
   }
   function savePersonal() { return StudioDB.set('progressUserTasks', personal); }
@@ -2662,10 +2732,10 @@ async function renderProgress(root) {
     const select = statusSelect(item.status); select.setAttribute('aria-label', '第 ' + item.day + ' 天的進度');
     toggle.addEventListener('click', function () {
       item.status = item.status === 'done' ? 'planned' : 'done';
-      saveProgress(item.task !== '待安排').then(draw);
+      saveProgress(item.task !== '待安排', item, { status: item.status }).then(draw);
     });
-    title.addEventListener('change', function () { item.task = title.value.trim().slice(0, 120) || '待安排'; saveProgress(item.task !== '待安排').then(draw); });
-    select.addEventListener('change', function () { item.status = select.value; saveProgress(item.task !== '待安排').then(draw); });
+    title.addEventListener('change', function () { item.task = title.value.trim().slice(0, 120) || '待安排'; saveProgress(item.task !== '待安排', item, { task: item.task }).then(draw); });
+    select.addEventListener('change', function () { item.status = select.value; saveProgress(item.task !== '待安排', item, { status: item.status }).then(draw); });
     row.append(toggle, body, select);
     row.dataset.day = String(item.day);
     row.dataset.kind = 'planned';
@@ -2699,7 +2769,7 @@ async function renderProgress(root) {
     const actualPlanned = planned.filter(function (entry) { return entry.item.task !== '待安排'; });
     const done = actualPlanned.concat(custom).filter(function (entry) { return entry.item.status === 'done'; }).length;
     const total = actualPlanned.length + custom.length;
-    count.textContent = total ? '完成 ' + done + ' 項，還有 ' + (total - done) + ' 項' : filter === 'all' ? '三十天還沒有已排定的進度。' : '目前沒有進度項目';
+    count.textContent = total ? (done === total ? '全部做完了' : '完成 ' + done + ' 項，還有 ' + (total - done) + ' 項') : filter === 'all' ? '三十天還沒有已排定的進度。' : '目前沒有進度項目';
     heading.textContent = filter === 'all' ? '全部' : filter === 'planned' ? '明排的項目' : filter === 'personal' ? '自己加的' : filter === 'day' ? '第 ' + game.day + ' 天' : '今天';
     if (!total && filter !== 'all') list.appendChild(el('div', 'ming-empty-panel', filter === 'planned' ? '目前沒有明排的項目。' : filter === 'personal' ? '目前沒有自己新增的項目。' : '今天還沒有排入進度。'));
   }
@@ -2717,7 +2787,7 @@ async function renderProgress(root) {
   ask.addEventListener('click', async function () {
     ask.disabled = true; status.textContent = '明正在整理進度……';
     try {
-      const result = await callWorker('/chat', Object.assign({}, await workerContext('ming'), { action: 'progress_table', progress: progress }));
+      const result = await callWorker('/chat', Object.assign({}, await workerContext('ming'), { action: 'progress_table', progress: progress.story ? sanitizeProgress(progress) : progress }));
       progress = sanitizeProgress(result.json || result.progress || JSON.parse(result.reply));
       await saveProgress(progress.days.some(item => item.task !== '待安排')); draw(); status.textContent = '進度表已更新。';
     } catch (error) { status.textContent = error.message; }
@@ -2985,7 +3055,8 @@ const studioBgm = (function () {
   if (!src || !/^(https?:|\.{0,2}\/)/.test(src)) return null;
   const audio = new Audio();
   audio.src = src; audio.loop = true; audio.preload = 'auto'; audio.volume = BGM_VOLUME;
-  const state = { audio: audio, unlocked: false, ducked: false, fadeTimer: null };
+  // holds：面板自己發聲、不是 <audio> 的（吉他用 Web Audio 撥弦），打開期間要配樂讓開，用 hold(名字, true／false) 登記。
+  const state = { audio: audio, unlocked: false, ducked: false, fadeTimer: null, holds: new Set() };
   function fadeTo(target, done) {
     clearInterval(state.fadeTimer);
     const start = audio.volume;
@@ -3009,7 +3080,7 @@ const studioBgm = (function () {
     fadeTo(0, function () { if (state.ducked) audio.pause(); });
   }
   function restore() {
-    if (!state.ducked || songsPlaying()) return;
+    if (!state.ducked || songsPlaying() || state.holds.size) return;
     state.ducked = false;
     if (!state.unlocked) return;
     audio.volume = 0;
@@ -3026,6 +3097,11 @@ const studioBgm = (function () {
   });
   // 歌所在的面板關掉時，元素被拿掉不一定送 pause，補查一次。
   new MutationObserver(function () { if (state.ducked) setTimeout(restore, 50); }).observe(document.body, { childList: true, subtree: true });
+  state.hold = function (key, on) {
+    if (on) { state.holds.add(key); duck(); return; }
+    state.holds.delete(key);
+    setTimeout(restore, 50);
+  };
   start();
   return state;
 })();
@@ -3121,7 +3197,13 @@ window.STUDIO_FEATURES = {
     if (id === 8) { openCharacter('chen', focus, 'gallery'); ensureHelpSeen(); return true; }
     if (id === 12) { openMingComputer(focus); ensureHelpSeen(); return true; }
     if (id === 13) {
-      panelOpen('長桌・四人群聊', focus, 'group'); clearBody(); addContext(panelBody); shellRow(panelBody); renderChat(null, true, panelBody); ensureHelpSeen(); return true;
+      panelOpen(realChat ? '開放聊天' : '長桌・四人群聊', focus, 'group');
+      clearBody();
+      addContext(panelBody);
+      if (!realChat) shellRow(panelBody);
+      renderChat(null, true, panelBody);
+      ensureHelpSeen();
+      return true;
     }
     return false;
   },

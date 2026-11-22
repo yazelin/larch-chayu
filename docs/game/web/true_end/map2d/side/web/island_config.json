@@ -12,13 +12,13 @@
     "y": 0.385
   },
   "maps": {
-    "1": "../../art/out/island_ext_s1.jpg",
-    "2": "../../art/out/island_ext_s2.jpg",
-    "3": "../../art/out/island_ext_s3.jpg",
-    "4": "../../art/out/island_ext_s4.jpg",
-    "5": "../../art/out/island_ext_s5.jpg",
-    "5_dusk": "../../art/out/island_ext_s5_dusk.jpg",
-    "5_night": "../../art/out/island_ext_s5_night.jpg"
+    "1": "../../art/out/island_ext_s1.webp",
+    "2": "../../art/out/island_ext_s2.webp",
+    "3": "../../art/out/island_ext_s3.webp",
+    "4": "../../art/out/island_ext_s4.webp",
+    "5": "../../art/out/island_ext_s5.webp",
+    "5_dusk": "../../art/out/island_ext_s5_dusk.webp",
+    "5_night": "../../art/out/island_ext_s5_night.webp"
   },
   "cloudLayer": {
     "maps": {
@@ -406,22 +406,22 @@
     "radius": 0.044
   },
   "sprites": {
-    "tea": "../../art/out/tea_walk.png",
-    "shi": "../../../sprites/shi_3h.png",
-    "scroll": "../art/sprites/scroll.png",
-    "boat": "../art/sprites/ie_boat.png",
-    "dolphinRide": "../art/sprites/ie_dolphin.png",
+    "tea": "../../art/out/tea_walk.webp",
+    "shi": "../../../sprites/shi_3h.webp",
+    "scroll": "../art/sprites/scroll.webp",
+    "boat": "../art/sprites/ie_boat.webp",
+    "dolphinRide": "../art/sprites/ie_dolphin.webp",
     "whale": [
       {
-        "src": "../art/sprites/ie_whale_0.png",
+        "src": "../art/sprites/ie_whale_0.webp",
         "width": 355
       },
       {
-        "src": "../art/sprites/ie_whale_1.png",
+        "src": "../art/sprites/ie_whale_1.webp",
         "width": 354
       },
       {
-        "src": "../art/sprites/ie_whale_2.png",
+        "src": "../art/sprites/ie_whale_2.webp",
         "width": 370
       }
     ]

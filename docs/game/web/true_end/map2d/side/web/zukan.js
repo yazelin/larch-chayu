@@ -6,19 +6,19 @@
 //   之後全島圖鑑右上「看那張畫」隨時再看。CG 走 新版/cg 產線，定稿 新版/cg/art/真結局/真-圖鑑.jpg（凍結列在 新版/cg/freeze/真結局.yaml）。
 //   各長畫只在第一次遇到時跳一句「收進小生物圖鑑：○○」；圖鑑本身只在全島大地圖右上「圖鑑 n／13」打開（openPanel）。
 export const CREATURES = [
-  { id: 'rabbit', name: '兔子', img: '../art/sprites/rabbit.png', desc: '灰色的時候躲在花田邊，塗上顏色就會跳來跳去。', place: '朝霞丘', ability: '上色' },
-  { id: 'butterfly', name: '蝴蝶', img: '../art/sprites/butterfly.png', desc: '在花田上飛，有時候停在花上，把翅膀收起來。', place: '朝霞丘', ability: '' },
-  { id: 'bird', name: '小鳥', img: '../art/sprites/bird.png', desc: '停在籬笆和信箱上，點一下會拍拍翅膀。', place: '朝霞丘・月光岬', ability: '' },
-  { id: 'cat', name: '貓', img: '../art/sprites/zk_cat_sleep.png', desc: '睡在小屋門口，摸摸牠，牠會跟著妳走一小段。', place: '朝霞丘・小屋門口', ability: '' },
-  { id: 'crab', name: '螃蟹', img: '../art/sprites/crab.png', desc: '很怕生，會橫著跑開；哼歌給牠聽，牠就會靠過來。', place: '海灘', ability: '呼喚' },
-  { id: 'gull', name: '海鷗', img: '../art/sprites/gull.png', desc: '停在木桶和漁網架上，被嚇到會飛走，過一下又飛回來。', place: '海灘', ability: '' },
-  { id: 'hermit', name: '寄居蟹', img: '../art/sprites/hermit.png', desc: '躲在石頭後面，要呼喚牠才會出來。', place: '海灘', ability: '呼喚' },
-  { id: 'dolphin', name: '海豚', img: '../art/sprites/dolphin_1.png', desc: '走到浪邊叫牠，牠就會游過來，還可以騎著牠繞島。', place: '海灘・全島', ability: '呼喚' },
-  { id: 'firefly', name: '螢火蟲', img: '../art/sprites/zk_firefly.png', desc: '走過去，牠們會散開；站著不動，牠們會飛過來。飛得很快的那幾隻，要停下時間才看得清楚。', place: '月光岬', ability: '停下時間' },
-  { id: 'turtle', name: '海龜', img: '../art/sprites/turtle_0.png', desc: '在礁石邊慢慢游；海底那一隻會載妳游一段。', place: '月光岬・海底', ability: '' },
-  { id: 'fish', name: '小魚群', img: '../art/sprites/dv_fish_0.png', desc: '一群一起游，點一下會散開，過一下又聚回來。', place: '海底', ability: '' },
-  { id: 'jelly', name: '水母', img: '../art/sprites/dv_jelly_0.png', desc: '身體一縮一放地漂，點一下會發光。', place: '海底', ability: '' },
-  { id: 'whale', name: '鯨魚', img: '../art/sprites/ie_whale_0.png', desc: '在很遠的海上噴水，坐船繞島才看得到。', place: '全島・遠海', ability: '坐船' },
+  { id: 'rabbit', name: '兔子', img: '../art/sprites/rabbit.webp', desc: '灰色的時候躲在花田邊，塗上顏色就會跳來跳去。', place: '朝霞丘', ability: '上色' },
+  { id: 'butterfly', name: '蝴蝶', img: '../art/sprites/butterfly.webp', desc: '在花田上飛，有時候停在花上，把翅膀收起來。', place: '朝霞丘', ability: '' },
+  { id: 'bird', name: '小鳥', img: '../art/sprites/bird.webp', desc: '停在籬笆和信箱上，點一下會拍拍翅膀。', place: '朝霞丘・月光岬', ability: '' },
+  { id: 'cat', name: '貓', img: '../art/sprites/zk_cat_sleep.webp', desc: '睡在小屋門口，摸摸牠，牠會跟著妳走一小段。', place: '朝霞丘・小屋門口', ability: '' },
+  { id: 'crab', name: '螃蟹', img: '../art/sprites/crab.webp', desc: '很怕生，會橫著跑開；哼歌給牠聽，牠就會靠過來。', place: '海灘', ability: '呼喚' },
+  { id: 'gull', name: '海鷗', img: '../art/sprites/gull.webp', desc: '停在木桶和漁網架上，被嚇到會飛走，過一下又飛回來。', place: '海灘', ability: '' },
+  { id: 'hermit', name: '寄居蟹', img: '../art/sprites/hermit.webp', desc: '躲在石頭後面，要呼喚牠才會出來。', place: '海灘', ability: '呼喚' },
+  { id: 'dolphin', name: '海豚', img: '../art/sprites/dolphin_1.webp', desc: '走到浪邊叫牠，牠就會游過來，還可以騎著牠繞島。', place: '海灘・全島', ability: '呼喚' },
+  { id: 'firefly', name: '螢火蟲', img: '../art/sprites/zk_firefly.webp', desc: '走過去，牠們會散開；站著不動，牠們會飛過來。飛得很快的那幾隻，要停下時間才看得清楚。', place: '月光岬', ability: '停下時間' },
+  { id: 'turtle', name: '海龜', img: '../art/sprites/turtle_0.webp', desc: '在礁石邊慢慢游；海底那一隻會載妳游一段。', place: '月光岬・海底', ability: '' },
+  { id: 'fish', name: '小魚群', img: '../art/sprites/dv_fish_0.webp', desc: '一群一起游，點一下會散開，過一下又聚回來。', place: '海底', ability: '' },
+  { id: 'jelly', name: '水母', img: '../art/sprites/dv_jelly_0.webp', desc: '身體一縮一放地漂，點一下會發光。', place: '海底', ability: '' },
+  { id: 'whale', name: '鯨魚', img: '../art/sprites/ie_whale_0.webp', desc: '在很遠的海上噴水，坐船繞島才看得到。', place: '全島・遠海', ability: '坐船' },
 ];
 export const TOTAL = CREATURES.length;
 // 收齊的獎勵 CG（相簿／獎勵 CG，不在劇情裡播；劇本標記在 新版/劇本/真結局.md「相簿／獎勵 CG」一節）
@@ -29,7 +29,11 @@ const list = v => String(v || '').split(',').map(s => s.trim()).filter(id => BY[
 
 // vars()：回這一頁目前的 Larch 變數（物件）；set(obj)：寫回 Larch（與這一頁自己的狀態）；toast(text)：這一頁的小提示
 export function createZukan({ vars, set, toast, reward = true }) {
-  for (const src of ['../art/ui/ui_panel.webp', '../art/ui/ui_tag.webp', '../art/ui/ui_btn.webp']) { const i = new Image(); i.src = src; }   // 紙感底圖先載，第一次打開圖鑑就有紙
+  // 紙感底圖先載，第一次打開圖鑑就有紙。
+  for (const src of ['../art/ui/ui_panel.webp', '../art/ui/ui_tag.webp', '../art/ui/ui_btn.webp']) {
+    if (window.PageLoading) PageLoading.prepare(src, PageLoading.preload(src));
+    else { const image = new Image(); image.src = src; }
+  }
   const seen = new Set();
   const merge = () => { const v = vars() || {}; for (const id of list(v.creatures)) seen.add(id); for (const k of LEGACY) for (const id of list(v[k])) seen.add(id); };
   const write = () => {
@@ -42,7 +46,10 @@ export function createZukan({ vars, set, toast, reward = true }) {
     ready: (async () => {
       merge();
       if (window.StudioDB) { try { if (new URLSearchParams(location.search).get('zukanReset') === '1') await StudioDB.remove('zukan_seen'); const a = await StudioDB.get('zukan_seen'); if (Array.isArray(a)) for (const id of a) if (BY[id]) seen.add(id); } catch (e) {} }
-      const v = vars() || {}; if (list(v.creatures).length !== seen.size) write();   // 舊的 dive_seen 或本機有、Larch 變數還沒有的，寫回去
+      // 讀存檔時可能才收到 larch:init，先合併播放器的新值，再判斷有沒有要補寫的生物。
+      merge();
+      const v = vars() || {};
+      if (new Set(list(v.creatures)).size < seen.size) write();
     })(),
     saw(id) { if (!BY[id]) return false; merge(); if (seen.has(id)) return false; seen.add(id); write(); if (toast) toast('收進小生物圖鑑：' + BY[id].name);
       if (seen.size === TOTAL && reward) setTimeout(() => showReward({ first: true }), 2800);   // 剛好收齊這一種：提示之後跳出那張畫
