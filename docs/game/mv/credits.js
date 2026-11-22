@@ -163,9 +163,22 @@
     post({ type: 'larch:complete', result: C.result, payload: {} });
     if (!EMBED) $('again').hidden = false;
   }
+  function showPostgameHint() {
+    if (Q.get('postgame') !== '1' || !Object.hasOwn(state.vars || {}, 'guideEndingSeen') || truthy(state.vars.guideEndingSeen)) return;
+    const hint = el('button', 'postgame-hint', '回標題按「開始」，可以選「回到小島」或「看各條結局」。');
+    hint.type = 'button';
+    hint.title = '收起提示';
+    hint.onclick = () => hint.remove();
+    document.body.append(hint);
+    state.vars.guideEndingSeen = true;
+    const write = { type: 'larch:set', name: 'guideEndingSeen', value: true };
+    state.sets.push(write);
+    post(write);
+  }
   function stopAndHold() {   // 捲到底：停在結語，hold 秒後淡出
     if (state.phase !== 'play') return;
     state.phase = 'hold'; state.tStop = fadeFrom = performance.now(); place(1);
+    showPostgameHint();
     endTimer = setTimeout(() => {
       state.phase = 'fade'; $('black').classList.add('on');
       endTimer = setTimeout(() => finish('ended'), C.fade * 1000);

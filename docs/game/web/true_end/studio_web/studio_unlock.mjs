@@ -1,3 +1,4 @@
+import { guideHint } from './guide_hint.mjs';
 import { storyTime } from './story_time.mjs';
 
 const BATCHES = [
@@ -9,6 +10,10 @@ const BATCHES = [
 const POINTS = '.hotspot, #table-entry, #seat-entry';
 const SEEN_KEY = 'studioUnlockSeen';
 const HIGHLIGHT_MS = 3000;
+const POINT_GUIDES = new Map([
+  [8, ['guideEaselSeen', '晨的畫架可以請晨畫，也可以給晨看妳的畫。']],
+  [16, ['guideHeadphonesSeen', '詩的耳機可以請詩做歌，也可以聽他的試唱。']],
+]);
 
 function unlockState(search, variables, inFrame) {
   const query = new URLSearchParams(search);
@@ -38,6 +43,7 @@ export function createStudioUnlock(search, scope) {
   let seen;
   const highlighting = new Set();
   let timer;
+  let panelObserver;
 
   function apply(button) {
     const id = Number(button.dataset.id);
@@ -50,8 +56,61 @@ export function createStudioUnlock(search, scope) {
     scope.querySelectorAll(POINTS).forEach(apply);
   }
 
+  function writeGuide(values) {
+    Object.assign(variables, values);
+    for (const [name, value] of Object.entries(values)) {
+      window.parent.postMessage({ type: 'larch:set', name, value }, '*');
+    }
+  }
+
+  function highlightGuide(id, key, message, options) {
+    if (!guideHint(key, message, options)) return;
+    highlighting.add(id);
+    refresh();
+    setTimeout(() => { highlighting.delete(id); refresh(); }, 8500);
+  }
+
+  function showGuides() {
+    const query = new URLSearchParams(search);
+    const mode = query.get('mode');
+    if (!['map', 'free_time'].includes(mode) || query.get('debug') === '1') return;
+    const panel = document.getElementById('panel');
+    if (panel?.classList.contains('on')) {
+      if (!panelObserver) {
+        panelObserver = new MutationObserver(() => {
+          if (panel.classList.contains('on')) return;
+          panelObserver.disconnect();
+          panelObserver = null;
+          showGuides();
+        });
+        panelObserver.observe(panel, { attributeFilter: ['class'] });
+      }
+      return;
+    }
+    const day = Number(query.get('day') ?? variables.day);
+    const chapter = query.get('chapter');
+    const options = {
+      vars: () => variables,
+      set: writeGuide,
+      container: status,
+      position: 'point',
+    };
+    if (mode === 'free_time' && chapter === '2' && day === 2) {
+      guideHint('guideStudioChatSeen', '點人可以私聊，點長桌可以四個人一起聊。', options);
+    }
+    if (mode === 'free_time' && chapter === '3' && day >= 9 && query.get('islandDoor') === '1') {
+      highlightGuide(11, 'guideStudioDoorSeen', '到南牆的圓拱門，可以出門上島。', options);
+    }
+    for (const [id, [key, message]] of POINT_GUIDES) {
+      if (studioPointOpen(id, search, variables, inFrame)) {
+        highlightGuide(id, key, message, options);
+      }
+    }
+  }
+
   async function notify() {
     if (unlockState(search, variables, inFrame).preview) return;
+    if (inFrame) await window.PageLoading.shown;
     // 跟唱片架的 albumSeen 一樣，網站存 IndexedDB，Larch 存在既有的 studioMisc。
     seen ??= StudioDB.get(SEEN_KEY).then(value => new Set(Array.isArray(value) ? value : []), () => new Set());
     const remembered = await seen;
@@ -69,12 +128,12 @@ export function createStudioUnlock(search, scope) {
     const line = document.createElement('div');
     line.className = 'sf-toast';
     line.textContent = '工作室裡多了可以看的地方';
-    status.replaceChildren(line);
+    if (!status.childElementCount) status.append(line);
     clearTimeout(timer);
     timer = setTimeout(() => {
       highlighting.clear();
       refresh();
-      status.replaceChildren();
+      line.remove();
     }, HIGHLIGHT_MS);
   }
 
@@ -83,6 +142,9 @@ export function createStudioUnlock(search, scope) {
     sync(values) {
       variables = values;
       refresh();
+      if (inFrame && Object.hasOwn(values, 'guideStudioChatSeen')) {
+        window.PageLoading.shown.then(showGuides);
+      }
       void notify();
     }
   };

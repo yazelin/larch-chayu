@@ -1,3 +1,5 @@
+import { guideHint } from '../../../studio_web/guide_hint.mjs';
+
 // 植物收集（全島 11 種）：島上各區與碼頭拿到的植物記在這裡，帶回工作室放在常駐位澆水長大。做法照 zukan.js。
 // 方案：真結局/studio_decor_plan.md 第三節（作者 2026-11-17 定案：10 種＋真結局碼頭「四個人一起種的小樹」）。
 // 記錄：Larch 變數 plants（逗號分隔的 id，照下面順序）；同網域另存 StudioDB plants_seen（工作室 studio_decor.mjs 也讀這一份）。
@@ -31,7 +33,9 @@ export function createPlants({ vars, set, toast }) {
       if (window.StudioDB) { try { if (new URLSearchParams(location.search).get('plantsReset') === '1') await StudioDB.remove('plants_seen'); const a = await StudioDB.get('plants_seen'); if (Array.isArray(a)) for (const id of a) if (BY[id]) have.add(id); } catch (e) {} }
       if (list((vars() || {}).plants).length !== have.size) write();
     })(),
-    got(id) { if (!BY[id]) return false; merge(); if (have.has(id)) return false; have.add(id); write(); if (toast) toast('收進花盆：' + BY[id].name); return true; },
+    got(id) { if (!BY[id]) return false; merge(); if (have.has(id)) return false; have.add(id); write(); if (toast) toast('收進花盆：' + BY[id].name);
+      guideHint('guidePlantSeen', '植物可以帶回工作室，放在常駐位澆水。', { vars, set });
+      return true; },
     has: id => (merge(), have.has(id)), get count() { merge(); return have.size; }, total: TOTAL, list: () => (merge(), [...have]),
   };
   return P;

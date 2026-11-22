@@ -9,7 +9,8 @@
 :root{--larch-top-left:56px;--larch-bottom:64px}
 #wall-label,#scroll-label{top:max(var(--larch-top-left),env(safe-area-inset-top))!important;left:max(16px,env(safe-area-inset-left))!important}
 #tools{top:max(var(--hud-clear),env(safe-area-inset-top))!important}
-#studio-unlock-status{top:calc(max(var(--larch-top-left),env(safe-area-inset-top)) + 48px)!important}
+#studio-unlock-status{top:calc(max(var(--larch-top-left),env(safe-area-inset-top)) + 48px)!important;max-width:calc(100vw - 28px)}
+body:has(#panel.on) #studio-unlock-status .play-guide-hint{visibility:hidden}
 #scroll-controls,#hint,.sf-toasts{bottom:max(var(--larch-bottom),env(safe-area-inset-bottom))!important}
 .studio-embed-continue{bottom:max(var(--larch-bottom),env(safe-area-inset-bottom))!important}
 @media(max-width:700px){

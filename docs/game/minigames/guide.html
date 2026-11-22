@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>遊玩說明書｜夜後明月．晨前朝霞．慕詩客</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #3b2a24;
+    --muted: #624b40;
+    --paper: #f7efe0;
+    --grain: url("./img/wipe_tea/paper.webp");
+    --rule: #cbb797;
+    --green: #4f5c34;
+    --blue: #344e68;
+    --wine: #793c4c;
+    font: 16px/1.55 "Noto Sans TC", "Noto Sans CJK TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    color: var(--ink);
+    background: #e3d1b6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    align-items: center;
+    padding: clamp(14px, 2.5vw, 48px);
+    background:
+      radial-gradient(ellipse at 13% 0%, #b4ba8d9c, transparent 49%),
+      radial-gradient(ellipse at 100% 77%, #a0b4c09c, transparent 51%),
+      radial-gradient(ellipse at 0% 100%, #c5958b9c, transparent 50%),
+      linear-gradient(#dfc8a96b, #dfc8a96b), var(--grain) repeat;
+  }
+  h1, h2, p, figure, dl, dd { margin: 0; }
+  h1, h2 {
+    font-family: "Noto Serif TC", "Noto Serif CJK TC", "Songti TC", "PMingLiU", serif;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+  .sheet {
+    width: min(100%, 1536px);
+    margin-inline: auto;
+    padding: clamp(23px, 2.25vw, 44px);
+    padding-bottom: clamp(15px, 1.55vw, 30px);
+    display: grid;
+    grid-template-columns: minmax(0, 34fr) minmax(0, 66fr);
+    gap: clamp(15px, 1.6vw, 30px) clamp(20px, 2.1vw, 40px);
+    background: linear-gradient(110deg, #fff9edea, #f7eddbdf), var(--grain) repeat, var(--paper);
+    border: 1px solid #a99071;
+    border-radius: 11px 8px 12px 8px;
+    box-shadow: 0 16px 44px #53382130, 0 3px 8px #53382124, inset 0 0 0 5px #fffcf050;
+  }
+  .intro {
+    display: grid;
+    align-content: start;
+    gap: clamp(12px, 1.15vw, 22px);
+    padding-inline-end: clamp(20px, 2.1vw, 40px);
+    border-inline-end: 1px solid var(--rule);
+  }
+  .work-name {
+    color: var(--muted);
+    font-weight: 700;
+    letter-spacing: .065em;
+    margin-bottom: 5px;
+  }
+  h1 {
+    font-size: clamp(38px, 3.65vw, 68px);
+    letter-spacing: .055em;
+  }
+  .cover { position: relative; }
+  .cover-art {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border: 5px solid #fffbf1;
+    outline: 1px solid #b49a7b;
+    outline-offset: -1px;
+    border-radius: 4px;
+    box-shadow: 0 5px 12px #5d44312b;
+  }
+  .cast {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    gap: clamp(7px, 1vw, 18px);
+    margin-top: -24px;
+  }
+  .cast img {
+    display: block;
+    width: clamp(48px, 4.15vw, 76px);
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #fff8e8;
+    background: #eee0ea;
+    box-shadow: 0 2px 6px #52382c35;
+  }
+  .cast img:nth-child(2) { background: #e5e8cb; }
+  .cast img:nth-child(3) { background: #dce7eb; }
+  .cast img:nth-child(4) { background: #efd8dd; }
+  .rating {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding-bottom: 11px;
+    border-bottom: 1px dashed var(--rule);
+  }
+  .rating strong {
+    flex: none;
+    padding: 3px 8px;
+    border: 1px solid #899169;
+    border-radius: 4px;
+    color: var(--green);
+    background: #e8ebd3;
+  }
+  .story h2 { font-size: clamp(21px, 1.6vw, 29px); margin-bottom: 7px; }
+  .story p, .rating p, .guide-grid { font-size: clamp(1rem, 1.25vw, 1.1875rem); }
+  .guide-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto 1fr;
+    gap: clamp(11px, 1.2vw, 22px);
+  }
+  .panel {
+    --accent: var(--green);
+    --stripe: #9da578;
+    --wash: #f2f1df;
+    padding: clamp(13px, 1.3vw, 25px);
+    background: var(--wash);
+    border: 1px solid #cfbfa8;
+    border-top: 3px solid var(--stripe);
+    border-radius: 5px 5px 8px 5px;
+    box-shadow: 0 2px 3px #6049300e;
+  }
+  .controls { --accent: var(--blue); --stripe: #819aae; --wash: #edf0ec; }
+  .studio { --accent: var(--wine); --stripe: #b98489; --wash: #f7ece6; }
+  .notes { --accent: #704e2c; --stripe: #b89a70; --wash: #f7efdf; }
+  .panel h2 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: clamp(7px, .7vw, 13px);
+    color: var(--accent);
+    font-size: clamp(23px, 1.65vw, 31px);
+  }
+  .number {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 2em;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff9ed;
+    font: 700 .57em/1 "Noto Sans TC", "Noto Sans CJK TC", sans-serif;
+    letter-spacing: .03em;
+  }
+  .panel p + p { margin-top: 7px; }
+  .routes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 7px 0;
+    padding: 0;
+    list-style: none;
+  }
+  .routes li {
+    padding: 2px 7px;
+    border: 1px solid #a7aa89;
+    border-radius: 4px;
+    background: #e9ebd8;
+    color: var(--green);
+    font-size: .94em;
+    font-weight: 700;
+  }
+  .routes li:nth-child(2) { color: var(--blue); background: #e4eced; border-color: #a3b3bc; }
+  .routes li:nth-child(3) { color: var(--wine); background: #f4e3e3; border-color: #c1a1a4; }
+  .routes li:nth-child(4) { color: #6b4d34; background: #f2e7d2; border-color: #bba787; }
+  .details > div + div { margin-top: 4px; }
+  .details dt { display: inline; color: var(--accent); font-weight: 700; }
+  .details dd { display: inline; }
+  .quotas {
+    margin-block: 7px;
+    padding-block: 7px;
+    border-block: 1px solid #d8bcb7;
+  }
+  .fine-print { color: var(--muted); }
+  .sheet footer {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    padding-top: clamp(12px, 1.15vw, 22px);
+    border-top: 1px solid var(--rule);
+  }
+  .start {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 19px;
+    min-height: 47px;
+    min-width: 222px;
+    padding: 7px 25px;
+    border: 1px solid #422b23;
+    border-radius: 6px;
+    background: #57382b;
+    color: #fff9ed;
+    box-shadow: 0 3px 0 #422b23, inset 0 0 0 2px #fff3d72b;
+    font: inherit;
+    font-size: clamp(1.125rem, 1.4vw, 1.3125rem);
+    font-weight: 700;
+    letter-spacing: .08em;
+    cursor: pointer;
+  }
+  .start:hover { background: #674637; }
+  .start:focus-visible { outline: 3px solid var(--blue); outline-offset: 4px; }
+  .start:active { box-shadow: inset 0 0 0 2px #fff3d72b; }
+  .start:disabled { background: #6b5042; cursor: default; }
+  .arrow {
+    width: .9em;
+    height: .65em;
+    background: linear-gradient(currentColor, currentColor) left center / 100% 2px no-repeat;
+  }
+  .arrow::after {
+    content: "";
+    display: block;
+    width: .47em;
+    height: .47em;
+    margin: .06em 0 0 auto;
+    border-block-start: 2px solid;
+    border-inline-end: 2px solid;
+    transform: rotate(45deg);
+  }
+  @media (max-width: 920px), (orientation: portrait) {
+    .sheet {
+      width: min(100%, 640px);
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .intro { padding-inline-end: 0; border-inline-end: 0; }
+    .guide-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+    .panel { padding: 15px; }
+    .start { width: 100%; min-width: 0; min-height: 49px; }
+  }
+  @media (max-width: 480px) {
+    .sheet { padding: 17px; }
+    .intro { gap: 12px; }
+    h1 { font-size: clamp(31px, 9.75vw, 42px); }
+    .work-name { letter-spacing: .025em; }
+  }
+  @media (min-width: 921px) and (max-height: 800px) and (orientation: landscape) {
+    body { padding-block: 16px; }
+    .sheet { padding-block: 18px 15px; row-gap: 14px; }
+    .intro { gap: 11px; }
+    .cover-art { aspect-ratio: 2 / 1; }
+    .guide-grid { line-height: 1.5; }
+    .panel { padding-block: 13px; }
+    .sheet footer { padding-top: 10px; }
+  }
+  @media (min-width: 921px) and (min-height: 900px) and (orientation: landscape) {
+    .intro { gap: 22px; }
+    .panel { padding-block: 21px; }
+    .panel p + p, .details > div + div { margin-top: 8px; }
+    .quotas { margin-block: 10px; padding-block: 10px; }
+  }
+</style>
+</head>
+<body>
+<main class="sheet" aria-labelledby="guide-title">
+  <header class="intro">
+    <div>
+      <p class="work-name">夜後明月．晨前朝霞．慕詩客</p>
+      <h1 id="guide-title">遊玩說明書</h1>
+    </div>
+    <figure class="cover">
+      <img class="cover-art" src="img/guide_cover.jpg" width="1536" height="1024" alt="作品封面">
+      <div class="cast">
+        <img src="../web/true_end/studio_web/avatars/tea.webp" width="256" height="256" alt="茶語">
+        <img src="../web/true_end/studio_web/avatars/chen.webp" width="256" height="256" alt="晨">
+        <img src="../web/true_end/studio_web/avatars/ming.webp" width="256" height="256" alt="明">
+        <img src="../web/true_end/studio_web/avatars/shi.webp" width="256" height="256" alt="詩">
+      </div>
+    </figure>
+    <div class="rating">
+      <strong>普遍級</strong>
+      <p>戀愛與療癒為主，後段有讓人心疼的情節。</p>
+    </div>
+    <section class="story" aria-labelledby="story-title">
+      <h2 id="story-title">故事簡介</h2>
+      <p>大二的茶語半夜收到「創作者挑戰」開跑的通知，得在三個禮拜內交件。她打開三個 AI 工具的人形介面試用，認識了畫圖的晨、寫程式的明、做音樂的詩。他們在茶語想像出來的工作室裡，一起做《勇者今天也下不了手》。</p>
+    </section>
+  </header>
+
+  <div class="guide-grid">
+    <section class="panel" aria-labelledby="play-title">
+      <h2 id="play-title"><span class="number" aria-hidden="true">01</span>遊玩方式</h2>
+      <p>讀劇情、做選擇，累積三個人的好感。第七章的選擇決定會走到哪一個結局。</p>
+      <ul class="routes" role="list">
+        <li>晨線</li>
+        <li>明線</li>
+        <li>詩線</li>
+        <li>夥伴結局</li>
+      </ul>
+      <p>夥伴結局之後會接著看到真結局。看過任一結局後，回標題按「開始」，可以選「看各條結局」。看完真結局後也可以選「回到小島」。</p>
+    </section>
+
+    <section class="panel controls" aria-labelledby="controls-title">
+      <h2 id="controls-title"><span class="number" aria-hidden="true">02</span>怎麼操作</h2>
+      <dl class="details">
+        <div><dt>往下讀</dt> <dd>點畫面或按空白鍵。</dd></div>
+        <div><dt>右上角手機</dt> <dd>好感、行事曆、相簿、音樂、訊息、設定。</dd></div>
+        <div><dt>工作室與小島</dt> <dd>電腦按方向鍵、WASD 或點地面。手機用左下角搖桿。</dd></div>
+        <div><dt>小遊戲</dt> <dd>照畫面提示操作。遊玩時記得存檔。</dd></div>
+      </dl>
+    </section>
+
+    <section class="panel studio" aria-labelledby="studio-title">
+      <h2 id="studio-title"><span class="number" aria-hidden="true">03</span>工作室的 AI 功能</h2>
+      <p>自由時間可以在工作室點人物私聊、點長桌群聊，也可以請晨畫圖、請詩做歌。AI 當場生成的內容可能會有錯。</p>
+      <dl class="details quotas">
+        <div><dt>試玩</dt> <dd>每天聊 20 句，總共畫 1 張、做 1 首歌、給晨看畫 3 次。</dd></div>
+        <div><dt>完整版</dt> <dd>每天聊 100 句、畫 3 張、做 1 首歌、給晨看畫 5 次。</dd></div>
+      </dl>
+      <p class="fine-print">次數以遊戲內顯示為準。請不要輸入個人資料。</p>
+    </section>
+
+    <section class="panel notes" aria-labelledby="notes-title">
+      <h2 id="notes-title"><span class="number" aria-hidden="true">04</span>遊玩前的小提醒</h2>
+      <p>試玩到第二章「握劍」，天空變粉紅的時候。接著玩要購買完整版，一次買斷。</p>
+      <p>明預設每 10 分鐘會問你要不要休息，可以在手機設定改時間或關掉。</p>
+      <p>建議戴耳機或打開聲音，每天玩 10～20 分鐘，大約兩個禮拜玩完。</p>
+    </section>
+  </div>
+
+  <footer><button class="start" type="button">開始遊戲<span class="arrow" aria-hidden="true"></span></button></footer>
+</main>
+<script src="../web/true_end/page_loading.js"></script>
+<script>
+  const LARCH = {
+    done(result, payload) {
+      parent.postMessage({ type: 'larch:complete', result, payload }, '*');
+    },
+  };
+  const start = document.querySelector('.start');
+  start.addEventListener('click', () => {
+    start.disabled = true;
+    LARCH.done('started', {});
+  }, { once: true });
+  for (const img of document.images) {
+    PageLoading.prepare(img.getAttribute('alt'), img.decode());
+  }
+  PageLoading.finish();
+  parent.postMessage({ type: 'larch:ready' }, '*');
+</script>
+</body>
+</html>

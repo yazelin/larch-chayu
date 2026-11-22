@@ -1,3 +1,4 @@
+import { guideHint } from '../../../studio_web/guide_hint.mjs';
 import { createJoystick, movementKeys } from './movement_input.mjs';
 import { approachRoute, slideAlongShore } from './island_walk.mjs';
 import { WALK_BLOCKED } from './walk_interaction.mjs';
@@ -27,10 +28,16 @@ document.getElementById('dusk-matrix').setAttribute('values', CFG.duskGrade.matr
 const inFrame = window.parent !== window;
 const BR = window.IslandBridge;   // 章與步、同一張卡裡換頁時的變數（island_bridge.js；規格 ../_島段步驟清單.md）
 const FLAT_OF = { '3': 'dawn', '4': 'beach', '5': 'cape' }, DONE_FLAG = { '3': 'ch3_done', '4': 'c4_done', '5': 'c5_done' }, AREA_NAME = { dawn: '朝霞丘', beach: '海灘', cape: '月光岬' };
+const ERRAND_GUIDES = [
+  ['dawn', 'chen', '晨', 'ch3_done', 'ch3_done', 3],
+  ['beach', 'shi', '詩', 'ch4_done', 'c4_done', 4],
+  ['cape', 'ming', '明', 'ch5_done', 'c5_done', 5],
+];
 const C7_PEOPLE = [['晨', 'dawn', 'ch7DoneC', 'c7_chen'], ['詩', 'beach', 'ch7DoneS', 'c7_shi'], ['明', 'cape', 'ch7DoneM', 'c7_ming']];
 const QUERY_VARIABLES = ['chapter', 'day', 'time', 'gifts', 'gift_chen', 'gift_shi', 'gift_ming', 'memories',
   'island_landed', 'island_dolphin_done', 'island_boat_trip', 'memory1', 'memory6', 'memory7', 'dive_seen', 'coral_dive', 'dive_done',
-  'trueEnding_island_step', 'dawn_visited', 'beach_visited', 'cape_visited', 'creatures', 'zukan_complete', 'plants'];
+  'trueEnding_island_step', 'dawn_visited', 'beach_visited', 'cape_visited', 'creatures', 'zukan_complete', 'plants',
+  'guideErrandChenSeen', 'guideErrandShiSeen', 'guideErrandMingSeen'];
 function queryVariables() {
   return Object.fromEntries(QUERY_VARIABLES.filter(k => Q.has(k)).map(k => [k, Q.get(k)]));
 }
@@ -243,6 +250,29 @@ function updateEntrances() {
     if (shouldShowMemory7(state.stage, state.vars)) addMemory7();
   }
   updateActions();
+}
+function showErrandMarkers() {
+  if (!interactionReady()) return;
+  const chapter = ctx().chapter;
+  for (const [area, id, name, done, localDone, fromChapter] of ERRAND_GUIDES) {
+    const key = 'guideErrand' + id[0].toUpperCase() + id.slice(1) + 'Seen';
+    if (truth(state.vars[key]) || state.vars['errand_' + id]) continue;
+    const unlocked = chapter === 'true' && ctx().mode !== 'visit'
+      ? truth(state.vars['gift_' + id])
+      : Number(chapter) > fromChapter || chapter === 'true' || (Number(chapter) === fromChapter &&
+        (ctx().mode === 'visit' || truth(state.vars[done]) || truth(state.vars[localDone])));
+    const button = unlocked && state.buttons.get(area);
+    if (!button) continue;
+    const rect = button.getBoundingClientRect();
+    const x = Math.max(55, Math.min(rect.left + rect.width / 2, innerWidth - 55));
+    const y = Math.max(orbitUiTop() + 60, Math.min(rect.top + rect.height / 2, innerHeight - 155));
+    const marker = guideHint(key, name + '有事找妳', { vars: () => state.vars, set: setVars, container: zones, position: 'map' });
+    if (marker) {
+      const mapRect = zones.getBoundingClientRect();
+      marker.style.left = `${100 * (x - mapRect.left) / mapRect.width}%`;
+      marker.style.top = `${100 * (y - mapRect.top) / mapRect.height}%`;
+    }
+  }
 }
 function addMemory7() {
   if (document.getElementById('memory7-scroll') || truth(state.vars.memory7)) return;
@@ -719,6 +749,7 @@ function frame(now) {
     return;
   }
   if (PageLoading.loading) { render(0); requestAnimationFrame(frame); return; }
+  showErrandMarkers();
   const walkFrom = { x: state.x, y: state.y };
   if (state.landingTick) {
     if (state.landingTick(dt)) {
@@ -737,7 +768,9 @@ function pointFromEvent(e) {
   return { x: Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)),
     y: Math.max(0, Math.min(1, (e.clientY - r.top) / r.height)) };
 }
-addEventListener('pointerdown', () => { if (walkInteraction) cancelMove(); }, true);
+addEventListener('pointerdown', event => {
+  if (walkInteraction && !event.target.closest?.('.play-guide-hint')) cancelMove();
+}, true);
 world.addEventListener('pointerdown', e => {
   if (e.button !== 0 || !e.isPrimary || e.target.closest('.entrance,.memory,.action')) return;
   cancelMove();

@@ -1219,7 +1219,7 @@ async function renderMingGames(root, filter, initialPrompt) {
   disposeMingGameFrames(root);
   const shell = el('div', 'ming-games-app');
   const form = el('form', 'ming-game-form');
-  form.append(el('h3', 'ming-empty-app', '請明做一個'));
+  form.append(el('h3', 'ming-empty-app', '請明做新遊戲'));
   form.appendChild(el('p', 'sf-context', '說一句妳想玩什麼。明會先自由發揮，檢查沒過再用固定玩法試一次。'));
   const input = el('textarea', 'ming-game-prompt');
   input.maxLength = 200; input.rows = 2; input.placeholder = '例如：做一個月亮主題、可以收集星星的小遊戲';
@@ -1737,7 +1737,7 @@ const MING_APPS = [
   { id: 'chat', label: '和明說話', icon: 'message' },
   { id: 'progress', label: '進度表', icon: 'todo' },
   { id: 'calendar', label: '月曆', icon: 'calendar' },
-  { id: 'games', label: '小遊戲', icon: 'games' },
+  { id: 'games', label: '請明做新遊戲', icon: 'games' },
   { id: 'timeline', label: '時光記錄', icon: 'timeline' },
   { id: 'favorites', label: '收藏', icon: 'files' },
   { id: 'phone', label: '我的手機', icon: 'phone' },
@@ -1745,7 +1745,7 @@ const MING_APPS = [
   { id: 'website', label: '作品網站', icon: 'globe', postgame: true },
   { id: 'files', label: '劇情裡的檔案', icon: 'files', secondary: true },
   { id: 'backup', label: '我的資料備份', icon: 'save', secondary: true },
-  { id: 'story-games', label: '劇情小遊戲重玩', icon: 'games', secondary: true },
+  { id: 'story-games', label: '重玩故事關卡', icon: 'games', secondary: true },
   { id: 'help', label: '說明', icon: 'info', secondary: true }
 ];
 
@@ -1921,7 +1921,8 @@ function showMingMenu(state, name, anchor) {
     popup.appendChild(el('span', 'menu-separator'));
     addAction('劇情裡的檔案', function () { open('files'); });
     addAction('我的資料備份', function () { open('backup'); });
-    addAction('劇情小遊戲重玩', function () { open('story-games'); });
+    addAction('請明做新遊戲', function () { open('games'); });
+    addAction('重玩故事關卡', function () { open('story-games'); });
     addAction('明的電腦說明', function () { open('help'); });
     addAction('回工作室', exitMingComputer);
   } else if (name === 'edit') {
@@ -2218,7 +2219,7 @@ function buildMingWindowSidebar(id) {
     side.append(mingSidebarButton('我的手機', '', true, '#8a7fb8', '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M10 6h4m-2 12h.01"/>'), mingSidebarButton('休息提醒', 'open:settings', false, '#e09a5e'));
   } else if (id === 'games') {
     group('清單');
-    side.append(mingSidebarButton('明做的', 'games:done', true, '#45628f'), mingSidebarButton('明試做的', 'games:pending', false, '#e09a5e'), mingSidebarButton('劇情裡的小遊戲', 'open:story-games', false, '#8a7fb8'));
+    side.append(mingSidebarButton('明做的', 'games:done', true, '#45628f'), mingSidebarButton('明試做的', 'games:pending', false, '#e09a5e'), mingSidebarButton('重玩故事關卡', 'open:story-games', false, '#8a7fb8'));
   } else if (id === 'timeline') {
     group('每天的記錄');
     const lastDay = Math.min(game.day, TRIAL_LAST_DAY);

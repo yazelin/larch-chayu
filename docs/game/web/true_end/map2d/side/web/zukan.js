@@ -1,3 +1,5 @@
+import { guideHint } from '../../../studio_web/guide_hint.mjs';
+
 // 全劇統一的小生物圖鑑（作者 2026-11-16 看過草圖 check/zukan_mock.jpg 定案；做法與紀錄 zukan_plan.md）。
 //   十三種：朝霞丘的兔子、蝴蝶、小鳥、小屋門口的貓；海灘的螃蟹、海鷗、寄居蟹、海豚；月光岬的螢火蟲、海龜；海底的小魚群、水母；全島遠海的鯨魚。
 //   記錄：Larch 變數 creatures（逗號分隔的 id），本機 StudioDB 'zukan_seen' 也存一份（同一個網域的各頁共用；網址加 ?zukanReset=1 清掉本機那份）。
@@ -52,6 +54,7 @@ export function createZukan({ vars, set, toast, reward = true }) {
       if (new Set(list(v.creatures)).size < seen.size) write();
     })(),
     saw(id) { if (!BY[id]) return false; merge(); if (seen.has(id)) return false; seen.add(id); write(); if (toast) toast('收進小生物圖鑑：' + BY[id].name);
+      guideHint('guideCreatureSeen', '點一下小生物，就能把牠收進圖鑑。', { vars, set });
       if (seen.size === TOTAL && reward) setTimeout(() => showReward({ first: true }), 2800);   // 剛好收齊這一種：提示之後跳出那張畫
       return true; },
     has: id => (merge(), seen.has(id)), get count() { merge(); return seen.size; }, total: TOTAL, list: () => (merge(), [...seen]),

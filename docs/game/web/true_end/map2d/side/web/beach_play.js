@@ -1,3 +1,4 @@
+import { guideHint } from '../../../studio_web/guide_hint.mjs';
 // 海灘舞台長畫的玩法與互動（設計.md「海灘與月光岬長畫的互動」的「海灘舞台」，2026-11-14 作者同意；做法與修正紀錄在 beach_plan.md）。結構照 dawn_play.js。
 // 兩個章節（?chapter=4 第四章、預設 true 真結局；嵌進 Larch 時看變數 chapter）：
 //   第四章：詩跟著進場 → 螃蟹海鷗怕生跑開 → 學會「呼喚」→ 找七個貝殼（三個被螃蟹壓著、一個在寄居蟹那裡，要呼喚）→ 交給詩 → 詩在舞台上敲旋律 → CG 4-12（佔位）→ 到浪邊呼喚海豚 → 「騎上去」佔位卡。
@@ -334,7 +335,17 @@ body.beach #palette i{width:15px;height:15px}`; document.head.appendChild(css);
       if (Math.abs(d) > 26) { const v = Math.sign(d) * Math.min(Math.abs(d) - 20, 540 * dt); shiPose(shi.x + v, FEET, 1); shiLook(d); shiEl.style.setProperty('--bob', (-window.WalkSway.pose(shi.t, true).lift * 100) + '%'); shiEl.style.setProperty('--rock', window.WalkSway.pose(shi.t, true).tilt + 'deg'); }
       else { shiEl.style.setProperty('--bob', '0%'); shiEl.style.setProperty('--rock', '0deg'); shiLook(state.x - shi.x); }
       shiZ.moveTo(shi.x); });
-    teachCall = () => { if (on('c4_call') || api.panelOpen()) { if (!on('c4_call')) setTimeout(teachCall, 800); return; } openDialogue([['詩', '牠們怕生啦。'], ['詩', '妳最近不是一直在哼我的歌嗎？在這裡哼，牠們就會過來。']], [() => { save({ c4_call: 'true' }); showCall(); setQuest(); api.toast('學會了「呼喚」'); }]); };
+    teachCall = () => {
+      if (on('c4_call') || api.panelOpen()) {
+        if (!on('c4_call')) setTimeout(teachCall, 800);
+        return;
+      }
+      openDialogue([['詩', '牠們怕生啦。'], ['詩', '妳最近不是一直在哼我的歌嗎？在這裡哼，牠們就會過來。']], [() => {
+        save({ c4_call: 'true' });
+        showCall(); setQuest(); api.toast('學會了「呼喚」');
+        guideHint('guideDiveSeen', '往浪邊左端可以下潛。', { vars: () => st, set: save });
+      }]);
+    };
     if (resumed) setTimeout(() => openDialogue([['詩', '最後一個。叫牠。']]), 900);
     else if (!on('c4_intro')) setTimeout(() => openDialogue([['', '南邊多了一整片沙灘，沙灘盡頭有一座小小的木頭舞台。'], ['詩', '是黃昏耶。']], [() => save({ c4_intro: 'true' })]), 900);
   } else {
