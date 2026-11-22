@@ -2,14 +2,14 @@
   "version": 1,
   "pagesBase": "https://yazelin.github.io/larch-chayu/game/",
   "totalFiles": 887,
-  "totalBytes": 88536121,
+  "totalBytes": 88536814,
   "bytesByCategory": {
     "bgm": 25662250,
     "cg": 3081222,
     "img": 203466,
-    "minigames": 10076406,
+    "minigames": 10076604,
     "mv": 15203043,
-    "web": 34309734
+    "web": 34310229
   },
   "largestFile": {
     "file": "mv/media/boring_v2.mp3",
@@ -220,15 +220,15 @@
     {
       "file": "minigames/chapter_tip.html",
       "category": "minigames",
-      "bytes": 79637,
-      "sha256": "19fad349a19e9416d7d8f21adb1d04d0e1df45abb96b60f8b0916395476da429",
+      "bytes": 79736,
+      "sha256": "a684c5cdcc8f3eb4a2044cbc58ba3ff26cc94b3d2091387e66a7e0c4f1ebe50a",
       "source": "新版/minigames/chapter_tip.html"
     },
     {
       "file": "minigames/chapter_tip.js",
       "category": "minigames",
-      "bytes": 3240,
-      "sha256": "e9305889e3c6dac9d13217be39939c6fecb56997905e119121ff9a0f61ee8305",
+      "bytes": 3339,
+      "sha256": "7d78bae8b1fcfd848e329959673b47de46d7f90cf30ea45a15e99832503196d5",
       "source": "新版/minigames/chapter_tip.js"
     },
     {
@@ -2866,8 +2866,8 @@
     {
       "file": "web/true_end/map2d/side/web/dive.html",
       "category": "web",
-      "bytes": 103071,
-      "sha256": "8eaa10bf070ee618978aea8f6da33b6d66b3e6effd2413b67235ae764343407d",
+      "bytes": 103170,
+      "sha256": "376b9b98db0b89897411a191a81ddee9b132a7a3570cedf22df8a64e049c2915",
       "source": "真結局/map2d/side/web/dive.html"
     },
     {
@@ -2880,8 +2880,8 @@
     {
       "file": "web/true_end/map2d/side/web/flat.html",
       "category": "web",
-      "bytes": 140697,
-      "sha256": "d1f4c06c495aa811f7fdf4d26630420032e055ec1fc0633e3c03c605f4fd827f",
+      "bytes": 140796,
+      "sha256": "29fcfad0f61913add7de7edf03a28182e5345a2b2a94aa06472b339ec3b88a1a",
       "source": "真結局/map2d/side/web/flat.html"
     },
     {
@@ -2901,8 +2901,8 @@
     {
       "file": "web/true_end/map2d/side/web/island.html",
       "category": "web",
-      "bytes": 78877,
-      "sha256": "62a73c5c41e0b9305d6ec1f2a33c891c85d276003e49b02f98bd88c7e1c5bc8b",
+      "bytes": 78976,
+      "sha256": "0e108d58295313fc25af2c13c9c134f5fb315afc1e655acae7dcbcff1a5de5bf",
       "source": "真結局/map2d/side/web/island.html"
     },
     {
@@ -2943,8 +2943,8 @@
     {
       "file": "web/true_end/map2d/side/web/lantern.html",
       "category": "web",
-      "bytes": 81521,
-      "sha256": "549aaecae884edf36794cbfa6358402c9642035a3ffa4b8582b4c9eb8db15b10",
+      "bytes": 81620,
+      "sha256": "3f8d5355eefe2ba154635b7c6d2dfaf01803bee353c5ece8b5a237378f7e0d69",
       "source": "真結局/map2d/side/web/lantern.html"
     },
     {
@@ -5729,8 +5729,8 @@
     {
       "file": "web/true_end/studio_web/index.html",
       "category": "web",
-      "bytes": 140802,
-      "sha256": "6d22e698b7939970fd8531b901e581e5abe4e4982beef09bbae8eeaf174dcce8",
+      "bytes": 140901,
+      "sha256": "b69cbca3ef8134895d69a7c8f76637b656cb895ffda9b6f1024aac2627987dcb",
       "source": "真結局/studio_web/index.html"
     },
     {
