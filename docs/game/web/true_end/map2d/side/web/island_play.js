@@ -1,4 +1,5 @@
-import { approachRoute } from './island_walk.mjs';
+import { createJoystick, movementKeys } from './movement_input.mjs';
+import { approachRoute, slideAlongShore } from './island_walk.mjs';
 import { WALK_BLOCKED } from './walk_interaction.mjs';
 import { createIslandAffinity } from './island_affinity.mjs';
 import { paperize } from './paper.js';
@@ -33,7 +34,7 @@ const QUERY_VARIABLES = ['chapter', 'day', 'time', 'gifts', 'gift_chen', 'gift_s
 function queryVariables() {
   return Object.fromEntries(QUERY_VARIABLES.filter(k => Q.has(k)).map(k => [k, Q.get(k)]));
 }
-const state = { x: CFG.start.x, y: CFG.start.y, face: 1, target: null, keyX: 0, keyY: 0, pointerDir: 0,
+const state = { x: CFG.start.x, y: CFG.start.y, face: 1, target: null, pointerDir: 0,
   stage: 1, time: '早上', vars: queryVariables(), orbit: null, landing: false, dialogOpen: false,
   passed: new Set(), buttons: new Map(), ready: false, initApplied: !inFrame, mapReady: false,
   mapLoaded: false, mapGeneration: 0, mapPromise: Promise.resolve(false), readyWaiters: [],
@@ -482,7 +483,7 @@ function clickInteraction(id, event) {
   if (!point) return;
   const reach = memory ? 86 : point.radius * H + 45;
   if (distance(state, point) <= reach) return interact(id);
-  state.keyX = state.keyY = state.pointerDir = 0;
+  keys.clear(); state.pointerDir = 0; joystick.release();
   const route = approachRoute(state, point, reach, W, H, walkable);
   walkInteraction = { id, point, reach, route, stage: state.stage };
   state.target = route.shift() || null;
@@ -580,7 +581,7 @@ function startOrbit(kind) {
   state.orbit = { kind, s: 0, lastLoop: null, face: faceAt(kind, 0) || 1, start,
     speed: T.total / (Q.has('fast') ? 3.2 : 32) };
   const p = tripPoint(kind, 0); state.x = p.x; state.y = p.y;
-  state.passed = new Set(); state.keyX = state.keyY = state.pointerDir = 0; cancelMove();
+  state.passed = new Set(); keys.clear(); state.pointerDir = 0; cancelMove();
   state.orbit.hint = document.getElementById('hint').textContent = kind === 'dolphin' ? '茶語和詩坐上海豚，沿海繞島一圈' : '小船沿海繞島，遠處鯨魚正在噴水';
   renderVehicle(); toast(kind === 'dolphin' ? '出發繞島' : '小船離開碼頭');
   return true;
@@ -613,7 +614,7 @@ function finishOrbit() {
   }
   state.x = ride.start.x; state.y = ride.start.y; state.orbit = null;
   vehicle.classList.remove('on'); clearTimeout(document.getElementById('hint')._timer);
-  document.getElementById('hint').textContent = '方向鍵移動，也可以點地面、入口或物件走過去';
+  showMoveHint(joystick.touch);
   const completion = orbitCompletion(ride.kind, [...state.passed]);
   setVars(completion.variables);
   if (ride.kind === 'boat') addMemory7();
@@ -643,7 +644,7 @@ function moveTarget(p) {
 }
 function moveFrame(dt) {
   advanceInteraction();
-  if (state.dialogOpen || state.orbit || state.landing) return;
+  if (!interactionReady()) return;
   let dx = 0, dy = 0;
   if (state.target) {
     const ax = (state.target.x - state.x) * W, ay = (state.target.y - state.y) * H;
@@ -651,19 +652,23 @@ function moveFrame(dt) {
     if (d < 0.01) state.target = null;
     else { dx = ax / d; dy = ay / d; }
   } else {
-    dx = state.keyX || state.pointerDir;
-    dy = state.keyY;
+    const input = joystick.active ? joystick : keys.vector();
+    dx = input.x || (joystick.active ? 0 : state.pointerDir);
+    dy = input.y;
   }
   const directionLength = Math.hypot(dx, dy);
-  if (directionLength) { dx /= directionLength; dy /= directionLength; }
+  if (directionLength > 1) { dx /= directionLength; dy /= directionLength; }
   const speed = Number(Q.get('speed')) || 390;
   if (dx || dy) {
     const step = state.target ? Math.min(speed * dt, distance(state, state.target)) : speed * dt;
     const next = { x: state.x + dx * step / W, y: state.y + dy * step / H };
-    if (walkable(next)) { state.x = next.x; state.y = next.y; }
+    if (state.target && walkable(next)) { state.x = next.x; state.y = next.y; }
     else if (walkInteraction) { walkInteraction.route.length = 0; state.target = null; }
-    else if (dx && walkable({ x: next.x, y: state.y })) state.x = next.x;
-    else if (dy && walkable({ x: state.x, y: next.y })) state.y = next.y;
+    else {
+      const p = slideAlongShore(state, dx * step, dy * step, W, H, CFG.walkable[state.stage], walkable);
+      if (state.target && p.x === state.x && p.y === state.y) state.target = null;
+      state.x = p.x; state.y = p.y;
+    }
     state.face = dx < 0 ? -1 : dx > 0 ? 1 : state.face;
   }
   advanceInteraction();
@@ -708,6 +713,7 @@ function landingAnimation() {
 
 function frame(now) {
   const dt = Math.min((now - state.lastFrame) / 1000 || 0, 0.05); state.lastFrame = now;
+  joystick.update();
   if (!state.ready) {
     requestAnimationFrame(frame);
     return;
@@ -733,42 +739,38 @@ function pointFromEvent(e) {
 }
 addEventListener('pointerdown', () => { if (walkInteraction) cancelMove(); }, true);
 world.addEventListener('pointerdown', e => {
-  if (e.target.closest('.entrance,.memory,.action,.move')) return;
+  if (e.button !== 0 || !e.isPrimary || e.target.closest('.entrance,.memory,.action')) return;
   cancelMove();
   if (state.pointer) clearTimeout(state.pointer.timer);
-  state.pointer = { x: e.clientX, y: e.clientY, held: false };
-  state.pointer.timer = setTimeout(() => { if (state.pointer) { state.pointer.held = true; state.pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; state.target = null; } }, 190);
+  state.pointer = { id: e.pointerId, x: e.clientX, y: e.clientY, held: false };
+  if (e.pointerType === 'mouse') state.pointer.timer = setTimeout(() => { if (state.pointer) { state.pointer.held = true; state.pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; state.target = null; } }, 190);
 });
-world.addEventListener('pointermove', e => { if (state.pointer?.held) state.pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; });
+world.addEventListener('pointermove', e => { if (state.pointer?.id === e.pointerId && state.pointer.held) state.pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; });
 function pointerUp(e) {
-  if (!state.pointer) return;
+  if (state.pointer?.id !== e.pointerId) return;
   clearTimeout(state.pointer.timer);
   const moved = Math.hypot(e.clientX - state.pointer.x, e.clientY - state.pointer.y);
   if (e.type === 'pointerup' && !state.pointer.held && moved < 14) moveTarget(pointFromEvent(e));
   state.pointer = null; state.pointerDir = 0;
 }
 world.addEventListener('pointerup', pointerUp); world.addEventListener('pointercancel', pointerUp);
-for (const b of document.querySelectorAll('.move')) {
-  const dir = Number(b.dataset.dir);
-  b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); b.setPointerCapture(e.pointerId); cancelMove(); state.pointerDir = dir; });
-  b.addEventListener('pointerup', e => { e.preventDefault(); state.pointerDir = 0; });
-  b.addEventListener('pointercancel', () => { state.pointerDir = 0; });
-  b.addEventListener('lostpointercapture', () => { state.pointerDir = 0; });
+const keys = movementKeys();
+function showMoveHint(touch) {
+  if (state.orbit) return;
+  document.getElementById('hint').textContent = touch
+    ? '拖動搖桿，也可以點地面、入口或物件走過去'
+    : '方向鍵或 WASD 移動，也可以點地面、入口或物件走過去';
 }
+const joystick = createJoystick({
+  enabled: () => interactionReady() && !PageLoading.loading,
+  onStart: () => { cancelMove(); keys.clear(); state.pointerDir = 0; },
+  onTouch: showMoveHint,
+});
 addEventListener('keydown', e => {
   if (panelOpen() || plantPanelOpen() || sceneOpen()) return;   // 圖鑑、植物一覽打開時不走路（Esc 由 zukan.js 收起）
   if (state.dialogOpen) { if (e.key === 'Enter' || e.key === ' ') closeScroll(); return; }
-  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); cancelMove(); state.keyX = -1; }
-  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); cancelMove(); state.keyX = 1; }
-  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { e.preventDefault(); cancelMove(); state.keyY = -1; }
-  if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { e.preventDefault(); cancelMove(); state.keyY = 1; }
+  if (interactionReady() && keys.press(e)) { joystick.release(); cancelMove(); }
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const id = updateNearby(); if (id) interact(id); }
-});
-addEventListener('keyup', e => {
-  if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && state.keyX < 0) state.keyX = 0;
-  if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && state.keyX > 0) state.keyX = 0;
-  if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && state.keyY < 0) state.keyY = 0;
-  if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && state.keyY > 0) state.keyY = 0;
 });
 document.getElementById('dolphin').addEventListener('click', () => startOrbit('dolphin'));
 document.getElementById('boat').addEventListener('click', () => startOrbit('boat'));
@@ -777,14 +779,14 @@ document.getElementById('dive').addEventListener('click', () => startDive());
 const zk = createZukan({ vars: () => state.vars, set: setVars, toast: t => setTimeout(() => toast(t), 2000) });   // 繞島回來的那句提示先講完，再講收進圖鑑
 function updateZukanBtn() { const b = document.getElementById('zukan'); if (b) b.textContent = `圖鑑 ${zk.count}／${ZK_TOTAL}`; }
 zk.ready.then(updateZukanBtn);
-document.getElementById('zukan').addEventListener('click', e => { e.stopPropagation(); if (!state.ready || state.orbit) return; state.keyX = state.keyY = state.pointerDir = 0; cancelMove(); openPanel(zk, { onClose: updateZukanBtn }); });
+document.getElementById('zukan').addEventListener('click', e => { e.stopPropagation(); if (!state.ready || state.orbit) return; keys.clear(); state.pointerDir = 0; cancelMove(); openPanel(zk, { onClose: updateZukanBtn }); });
 document.getElementById('zukan').addEventListener('pointerdown', e => e.stopPropagation());
 // 植物收集（plants.js）：右上「植物 n／11」開一覽；真結局三樣禮物都拿到之後，多一顆「一起種小樹」（碼頭，四個人一起種的小樹）
 const pl = createPlants({ vars: () => state.vars, set: setVars, toast: t => setTimeout(() => toast(t), 600) }); window.__plants = pl;
 function updatePlantBtn() { const b = document.getElementById('plants'); if (b) b.textContent = `植物 ${pl.count}／${PL_TOTAL}`; const t = document.getElementById('plant-tree'); if (t) t.hidden = !(state.stage === 5 && Number(state.vars.gifts || 0) >= 3 && !pl.has('olive')); }
 pl.ready.then(updatePlantBtn); setInterval(updatePlantBtn, 1500);
-document.getElementById('plants').addEventListener('click', e => { e.stopPropagation(); if (!state.ready || state.orbit) return; state.keyX = state.keyY = state.pointerDir = 0; cancelMove(); openPlantPanel(pl, { onClose: updatePlantBtn }); });
-document.getElementById('plant-tree').addEventListener('click', e => { e.stopPropagation(); if (!state.ready || state.orbit) return; state.keyX = state.keyY = state.pointerDir = 0; cancelMove(); playScene(TREE_LINES, { cg: TREE_CG, onDone: () => { pl.got('olive'); updatePlantBtn(); } }); });
+document.getElementById('plants').addEventListener('click', e => { e.stopPropagation(); if (!state.ready || state.orbit) return; keys.clear(); state.pointerDir = 0; cancelMove(); openPlantPanel(pl, { onClose: updatePlantBtn }); });
+document.getElementById('plant-tree').addEventListener('click', e => { e.stopPropagation(); if (!state.ready || state.orbit) return; keys.clear(); state.pointerDir = 0; cancelMove(); playScene(TREE_LINES, { cg: TREE_CG, onDone: () => { pl.got('olive'); updatePlantBtn(); } }); });
 for (const id of ['plants', 'plant-tree']) document.getElementById(id).addEventListener('pointerdown', e => e.stopPropagation());
 // 真結局：從碼頭水邊下潛 → dive.html（潛到最底）；浮回水面後回到碼頭（?at=dock）。回來時 dive.html 把 memory6、memories 等寫在網址上
 function startDive() {

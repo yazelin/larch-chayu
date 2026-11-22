@@ -1,9 +1,10 @@
+import { createJoystick } from './movement_input.mjs';
 import { horizontalInteraction, stepToward, WALK_BLOCKED } from './walk_interaction.mjs';
 import { createIslandAffinity } from './island_affinity.mjs';
 // 「一整張長畫」（作者 2026-11-13 定調：分層可以、不要視差，像故事插畫繪本，人物可以走動）：
 // 底圖 art/out/<scene>/flat.jpg（中心框＋接力外延拼成一張）＋可有可無的前景遮擋 fg.png（同一張剪、同速度）。鏡頭跟著人水平捲、兩端夾住。
 // 設定全部來自 art/out/<scene>/flat.json（flat.py 寫的：寬度、中心框位置、熱區、人物站位、腳底線、出口在哪一邊、CG）。
-// 操作與橋接照 studio_web：方向鍵或 A、D、點地面走過去、手機按住左右半邊、靠近熱區亮起、Enter 或點擊互動、larch:init／ready、IndexedDB 記位置。
+// 操作與橋接照 studio_web：方向鍵或 A、D、點地面走過去、手機搖桿、靠近熱區亮起、Enter 或點擊互動、larch:init／ready、IndexedDB 記位置。
 // 網址參數：?scene=dawn|cape|beach、x=0.5（起點，長圖寬的比例）、walk=1|-1（自動走）、hud=0、mock=1。
 import { CHARACTERS } from '../../../studio_web/studio_core.mjs';
 import { paperize } from './paper.js';
@@ -131,13 +132,24 @@ function cancelClickWalk() {
   clickWalk.cancel();
   targetX = null;
 }
+const joystick = createJoystick({
+  enabled: () => !PageLoading.loading && !panelOpen && !locked && cg.style.display !== 'block' && document.getElementById('scroll').style.display !== 'block',
+  onStart: () => { cancelClickWalk(); keyDir = pointerDir = 0; },
+  onTouch: touch => {
+    const move = touch ? '左右拖動搖桿，也可以點地面或物件走過去' : '方向鍵移動，點地面或物件走過去';
+    document.getElementById('hint').textContent = SCENE === 'cape' && !touch ? move + '。按 T 停下時間' : move;
+  },
+});
+function manualDirection() { return joystick.active ? joystick.x : keyDir || pointerDir; }
+addEventListener('blur', () => { keyDir = pointerDir = 0; });
+
 function bindHotspot(button, hot) {
   button.addEventListener('pointerdown', e => { e.stopPropagation(); });
   button.addEventListener('click', e => {
     e.stopPropagation();
     cancelClickWalk();
     if (e.detail === 0) return interact(hot.id);
-    keyDir = pointerDir = 0;
+    keyDir = pointerDir = 0; joystick.release();
     clickWalk.begin(hot, { x: camX() + e.clientX / scale, y: VIEW.top + VIEW.h * e.clientY / innerHeight });
   });
 }
@@ -182,50 +194,53 @@ function runHot(h) {
 scrim.addEventListener('click', advance); cg.addEventListener('click', () => { if (!cg.classList.contains('under')) hideCg(); }); document.getElementById('scroll').addEventListener('click', e => { e.currentTarget.style.display = 'none'; });
 function step(dt) {
   camShift += (camShiftTarget - camShift) * Math.min(1, dt * 2.2); if (Math.abs(camShiftTarget - camShift) > 0.5) render();
-  if (locked) { player.classList.remove('walking'); window.WalkSway.step(sway, dt, false); render(); return; }
+  if (PageLoading.loading || locked) { player.classList.remove('walking'); window.WalkSway.step(sway, dt, false); render(); return; }
   const approaching = clickWalk.active;
   const destination = clickWalk.destination();
   if (destination !== null && clickMovement.move) clickMovement.move(destination);
   if (locked || panelOpen) { player.classList.remove('walking'); return; }
   const target = approaching ? (clickMovement.move ? null : destination) : targetX;
-  let dir = keyDir || pointerDir;
+  let dir = manualDirection();
   if (target !== null) dir = Math.sign(target - state.x);
-  if (!approaching && targetX !== null && Math.abs(targetX - state.x) < 0.01) { targetX = null; dir = keyDir || pointerDir; }
+  if (!approaching && targetX !== null && Math.abs(targetX - state.x) < 0.01) { targetX = null; dir = manualDirection(); }
   const walking = !!dir && !panelOpen; player.classList.toggle('walking', walking); walkT += dt; if (flip.t < 1) flip.t = Math.min(1, flip.t + dt / 0.22);
   if (!walking) window.WalkSway.step(sway, dt, false);
   if (walking) {
-    if (dir !== state.face) { flip = { from: state.face, t: 0 }; state.face = dir; }
+    const face = Math.sign(dir);
+    if (face !== state.face) { flip = { from: state.face, t: 0 }; state.face = face; }
     const x0 = state.x;
     const next = target === null ? state.x + dir * WALK * dt : stepToward(state.x, target, WALK * dt);
     state.x = Math.max(WALK_X[0], Math.min(WALK_X[1], next)); window.WalkSway.step(sway, dt, state.x !== x0);
     const atExit = META.exit === 'right' ? (state.x >= WALK_X[1] - 1 && dir > 0) : (state.x <= WALK_X[0] + 1 && dir < 0);
-    if (atExit && !approaching) { keyDir = pointerDir = 0; targetX = null; interact('exit'); }
+    if (atExit && !approaching) { keyDir = pointerDir = 0; joystick.release(); targetX = null; interact('exit'); }
   }
   render();
 }
 const frameHooks = [];
-function frame(t) { const dt = Math.min((t - lastT) / 1000, .05); lastT = t; step(dt); for (const f of frameHooks) f(dt); requestAnimationFrame(frame); }
+function frame(t) { const dt = Math.min((t - lastT) / 1000, .05); lastT = t; joystick.update(); step(dt); for (const f of frameHooks) f(dt); requestAnimationFrame(frame); }
 addEventListener('keydown', e => {
   if (panelOpen) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); advance(); } return; }
   if (cg.style.display === 'block' && !cg.classList.contains('under')) { if (!cg.classList.contains('on')) return; hideCg(); return; }
   const scEl = document.getElementById('scroll'); if (scEl.style.display === 'block') { scEl.style.display = 'none'; return; }
-  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); cancelClickWalk(); keyDir = -1; }
-  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); cancelClickWalk(); keyDir = 1; }
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); cancelClickWalk(); joystick.release(); keyDir = -1; }
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); cancelClickWalk(); joystick.release(); keyDir = 1; }
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (locked) return; const k = nearest(); if (k) { cancelClickWalk(); interact(k); } }
 });
 addEventListener('keyup', e => { if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && keyDir < 0) keyDir = 0; if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && keyDir > 0) keyDir = 0; });
 addEventListener('pointerdown', () => { if (clickWalk.active) cancelClickWalk(); }, true);
 addEventListener('keydown', e => {
-  if (clickWalk.active && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) cancelClickWalk();
+  if (clickWalk.active && ['arrowup', 'arrowdown', 'w', 's'].includes(e.key.toLowerCase())) cancelClickWalk();
 }, true);
 let down = null;
 stage.addEventListener('pointerdown', e => {
+  if (!e.isPrimary || e.button !== 0) return;
   cancelClickWalk();
   if (down) clearTimeout(down.timer);
-  down = { x: e.clientX, y: e.clientY, held: false }; down.timer = setTimeout(() => { if (down) { down.held = true; pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; targetX = null; } }, 180); });
-stage.addEventListener('pointermove', e => { if (down && down.held) pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; });
+  down = { id: e.pointerId, x: e.clientX, y: e.clientY, held: false };
+  if (e.pointerType === 'mouse') down.timer = setTimeout(() => { if (down) { down.held = true; pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; targetX = null; } }, 180); });
+stage.addEventListener('pointermove', e => { if (down?.id === e.pointerId && down.held) pointerDir = e.clientX < innerWidth / 2 ? -1 : 1; });
 function up(e) {
-  if (!down) return; clearTimeout(down.timer); const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+  if (down?.id !== e.pointerId) return; clearTimeout(down.timer); const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
   if (e.type === 'pointerup' && !down.held && moved < 14 && !panelOpen && e.clientY >= (FEET - 0.12 - VIEW.top) / VIEW.h * innerHeight) {
     const [left, right] = clickMovement.bounds();
     targetX = Math.max(left, Math.min(right, camX() + e.clientX / scale));

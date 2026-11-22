@@ -1,6 +1,7 @@
+import { createJoystick } from './movement_input.mjs';
 import { horizontalInteraction, hintBlocked, stepToward } from './walk_interaction.mjs';
 // 朝霞丘橫向捲軸小樣：六層視差＋茶語左右走＋熱區。操作與橋接照 studio_web/index.html 的捲軸版（方向鍵或 A、D、點地面走過去、
-// 手機按住左右半邊、靠近熱區亮起、Enter 或點擊互動、larch:init／larch:ready、IndexedDB 記位置）；角色表共用 studio_core.mjs。
+// 手機搖桿、靠近熱區亮起、Enter 或點擊互動、larch:init／larch:ready、IndexedDB 記位置）；角色表共用 studio_core.mjs。
 // 層用 canvas 畫（工作室是 DOM 一張長圖；這裡六層各自速度，canvas 比六個 div 省事），超出條帶的地方鏡射補。
 // 網址參數：?x=0.5（起點 sw）、walk=1（自動往右走，截視差用）、hud=0（藏介面）、mock=1（不接 Larch）。
 import { CHARACTERS } from '../../../studio_web/studio_core.mjs';
@@ -88,39 +89,57 @@ document.getElementById('panel-close').addEventListener('click', closePanel); sc
 cg.addEventListener('click', () => { cg.style.display = 'none'; });
 nearBtn.addEventListener('click', () => interact(nearest()));
 
+const joystick = createJoystick({
+  enabled: () => !panelOpen && cg.style.display !== 'block',
+  onStart: () => { cancelClickWalk(); keyDir = pointerDir = 0; },
+  onTouch: touch => { document.getElementById('hint').textContent = (touch
+      ? '左右拖動搖桿，也可以點地面、入口或物件走過去'
+      : '方向鍵或 A、D 移動，也可以點地面、入口或物件走過去'); },
+});
+function manualDirection() { return joystick.active ? joystick.x : keyDir || pointerDir; }
+addEventListener('blur', () => { keyDir = pointerDir = 0; });
+
 function step(dt) {
   const approaching = clickWalk.active;
   const target = approaching ? clickWalk.destination() : targetX;
-  const dir = target === null ? keyDir || pointerDir : Math.sign(target - state.x);
+  const dir = target === null ? manualDirection() : Math.sign(target - state.x);
   if (!approaching && targetX === state.x) targetX = null;
   state.walking = !!dir && !panelOpen;
   if (state.walking) {
-    state.face = dir; state.x = target === null ? state.x + dir * WALK * dt : stepToward(state.x, target, WALK * dt); state.phase += dt * 11;
+    state.face = Math.sign(dir); state.x = target === null ? state.x + dir * WALK * dt : stepToward(state.x, target, WALK * dt); state.phase += dt * 11;
     const [a, b] = scene.walk_x; state.x = Math.max(a * SW, Math.min(b * SW, state.x));
-    if (!approaching && state.x <= P.exit_to_island.x * SW + 1 && dir < 0) { keyDir = pointerDir = 0; targetX = null; interact('exit_to_island'); }
+    if (!approaching && state.x <= P.exit_to_island.x * SW + 1 && dir < 0) { keyDir = pointerDir = 0; joystick.release(); targetX = null; interact('exit_to_island'); }
   }
   const k = nearest(); nearBtn.style.display = k && !panelOpen ? 'block' : 'none'; if (k) nearBtn.textContent = HOT[k].label;
 }
-function frame(t) { const dt = Math.min((t - lastT) / 1000, .05); lastT = t; step(dt); render(); requestAnimationFrame(frame); }
+function frame(t) { const dt = Math.min((t - lastT) / 1000, .05); lastT = t; joystick.update(); step(dt); render(); requestAnimationFrame(frame); }
 requestAnimationFrame(frame);
 
 addEventListener('keydown', e => {
   if (panelOpen) { if (e.key === 'Escape' || e.key === 'Enter') closePanel(); return; }
   if (cg.style.display === 'block') { cg.style.display = 'none'; return; }
-  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); cancelClickWalk(); keyDir = -1; }
-  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); cancelClickWalk(); keyDir = 1; }
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); cancelClickWalk(); joystick.release(); keyDir = -1; }
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); cancelClickWalk(); joystick.release(); keyDir = 1; }
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const k = nearest(); if (k) interact(k); }
 });
 addEventListener('keyup', e => { if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && keyDir < 0) keyDir = 0; if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && keyDir > 0) keyDir = 0; });
 let down = null;
 addEventListener('pointerdown', () => { if (clickWalk.active) cancelClickWalk(); }, true);
 addEventListener('keydown', e => {
-  if (clickWalk.active && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) cancelClickWalk();
+  if (clickWalk.active && ['arrowup', 'arrowdown', 'w', 's'].includes(e.key.toLowerCase())) cancelClickWalk();
 }, true);
-canvas.addEventListener('pointerdown', e => { cancelClickWalk(); if (down) clearTimeout(down.timer); down = { x: e.clientX, y: e.clientY, t: Date.now(), held: false }; down.timer = setTimeout(() => { if (down) { down.held = true; pointerDir = e.clientX < viewW / 2 ? -1 : 1; targetX = null; } }, 180); });
-canvas.addEventListener('pointermove', e => { if (down && down.held) pointerDir = e.clientX < viewW / 2 ? -1 : 1; });
+canvas.addEventListener('pointerdown', e => {
+  if (!e.isPrimary || e.button !== 0) return;
+  cancelClickWalk();
+  if (down) clearTimeout(down.timer);
+  down = { id: e.pointerId, x: e.clientX, y: e.clientY, held: false };
+  if (e.pointerType === 'mouse') down.timer = setTimeout(() => {
+    down.held = true; pointerDir = e.clientX < viewW / 2 ? -1 : 1; targetX = null;
+  }, 180);
+});
+canvas.addEventListener('pointermove', e => { if (down?.id === e.pointerId && down.held) pointerDir = e.clientX < viewW / 2 ? -1 : 1; });
 function up(e) {
-  if (!down) return; clearTimeout(down.timer); const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+  if (down?.id !== e.pointerId) return; clearTimeout(down.timer); const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
   if (e.type === 'pointerup' && !down.held && moved < 14 && !panelOpen) {
     const xRef = camX() + e.clientX / scale;
     const yRef = e.clientY / (FH * scale);

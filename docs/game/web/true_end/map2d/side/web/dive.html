@@ -198,6 +198,7 @@ body:has(> #page-loading:not(.leaving)) > :not(#page-loading, .loading-backdrop)
 }
 </style>
 <!-- page-loading:style:end -->
+<link rel="stylesheet" href="movement_joystick.css">
 </head>
 <body data-state="loading">
 <!-- page-loading:screen:start -->
@@ -575,12 +576,13 @@ html,body{width:100%;height:100%;height:100dvh;margin:0;overflow:hidden;backgrou
 #fade{position:fixed;inset:0;z-index:30;background:#06243c;opacity:0;pointer-events:none;transition:opacity .9s ease}
 @media(max-width:700px){.ui{font-size:12px}#label{font-size:13px}.btn{font-size:15px}#hint{bottom:max(84px,calc(env(safe-area-inset-bottom) + 76px));white-space:normal;width:max-content;max-width:calc(100vw - 32px);text-align:center}}
 @media(prefers-reduced-motion:reduce){.bub,.note{animation-duration:.01ms!important}}
+@media(max-width:700px){body.touch-movement #hint{bottom:max(112px,calc(env(safe-area-inset-bottom) + 108px))}}
 </style>
-<div id="stage" aria-label="海底長畫：按住往下潛，放開浮上來">
+<div id="stage" aria-label="海底長畫">
   <div id="art"><img id="bg" alt="" src="../art/out/dive/flat.webp" draggable="false"><canvas id="rays"></canvas></div>
 </div>
 <div id="label" class="ui">海底</div>
-<div id="hint" class="ui">按住下潛，放開上浮。← → 左右游，點珊瑚或捲軸就會游過去</div>
+<div id="hint" class="ui">方向鍵或 WASD 游泳。滑鼠按住下潛，放開上浮</div>
 <button id="call" class="btn" type="button">呼喚</button>
 <button id="up" class="btn" type="button" hidden>上岸</button>
 <div id="toast"></div>

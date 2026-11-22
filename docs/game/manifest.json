@@ -1,15 +1,15 @@
 {
   "version": 1,
   "pagesBase": "https://yazelin.github.io/larch-chayu/game/",
-  "totalFiles": 898,
-  "totalBytes": 89226518,
+  "totalFiles": 900,
+  "totalBytes": 89235569,
   "bytesByCategory": {
     "bgm": 25662250,
     "cg": 3081222,
     "img": 203466,
     "minigames": 10572482,
     "mv": 15203043,
-    "web": 34504055
+    "web": 34513106
   },
   "largestFile": {
     "file": "mv/media/boring_v2.mp3",
@@ -18,7 +18,7 @@
     "sha256": "d6e99b0176da8186897b6b8a7d37cd99f72a8c677907bcbe9413cac56bcf7059",
     "source": "新版/mv/media/boring_v2.mp3"
   },
-  "webDependencyFiles": 898,
+  "webDependencyFiles": 900,
   "cgNameMap": [
     {
       "file": "cg/ch1/ch1_cg_079.webp",
@@ -2908,8 +2908,8 @@
     {
       "file": "web/true_end/map2d/side/web/cape_play.js",
       "category": "web",
-      "bytes": 84207,
-      "sha256": "a8987d9d36eff14cc04c4ea6f5425f0265e1a374a70506d70dfdbb95ac6b2b77",
+      "bytes": 84200,
+      "sha256": "ce67a2556521fbafbbc7e40f1a14191f77ac216204acacadfd1da52acef70477",
       "source": "真結局/map2d/side/web/cape_play.js"
     },
     {
@@ -2922,29 +2922,29 @@
     {
       "file": "web/true_end/map2d/side/web/dive.html",
       "category": "web",
-      "bytes": 103194,
-      "sha256": "b9825e4fcb6785cc0b114713bb3620420b70b2f12c2d4ee21192c618e33dbdbf",
+      "bytes": 103300,
+      "sha256": "ddce106a1c3c686a1fd0ab7e5eb9c30ef3ed170feba11b3f190e5f42992558fa",
       "source": "真結局/map2d/side/web/dive.html"
     },
     {
       "file": "web/true_end/map2d/side/web/dive_play.js",
       "category": "web",
-      "bytes": 30648,
-      "sha256": "bcfbafc0a885af5201e10d07fb1b2fe882f6c556f7fb98cd3ecfea1b08135702",
+      "bytes": 31431,
+      "sha256": "45af932d0c673bfa2419289767bc151719e87ebca4c07c111e4e5a72bbd85fe7",
       "source": "真結局/map2d/side/web/dive_play.js"
     },
     {
       "file": "web/true_end/map2d/side/web/flat.html",
       "category": "web",
-      "bytes": 140768,
-      "sha256": "3c1e8305bbfcbc1201de930f1087f8513962ba2670b5ae3f649df050b67be639",
+      "bytes": 141050,
+      "sha256": "d36ff4a03fc42168c05215bc7d2ae6dafcd86bec72173cc6913145eb44655e32",
       "source": "真結局/map2d/side/web/flat.html"
     },
     {
       "file": "web/true_end/map2d/side/web/flat_engine.js",
       "category": "web",
-      "bytes": 27806,
-      "sha256": "727b0058af6eb64f6b33671b13e59d43cd10f7e986fa0c0afacd32e31ffa3c0b",
+      "bytes": 28851,
+      "sha256": "c504c5a5f946a58407a7a15c5ae646cb89afca692c3edd8b893338cf049db682",
       "source": "真結局/map2d/side/web/flat_engine.js"
     },
     {
@@ -2957,8 +2957,8 @@
     {
       "file": "web/true_end/map2d/side/web/island.html",
       "category": "web",
-      "bytes": 78982,
-      "sha256": "1f29369661559e8f4492333b4b1ceb971fa530e91de7260ba447e79d21e53a50",
+      "bytes": 78529,
+      "sha256": "0881640827cea532355fee608a3da039213ed5763ddf6daa9b39ca727daf7690",
       "source": "真結局/map2d/side/web/island.html"
     },
     {
@@ -2985,8 +2985,8 @@
     {
       "file": "web/true_end/map2d/side/web/island_play.js",
       "category": "web",
-      "bytes": 51902,
-      "sha256": "fe820e89ee2115986a28c6b0e982a3efd726a54821e4140ee55d7628aa9a94de",
+      "bytes": 51344,
+      "sha256": "95e9d15851e3cdadfbd29808b8e4c6a7d8ea94fc586c70eeaae658287ea65433",
       "source": "真結局/map2d/side/web/island_play.js"
     },
     {
@@ -2999,8 +2999,8 @@
     {
       "file": "web/true_end/map2d/side/web/island_walk.mjs",
       "category": "web",
-      "bytes": 2444,
-      "sha256": "525ca45825427329237e7bc4cc128b994428732799ab7383cdb93da9f3c13e90",
+      "bytes": 3742,
+      "sha256": "0566b59d46f22b34d66569d67378b00e18a8e9fbefb26024de25dcd50b3d4359",
       "source": "真結局/map2d/side/web/island_walk.mjs"
     },
     {
@@ -3018,6 +3018,20 @@
       "source": "真結局/map2d/side/web/lantern_play.js"
     },
     {
+      "file": "web/true_end/map2d/side/web/movement_input.mjs",
+      "category": "web",
+      "bytes": 3795,
+      "sha256": "10cac20af0b37ae8aa6f0d3aaa4a9d5f27650b157ca3bb2c3276cb6dbb5877b9",
+      "source": "真結局/map2d/side/web/movement_input.mjs"
+    },
+    {
+      "file": "web/true_end/map2d/side/web/movement_joystick.css",
+      "category": "web",
+      "bytes": 967,
+      "sha256": "13b3805a2452ab002be9488efef671eee612170c94c5f7252ba726cb3fd013db",
+      "source": "真結局/map2d/side/web/movement_joystick.css"
+    },
+    {
       "file": "web/true_end/map2d/side/web/paper.js",
       "category": "web",
       "bytes": 4700,
@@ -3027,8 +3041,8 @@
     {
       "file": "web/true_end/map2d/side/web/parallax.html",
       "category": "web",
-      "bytes": 3385,
-      "sha256": "f61aa00e4e3d6abda7dbb8559d6a0c0b06227caf7345c5bf44a651b7f6544ee2",
+      "bytes": 3438,
+      "sha256": "043575ec7002f7944e565ec4628e1bc7c1ec14fa52c915ad568e55b50da6e171",
       "source": "真結局/map2d/side/web/parallax.html"
     },
     {
@@ -3048,22 +3062,22 @@
     {
       "file": "web/true_end/map2d/side/web/scene_engine.js",
       "category": "web",
-      "bytes": 13122,
-      "sha256": "8f196a184cef28c49b8bd9817e93968738514c55282e81710d84c410bd98fa22",
+      "bytes": 13983,
+      "sha256": "aebde8d992af9c6a9ab9217b93cbffc4ba19f15ec6d47b397481e16b73a2115c",
       "source": "真結局/map2d/side/web/scene_engine.js"
     },
     {
       "file": "web/true_end/map2d/side/web/scenes.html",
       "category": "web",
-      "bytes": 5965,
-      "sha256": "d0061e247273e2c85efeae9839bfe6300cbf9386eedeff92b82a35cbd1259152",
+      "bytes": 6018,
+      "sha256": "7d59f855c4be220215af5df7912a887c6e464ed335b98b23592999e17bfb46d0",
       "source": "真結局/map2d/side/web/scenes.html"
     },
     {
       "file": "web/true_end/map2d/side/web/scroll_engine.js",
       "category": "web",
-      "bytes": 10449,
-      "sha256": "992a77c3a95e092b4b047ea881607573e1160f75cac00285df8035000d6b7840",
+      "bytes": 11275,
+      "sha256": "3969eee060384fc25b4e536e4515c45be21fcbdfbd190381b959ebc496ede0f0",
       "source": "真結局/map2d/side/web/scroll_engine.js"
     },
     {

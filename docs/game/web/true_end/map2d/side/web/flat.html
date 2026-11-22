@@ -197,6 +197,7 @@ body:has(> #page-loading:not(.leaving)) > :not(#page-loading, .loading-backdrop)
 }
 </style>
 <!-- page-loading:style:end -->
+<link rel="stylesheet" href="movement_joystick.css">
 </head>
 <body>
 <!-- page-loading:screen:start -->
@@ -670,6 +671,8 @@ body.sitting .hotspot::after,body.panel-open .hotspot::after{opacity:0!important
 @media(max-width:1100px){#hint{top:auto;bottom:max(var(--larch-bottom),env(safe-area-inset-bottom));white-space:normal;box-sizing:border-box;width:max-content;max-width:calc(100vw - 32px);text-align:center;font-size:13px}}
 @media(max-width:700px){#label{top:var(--hud-clear)}}
 @media(prefers-reduced-motion:reduce){#panel,.hotspot::after,#scrim{transition-duration:0s}#cg .mat{animation:none}}
+@media(max-width:1100px){body.touch-movement #hint{left:120px;max-width:calc(100vw - 132px);transform:rotate(.6deg)}}
+@media(max-width:1100px) and (orientation:landscape){body.touch-movement #hint{max-width:calc(100vw - 250px)}}
 </style>
 <link rel="stylesheet" href="../../../studio_web/free_affinity.css">
 <main id="stage" aria-label="朝霞丘"><div id="art"></div></main>

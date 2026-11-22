@@ -15,7 +15,6 @@ export async function install(api) {
   const smooth = t => t * t * (3 - 2 * t), lerp = (a, b, t) => a + (b - a) * t;
   const Q = new URLSearchParams(location.search); document.body.classList.add('cape'); document.title = M.name + '（一整張長畫）'; document.getElementById('stage').setAttribute('aria-label', M.name);
   document.querySelector('#cg span').textContent = '點一下回到月光岬';
-  document.getElementById('hint').textContent = '方向鍵移動，點地面或物件走過去。按 T 停下時間';
 
   // ── 樣式（只給月光岬用，掛在 body.cape 底下；flat.html 不動） ──
   const css = document.createElement('style'); css.textContent = `
@@ -197,10 +196,10 @@ body.cape #palette i{width:15px;height:15px}`; document.head.appendChild(css);
     const tx = clamp(x + Math.sign(d) * range * 0.7, R[R.length - 1].x, R[0].x); await walkS(sOfX(tx)); state.face = pose.x > x ? -1 : 1; api.render(); return true; }
   // 點地面走過去：引擎的那一套只會左右平走（flat.json 把 feet_y 設在畫面外讓它不啟動），這裡照路線走
   const stageEl = document.getElementById('stage'); let pd = null;
-  stageEl.addEventListener('pointerdown', e => { pd = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+  stageEl.addEventListener('pointerdown', e => { if (!e.isPrimary || e.button !== 0) return; pd = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now() }; });
   stageEl.addEventListener('pointerup', e => {
-    if (!pd) return; const moved = Math.hypot(e.clientX - pd.x, e.clientY - pd.y), held = performance.now() - pd.t; pd = null;
-    if (moved > 14 || held > 180 || api.panelOpen() || api.isLocked() || me.busy) return;
+    if (pd?.id !== e.pointerId) return; const moved = Math.hypot(e.clientX - pd.x, e.clientY - pd.y), held = performance.now() - pd.t; pd = null;
+    if (moved > 14 || (e.pointerType === 'mouse' && held > 180) || api.panelOpen() || api.isLocked() || me.busy) return;
     const sc = api.getScale(); const px = api.camX() + e.clientX / sc, py = (e.clientY / innerHeight * api.VIEW.h + api.VIEW.top) * H;
     if (me.mode === 'route') { const s = sOfX(px); const p = posAt(s); if (py > p.y - p.h * 1.15 - 30 && py < p.y + 200) me.target = s; }
     else if (me.mode === 'plat') { if (py > PL.y - 110 && py < PL.y + 60 && px > PL.x0 - 60 && px < PL.x1 + 40) me.target = clamp(px, PL.x0, PL.x1); }

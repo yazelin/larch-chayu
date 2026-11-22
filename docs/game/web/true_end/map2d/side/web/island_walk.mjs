@@ -53,3 +53,30 @@ export function approachRoute(start, goal, reach, width, height, walkable) {
   }
   return route;
 }
+
+// 小步檢查岸線。碰到邊界後，只保留沿該段岸線的速度。
+export function slideAlongShore(start, dx, dy, width, height, polygon, walkable) {
+  const steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 4));
+  const sx = dx / steps, sy = dy / steps;
+  let p = { x: start.x, y: start.y };
+  for (let i = 0; i < steps; i++) {
+    const next = { x: p.x + sx / width, y: p.y + sy / height };
+    if (walkable(next)) { p = next; continue; }
+    let distance = Infinity, tangentX = 0, tangentY = 0;
+    for (let j = 0; j < polygon.length; j++) {
+      const a = polygon[j], b = polygon[(j + 1) % polygon.length];
+      const ex = (b[0] - a[0]) * width, ey = (b[1] - a[1]) * height;
+      const length = Math.hypot(ex, ey);
+      if (!length) continue;
+      const ux = ex / length, uy = ey / length;
+      const ax = (next.x - a[0]) * width, ay = (next.y - a[1]) * height;
+      const along = Math.max(0, Math.min(length, ax * ux + ay * uy));
+      const gap = Math.hypot(ax - along * ux, ay - along * uy);
+      if (gap < distance) { distance = gap; tangentX = ux; tangentY = uy; }
+    }
+    const along = sx * tangentX + sy * tangentY;
+    const slide = { x: p.x + along * tangentX / width, y: p.y + along * tangentY / height };
+    if (walkable(slide)) p = slide;
+  }
+  return p;
+}

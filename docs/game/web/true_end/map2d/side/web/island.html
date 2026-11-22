@@ -197,6 +197,7 @@ body:has(> #page-loading:not(.leaving)) > :not(#page-loading, .loading-backdrop)
 }
 </style>
 <!-- page-loading:style:end -->
+<link rel="stylesheet" href="movement_joystick.css">
 </head>
 <body>
 <!-- page-loading:screen:start -->
@@ -572,17 +573,15 @@ screen.setLoadingArt({ walker: art.walker, ...art.casts[screen.dataset.cast] });
 #label,#hint,#progress{position:fixed;z-index:12;padding:.5em 1.2em .55em;border:1px solid #ffffffbb;border-radius:3px;background:#fff3e8ed;color:var(--ink);box-shadow:0 4px 12px #221e2d44;backdrop-filter:blur(5px);letter-spacing:.1em;pointer-events:none}
 #label{top:max(var(--larch-top-left),env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));font-weight:700}#hint{top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);font-size:14px;color:var(--dim);white-space:nowrap}#progress{top:var(--hud-clear);right:max(12px,env(safe-area-inset-right));font-size:14px}
 #actions{position:fixed;z-index:13;top:calc(var(--hud-clear) + 54px);right:max(12px,env(safe-area-inset-right));display:flex;gap:8px;flex-direction:column;align-items:flex-end}
-.action,.move{border:1px solid #fff9;border-radius:4px;background:#fff0e2ed;color:var(--ink);font:700 15px/1.25 var(--hand);letter-spacing:.08em;box-shadow:0 4px 12px #221e2d44;cursor:pointer;touch-action:manipulation}.action{padding:.55em 1em}.action[hidden]{display:none}.action:active,.move:active{transform:translateY(2px)}
-#move{position:fixed;z-index:14;left:max(12px,env(safe-area-inset-left));bottom:max(var(--larch-bottom),env(safe-area-inset-bottom));display:flex;gap:10px}
-.move{width:62px;height:58px;font-size:28px;background:#fff0e2d9;touch-action:none}
+.action{border:1px solid #fff9;border-radius:4px;background:#fff0e2ed;color:var(--ink);font:700 15px/1.25 var(--hand);letter-spacing:.08em;box-shadow:0 4px 12px #221e2d44;cursor:pointer;touch-action:manipulation}.action{padding:.55em 1em}.action[hidden]{display:none}.action:active{transform:translateY(2px)}
 #dialog{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:#1c233bb0;cursor:pointer}#dialog.on{display:grid}
 #dialog .paper{width:min(760px,calc(100vw - 36px));padding:clamp(28px,6vw,64px);background:repeating-linear-gradient(0deg,#fffaf1,#fffaf1 2px,#f7f0e6 3px,#fffaf1 5px);border:2px solid #fff8e8;border-radius:8px;box-shadow:0 12px 42px #130e1c99;transform:rotate(-1deg);animation:unroll .35s ease-out}
 @keyframes unroll{from{transform:rotate(-1deg) translateY(14px);opacity:0}}
 #dialog b{display:block;margin-bottom:.6em;color:var(--dim);font-size:17px;letter-spacing:.12em}#dialog p{margin:0;font-size:clamp(20px,4vw,28px);line-height:1.7;letter-spacing:.04em}#dialog small{display:block;margin-top:1em;text-align:right;color:var(--dim)}
 .toast{position:fixed;z-index:18;left:50%;bottom:max(92px,calc(env(safe-area-inset-bottom) + 78px));transform:translate(-50%,14px);padding:.55em 1.2em;background:#fff3e8ed;border:1px solid #fff9;border-radius:4px;box-shadow:0 4px 12px #221e2d44;color:var(--ink);font-weight:700;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap}.toast.on{opacity:1;transform:translate(-50%,0)}
 body.debug #world{outline:2px dashed #fff}body.debug .entrance{background:#f00a;border:1px solid #fff}body.debug #person::after{content:"";position:absolute;left:0;top:0;width:100%;height:100%;background:linear-gradient(90deg,transparent 49.9%,#fff5 50%,transparent 50.1%);pointer-events:none}
-body.orbiting #move,body.orbiting #actions,body.orbiting #label,body.orbiting #progress{display:none}body.orbiting #hint{padding:.3em .9em;font-size:12px;top:max(8px,env(safe-area-inset-top));bottom:auto}body.orbiting .toast{top:max(54px,calc(env(safe-area-inset-top) + 44px));bottom:auto}
-@media(max-width:700px){#label{top:var(--hud-clear)}body.orbiting #hint{top:auto;bottom:max(var(--larch-bottom),env(safe-area-inset-bottom))}body.orbiting .toast{top:auto;bottom:max(52px,calc(env(safe-area-inset-bottom) + 48px))}#hint{top:auto;bottom:max(var(--larch-bottom),env(safe-area-inset-bottom));left:160px;right:12px;transform:none;white-space:normal;text-align:left;font-size:12px}#progress{top:auto;bottom:max(148px,calc(env(safe-area-inset-bottom) + 142px));right:10px;font-size:12px}#actions{top:auto;bottom:max(154px,calc(env(safe-area-inset-bottom) + 148px));right:10px}.action{font-size:13px}.entrance{width:14%;height:24%}}
+body.orbiting #actions,body.orbiting #label,body.orbiting #progress{display:none}body.orbiting #hint{padding:.3em .9em;font-size:12px;top:max(8px,env(safe-area-inset-top));bottom:auto}body.orbiting .toast{top:max(54px,calc(env(safe-area-inset-top) + 44px));bottom:auto}
+@media(max-width:700px){#label{top:var(--hud-clear)}body.orbiting #hint{top:auto;bottom:max(var(--larch-bottom),env(safe-area-inset-bottom))}body.orbiting .toast{top:auto;bottom:max(52px,calc(env(safe-area-inset-bottom) + 48px))}#hint{top:auto;bottom:max(var(--larch-bottom),env(safe-area-inset-bottom));left:120px;right:12px;transform:none;white-space:normal;text-align:left;font-size:12px}#progress{top:auto;bottom:max(148px,calc(env(safe-area-inset-bottom) + 142px));right:10px;font-size:12px}#actions{top:auto;bottom:max(154px,calc(env(safe-area-inset-bottom) + 148px));right:10px}.action{font-size:13px}.entrance{width:14%;height:24%}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 </style>
 <link rel="stylesheet" href="../../../studio_web/free_affinity.css">
@@ -603,7 +602,6 @@ body.orbiting #move,body.orbiting #actions,body.orbiting #label,body.orbiting #p
 </main>
 <div id="label">繪本小島</div><div id="hint">方向鍵移動，也可以點地面、入口或物件走過去</div><div id="progress"></div>
 <div id="actions"><button id="zukan" class="action" type="button">圖鑑 0／13</button><button id="plants" class="action" type="button">植物 0／11</button><button id="plant-tree" class="action" type="button" hidden>一起種小樹</button><button id="dolphin" class="action" type="button" hidden>騎海豚繞島</button><button id="boat" class="action" type="button" hidden>坐船繞島看鯨魚</button><button id="dive" class="action" type="button" hidden>下潛</button></div>
-<div id="move" aria-label="手機方向操作"><button class="move" data-dir="-1" type="button" aria-label="向左移動">←</button><button class="move" data-dir="1" type="button" aria-label="向右移動">→</button></div>
 <div id="dialog" role="button" tabindex="0" aria-label="收起回憶，點一下或按 Enter"><div class="paper"><b id="dialog-title"></b><p id="dialog-text"></p><small>點一下收起</small></div></div>
 <script src="island_bridge.js"></script>
 <script src="../../../studio_web/studio_storage.js"></script>

@@ -1,6 +1,7 @@
+import { createJoystick, movementKeys } from './movement_input.mjs';
 // 海灘「下潛」直向海底長畫的玩法（dive.html）。規格：真結局/設計.md「3D 玩法的繪本版演法」第 3 項；劇本 第四章.md 691、694 行、真結局.md 156 行；做法與紀錄 dive_plan.md。
 // 自己一支檔，不改 flat_engine.js；捲動跟天燈長畫共用 vscroll.js，音效用 sfx.js 既有的聲音（不新增）。
-//   按住往下潛、放開慢慢浮回水面（越深浮得越快一點），左右可小幅移動；沒有氧氣條、不會失敗。
+//   手機用搖桿游動。滑鼠按住往下潛，放開慢慢浮回水面。
 //   小魚群（淺層）：點了散開再聚回來；按「呼喚」附近的魚群游到她身邊。
 //   水母（中層）：點了發光。第四章只潛到這一層。
 //   真結局才到最底：海龜（點了游過來讓她搭一段）、灰珊瑚（靠近按「上色」塗回顏色）、回憶捲軸第 6 張（靠近撿起，第六章　茶語）。
@@ -106,7 +107,6 @@ async function boot() {
   }
   art.append(tea.el);   // 茶語畫在最上面
   layout(); addEventListener('resize', layout);
-  if (matchMedia('(pointer: coarse)').matches) hint.textContent = '按住下潛，放開上浮。點珊瑚或捲軸就會游過去';   // 手機沒有方向鍵
   follow(cam, W, H, S.x - cam.Vw / 2, S.y - cam.Vh * 0.42, 0);
   render(performance.now() / 1000);
   PageLoading.shown.then(() => {
@@ -124,8 +124,8 @@ function place(el, x, y, w, h, extra = '') { el.style.transform = `translate3d($
 function tag(text, fn) { const b = document.createElement('button'); b.type = 'button'; b.className = 'tag'; b.textContent = text; b.hidden = true; b.addEventListener('pointerdown', e => { e.stopPropagation(); }); b.addEventListener('click', e => { e.stopPropagation(); swimTarget = null; fn(); }); art.append(b); return b; }
 function layout() { fit(cam, W, H, stage.clientWidth || innerWidth, stage.clientHeight || innerHeight, 900); }
 function toast(t) { toastEl.textContent = t; toastEl.classList.add('on'); clearTimeout(toastEl._t); toastEl._t = setTimeout(() => toastEl.classList.remove('on'), 2200); }
-function showScroll(title, text) { swimTarget = null; $('dialog-title').textContent = title; $('dialog-text').textContent = text; dialog.classList.add('on'); S.dialog = true; S.held = false; }
-function closeScroll() { dialog.classList.remove('on'); S.dialog = false; }
+function showScroll(title, text) { swimTarget = null; $('dialog-title').textContent = title; $('dialog-text').textContent = text; dialog.classList.add('on'); S.dialog = true; S.held = false; joystick.update(); }
+function closeScroll() { dialog.classList.remove('on'); S.dialog = false; joystick.update(); }
 dialog.addEventListener('click', closeScroll);
 function note(x, y) { const im = new Image(); im.className = 'note'; im.src = IMG.notes[Math.floor(Math.random() * IMG.notes.length)]; im.alt = ''; im.style.left = x + 'px'; im.style.top = y + 'px'; im.style.setProperty('--dx', rnd(-30, 30) + 'px'); art.append(im); setTimeout(() => im.remove(), 2000); }
 function bubble(x, y, r = rnd(6, 13)) { if (STILL) return; const b = document.createElement('i'); b.className = 'bub'; Object.assign(b.style, { left: (x - r) + 'px', top: (y - r) + 'px', width: 2 * r + 'px', height: 2 * r + 'px' }); b.style.setProperty('--dx', rnd(-24, 24) + 'px'); b.style.setProperty('--dy', -rnd(120, 220) + 'px'); b.style.setProperty('--t', rnd(1.6, 2.6) + 's'); art.append(b); setTimeout(() => b.remove(), 2700); }
@@ -138,7 +138,17 @@ function saw(kind) { if (!zk) return; zk.saw(kind); S.seen = DIVE_KINDS.filter(k
 
 // ── 操作 ──
 let swimTarget = null;
-let keyX = 0, keyDown = false, pointerHeld = false, steerX = null, last = 0, surfT = 0;
+let spaceDown = false, mousePointer = null, steerX = null, touchTap = null, last = 0, surfT = 0;
+const keys = movementKeys();
+const joystick = createJoystick({
+  enabled: () => S.state === 'ready' && !S.dialog && !S.riding,
+  onStart: () => { swimTarget = null; keys.clear(); spaceDown = false; mousePointer = null; S.vy = 0; },
+  onTouch: touch => {
+    hint.textContent = touch
+      ? '拖動搖桿游泳，也可以點水中任一處、珊瑚或捲軸游過去'
+      : '方向鍵或 WASD 游泳。滑鼠按住下潛，放開上浮';
+  },
+});
 function artPt(e) { return { x: cam.vx + e.clientX / cam.s, y: cam.vy + e.clientY / cam.s }; }
 function bindInput() {
   addEventListener('pointerdown', e => {
@@ -146,27 +156,33 @@ function bindInput() {
   }, true);
   stage.addEventListener('pointerdown', e => {
     if (!e.isPrimary || e.button !== 0 || S.state !== 'ready' || S.dialog) return;
+    if (e.pointerType === 'touch') {
+      touchTap = { id: e.pointerId, x: e.clientX, y: e.clientY };
+      return;
+    }
     const p = artPt(e); if (tapCreature(p)) return;
-    pointerHeld = true; steerX = p.x; try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+    mousePointer = e.pointerId; steerX = p.x; stage.setPointerCapture(e.pointerId);
   });
-  stage.addEventListener('pointermove', e => { if (pointerHeld) steerX = artPt(e).x; });
-  const up = () => { pointerHeld = false; steerX = null; };
-  stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up); stage.addEventListener('lostpointercapture', up);
+  stage.addEventListener('pointermove', e => { if (mousePointer === e.pointerId) steerX = artPt(e).x; });
+  function endPointer(e) {
+    if (mousePointer === e.pointerId) { mousePointer = null; steerX = null; }
+    if (touchTap?.id !== e.pointerId) return;
+    const moved = Math.hypot(e.clientX - touchTap.x, e.clientY - touchTap.y);
+    touchTap = null;
+    if (e.type !== 'pointerup' || moved >= 14 || S.dialog || S.riding) return;
+    const p = artPt(e);
+    if (!tapCreature(p)) swimTarget = { x: clamp(p.x, ...L.x_range), y: clamp(p.y, L.surface + L.rest, S.limitY) };
+  }
+  for (const event of ['pointerup', 'pointercancel', 'lostpointercapture']) stage.addEventListener(event, endPointer);
   addEventListener('keydown', e => {
     if (S.dialog) { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') { e.preventDefault(); closeScroll(); } return; }
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'W', 's', 'S', 'a', 'A', 'd', 'D', ' '].includes(e.key)) swimTarget = null;
-    if (e.key === ' ' || e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { e.preventDefault(); keyDown = true; }
-    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); keyX = -1; }
-    if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); keyX = 1; }
+    if (keys.press(e)) { joystick.release(); swimTarget = null; }
+    if (e.key === ' ') { e.preventDefault(); swimTarget = null; spaceDown = true; }
     if (e.key === 'c' || e.key === 'C') call();
     if (e.key === 'Enter') { e.preventDefault(); interactNear(); }
   });
-  addEventListener('keyup', e => {
-    if (e.key === ' ' || e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keyDown = false;
-    if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && keyX < 0) keyX = 0;
-    if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && keyX > 0) keyX = 0;
-  });
-  addEventListener('blur', () => { keyDown = pointerHeld = false; keyX = 0; swimTarget = null; });
+  addEventListener('keyup', e => { if (e.key === ' ') spaceDown = false; });
+  addEventListener('blur', () => { spaceDown = false; mousePointer = null; touchTap = null; swimTarget = null; });
   for (const b of [callBtn, upBtn]) b.addEventListener('pointerdown', e => e.stopPropagation());
   callBtn.addEventListener('click', () => { swimTarget = null; call(); }); upBtn.addEventListener('click', () => finish('up'));
 }
@@ -202,6 +218,10 @@ function finishApproach() {
   const target = swimTarget;
   if (!target) return;
   const { object, reach, x, y, interact } = target;
+  if (!object) {
+    if (S.x === x && S.y === y) swimTarget = null;
+    return;
+  }
   if (Math.hypot(S.x - object.x, S.y - object.y) <= reach) {
     swimTarget = null;
     interact();
@@ -238,7 +258,7 @@ function pickScroll() {
   if (Math.hypot(S.x - scroll.x, S.y - scroll.y) > L.scroll.reach) { toast('再靠近一點'); return; }
   S.memory6 = true; S.events.pick++; play('pick');
   const n = (Number(get('memories')) || 0) + 1; setVars({ memory6: 'true', memories: String(n) });
-  scroll.el.remove(); scroll.tag.remove(); scroll = null; S.held = false; pointerHeld = keyDown = false;
+  scroll.el.remove(); scroll.tag.remove(); scroll = null; S.held = false; mousePointer = null; spaceDown = false; keys.clear(); joystick.release();
   showScroll(MEMORY6.title, MEMORY6.text);
 }
 function interactNear() {
@@ -249,17 +269,25 @@ function interactNear() {
 // ── 每一格 ──
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = now / 1000;
+  joystick.update();
   if (S.state === 'ready') step(dt, t);
   render(t);
   if (S.state !== 'done') requestAnimationFrame(frame);
 }
 function step(dt, t) {
   if (S.dialog) { S.vy = 0; follow(cam, W, H, S.x - cam.Vw / 2, S.y - cam.Vh * 0.42, dt, 4); return; }   // 展開捲軸時停在原地
-  const held = !S.riding && (swimTarget ? swimTarget.y > S.y : pointerHeld || keyDown); S.held = held;
-  // 上下：按住往下潛（加速到 330 px／秒），放開慢慢浮上來（110 px／秒起，越深越快一點）
+  const input = joystick.active ? joystick : keys.vector();
+  const mouseDiving = mousePointer !== null;
+  const manualY = spaceDown || mouseDiving ? 1 : input.y;
+  const held = !S.riding && (swimTarget ? swimTarget.y > S.y : manualY > 0); S.held = held;
+  // 搖桿放開即停。桌機保留放開滑鼠後的浮力。
   if (!S.riding) {
-    const want = held ? 330 * FAST : -(110 + 0.06 * (S.y - L.surface)) * FAST;
-    S.vy += (want - S.vy) * (1 - Math.exp(-dt * (held ? 2.4 : 1.6)));
+    if (!swimTarget && !mouseDiving && !spaceDown && (joystick.touch || input.x || input.y)) {
+      S.vy = input.y * 330 * FAST;
+    } else {
+      const want = held ? 330 : -(110 + 0.06 * (S.y - L.surface));
+      S.vy += (want * FAST - S.vy) * (1 - Math.exp(-dt * (held ? 2.4 : 1.6)));
+    }
     const y0 = S.y;
     S.y += S.vy * dt;
     if (swimTarget && (swimTarget.y - y0) * (swimTarget.y - S.y) <= 0) {
@@ -270,8 +298,8 @@ function step(dt, t) {
     if (S.y > S.limitY) { S.y = S.limitY; S.vy = Math.min(0, S.vy); if (S.ch4 && held && !S.limitShown) { S.limitShown = true; S.events.limit++; toast('這次只潛到這裡'); } }
     if (S.ch4 && S.y < S.limitY - 260) S.limitShown = false;
     // 左右：鍵盤，或按住時往手指那邊游
-    let vx = swimTarget ? clamp((swimTarget.x - S.x) * 3, -260, 260) : keyX * 260;
-    if (pointerHeld && steerX !== null && Math.abs(steerX - S.x) > 36) vx = Math.sign(steerX - S.x) * Math.min(260, Math.abs(steerX - S.x) * 2.2);
+    let vx = swimTarget ? clamp((swimTarget.x - S.x) * 3, -260, 260) : input.x * 260;
+    if (mouseDiving && steerX !== null && Math.abs(steerX - S.x) > 36) vx = Math.sign(steerX - S.x) * Math.min(260, Math.abs(steerX - S.x) * 2.2);
     if (swimTarget) {
       const step = Math.max(1, Math.abs(vx)) * dt * FAST;
       S.x = stepToward(S.x, swimTarget.x, step);
@@ -284,7 +312,7 @@ function step(dt, t) {
   // 浮回水面：潛下去過之後，回到水面放開停 1.2 秒就上岸
   const atTop = S.y <= L.surface + L.rest + 2;
   upBtn.hidden = !atTop;
-  if (atTop && S.maxDepth > 320 && !held && !S.dialog && !swimTarget) { surfT += dt; if (surfT > 1.2) finish('surfaced'); } else surfT = 0;
+  if (atTop && S.maxDepth > 320 && !held && !joystick.active && !S.dialog && !swimTarget) { surfT += dt; if (surfT > 1.2) finish('surfaced'); } else surfT = 0;
   // 氣泡
   if ((held || Math.abs(S.vy) > 80) && Math.random() < dt * 5) bubble(S.x + tea.face * 40, S.y - tea.h * 0.35);
   // 魚群
@@ -312,7 +340,7 @@ function turtleStep(dt, t) {
   else if (T.mode === 'come') {   // 游到她下面（她的腳下一點點）
     T.t += dt * FAST; const tx = clamp(S.x, R.x0, R.x1), ty = clamp(S.y + tea.h * 0.45, R.y - 700, R.y + 60); const k = 1 - Math.exp(-dt * 2.2 * FAST);
     T.face = tx > T.x ? 1 : -1; T.x += (tx - T.x) * k; T.y += (ty - T.y) * k;
-    if (Math.hypot(tx - T.x, ty - T.y) < 12 || T.t > 3) { T.mode = 'ride'; T.t = 0; S.riding = true; swimTarget = null; S.vy = 0; pointerHeld = keyDown = false; T.rx0 = T.x; T.dir = T.x < W / 2 ? 1 : -1; play('splash'); }
+    if (Math.hypot(tx - T.x, ty - T.y) < 12 || T.t > 3) { T.mode = 'ride'; T.t = 0; S.riding = true; swimTarget = null; S.vy = 0; mousePointer = null; spaceDown = false; keys.clear(); joystick.release(); T.rx0 = T.x; T.dir = T.x < W / 2 ? 1 : -1; play('splash'); }
   } else if (T.mode === 'ride') {   // 載著她游一段：往一邊游過去、繞回來，沿路冒泡
     T.t += dt * FAST; const k = clamp(T.t / 5, 0, 1), e = 0.5 - 0.5 * Math.cos(Math.PI * 2 * k);
     T.x = clamp(T.rx0 + T.dir * 420 * e, R.x0 - 120, R.x1 + 120); T.face = k < 0.5 ? T.dir : -T.dir; T.y = Math.min(T.y, R.y) + Math.sin(t * 2) * 0.6;
