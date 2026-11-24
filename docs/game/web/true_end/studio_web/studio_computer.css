@@ -406,7 +406,7 @@
 .ming-computer-shell .win[data-ming-window="files"] { --app-accent: #75543d; }
 .ming-computer-shell .win[data-ming-window="favorites"] { --app-accent: #805438; }
 .ming-computer-shell .wbar {
-  background: var(--studio-fiber), #e9dabb;
+  background: var(--studio-fiber), var(--ming-accent, #e9dabb);
   border-bottom: 1px solid #8b735357;
 }
 .ming-computer-shell .wbar h4 {

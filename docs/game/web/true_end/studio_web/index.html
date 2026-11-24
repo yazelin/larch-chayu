@@ -605,17 +605,17 @@ html.studio-real-chat #panel:focus{outline:none}
 @media(max-width:1040px){
   /* 保留 Larch 底部控制列，再留 56px 的「繼續」鈕和間距。 */
   html.studio-real-chat{--real-chat-bottom:calc(max(var(--larch-bottom),env(safe-area-inset-bottom)) + 72px)}
-  html.studio-real-chat #panel[data-design]{top:auto;bottom:var(--real-chat-bottom);max-height:calc(100dvh - var(--real-chat-bottom) - 16px);transform:translateX(-50%)}
+  html.studio-real-chat #panel[data-design]:not(.ming-os-panel){top:auto;bottom:var(--real-chat-bottom);max-height:calc(100dvh - var(--real-chat-bottom) - 16px);transform:translateX(-50%)}
 }
 @media(max-width:720px){
-  html.studio-real-chat #panel[data-design]{left:8px;right:8px;width:auto;transform:none}
+  html.studio-real-chat #panel[data-design]:not(.ming-os-panel){left:8px;right:8px;width:auto;transform:none}
 }
 @media (max-width:600px) and (orientation:portrait){
-  html.studio-real-chat #panel[data-design] .sf-chat{height:min(43dvh,420px)}
+  html.studio-real-chat #panel[data-design]:not(.ming-os-panel) .sf-chat{height:min(43dvh,420px)}
 }
 @media (min-width:601px) and (max-width:1040px) and (max-height:500px){
-  html.studio-real-chat #panel[data-design]{inset:var(--larch-top-left) 136px auto 16px;width:auto;max-height:calc(100dvh - var(--larch-top-left) - 16px);transform:none}
-  html.studio-real-chat #panel .sf-chat{height:45dvh;min-height:0}
+  html.studio-real-chat #panel[data-design]:not(.ming-os-panel){inset:var(--larch-top-left) 136px auto 16px;width:auto;max-height:calc(100dvh - var(--larch-top-left) - 16px);transform:none}
+  html.studio-real-chat #panel:not(.ming-os-panel) .sf-chat{height:45dvh;min-height:0}
 }
 #scroll-stage{position:fixed;inset:0;overflow:hidden;background:#28232a;touch-action:none;user-select:none;-webkit-user-select:none}
 #ring-track{position:absolute;top:0;left:0;height:100%;will-change:transform}

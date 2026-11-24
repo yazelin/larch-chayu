@@ -1,15 +1,15 @@
 {
   "version": 1,
   "pagesBase": "https://yazelin.github.io/larch-chayu/game/",
-  "totalFiles": 903,
-  "totalBytes": 89727676,
+  "totalFiles": 904,
+  "totalBytes": 89738745,
   "bytesByCategory": {
     "bgm": 25662250,
     "cg": 3081222,
     "img": 203466,
     "minigames": 11052296,
     "mv": 15206418,
-    "web": 34522024
+    "web": 34533093
   },
   "largestFile": {
     "file": "mv/media/boring_v2.mp3",
@@ -18,7 +18,7 @@
     "sha256": "d6e99b0176da8186897b6b8a7d37cd99f72a8c677907bcbe9413cac56bcf7059",
     "source": "新版/mv/media/boring_v2.mp3"
   },
-  "webDependencyFiles": 903,
+  "webDependencyFiles": 904,
   "cgNameMap": [
     {
       "file": "cg/ch1/ch1_cg_079.webp",
@@ -4544,6 +4544,13 @@
       "source": "真結局/studio_web/avatars/tea.webp"
     },
     {
+      "file": "web/true_end/studio_web/computer_actions.mjs",
+      "category": "web",
+      "bytes": 1769,
+      "sha256": "7fa6beecbf8afcc426b2989cc94e928a65bbc2cebdb0ac520127102f0dda1789",
+      "source": "真結局/studio_web/computer_actions.mjs"
+    },
+    {
       "file": "web/true_end/studio_web/fonts/OFL.txt",
       "category": "web",
       "bytes": 4387,
@@ -4553,8 +4560,8 @@
     {
       "file": "web/true_end/studio_web/fonts/iansui-studio.woff2",
       "category": "web",
-      "bytes": 425200,
-      "sha256": "0fe28c109e3fb8c240b6a8dba37a05b34bf838abf9ea240e8118b209e025158e",
+      "bytes": 427412,
+      "sha256": "53c67e9357209a47e82e86e2c9e411fc51b0e93b2d65d6b26931ed28c8eb9f48",
       "source": "真結局/studio_web/fonts/iansui-studio.woff2"
     },
     {
@@ -5834,8 +5841,8 @@
     {
       "file": "web/true_end/studio_web/index.html",
       "category": "web",
-      "bytes": 141132,
-      "sha256": "fccec4b4a9f2ea0d0da7c0f42e96018e4ae076c6f82142260895ee255cdee3e3",
+      "bytes": 141232,
+      "sha256": "819b2fa8dbead55e18c4be50eaf13595093696a9e7fd6e9a028e792cd3a0c245",
       "source": "真結局/studio_web/index.html"
     },
     {
@@ -5876,8 +5883,8 @@
     {
       "file": "web/true_end/studio_web/story_time.mjs",
       "category": "web",
-      "bytes": 3744,
-      "sha256": "3485e4670c6adf48951f411fc5af42527419589a16081dc876cb12130d5c2170",
+      "bytes": 7865,
+      "sha256": "9f9bf7fff7218ad4bc258139743a4734714d196946056d6e888cc41f8b46de8e",
       "source": "真結局/studio_web/story_time.mjs"
     },
     {
@@ -5918,15 +5925,15 @@
     {
       "file": "web/true_end/studio_web/studio_computer.css",
       "category": "web",
-      "bytes": 45842,
-      "sha256": "df64e18f297276faaee12150b09218ecc11efd433d42f320e0f56848296cbd50",
+      "bytes": 45862,
+      "sha256": "b7f194738ba1b9aecca3a1d947d17dd8915d5db81ae7d34d68dcfc6c5d2c7dfa",
       "source": "真結局/studio_web/studio_computer.css"
     },
     {
       "file": "web/true_end/studio_web/studio_core.mjs",
       "category": "web",
-      "bytes": 23480,
-      "sha256": "228c8e2042b14dc3f4de748999e2ac048b3273737b3866b3fb9b607bb54a8ec2",
+      "bytes": 23355,
+      "sha256": "8ebf1a2f6d8649e8855e14f51d96a0019b9b8309a0bb25589a8fa389c8638810",
       "source": "真結局/studio_web/studio_core.mjs"
     },
     {
@@ -5967,8 +5974,8 @@
     {
       "file": "web/true_end/studio_web/studio_features.mjs",
       "category": "web",
-      "bytes": 190543,
-      "sha256": "04f45d6afd3c4c0b4848c5eadc707847cd551b2c73b25e4c51cdfc0c072067b7",
+      "bytes": 193515,
+      "sha256": "6a8a018a80afc4414f10ed475258de429170b69610d8a780098fefcc89690629",
       "source": "真結局/studio_web/studio_features.mjs"
     },
     {

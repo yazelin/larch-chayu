@@ -1,4 +1,5 @@
 import { storySummary, storyTime } from './story_time.mjs';
+import { WALLPAPERS, COLORS, POSITIONS } from './computer_actions.mjs';
 
 export const CHARACTERS = {
   // avatar：聊天用的頭像，只有頭（avatars/make_avatars.py 從定稿 Q 版裁的；整張全身圖塞進圓框會切到頭頂、帶到腰）
@@ -55,8 +56,8 @@ export function readGameState(search, variables) {
     return vars[key] === true || vars[key] === 1 || vars[key] === 'true' || vars[key] === '1';
   });
   const trialKnown = day >= 18 || (day >= 17 && explicitTrialKnowledge) || query.get('trial') === '1';
-  const summary = storySummary(day, trialKnown);
   const { chapter } = storyTime(day, vars.studioChapter || query.get('chapter'));
+  const summary = storySummary(day, trialKnown, chapter);
   const rawSeat = String(vars.seat !== undefined ? vars.seat : (query.get('seat') || ''));
   const seat = ['a', 'b', 'c'].includes(rawSeat) ? rawSeat : '';
   const clearedTrue = [true, 1, 'true', '1'].includes(vars.clearedTrue ?? query.get('clearedTrue'));
@@ -122,10 +123,6 @@ export const DEFAULT_SETTINGS = {
     notes: { enabled: false, position: 'right' }
   }
 };
-
-const WALLPAPERS = ['moonlight', 'north', 'east', 'south', 'west'];
-const COLORS = ['#eadfda', '#e8d9b8', '#d8dfed', '#d9e2c2', '#eed7dc', '#f3ead9'];
-const POSITIONS = ['left', 'right', 'top', 'bottom'];
 
 export function sanitizeSettings(value) {
   const input = value && typeof value === 'object' ? value : {};

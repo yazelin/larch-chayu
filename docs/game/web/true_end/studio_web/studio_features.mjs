@@ -2,7 +2,8 @@ import { TODO_ITEMS } from './studio_points2_data.mjs';
 import { CHEN_ART, SKY_DIARY } from './studio_collection_data.mjs';
 import { preparePanel } from './studio_panel.mjs';
 import { affinityChapter, AFFINITY_MAX, createFreeAffinity } from './free_affinity.mjs';
-import { storyDayNote, storyTime } from './story_time.mjs';
+import { storyDayNote, storyTime, storyProduction } from './story_time.mjs';
+import { computerAction, applySettingsPatch } from './computer_actions.mjs';
 import { renderDraw, taipeiDay, LOOK_DAILY_LIMIT } from './studio_draw.mjs';
 import { mountAlbum, unlockedIds, ALBUM_TRACKS, HEADPHONE_TRACKS } from './studio_album.mjs';
 import { waitingIndicator, chatStages, lookStages, jobStages, CHARACTER_STAGE_COLORS } from './studio_wait.mjs';
@@ -94,6 +95,7 @@ function closeFeature() {
 }
 
 function exitMingComputer() {
+  if (realChat) { openRealChat(returnFocus, 'ming'); return; }
   closeButton.click();
 }
 
@@ -329,7 +331,7 @@ const memoryMigration = (async function migrateSharedMemory() {
 
 async function workerContext(conversation, scene = game) {
   await memoryMigration;
-  return {
+  const context = {
     day: scene.day,
     chapter: scene.chapter,
     plotSummary: scene.summary,
@@ -339,6 +341,20 @@ async function workerContext(conversation, scene = game) {
     tier: studioTier(),
     memory: await StudioDB.get(memoryKey(conversation)) || ''
   };
+  if (conversation === 'ming' || conversation === 'group') {
+    const flags = { ...Object.fromEntries(query), ...larchVariables };
+    const progress = await readProgress(scene);
+    const personal = await StudioDB.get('progressUserTasks').catch(() => []);
+    const tasks = progress.days.concat(Array.isArray(personal) ? personal : []);
+    context.productionProgress = {
+      ...storyProduction(scene.day, scene.chapter, flags, scene.trialKnown),
+      replayGames: replayGames(scene).map(entry => entry.name),
+      todayTasks: tasks.filter(item => Number(item?.day) === scene.day).map(item => ({
+        task: item.task || item.title, status: item.status
+      })).filter(item => item.task && item.task !== '待安排')
+    };
+  }
+  return context;
 }
 
 // 配對共用 HUD 存在遊戲存檔的憑證；只把遊戲狀態白名單欄位送到 Worker。
@@ -583,6 +599,7 @@ async function renderChat(character, group, root) {
     send.disabled = true;
     status.textContent = '';
     const scene = game;
+    const mingDirect = !group && character === 'ming';
     const phoneStory = Object.fromEntries(phoneStoryKeys.map(key => [key, larchVariables[key]]));
     const timing = storyTime(scene.day, scene.chapter);
     const userMessage = { role: 'user', content: content, ts: Date.now(), ...timing };
@@ -599,6 +616,10 @@ async function renderChat(character, group, root) {
         mode: 'chat', character: character || 'group', group: !!group, phoneStory: phoneStory,
         messages: history.slice(-16).map(function (message) { return messageLine(message, group); })
       });
+      if (mingDirect) payload.computer = {
+        panels: availableComputerPanels(scene),
+        settings: sanitizeSettings(await StudioDB.get('computerSettings').catch(() => null))
+      };
       const result = await callWorker('/chat', payload);
       const responses = group ? parseGroupReply(result.replies || result.reply || result.json) : null;
       const replyItems = group
@@ -624,6 +645,11 @@ async function renderChat(character, group, root) {
       }
       await StudioDB.set(sessionKey, history);
       status.textContent = '';
+      if (mingDirect && result.action) {
+        await runComputerChatAction(result.action, chat, scene).catch(function (error) {
+          status.textContent = error.message;
+        });
+      }
       summarizeIfNeeded(group ? 'group' : character).catch(function () { status.textContent = '聊天已儲存；記憶摘要稍後再試。'; });
     } catch (error) {
       if (error.code === 'TRIAL_CHAT_LIMIT') { status.textContent = ''; log.appendChild(trialLineBubble(error.code, group ? 'ming' : character)); return; }
@@ -674,7 +700,7 @@ function setupTabs(tabs, render, initialId, label = '工作室活動') {
   return choose(current);
 }
 
-function openRealChat(focus) {
+function openRealChat(focus, initialTab = 'group') {
   panelOpen('開放聊天', focus, 'group');
   clearBody();
   addContext(panelBody);
@@ -686,7 +712,7 @@ function openRealChat(focus) {
     if (group) delete panel.dataset.character;
     else panel.dataset.character = id;
     return renderChat(group ? null : id, group, content);
-  }, 'group', '聊天對象');
+  }, initialTab, '聊天對象');
 }
 
 function openCharacter(character, focus, initialTab, options) {
@@ -1646,7 +1672,7 @@ function osBar() {
   return bar;
 }
 
-async function openMingComputer(focus, initialTab) {
+async function openMingComputer(focus, initialTab, showChat = false) {
   panelOpen('明的電腦', focus, 'computer');
   clearBody();
   const pending = el('div');
@@ -1709,6 +1735,7 @@ async function openMingComputer(focus, initialTab) {
   state.clockTimer = window.setInterval(function () { updateMingClock(state); }, 15000);
   renderMingDesktopWidgets(state).catch(function () {});
   resumeMingGameJobs();
+  if (showChat) openMingApp(state, 'chat');
   if (initialTab) openMingApp(state, initialTab);
   else if (!$('.sf-help-layer')) shell.querySelector('.ming-exit').focus({ preventScroll: true });
 }
@@ -1751,6 +1778,28 @@ const MING_APPS = [
 
 function mingAppAvailable(app) { return !app.postgame || game.clearedTrue || game.day > 30; }
 function mingApp(id) { return MING_APPS.find(function (app) { return app.id === id && mingAppAvailable(app); }); }
+
+const COMPUTER_APPS = { progress: 'progress', replay: 'story-games', newgame: 'games' };
+
+function availableComputerPanels(scene) {
+  return Object.keys(COMPUTER_APPS).filter(key => mingApp(COMPUTER_APPS[key])
+    && (key !== 'replay' || replayGames(scene).length > 0));
+}
+
+async function runComputerChatAction(value, root, scene) {
+  const action = computerAction(value);
+  if (!action || game.day !== scene.day || game.chapter !== scene.chapter) return;
+  if (action.type === 'settings') {
+    const current = sanitizeSettings(await StudioDB.get('computerSettings'));
+    await saveSettings(applySettingsPatch(current, action.settings));
+    if (!mingComputerState && panel.classList.contains('on') && root.isConnected) await openMingComputer(returnFocus, 'chat');
+    return;
+  }
+  if (!panel.classList.contains('on') || !root.isConnected || !availableComputerPanels(game).includes(action.panel)) return;
+  const id = COMPUTER_APPS[action.panel];
+  if (mingComputerState) openMingApp(mingComputerState, id);
+  else await openMingComputer(returnFocus, id, true);
+}
 
 let mingLogoSequence = 0;
 // 月蝕幾何照新版/canon_new/props/ming_os_logo.svg 描繪成 inline SVG。
@@ -2512,6 +2561,10 @@ const MINIGAMES = [
   { name: '齒輪', href: '../../../minigames/gears.html', chapter: 5, note: '第五章，時之國。' },
   { name: '好感三角', href: '../../../minigames/triangle.html', chapter: 7, note: '第七章，最後一幕。' }
 ];
+function replayGames(scene) {
+  return MINIGAMES.filter(entry => scene.chapter >= entry.chapter);
+}
+
 function openReplay(entry) {
   const old = document.querySelector('.sf-replay'); if (old) old.remove();
   const layer = el('div', 'sf-replay');
@@ -2539,8 +2592,9 @@ function openReplay(entry) {
 
 function renderGames(root) {
   const list = el('div', 'sf-stack');
+  const playable = replayGames(game);
   MINIGAMES.forEach(function (entry) {
-    const open = game.chapter >= entry.chapter;
+    const open = playable.includes(entry);
     const row = el('article', 'sf-card sf-game' + (open ? '' : ' locked'));
     row.dataset.gameName = entry.name;
     row.append(el('h3', '', entry.name), el('p', '', open ? entry.note : '第 ' + entry.chapter + ' 章玩過之後才能重玩。'));
@@ -2692,14 +2746,14 @@ function statusSelect(value) {
   return select;
 }
 
-async function readProgress() {
+async function readProgress(scene = game) {
   const saved = await StudioDB.get('progressTable').catch(() => null);
   const progress = sanitizeProgress(saved);
   if (progress.days.some(item => item.task !== '待安排')) return progress;
   const overrides = await StudioDB.get('progressStoryOverrides').catch(() => null) || {};
-  const days = TODO_ITEMS.filter(item => (item.show || 3) <= game.day && item.d <= game.day + 3).map(item => {
-    const late = item.red && game.day >= item.red[0] && game.day <= item.red[1];
-    const done = (game.trialEnded && item.d >= 30) || game.day > (item.red ? item.red[1] : item.d);
+  const days = TODO_ITEMS.filter(item => (item.show || 3) <= scene.day && item.d <= scene.day + 3).map(item => {
+    const late = item.red && scene.day >= item.red[0] && scene.day <= item.red[1];
+    const done = (scene.trialEnded && item.d >= 30) || scene.day > (item.red ? item.red[1] : item.d);
     const status = done ? 'done' : late ? 'late' : 'planned';
     return { day: item.d, task: item.t, status, ...overrides[item.id], id: item.id };
   });
@@ -2936,6 +2990,10 @@ async function renderSettings(root) {
   const json = el('textarea', 'sf-textarea'); json.value = JSON.stringify(settings, null, 2); json.setAttribute('aria-label', '明的電腦畫面設定 JSON');
   const jsonLabel = el('label', 'sf-label', '設定 JSON'); jsonLabel.appendChild(json); form.appendChild(jsonLabel);
   const status = el('p', 'sf-status');
+  root.addEventListener('ming-settings-saved', function (event) {
+    settings = sanitizeSettings(event.detail);
+    refresh();
+  });
   const controls = el('div', 'sf-row');
   const apply = button('套用設定 JSON', async function () {
     try { settings = sanitizeSettings(JSON.parse(json.value)); await saveSettings(settings); status.textContent = '畫面設定已套用。'; refresh(); }
@@ -3033,6 +3091,8 @@ async function saveSettings(value) {
     updateMingWallpaper(mingComputerState, safe.wallpaper);
     buildMingWidgets(mingComputerState);
     renderMingDesktopWidgets(mingComputerState).catch(function () {});
+    mingComputerState.windows.get('settings')?.querySelector('.ming-window-content')
+      ?.dispatchEvent(new CustomEvent('ming-settings-saved', { detail: safe }));
   }
   return safe;
 }
