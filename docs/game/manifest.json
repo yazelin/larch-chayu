@@ -1026,7 +1026,7 @@
       "file": "mv/credits.html",
       "category": "mv",
       "bytes": 6994,
-      "sha256": "2e2efdcd49cfb8dd8eff64fcd4d7e4f3c064f886e2264dd08663a276509d099c",
+      "sha256": "fd399c5ffc4d76c117cc06a48ee10d482d5631c93ef411656986924926a86be0",
       "source": "新版/mv/credits.html"
     },
     {
@@ -6024,7 +6024,7 @@
       "file": "web/true_end/studio_web/studio_points2_data.mjs",
       "category": "web",
       "bytes": 3959,
-      "sha256": "a0e5de6ccb8035d80ad9d72cdda2f5beb0efc26aea711109bb24b0b30f7ae11e",
+      "sha256": "82ee3bac4a13041a1e1f2998748af2177fe47e86b0f12ca4b85b33fb8bef3b79",
       "source": "真結局/studio_web/studio_points2_data.mjs"
     },
     {
