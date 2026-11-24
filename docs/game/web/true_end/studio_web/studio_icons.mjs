@@ -11,6 +11,7 @@
 const RULES = [
   // 工作室地圖
   { sel: '#panel-close', i: 'close', m: 'icon', tip: '關閉' },
+  { sel: '#panel-back', i: 'prev', m: 'label', tip: '返回工作室' },
   { sel: '#turn-left', i: 'prev', m: 'icon', tip: '轉身向左' },
   { sel: '#turn-right', i: 'next', m: 'icon', tip: '轉身向右' },
   { sel: '#table-entry', i: 'table', m: 'icon', tip: '長桌：四人群聊' },

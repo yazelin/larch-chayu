@@ -2,14 +2,14 @@
   "version": 1,
   "pagesBase": "https://yazelin.github.io/larch-chayu/game/",
   "totalFiles": 904,
-  "totalBytes": 89741925,
+  "totalBytes": 89744853,
   "bytesByCategory": {
     "bgm": 25662250,
     "cg": 3081222,
     "img": 203466,
     "minigames": 11052296,
     "mv": 15206418,
-    "web": 34536273
+    "web": 34539201
   },
   "largestFile": {
     "file": "mv/media/boring_v2.mp3",
@@ -4560,8 +4560,8 @@
     {
       "file": "web/true_end/studio_web/fonts/iansui-studio.woff2",
       "category": "web",
-      "bytes": 427412,
-      "sha256": "53c67e9357209a47e82e86e2c9e411fc51b0e93b2d65d6b26931ed28c8eb9f48",
+      "bytes": 427940,
+      "sha256": "2b2fb30a4adabc00f54a17a5fe9fa22d7f21bbb52a989c1c9986b67d2b206688",
       "source": "真結局/studio_web/fonts/iansui-studio.woff2"
     },
     {
@@ -5841,8 +5841,8 @@
     {
       "file": "web/true_end/studio_web/index.html",
       "category": "web",
-      "bytes": 141232,
-      "sha256": "819b2fa8dbead55e18c4be50eaf13595093696a9e7fd6e9a028e792cd3a0c245",
+      "bytes": 141437,
+      "sha256": "a1b1c4e5340fa11795048dea18fc9ca7892055169b883a884b4cd36dee9dece0",
       "source": "真結局/studio_web/index.html"
     },
     {
@@ -5988,8 +5988,8 @@
     {
       "file": "web/true_end/studio_web/studio_icons.mjs",
       "category": "web",
-      "bytes": 17604,
-      "sha256": "c6b5d2ae5afaa0edeec953f056354eb879d88afaef630ca4f277e4d24f2a10c2",
+      "bytes": 17677,
+      "sha256": "41cb257baa53df9b8bba61d62709f630c1bb59c81ebb37308db44c7cd92bbfe7",
       "source": "真結局/studio_web/studio_icons.mjs"
     },
     {
@@ -6002,15 +6002,15 @@
     {
       "file": "web/true_end/studio_web/studio_paper.css",
       "category": "web",
-      "bytes": 44553,
-      "sha256": "3b6a010a95322c399eb914cad420b59cd8105869f41a2f5fa6e529dba377ce15",
+      "bytes": 46556,
+      "sha256": "6296c62c92ee7c5a472812fae006f6ba999b915a02d562c3af06154ed49b3ba5",
       "source": "真結局/studio_web/studio_paper.css"
     },
     {
       "file": "web/true_end/studio_web/studio_points.mjs",
       "category": "web",
-      "bytes": 29282,
-      "sha256": "2055f46525da5b53ff5021e4e613e7d61d05e11332299c4d5f312a9c1bcd0928",
+      "bytes": 29401,
+      "sha256": "23e69f2eada9c1bd695060c214c51c608b9cc0b6ffec26b36513c74d7a5c11b5",
       "source": "真結局/studio_web/studio_points.mjs"
     },
     {

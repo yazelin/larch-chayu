@@ -734,7 +734,7 @@ body.debug .hotspot::before{content:attr(data-mark);position:absolute;top:2px;le
 <div id="studio-unlock-status" role="status"></div>
 <div id="scrim"></div>
 <section id="panel" tabindex="-1" inert role="dialog" aria-modal="true" aria-labelledby="panel-title" aria-hidden="true">
-  <header class="panel-head"><h1 id="panel-title"></h1><button id="panel-close" type="button" aria-label="關閉視窗">×</button></header>
+  <header class="panel-head"><button id="panel-back" type="button">返回</button><h1 id="panel-title"></h1><button id="panel-close" type="button" aria-label="關閉視窗">×</button></header>
   <div id="panel-body"></div>
 </section>
 <script type="module">
@@ -1010,6 +1010,7 @@ document.getElementById('decor-toggle').addEventListener('click',function(){
   showPanel('自訂佈置','工作室之後可以換上不同的佈置。','壁紙、地板、窗簾、地毯與燈，以及小物件和劇情禮物。',this);
 });
 document.getElementById('panel-close').addEventListener('click',closePanel);
+document.getElementById('panel-back').addEventListener('click',closePanel);
 document.getElementById('scrim').addEventListener('click',closePanel);
 window.addEventListener('keydown',function(event){
   if(event.key==='Escape'&&!event.isComposing){closePanel();return;}
@@ -1405,6 +1406,7 @@ timeButton.addEventListener('click',function(){state.night=!state.night;updateLa
   });
 });
 closeButton.addEventListener('click',closePanel);
+document.getElementById('panel-back').addEventListener('click',closePanel);
 scrim.addEventListener('click',closePanel);
 var debug=QUERY.get('debug')==='1';if(debug)document.body.classList.add('debug');
 function start(){

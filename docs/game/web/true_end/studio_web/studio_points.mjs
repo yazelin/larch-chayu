@@ -25,9 +25,9 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
 .sp-door-img{display:block;width:100%;height:auto}
 .sp-go{appearance:none;border:2px solid #8b6a45;border-radius:999px;background:#f6e2b8;color:#4a3a30;font:inherit;font-weight:700;padding:8px 22px;cursor:pointer}
 .sp-go:disabled{opacity:.55;cursor:default}
-.sp-keys-scroll{margin:8px auto 4px;width:100%;overflow-x:auto;overscroll-behavior-x:contain;padding-top:16px}.sp-key.octave-start::before{content:attr(data-octave);position:absolute;top:-16px;left:2px;font:600 11px/1 inherit;color:#f3e3c8;white-space:nowrap}
+.sp-keys-scroll{margin:8px auto 4px;width:100%;overflow-x:auto;overscroll-behavior-x:contain;padding-top:16px}.sp-key.octave-start::before{content:attr(data-octave);position:absolute;top:-16px;left:2px;font:600 11px/1 var(--studio-hand);color:#f3e3c8;white-space:nowrap}
 .sp-keys{position:relative;display:flex;justify-content:center;width:100%;height:110px;user-select:none;touch-action:none}
-.sp-key{position:relative;flex:1 1 0;border:2px solid #6d5a4b;border-left-width:1px;border-right-width:1px;border-radius:0 0 7px 7px;background:linear-gradient(#fffdf8,#f1e7d6);cursor:pointer;padding:0;font:600 11px/1 inherit;color:#9a8478;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px}
+.sp-key{position:relative;flex:1 1 0;border:2px solid #6d5a4b;border-left-width:1px;border-right-width:1px;border-radius:0 0 7px 7px;background:linear-gradient(#fffdf8,#f1e7d6);cursor:pointer;padding:0;font:600 11px/1 var(--studio-hand);color:#9a8478;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px}
 .sp-key.black{position:absolute;top:0;z-index:2;width:8%;height:60%;flex:none;border-radius:0 0 5px 5px;background:linear-gradient(#5a4a40,#2f2622);color:#d8c9b6;border-color:#2f2622}
 .sp-key.down{background:#f3cf8c}.sp-key.black.down{background:#8b6a45}`;
   document.head.appendChild(style);
@@ -35,7 +35,9 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
   function openPanel(title, focus, design) {
     preparePanel(design, focus);
     panelTitle.textContent = title; panelBody.replaceChildren(); panel.classList.add('on'); panel.setAttribute('aria-hidden', 'false'); scrim.classList.add('on');
-    panel.dataset.point = title; document.getElementById('panel-close').focus({ preventScroll: true });
+    panel.dataset.point = title;
+    const initialFocus = design === 'piano' || design === 'guitar' ? panel : document.getElementById('panel-close');
+    initialFocus.focus({ preventScroll: true });
   }
 
   // ── 聲音：電子琴與吉他都用瀏覽器合成，不另外帶音檔 ──
@@ -206,7 +208,12 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
     deck.setAttribute('aria-hidden', 'true');
     instrument.append(deck, scroller);
     requestAnimationFrame(() => { const mid = wrap.querySelector('[data-octave="中音"]'); if (mid && scroller.scrollWidth > scroller.clientWidth) scroller.scrollLeft = mid.offsetLeft - 8; });
-    panelBody.append(instrument, el('p', 'sp-cap', matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches ? '琴鍵左右滑，可以彈到低音和高音。' : '高音 Q W E R T Y U I，中音 A S D F G H J，低音 Z X C V B N M。按住 Shift 再按就是升半音（黑鍵）。')); bindKeys({ wrap, keys });
+    panelBody.append(
+      instrument,
+      el('p', 'sp-cap sp-piano-scroll-hint', '左右滑動琴鍵，可彈到低音和高音。'),
+      el('p', 'sp-cap sp-piano-keyboard-hint', '高音 Q W E R T Y U I，中音 A S D F G H J，低音 Z X C V B N M。按住 Shift 再按就是升半音（黑鍵）。'),
+    );
+    bindKeys({ wrap, keys });
     // 彈電子琴時配樂也讓開（同吉他，作者 2026-11-22），面板關掉或換內容就淡回。
     window.STUDIO_FEATURES?.bgm?.hold?.('piano', true);
     const pianoWatch = new MutationObserver(() => {
@@ -229,7 +236,7 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
     window.STUDIO_FEATURES?.bgm?.hold?.('guitar', true);
     const layout = el('div', 'sp-guitar-layout');
     const wrap = el('section', 'sp-guitar');
-    wrap.setAttribute('aria-label', '指板與和弦');
+    wrap.setAttribute('aria-label', '指板');
     const neck = el('div', 'sp-neck');
     const keyHeld = STRINGS.map(() => new Set());
     const tapHeld = STRINGS.map(() => 0);
@@ -419,7 +426,7 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
       }),
       feedback,
     );
-    const chords = el('div', 'sp-chords');
+    const chords = el('section', 'sp-chords');
     chords.setAttribute('aria-label', '和弦指法');
     for (const [label, shapes] of CHORD_GROUPS) {
       const row = el('div', 'sp-chord-group');
@@ -452,9 +459,9 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
       el, button, playChord, stopNotes, storage: window.StudioDB,
       beforePlay: () => { practice.stop(); audio(); },
     });
-    wrap.append(picks, neck, capoLabel, tools, practice.hint, chords,
+    wrap.append(picks, neck, capoLabel, tools, practice.hint,
       el('p', 'sp-cap', '點格子壓弦，點指板上方的撥片試音，點琴枕可悶弦。也能按住格上的鍵，再按空白鍵刷弦。'));
-    layout.append(wrap, practice.panel, arranger.panel);
+    layout.append(wrap, chords, practice.panel, arranger.panel);
     panelBody.append(layout);
     refresh();
 
