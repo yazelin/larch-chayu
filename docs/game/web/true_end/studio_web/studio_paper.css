@@ -138,9 +138,11 @@
   background: repeating-linear-gradient(0deg, #302731 0 1px, transparent 1px 3px);
 }
 .sp-piano-lamp { width: 7px; height: 7px; border-radius: 50%; background: #def3a0; box-shadow: 0 0 8px #ddeca6; }
-#panel .sp-keys { width: 100%; height: clamp(112px, 23vw, 220px); }
+#panel .sp-keys { width: 100%; height: clamp(120px, 15vw, 200px); }
+/* 電子琴三個八度一排（2026-11-24）：面板跟吉他一樣寬 */
+#panel[data-design="piano"]:not([data-paper-off]):not(.ming-os-panel) { width: min(1100px, calc(100vw - 32px)); }
 #panel .sp-key { min-width: 0; color: #604631; font: 14px/1 var(--studio-hand); }
-#panel .sp-key.black { color: #fff4df; min-width: 44px; transform: translateX(calc((100% - 44px) / 2)); }
+#panel .sp-key.black { color: #fff4df; min-width: 0; transform: none; }   /* 寬度與位置由 studio_points.mjs 依白鍵數算（兩個八度，2026-11-24） */
 
 #panel[data-design="guitar"]:not([data-paper-off]):not(.ming-os-panel) {
   width: min(1100px, calc(100vw - 32px));
@@ -438,10 +440,13 @@
   #panel .sp2-focus { justify-content: center; width: 100%; }
   #panel .sp2-note { min-height: 82px; }
   #panel .sp2-slot::before { width: 9px; }
-  /* 手機也保留真的琴鍵：白鍵八個並排，黑鍵疊在上面。 */
+  /* 手機也保留真的琴鍵：一排三個八度，可以左右滑，打開時停在中音。 */
   #panel .sp-piano-case { padding-inline: 6px; }
-  #panel .sp-keys { height: 170px; }
-  #panel .sp-key.black { min-width: 30px; width: 9%; transform: none; margin-left: -1%; }
+  #panel .sp-keys { height: 150px; }
+  #panel .sp-keys-wide { width: 720px; }   /* 手機：一排 22 鍵每鍵約 33 px，在面板裡左右滑 */
+  #panel .sp-keys-wide, #panel .sp-keys-wide .sp-key { touch-action: pan-x; }
+  #panel .sp-key { font-size: 12px; letter-spacing: 0; }
+  #panel .sp-key.black { min-width: 0; transform: none; margin-left: 0; }
   #panel .sf-chat-faces .sf-avatar { width: 36px; height: 36px; }
   #panel .sf-chat-faces .sf-avatar + .sf-avatar { margin-left: -11px; }
   #panel .sf-chat-masthead { gap: 9px; padding-inline: 10px; }

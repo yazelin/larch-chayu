@@ -25,7 +25,8 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
 .sp-door-img{display:block;width:100%;height:auto}
 .sp-go{appearance:none;border:2px solid #8b6a45;border-radius:999px;background:#f6e2b8;color:#4a3a30;font:inherit;font-weight:700;padding:8px 22px;cursor:pointer}
 .sp-go:disabled{opacity:.55;cursor:default}
-.sp-keys{position:relative;display:flex;justify-content:center;margin:8px auto 4px;width:min(400px,100%);height:150px;user-select:none;touch-action:none}
+.sp-keys-scroll{margin:8px auto 4px;width:100%;overflow-x:auto;overscroll-behavior-x:contain;padding-top:16px}.sp-key.octave-start::before{content:attr(data-octave);position:absolute;top:-16px;left:2px;font:600 11px/1 inherit;color:#f3e3c8;white-space:nowrap}
+.sp-keys{position:relative;display:flex;justify-content:center;width:100%;height:110px;user-select:none;touch-action:none}
 .sp-key{position:relative;flex:1 1 0;border:2px solid #6d5a4b;border-left-width:1px;border-right-width:1px;border-radius:0 0 7px 7px;background:linear-gradient(#fffdf8,#f1e7d6);cursor:pointer;padding:0;font:600 11px/1 inherit;color:#9a8478;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px}
 .sp-key.black{position:absolute;top:0;z-index:2;width:8%;height:60%;flex:none;border-radius:0 0 5px 5px;background:linear-gradient(#5a4a40,#2f2622);color:#d8c9b6;border-color:#2f2622}
 .sp-key.down{background:#f3cf8c}.sp-key.black.down{background:#8b6a45}`;
@@ -140,27 +141,72 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
     panelBody.append(wrap);
   }
 
-  // ── 電子琴（6）：一個八度加高音 Do，滑鼠、觸控或鍵盤 A S D F G H J K（黑鍵 W E T Y U）──
+  // ── 電子琴（6）：三排三個八度（C3～C6），滑鼠、觸控或鍵盤 ──
+  // 2026-11-24 玩家反應想多 7 個音彈更多曲；作者：上下排的黑鍵用 Shift 升、做成三排。
+  // 畫面由上到下：高音（Q W E R T Y U，最右多一個最高 Do＝I）、中音（A S D F G H J，跟舊版一樣）、低音（Z X C V B N M）。
+  // 黑鍵：按住 Shift 再按白鍵＝升半音；畫面上的黑鍵也能直接點。
   const C4 = 261.63, NOTE = n => C4 * Math.pow(2, n / 12);
-  const WHITE = [[0, 'Do', 'a'], [2, 'Re', 's'], [4, 'Mi', 'd'], [5, 'Fa', 'f'], [7, 'Sol', 'g'], [9, 'La', 'h'], [11, 'Si', 'j'], [12, 'Do', 'k']];
-  const BLACK = [[1, 0, 'w'], [3, 1, 'e'], [6, 3, 't'], [8, 4, 'y'], [10, 5, 'u']];   // 半音、在第幾個白鍵右邊、鍵盤鍵
+  const DEGREES = [[0, 'Do'], [2, 'Re'], [4, 'Mi'], [5, 'Fa'], [7, 'Sol'], [9, 'La'], [11, 'Si']];
+  const SHARPS = [[1, 0], [3, 1], [6, 3], [8, 4], [10, 5]];   // 半音、在第幾個白鍵右邊
+  const PIANO_ROWS = [
+    { name: '高音', base: 12, letters: 'qwertyu', top: 'i' },
+    { name: '中音', base: 0, letters: 'asdfghj' },
+    { name: '低音', base: -12, letters: 'zxcvbnm' }
+  ];
   let keyHandler = null;
   function bindKeys(map) {
     if (keyHandler) removeEventListener('keydown', keyHandler, true);
-    keyHandler = e => { if (!panel.classList.contains('on') || !map.wrap.isConnected) { removeEventListener('keydown', keyHandler, true); keyHandler = null; return; } if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return; const hit = map.keys[e.key.toLowerCase()]; if (hit) { e.preventDefault(); e.stopPropagation(); hit(); } };
+    keyHandler = e => {
+      if (!panel.classList.contains('on') || !map.wrap.isConnected) { removeEventListener('keydown', keyHandler, true); keyHandler = null; return; }
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+      const k = /^Key[A-Z]$/.test(e.code) ? e.code.slice(3).toLowerCase() : e.key.toLowerCase();
+      const hit = map.keys[k]; if (!hit) return;
+      e.preventDefault(); e.stopPropagation(); hit(e.shiftKey);
+    };
     addEventListener('keydown', keyHandler, true);
   }
   function openPiano(focus) {
     openPanel('電子琴', focus, 'piano');
-    const wrap = el('div', 'sp-keys'); const keys = {};
-    WHITE.forEach(([n, name, k]) => { const b = el('button', 'sp-key', name); b.type = 'button'; b.dataset.note = String(n); b.setAttribute('aria-label', name + '（鍵盤 ' + k.toUpperCase() + '）'); const hit = () => press(b, NOTE(n), 'key'); b.addEventListener('pointerdown', e => { e.preventDefault(); hit(); }); b.addEventListener('click', e => { if (e.detail === 0) hit(); }); keys[k] = hit; wrap.append(b); });
-    BLACK.forEach(([n, after, k]) => { const b = el('button', 'sp-key black', k.toUpperCase()); b.type = 'button'; b.dataset.note = String(n); b.style.left = ((after + 1) * 12.5 - 4) + '%'; b.setAttribute('aria-label', '黑鍵（鍵盤 ' + k.toUpperCase() + '）'); const hit = () => press(b, NOTE(n), 'key'); b.addEventListener('pointerdown', e => { e.preventDefault(); hit(); }); b.addEventListener('click', e => { if (e.detail === 0) hit(); }); keys[k] = hit; wrap.append(b); });
+    // 畫面一排（低音→中音→高音，22 白鍵），鍵盤是 Q／A／Z 三排（作者 2026-11-24：「畫面上應該是一排，只是鍵盤上是 qaz 三排」）。
+    const wrap = el('div', 'sp-keys sp-keys-wide'); const keys = {}; const byNote = new Map();
+    const playNote = (n, node) => press(node || byNote.get(n) || wrap, NOTE(n), 'key');
+    const whites = [];
+    for (const row of PIANO_ROWS.slice().reverse()) {
+      DEGREES.forEach(([d, name], i) => whites.push({ n: row.base + d, name, k: row.letters[i], row }));
+      if (row.top) whites.push({ n: row.base + 12, name: 'Do', k: row.top, row });
+    }
+    const w = 100 / whites.length;
+    // 手機上琴鍵可以左右滑：手指移動超過 8 px 算滑動、不出聲；點一下（放開時）才出聲。滑鼠與筆照舊按下就出聲。
+    const bindHit = (b, hit) => {
+      let start = null;
+      b.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { start = [e.clientX, e.clientY]; return; } e.preventDefault(); hit(); });
+      b.addEventListener('pointerup', e => { if (e.pointerType !== 'touch' || !start) return; const moved = Math.hypot(e.clientX - start[0], e.clientY - start[1]); start = null; if (moved < 8) hit(); });
+      b.addEventListener('pointercancel', () => { start = null; });
+      b.addEventListener('click', e => { if (e.detail === 0) hit(); });
+    };
+    const keyButton = (cls, label, n, aria) => {
+      const b = el('button', cls, label); b.type = 'button'; b.dataset.note = String(n); b.setAttribute('aria-label', aria);
+      bindHit(b, () => playNote(n, b)); byNote.set(n, b); return b;
+    };
+    whites.forEach(({ n, name, k, row }, i) => {
+      const b = keyButton('sp-key', name, n, row.name + ' ' + name + '（鍵盤 ' + k.toUpperCase() + '，Shift 升半音）');
+      if (name === 'Do' && n === row.base) { b.dataset.octave = row.name; b.classList.add('octave-start'); }
+      wrap.append(b);
+      keys[k] = shift => playNote(shift ? n + 1 : n);
+      const sharp = SHARPS.find(([d]) => row.base + d === n + 1 && n !== row.base + 12);
+      if (sharp) {
+        const bk = keyButton('sp-key black', '', n + 1, row.name + ' 黑鍵（Shift＋' + k.toUpperCase() + '）');
+        bk.style.left = ((i + 1) * w - w * 0.32) + '%'; bk.style.width = (w * 0.64) + '%'; wrap.append(bk);
+      }
+    });
+    const scroller = el('div', 'sp-keys-scroll'); scroller.append(wrap);
     const instrument = el('div', 'sp-piano-case');
     const deck = el('div', 'sp-piano-deck');
     deck.append(el('span'), el('span', 'sp-piano-lamp'), el('span'));
     deck.setAttribute('aria-hidden', 'true');
-    instrument.append(deck, wrap);
-    panelBody.append(instrument, el('p', 'sp-cap', '白鍵：A S D F G H J K。黑鍵：W E T Y U。')); bindKeys({ wrap, keys });
+    instrument.append(deck, scroller);
+    requestAnimationFrame(() => { const mid = wrap.querySelector('[data-octave="中音"]'); if (mid && scroller.scrollWidth > scroller.clientWidth) scroller.scrollLeft = mid.offsetLeft - 8; });
+    panelBody.append(instrument, el('p', 'sp-cap', matchMedia('(pointer: coarse)').matches && !matchMedia('(pointer: fine)').matches ? '琴鍵左右滑，可以彈到低音和高音。' : '高音 Q W E R T Y U I，中音 A S D F G H J，低音 Z X C V B N M。按住 Shift 再按就是升半音（黑鍵）。')); bindKeys({ wrap, keys });
     // 彈電子琴時配樂也讓開（同吉他，作者 2026-11-22），面板關掉或換內容就淡回。
     window.STUDIO_FEATURES?.bgm?.hold?.('piano', true);
     const pianoWatch = new MutationObserver(() => {
