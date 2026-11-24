@@ -319,8 +319,8 @@ export function makeGuitarPractice({ el, button, applyShape, setCapo, cards, pla
     setCapo(song.capo ?? 0);
     notice.textContent = '';
     const start = cues[0].at;
-    // 四小節 4/4。生日快樂是 3/4，用六小節示範。
-    const end = Math.min(song.duration, start + song.beat * (song.id === 'birthday' ? 18 : 16));
+    // 示範整首播完（作者 2026-11-24；原本只示範四小節，生日快樂六小節）。中途可以再按一次停止。
+    const end = song.duration;
     const beats = [];
     for (const [i, cue] of cues.entries()) {
       const limit = Math.min(end, cues[i + 1]?.at ?? end);
