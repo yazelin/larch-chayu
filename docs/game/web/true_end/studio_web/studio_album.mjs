@@ -143,10 +143,16 @@ export function mountAlbum(root, opts) {
   // 頻譜：同源（或 blob）才接 Web Audio 分析器；跨網域的音檔（Larch 版作品從 Worker 讀）接了會沒聲音，改用合成的起伏。
   // 嵌在 Larch 裡（小遊戲卡 iframe 沒把 autoplay 交下來）時 AudioContext 可能一直停著，音檔一接進去就整個沒聲音（作者 2026-11-21 回報），
   // 所以：音檔先直接播；頁面允許 autoplay、而且 AudioContext 確定在跑（running）才接分析器，否則就用合成的起伏。
+  function isWebKitSafari() {
+    const ua = navigator.userAgent || '';
+    const iOS = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);   // iPadOS 預設回報成 Mac
+    const safari = /Safari\//.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Android|Firefox|FxiOS/.test(ua);
+    return iOS || safari;
+  }
   function webAudioAllowed() {
     // 2026-11-24 平板回報唱片架、耳機播不出聲：Safari 沒有 featurePolicy 擋不到，接進 Web Audio 後遇到靜音鍵或 iframe 裡 AudioContext 被暫停就整個沒聲音。
-    // 頻譜改成一律用合成的起伏，音檔永遠直接播。
-    return false;
+    // 作者決定只擋 Safari 核心（iPhone、iPad 上所有瀏覽器都是，加上 Mac Safari），其他瀏覽器照舊接分析器。
+    if (isWebKitSafari()) return false;
     try { const fp = document.featurePolicy || document.permissionsPolicy; if (fp && typeof fp.allowsFeature === 'function' && !fp.allowsFeature('autoplay')) return false; } catch (e) { /* 舊瀏覽器沒有這個 */ }
     return true;
   }
