@@ -68,6 +68,7 @@ h2{font-size:28px;margin:56px 0 14px}
 .choice div{margin:3px 0}
 .branch{font-family:var(--f-ui);font-size:13px;letter-spacing:.1em;color:var(--ink-2);margin:22px 0 6px}
 .end{text-align:center;color:var(--ink-2);margin:36px 0}
+.go{text-align:center;margin:22px 0}.go a{display:inline-block;font-family:var(--f-ui);font-size:16px;letter-spacing:.08em;color:#fff8ee;background:#7a4f3a;text-decoration:none;padding:12px 30px;border-radius:10px 4px 12px 6px/6px 12px 5px 10px;box-shadow:0 2px 6px rgb(90 60 40/.3)}.go a:hover{background:#8d5d45}
 .play{font-family:var(--f-ui);font-size:13.5px;letter-spacing:.06em;color:var(--ink-2);border:1px dashed var(--line);border-radius:8px 4px 10px 5px/5px 10px 4px 8px;padding:10px 14px;margin:18px 0;text-align:center}
 .card{font-family:var(--f-display);font-size:22px;text-align:center;margin:30px 0 4px;color:var(--plum)}
 .card.small{font-size:15px;margin:0 0 18px;color:var(--ink-2)}
