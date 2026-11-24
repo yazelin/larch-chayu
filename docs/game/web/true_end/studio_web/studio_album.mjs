@@ -123,7 +123,7 @@ export function mountAlbum(root, opts) {
   wrap.append(tabs, grid, host);
 
   // ── 狀態 ──
-  let current = -1, playing = false, audio = null, volume = 0.8, muted = false, err = '', dragging = false, destroyed = false;
+  let current = -1, playing = false, loading = false, audio = null, volume = 0.8, muted = false, err = '', dragging = false, destroyed = false;
   let actx = null, analyser = null, buf = null, analyserReal = false;
   const sources = new WeakMap();
   const isLocked = i => !items[i] || !!items[i].locked;
@@ -144,6 +144,9 @@ export function mountAlbum(root, opts) {
   // 嵌在 Larch 裡（小遊戲卡 iframe 沒把 autoplay 交下來）時 AudioContext 可能一直停著，音檔一接進去就整個沒聲音（作者 2026-11-21 回報），
   // 所以：音檔先直接播；頁面允許 autoplay、而且 AudioContext 確定在跑（running）才接分析器，否則就用合成的起伏。
   function webAudioAllowed() {
+    // 2026-11-24 平板回報唱片架、耳機播不出聲：Safari 沒有 featurePolicy 擋不到，接進 Web Audio 後遇到靜音鍵或 iframe 裡 AudioContext 被暫停就整個沒聲音。
+    // 頻譜改成一律用合成的起伏，音檔永遠直接播。
+    return false;
     try { const fp = document.featurePolicy || document.permissionsPolicy; if (fp && typeof fp.allowsFeature === 'function' && !fp.allowsFeature('autoplay')) return false; } catch (e) { /* 舊瀏覽器沒有這個 */ }
     return true;
   }
@@ -173,16 +176,18 @@ export function mountAlbum(root, opts) {
 
   function newAudio(src) {
     if (audio) { audio.pause(); audio.removeAttribute('src'); try { audio.load(); } catch (e) { /* 舊的 */ } audio.remove(); }
-    const a = el('audio'); a.preload = 'metadata'; a.src = src; host.appendChild(a); audio = a; analyserReal = false;
+    loading = false;
+    const a = el('audio'); a.preload = 'auto'; a.src = src; host.appendChild(a); audio = a; analyserReal = false;
     applyVol();
-    a.addEventListener('play', () => { playing = true; err = ''; state(); });
-    a.addEventListener('playing', () => holdBgm(true));
-    a.addEventListener('pause', () => { if (a !== audio) return; playing = false; state(); holdBgm(false); });
+    a.addEventListener('play', () => { playing = true; err = ''; state(); if (a.readyState < 3) { loading = true; status.textContent = '載入中…'; } });
+    a.addEventListener('playing', () => { holdBgm(true); if (loading) { loading = false; state(); } });
+    a.addEventListener('waiting', () => { if (a !== audio || a.paused) return; loading = true; status.textContent = '載入中…'; });
+    a.addEventListener('pause', () => { if (a !== audio) return; playing = false; loading = false; state(); holdBgm(false); });
     a.addEventListener('ended', () => finished(a));
     // 資料裡有 end（音檔尾巴是補上的靜音）：播到 end 就當作播完
     a.addEventListener('timeupdate', () => { if (a !== audio) return; checkListening(a); const e = endAt(); if (e && a.currentTime >= e && !a.paused) { a.pause(); finished(a); return; } paint(); syncLyrics(); });
     a.addEventListener('loadedmetadata', () => { if (a === audio) paint(); });
-    a.addEventListener('error', () => { if (a !== audio) return; err = '這首暫時播不出來，等一下再試。'; playing = false; state(); holdBgm(false); });
+    a.addEventListener('error', () => { if (a !== audio) return; loading = false; err = '這首暫時播不出來，等一下再試。'; playing = false; state(); holdBgm(false); });
     return a;
   }
   function endAt() { const it = items[current]; return it && it.end > 0 ? it.end : 0; }
@@ -226,7 +231,8 @@ export function mountAlbum(root, opts) {
     if (pr && pr.then) pr.then(() => { if (a === audio && !sources.has(a)) connect(a, a.src); }, e => { if (e && e.name === 'AbortError') return; playing = false; if (!(e && e.name === 'NotAllowedError')) err = '這首暫時播不出來，等一下再試。'; state(); });
     else if (!sources.has(a)) connect(a, a.src);
   }
-  function toggle() { if (!audio || audio.paused) doPlay(); else audio.pause(); }
+  // 載入中再按一次不要變成暫停（玩家以為沒反應會再點）
+  function toggle() { if (!audio || audio.paused) doPlay(); else if (!loading) audio.pause(); }
   function step(d) { const p = playable(); if (!p.length) return; let k = p.indexOf(current); k = k < 0 ? 0 : (k + d + p.length) % p.length; select(p[k], true); }
   function next() { step(1); }
   function prev() { if (audio && audio.currentTime > 3) { audio.currentTime = 0; paint(); return; } step(-1); }
@@ -358,7 +364,7 @@ export function mountAlbum(root, opts) {
     deck.classList.toggle('playing', playing);
     wrap.classList.toggle('is-playing', playing);
     setText(bToggle, playing ? '暫停' : '播放');
-    status.textContent = err;
+    status.textContent = err || (loading && playing ? '載入中…' : '');
     renderList();
   }
   function change() { renderList(); renderMeta(); buildLyrics(); paint(); state(); }
