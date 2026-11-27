@@ -289,8 +289,9 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
       clearTimeout(feedbackTimer);
       feedbackTimer = setTimeout(() => feedback.classList.remove('on'), 1200);
     }
-    // 下刷：低音弦→高音弦；上刷：只刷上面四條細弦、高→低，跟真的吉他一樣比較輕（作者 2026-11-28：要能自由上下刷）
-    const UP_STRINGS = [5, 4, 3, 2];
+    // 下刷：低音弦→高音弦；上刷：六條弦高→低（作者 2026-11-28：要能自由上下刷；
+    // 原本上刷只刷四條細弦，按 S 壓的第五弦就沒聲音，作者說「上刷少了 S」，改成全部六條）
+    const UP_STRINGS = [...STRINGS].reverse();
     function strum(direction = 'down') {
       if (!brush(direction === 'up' ? UP_STRINGS : STRINGS, false)) return;
       showStrum();
