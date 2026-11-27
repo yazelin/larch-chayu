@@ -23,7 +23,8 @@ export const GROUP1_LINES = {
     coloring_enter: '線稿在這裡。妳選。',
     coloring_pick: '慢慢塗。顏色妳選。',
     coloring_done: '塗好了？我看看。',
-    coloring_saved: '收好了。下一張，妳選。'
+    coloring_saved: '收好了。下一張，妳選。',
+    coloring_switch_warn: '那張還沒收好。妳選。'
   }
 };
 

@@ -155,7 +155,7 @@ export async function renderColoring(root, deps) {
     const heading = el('h2', '', '選一張線稿');
     const grid = el('div', 'sf-coloring-picks');
     for (const item of sources) {
-      const card = button('', () => open(item), 'sf-coloring-card');
+      const card = button('', () => openChecked(item), 'sf-coloring-card');
       card.dataset.coloringId = item.id;
       const preview = item.fixture ? item.make() : el('img');
       if (!item.fixture) {
@@ -170,6 +170,36 @@ export async function renderColoring(root, deps) {
     const fixtureNote = sources.some(item => item.fixture) ? el('small', 'sf-coloring-fixture', '預覽線稿') : '';
     content.replaceChildren(...(fixtureNote ? [heading, fixtureNote, grid] : [heading, grid]));
     if (selected) grid.querySelector('[data-coloring-id="' + selected.id + '"]')?.focus({ preventScroll: true });
+  }
+
+  // Larch 版只留一張草稿（存檔空間小）。換線稿前，若上一張塗過、還沒放進展廳或給晨看，先提醒（作者 2026-11-28）。
+  function markShelved(item) {
+    if (db.mode !== 'larch') return;
+    writes = writes.then(async () => {
+      const draft = await db.get(draftKey(db, item)).catch(() => null);
+      if (draft?.id === item.id) await db.set(draftKey(db, item), { ...draft, shelved: true });
+    }).catch(() => {});
+  }
+  async function openChecked(item) {
+    if (db.mode === 'larch') {
+      await writes;
+      const draft = await db.get(draftKey(db, item)).catch(() => null);
+      const previous = draft?.src && !draft.shelved && draft.id !== item.id ? sources.find(other => other.id === draft.id) : null;
+      if (previous) {
+        phrase.textContent = say('switch_warn');
+        const note = el('p', 'sf-status', '「' + previous.title + '」塗到一半，還沒放進展廳。換成「' + item.title + '」的話，那張塗的會不見。');
+        const back = button('回去塗「' + previous.title + '」', () => open(previous), 'primary');
+        const drop = button('放掉，換這張', () => open(item), 'danger');
+        const cancel = button('取消', pick);
+        const row = el('div', 'sf-coloring-row');
+        row.append(back, drop, cancel);
+        content.replaceChildren(note, row);
+        root.coloringEscape = () => { pick(); return true; };
+        back.focus();
+        return;
+      }
+    }
+    return open(item);
   }
 
   async function open(item) {
@@ -352,7 +382,8 @@ export async function renderColoring(root, deps) {
       emptyMessage: '先塗點顏色，再給晨看。',
       savedMessage: '這張畫收進畫架展廳的「我畫的」。',
       onSubmit() { phrase.textContent = say('done'); showLook(); },
-      onResult() { openReply.hidden = false; }
+      onResult() { openReply.hidden = false; },
+      onSaved() { markShelved(item); }
     });
     lookBox.append(look.status, look.result);
     lookRoot.append(lookBox);
@@ -384,6 +415,7 @@ export async function renderColoring(root, deps) {
       saveDrawing.textContent = '存放中…';
       try {
         await deps.saveDrawing(drawingImage(), item.title);
+        markShelved(item);
         if (!editor.isConnected) return;
         showSaveResult(deps.chenBubble(say('saved'), 'smile'), el('p', 'sf-status', '放進畫架展廳了'),
           button('打開畫架展廳', () => { dialog.close(); deps.openGallery(); }));

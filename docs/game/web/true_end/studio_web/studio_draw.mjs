@@ -242,6 +242,7 @@ export function drawingLook(root, deps, drawing) {
   function appendAnswer(answer) {
     drawing.onResult?.();
     result.replaceChildren(deps.chenBubble(answer.reply, answer.mood));
+    if (!answer.fallback && answer.saved !== false) drawing.onSaved?.();   // 真的收進展廳了（著色本用來判斷換線稿前要不要提醒）
     if (!answer.fallback) {
       if (answer.title) { const name = el('p', 'sf-draw-title', '晨幫這張畫取的名字：〈' + answer.title + '〉'); result.appendChild(name); }
       if (answer.work) result.appendChild(el('p', 'sf-context', drawing.savedMessage || '這張畫和晨的回覆都留在聊天裡。'));
