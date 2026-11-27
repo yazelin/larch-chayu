@@ -80,6 +80,7 @@
     studioChatC: 5, studioChatM: 5, studioChatS: 5, studioChatG: 5,
     studioWorks: 4, studioProgress: 2, studioSettings: 1, studioMisc: 2,
     studioComposerSlot1: 9, studioComposerSlot2: 9, studioComposerSlot3: 9, studioComposerMigrated: 1,
+    studioClip1: 9, studioClip2: 9, studioClip3: 9,
     studioFocus: 1, studioNight: 1, studioPuzzle: 8 };
   // 島的各頁（真結局/map2d/side/web/island_bridge.js 會設 STUDIO_DB_SCOPE='island'）雜項另外寫 islandSave0／1，
   // 不碰 studioMisc：島卡沒有登記 studioMisc，只寫不讀會把工作室存的換裝、常駐位蓋掉。islandSave 跟著存檔走、不跨週目。
@@ -94,7 +95,7 @@
   };
   function chatVar(conversation) { return 'studioChat' + SHORT[conversation]; }
   function memoryVar(conversation) { return 'studioMem' + SHORT[conversation]; }
-  var DEDICATED_KEY = /^studio(?:Composer(?:Slot[1-3]|Migrated)|Focus|Night|Puzzle)$/;
+  var DEDICATED_KEY = /^studio(?:Composer(?:Slot[1-3]|Migrated)|Clip[1-3]|Focus|Night|Puzzle)$/;
   var CARD_KEYS = { studioTurnState: true, coloringDraft: true };
 
   function larchBackend(waitForInit) {

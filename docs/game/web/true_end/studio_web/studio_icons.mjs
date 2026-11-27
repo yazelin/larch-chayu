@@ -235,6 +235,10 @@ const root = document.documentElement;
 })();
 
 function ruleFor(node, text) {
+  if (node.matches('button.ce-button[data-clip-icon], a.ce-button[data-clip-icon]')) return {
+    i: node.dataset.clipIcon, tip: node.getAttribute('aria-label') || undefined, m: node.matches('.ce-asset, .ce-clip') ? 'prepend' :
+      node.matches('.ce-icon') ? 'icon' : 'label'
+  };
   for (const r of RULES) {
     if (r.sel && !node.matches(r.sel)) continue;
     if (r.t !== undefined && !(r.t instanceof RegExp ? r.t.test(text) : r.t === text)) continue;
@@ -280,7 +284,7 @@ function decorate(node) {
   node.replaceChildren(ic, label);
 }
 
-const CANDIDATE = 'button, label.ming-backup-upload, a.ming-website-external';
+const CANDIDATE = 'button, label.ming-backup-upload, a.ming-website-external, a.ce-button[data-clip-icon]';
 function scan(scope) {
   if (scope.nodeType !== 1) return;
   if (scope.matches(CANDIDATE)) decorate(scope);

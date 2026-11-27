@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#201b2c">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="夜後明月・玩家剪輯">
+  <meta property="og:description" content="來看《夜後明月》的玩家作品。">
+  <meta property="og:image" content="https://yazelin.github.io/larch-chayu/clip/og-cover.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>玩家剪輯 · 夜後明月</title>
+  <link rel="stylesheet" href="./clip_page.css">
+  <script type="module" src="./clip_page.mjs"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="work-label">玩家作品</p>
+      <h1 id="title">玩家剪輯</h1>
+    </header>
+    <p id="load" role="status">正在讀取剪輯…</p>
+    <section id="player" aria-label="剪輯播放器" hidden>
+      <canvas aria-label="剪輯畫面"></canvas>
+      <div class="transport">
+        <button type="button" id="play" disabled>播放</button>
+        <input type="range" id="time" min="0" max="1" value="0" step="0.01" aria-label="播放進度" disabled>
+        <output for="time" id="position">0:00 / 0:00</output>
+        <button type="button" id="fullscreen">全螢幕</button>
+      </div>
+    </section>
+    <div class="actions">
+      <div id="export" hidden>
+        <button type="button" id="download" disabled>下載影片</button>
+        <progress id="record-progress" aria-label="錄製進度" value="0" max="1" hidden></progress>
+      </div>
+      <a href="https://yazelin-chayu.larch.games">到 Larch 玩《夜後明月》 <span aria-hidden="true">↗</span></a>
+    </div>
+    <p id="status" role="status" hidden></p>
+  </main>
+</body>
+</html>

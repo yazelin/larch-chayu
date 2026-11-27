@@ -927,23 +927,23 @@
 
 /* 滑桿（唱片架、耳機的進度與音量另有一套 --p 填色，見 studio_album.css）：軌道像紙上的鉛筆線，已拉過的一段用代表色，滑塊是一顆木珠。
    Chrome 沒有「已填段」的偽元素，用木珠往左的長陰影（上下各縮 8px）畫出來，所以軌道兩端要 overflow: hidden。 */
-#panel input[type="range"]:not(.sa-seek, .sa-vol) {
+#panel input[type="range"]:not(.sa-seek, .sa-vol, .ce-scrub) {
   -webkit-appearance: none; appearance: none; min-height: 44px; height: 44px; margin: 0; padding: 0 2px;
   overflow: hidden; background: transparent; cursor: pointer; accent-color: var(--field-ink);
 }
-#panel input[type="range"]:not(.sa-seek, .sa-vol)::-webkit-slider-runnable-track {
+#panel input[type="range"]:not(.sa-seek, .sa-vol, .ce-scrub)::-webkit-slider-runnable-track {
   height: 4px; border-radius: 3px;
   background: repeating-linear-gradient(90deg, #8b7766aa 0 7px, #8b776677 7px 9px, #8b7766bb 9px 15px), #e3d2bd;
 }
-#panel input[type="range"]:not(.sa-seek, .sa-vol)::-webkit-slider-thumb {
+#panel input[type="range"]:not(.sa-seek, .sa-vol, .ce-scrub)::-webkit-slider-thumb {
   -webkit-appearance: none; width: 22px; height: 22px; margin-top: -9px; border: 1px solid #7d5434; border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #f6e2b8, #c89a62 55%, #a07a45);
   box-shadow: -100vw 0 0 -8px color-mix(in srgb, var(--field-ink) 70%, #e6d3bb), 0 2px 2px #3b241855;
 }
-#panel input[type="range"]:not(.sa-seek, .sa-vol)::-moz-range-track { height: 4px; border-radius: 3px; background: #d8c4ab; }
-#panel input[type="range"]:not(.sa-seek, .sa-vol)::-moz-range-progress { height: 4px; border-radius: 3px; background: color-mix(in srgb, var(--field-ink) 70%, #e6d3bb); }
-#panel input[type="range"]:not(.sa-seek, .sa-vol)::-moz-range-thumb { width: 20px; height: 20px; border: 1px solid #7d5434; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f6e2b8, #c89a62 55%, #a07a45); }
-#panel input[type="range"]:not(.sa-seek, .sa-vol):focus-visible { outline-offset: 0; }
+#panel input[type="range"]:not(.sa-seek, .sa-vol, .ce-scrub)::-moz-range-track { height: 4px; border-radius: 3px; background: #d8c4ab; }
+#panel input[type="range"]:not(.sa-seek, .sa-vol, .ce-scrub)::-moz-range-progress { height: 4px; border-radius: 3px; background: color-mix(in srgb, var(--field-ink) 70%, #e6d3bb); }
+#panel input[type="range"]:not(.sa-seek, .sa-vol, .ce-scrub)::-moz-range-thumb { width: 20px; height: 20px; border: 1px solid #7d5434; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f6e2b8, #c89a62 55%, #a07a45); }
+#panel input[type="range"]:not(.sa-seek, .sa-vol, .ce-scrub):focus-visible { outline-offset: 0; }
 
 /* 勾選框、單選：44×44 的可點範圍，中間一個 24px 的紙片小方格（單選是圓的），勾上時填代表色＋手寫勾 */
 #panel input:is([type="checkbox"], [type="radio"]) {

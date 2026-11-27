@@ -25,6 +25,7 @@ const mockMode = query.get('mock') === '1';
 const focusEnabled = query.get('focus') === '1';
 const puzzleEnabled = query.get('puzzle') === '1';
 const coloringEnabled = query.get('coloring') === '1';
+const editorEnabled = query.get('editor') === '1';
 const phoneStoryKeys = ['ch2Msg', 'ch3SkyFirst', 'ch4Apology', 'ch4AssetsFirst', 'ch5PassFirst', 'ch7Route', 'trueEndMsg'];
 const realChat = document.documentElement.classList.contains('studio-real-chat');
 // larch:init 常比這支模組早到（index.html 先收）：有的話先用那一份，天數才不會停在預設的第 1 天
@@ -67,7 +68,7 @@ function disposeMingComputer() {
   if (mingComputerState && mingComputerState.clockTimer) clearInterval(mingComputerState.clockTimer);
   if (mingComputerState && mingComputerState.documentPointerHandler) document.removeEventListener('pointerdown', mingComputerState.documentPointerHandler);
   if (mingComputerState && mingComputerState.resizeHandler) window.removeEventListener('resize', mingComputerState.resizeHandler);
-  if (mingComputerState && mingComputerState.windows) mingComputerState.windows.forEach(function (node) { disposeMingGameFrames(node); });
+  if (mingComputerState && mingComputerState.windows) mingComputerState.windows.forEach(disposeMingWindow);
   mingComputerState = null;
   focusApp?.desktopChanged();
   panel.classList.remove('ming-os-panel');
@@ -1235,6 +1236,11 @@ async function refreshMingGameQuota() {
   document.querySelectorAll('[data-ming-game-submit]').forEach(function (node) { node.disabled = !!(quota && Number.isFinite(remaining) && remaining <= 0); });
 }
 
+function disposeMingWindow(node) {
+  node.querySelector('.ming-window-content')?.clipEditor?.dispose();
+  disposeMingGameFrames(node);
+}
+
 function disposeMingGameFrames(root) {
   if (!root || !root.querySelectorAll) return;
   root.querySelectorAll('iframe[data-ming-game]').forEach(function (frame) {
@@ -2018,6 +2024,7 @@ const MING_APPS = [
   { id: 'chat', label: '和明說話', icon: 'message' },
   { id: 'progress', label: '進度表', icon: 'todo' },
   ...(focusEnabled ? [{ id: 'focus', label: '陪讀計時器', icon: 'focus' }] : []),
+  ...(editorEnabled ? [{ id: 'editor', label: '剪輯台', icon: 'editor' }] : []),
   { id: 'calendar', label: '月曆', icon: 'calendar' },
   { id: 'games', label: '請明做新遊戲', icon: 'games' },
   { id: 'timeline', label: '時光記錄', icon: 'timeline' },
@@ -2105,6 +2112,12 @@ function mingIconShape(kind, id) {
     '<g fill="none" stroke="#fff2d9" stroke-width="3" stroke-linecap="round"><circle cx="50" cy="51" r="28"/><ellipse cx="50" cy="51" rx="12" ry="28"/><path d="M23 51h54M28 36q22 10 44 0M28 66q22-10 44 0"/></g>';
   if (kind === 'message') return '<defs>' + mingIconGradient(id, '#c4b8f6', '#7b84e0') + gloss + mingIconShadow(id, '#3b2f8a', .3) + '<linearGradient id="' + id + 'w" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#e9eafe"/></linearGradient></defs><rect width="100" height="100" fill="url(#' + id + 'bg)"/><g filter="url(#' + id + 'sh)"><ellipse cx="50" cy="47" rx="32" ry="26.5" fill="url(#' + id + 'w)"/><path d="M26 60c-1 8-5 13-10 16 9 1 17-2 23-8z" fill="url(#' + id + 'w)"/></g><rect width="100" height="100" fill="url(#' + id + 'gl)"/>';
   if (kind === 'focus') return '<defs>' + mingIconGradient(id, '#b6cafd', '#617bbf') + '</defs><rect width="100" height="100" fill="url(#' + id + 'bg)"/><g stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none"><circle cx="50" cy="54" r="26"/><path d="M43 17h14m-7 0v11m0 13v13l11 7"/></g>';
+  if (kind === 'editor') return '<defs>' + mingIconGradient(id, '#aebaea', '#535d99') + gloss +
+    mingIconShadow(id, '#262750', .35) + '</defs><rect width="100" height="100" fill="url(#' + id + 'bg)"/>' +
+    '<g filter="url(#' + id + 'sh)"><rect x="17" y="24" width="66" height="53" rx="8" fill="#f6effc"/>' +
+    '<path d="M29 32h42v33H29z" fill="#585992"/><path d="m43 39 18 9.5L43 58z" fill="#fff3dc"/>' +
+    '<path d="M22 36v5m0 6v5m0 6v5m56-27v5m0 6v5m0 6v5" stroke="#7b7ba9" stroke-width="3" stroke-linecap="round"/>' +
+    '</g><rect width="100" height="100" fill="url(#' + id + 'gl)"/>';
   if (kind === 'todo') {
     let rows = '';
     [['#97bd56', true], ['#45628f', true], ['#9a536a', false]].forEach(function (row, index) {
@@ -2286,6 +2299,12 @@ function showMingToast(state, message) {
 }
 
 function buildMingDesktop(state) {
+  const editor = mingApp('editor');
+  if (editor) state.icons.appendChild(mingLaunchButton(editor, 'ming-launch-editor'));
+  state.icons.addEventListener('click', function (event) {
+    const item = event.target.closest('[data-osapp]');
+    if (item) openMingApp(state, item.dataset.osapp);
+  });
   buildMingWidgets(state);
   state.widgets.addEventListener('click', function (event) {
     const item = event.target.closest('[data-osapp]');
@@ -2417,6 +2436,8 @@ function syncMingDockApps(state) {
 }
 
 function showMingDesktop(state) {
+  state.windows.get('editor')?.querySelector('.ming-window-content')?.clipEditor?.stop();
+  state.shell.classList.remove('ming-editor-active');
   state.active = '';
   state.mobileActive = '';
   state.desktop.classList.remove('app-active');
@@ -2429,6 +2450,10 @@ function showMingDesktop(state) {
 function focusMingWindow(state, id) {
   const node = state.windows.get(id);
   if (!node) return;
+  if (state.active === 'editor' && id !== 'editor') {
+    state.windows.get('editor')?.querySelector('.ming-window-content')?.clipEditor?.stop();
+  }
+  state.shell.classList.toggle('ming-editor-active', id === 'editor');
   state.active = id;
   state.desktop.classList.add('app-active');
   state.windows.forEach(function (item, key) { item.classList.toggle('inactive', key !== id); });
@@ -2443,7 +2468,7 @@ function focusMingWindow(state, id) {
 function closeMingWindow(state, id) {
   const node = state.windows.get(id);
   if (node) {
-    disposeMingGameFrames(node);
+    disposeMingWindow(node);
     const content = node.querySelector('.ming-window-content');
     if (content) {
       mingGameRoots.delete(content);
@@ -2466,6 +2491,7 @@ const MING_WINDOWS = {
   chat: { x: 716, y: 118, w: 420, h: 450 },
   progress: { x: 90, y: 62, w: 600, h: 500 },
   focus: { x: 345, y: 92, w: 470, h: 420 },
+  editor: { x: 53, y: 41, w: 1174, h: 581 },
   calendar: { x: 300, y: 80, w: 520, h: 430 },
   games: { x: 135, y: 44, w: 1010, h: 584 },
   timeline: { x: 160, y: 52, w: 860, h: 560 },
@@ -2577,7 +2603,7 @@ function openMingApp(state, id, options) {
   const searchInput = el('input'); searchInput.type = 'search'; searchInput.tabIndex = -1; searchInput.placeholder = '搜尋'; searchInput.setAttribute('aria-label', '在這個視窗裡搜尋');
   const searchButton = el('button', 'tb ic'); searchButton.type = 'button'; searchButton.dataset.windowSearch = ''; searchButton.setAttribute('aria-label', '搜尋'); searchButton.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
   search.append(searchInput, searchButton);
-  if (id !== 'website' && id !== 'focus') tools.appendChild(search);
+  if (!['website', 'focus', 'editor'].includes(id)) tools.appendChild(search);
   if (id === 'progress') {
     const add = el('button', 'tb ic', '+'); add.type = 'button'; add.dataset.progressAddToggle = ''; add.setAttribute('aria-label', '新增待辦'); tools.appendChild(add);
   }
@@ -2600,7 +2626,7 @@ function openMingApp(state, id, options) {
   if (dockItem) dockItem.classList.add('running');
   if (id === 'progress' && !window.matchMedia('(max-width: 600px), (orientation: portrait)').matches && !(options && options.skipCompanion) && !state.windows.has('chat')) openMingApp(state, 'chat', { skipCompanion: true });
   header.addEventListener('pointerdown', function (event) {
-    if (event.pointerType !== 'mouse' || event.target.closest('button') || win.classList.contains('zoomed')) return;
+    if (id === 'editor' || event.pointerType !== 'mouse' || event.target.closest('button') || win.classList.contains('zoomed')) return;
     const rect = win.getBoundingClientRect(), startX = event.clientX, startY = event.clientY;
     const baseLeft = rect.left - state.windowLayer.getBoundingClientRect().left;
     const baseTop = rect.top - state.windowLayer.getBoundingClientRect().top;
@@ -2669,9 +2695,82 @@ function openMingApp(state, id, options) {
   renderMingApp(id, content).catch(function (error) { content.replaceChildren(el('p', 'sf-status', error.message)); });
 }
 
+async function renderClipEditor(root) {
+  root.classList.add('ming-clip-host');
+  const player = await playerId();
+  const [{ mountClipEditor }, { createComposerStore }, images, drawings, cgs, songs] = await Promise.all([
+    import('./clip_editor.mjs'), import('./composer_store.mjs'), savedWorks('image'), savedWorks('drawing'),
+    unlockedPuzzleCGs(), savedWorks('song')
+  ]);
+  const composer = createComposerStore(StudioDB);
+  const composerSlots = await Promise.all([1, 2, 3].map(async slot => {
+    const song = await composer.load(slot);
+    return { slot, song, title: song && (song.title || '未命名曲子') };
+  }));
+  if (!root.isConnected) return;
+  const urls = [];
+  const source = work => {
+    if (!(work.blob instanceof Blob)) return work.src || workSrc(work);
+    const url = URL.createObjectURL(work.blob);
+    urls.push(url);
+    return url;
+  };
+  const workItem = work => ({ title: work.title || '未命名畫作', url: source(work),
+    ref: { kind: 'work', id: work.workId || work.id } });
+  const editor = mountClipEditor(root, {
+    storage: StudioDB,
+    collections: [
+      ['晨的畫', [...images.filter(chenImage).map(workItem), ...galleryArt().map(work => ({
+        title: work.title, url: work.src, ref: { kind: 'art', id: work.puzzleId }
+      }))].filter(item => item.ref.id && item.url)],
+      ['我畫的', drawings.filter(work => work.kind === 'drawing').map(workItem).filter(item => item.ref.id && item.url)],
+      ['看過的 CG', cgs.map(cg => ({ title: cg.title, url: cg.src, ref: { kind: 'cg', id: cg.id.slice(3) } }))]
+    ],
+    songs: songs.filter(work => work.kind === 'song').map(work => ({
+      id: work.workId || work.id, title: work.title || '詩的歌', url: source(work)
+    })).filter(song => song.id && song.url),
+    composerSlots,
+    remoteSource: (kind, id) => (kind === 'song' ? /^song-[\w-]{1,120}$/ : /^(img|draw)-[\w-]{1,120}$/).test(id)
+      ? apiBase() + '/work?id=' + encodeURIComponent(id) + '&player=' + encodeURIComponent(player) : '',
+    keepWorks: mockMode ? null : async (slot, clip) => {
+      const ids = [...new Set([
+        ...clip.slides.filter(slide => slide.src.kind === 'work').map(slide => slide.src.id),
+        ...(clip.music.kind === 'work' ? [clip.music.id] : [])
+      ].filter(id => /^(img|song|draw)-[\w-]{1,120}$/.test(id)))];
+      const response = await fetch(apiBase() + '/clip/assets', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerId: player, scope: larchMode() ? 'larch' : 'web', slot, ids }),
+        signal: AbortSignal.timeout(10000)
+      });
+      if (!response.ok) throw new Error('素材保存服務暫時沒有回應。');
+      return (await response.json()).kept === ids.length;
+    },
+    embedded: larchMode(),
+    shareClip: async payload => {
+      const response = await fetch(apiBase() + '/clip/share', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...payload, playerId: player, tier: studioTier() }),
+        signal: AbortSignal.timeout(15000)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || '分享服務暫時沒有回應。');
+      return result;
+    },
+    onSound: playing => studioBgm?.hold('clip-editor', playing)
+  });
+  root.clipEditor = {
+    stop: editor.stop,
+    dispose() {
+      editor.dispose();
+      urls.forEach(url => URL.revokeObjectURL(url));
+    }
+  };
+}
+
 async function renderMingApp(id, root) {
   if (id === 'website') { renderMingWebsite(root); return; }
   if (id === 'focus') { await focusApp.render(root); return; }
+  if (id === 'editor') { await renderClipEditor(root); return; }
   addContext(root, id === 'chat' ? 'ming' : undefined);
   if (id === 'chat') { await renderChat('ming', false, root); return; }
   if (id === 'progress') { await renderProgress(root); return; }

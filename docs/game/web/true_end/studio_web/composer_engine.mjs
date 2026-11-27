@@ -287,7 +287,7 @@ export function createComposerEngine(context, {
       preview.releaseAll();
       stopSources(previewSources);
     },
-    play(source, { fromBar, endBar, loop, countIn = false } = {}) {
+    play(source, { fromBar, endBar, loop, countIn = false, offset = 0, at } = {}) {
       if (disposed) return;
       stop();
       const song = normalizeSong(source);
@@ -317,7 +317,10 @@ export function createComposerEngine(context, {
         return { drums: bar.drums, bass, autoBass, melodySteps,
           chordSteps: chordSteps(bar, song.beats, song.tracks.chords.pattern) };
       });
-      const firstBeat = context.currentTime + START_LEAD;
+      // Offset is measured from fromBar. Keep the original subdivision grid
+      // when a caller starts in the middle of a bar.
+      offset = Number.isFinite(offset) ? Math.max(0, offset) : 0;
+      const firstBeat = Math.max(context.currentTime + START_LEAD, Number.isFinite(at) ? at : 0);
       const beatDuration = 60 / song.bpm;
       const startTime = firstBeat + (countIn ? beatDuration * song.beats : 0);
       const metronome = new Map();
@@ -331,6 +334,9 @@ export function createComposerEngine(context, {
         bpm: song.bpm, tick: 0, nextTime: startTime,
         endTick: loop ? Infinity : (lastBar - fromBar + 1) * steps,
         sources: new Set(), releases: new Map(), metronome };
+      const firstTick = Math.min(clock.endTick, Math.ceil(offset / stepLength(song.bpm) - 1e-8));
+      clock.tick = firstTick || 0;
+      clock.nextTime += clock.tick * stepLength(song.bpm) - offset;
       run = clock;
       applyMix(clock, true);
       schedule(clock);

@@ -9,6 +9,10 @@ export const GROUP1_LINES = {
     resume_note: '上次停在第 {minutes} 分鐘。',
     late_night: '{time} 了。去睡。',
     late_night_2: '進度明天再趕。',
+    clip_open: '剪輯台開了。存檔 {slots} 格。',
+    clip_shared: '連結好了。可以把它送出去了。',
+    clip_saved: '存好了。第 {slot} 格。',
+    clip_done: '播完了。片長 {seconds}。',
     phone_focus: '手機那邊專心了 {minutes} 分鐘。記上了。'
   },
   chen: {

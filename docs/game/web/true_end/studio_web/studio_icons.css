@@ -214,7 +214,7 @@ html[data-icon-style="C"] .sp-ic[data-icon="zoom-out"]{background-image:url("ico
   transition: transform .2s cubic-bezier(.3, 1.7, .5, 1), filter .2s ease;
   pointer-events: none;
 }
-.sp-icon-btn.sp-icon-only {
+.sp-icon-btn.sp-icon-only:where(:not(.ce-button)) {
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
@@ -236,7 +236,7 @@ html[data-icon-style="C"] .sp-ic[data-icon="zoom-out"]{background-image:url("ico
   clip-path: inset(50%);
   white-space: nowrap;
 }
-.sp-icon-btn.sp-with-label {
+.sp-icon-btn.sp-with-label:where(:not(.ce-button)) {
   display: inline-flex !important;
   align-items: center;
   justify-content: flex-start;
@@ -264,7 +264,7 @@ label.sp-with-label input[type="file"] { max-width: 100%; }
 }
 .sp-icon-btn.sp-with-label.danger { color: #8d3a2c !important; border-color: #b9806f99 !important; }
 /* 分頁、選項的「目前這個」 */
-.sp-icon-btn.sp-with-label:is([aria-selected="true"], [aria-pressed="true"]) {
+.sp-icon-btn.sp-with-label:where(:not(.ce-button)):is([aria-selected="true"], [aria-pressed="true"]) {
   border-color: var(--binding, #704934) !important;
   background: var(--binding, #704934) !important;
   color: #fffaf0 !important;
@@ -384,11 +384,11 @@ label.sp-with-label input[type="file"] { max-width: 100%; }
 /* hover／鍵盤焦點：輕微上浮放大、陰影加深；按下縮一下，放開時回彈（transition 的曲線超過 1） */
 @media (hover: hover) {
   .sp-icon-btn:not(:disabled):hover .sp-ic { transform: translateY(-2px) scale(1.08); filter: drop-shadow(0 5px 5px rgba(74, 46, 28, .36)); }
-  .sp-icon-btn.sp-with-label:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 5px 12px #85583b40 !important; }
+  .sp-icon-btn.sp-with-label:not(:disabled, .ce-button):hover { transform: translateY(-1px); box-shadow: 0 5px 12px #85583b40 !important; }
 }
 .sp-icon-btn:not(:disabled):focus-visible .sp-ic { transform: translateY(-2px) scale(1.08); filter: drop-shadow(0 5px 5px rgba(74, 46, 28, .36)); }
 .sp-icon-btn:not(:disabled):active .sp-ic { transform: translateY(1px) scale(.9); transition-duration: .06s; }
-.sp-icon-btn.sp-with-label:not(:disabled):active { transform: translateY(1px) scale(.98); transition-duration: .06s; }
+.sp-icon-btn.sp-with-label:not(:disabled, .ce-button):active { transform: translateY(1px) scale(.98); transition-duration: .06s; }
 
 /* A 水彩手繪：hover 時圖示後面暈開一圈水彩 */
 html[data-icon-style="A"] .sp-icon-btn::before {
@@ -496,7 +496,7 @@ html[data-icon-style="C"] .sp-icon-btn:not(:disabled):focus-visible .sp-ic { fil
 #panel .sf-draw-tools .sp-icon-btn.sp-icon-only[aria-pressed="true"] .sp-ic, #panel .sf-draw-tools .sp-icon-btn.sp-icon-only.on .sp-ic { transform: scale(1.08); }
 
 @media (max-width: 600px) {
-  .sp-icon-btn.sp-with-label { gap: 5px; padding-right: 12px !important; font-size: 14px; --ic: 36px; }
+  .sp-icon-btn.sp-with-label:where(:not(.ce-button)) { gap: 5px; padding-right: 12px !important; font-size: 14px; --ic: 36px; }
   #scroll-controls .sp-icon-btn.sp-icon-only, #tools .sp-icon-btn.sp-icon-only { width: 50px; height: 50px !important; --ic: 46px; }
   .turn.sp-icon-btn.sp-icon-only { width: 52px !important; height: 52px !important; margin-top: -26px !important; --ic: 48px; }
   .ming-exit.sp-icon-btn.sp-with-label { font-size: 12px; --ic: 26px; }

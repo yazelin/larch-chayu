@@ -1,15 +1,15 @@
 {
   "version": 1,
   "pagesBase": "https://yazelin.github.io/larch-chayu/game/",
-  "totalFiles": 992,
-  "totalBytes": 96418157,
+  "totalFiles": 996,
+  "totalBytes": 96490042,
   "bytesByCategory": {
     "bgm": 25662250,
     "cg": 3081222,
     "img": 203466,
     "minigames": 11052296,
     "mv": 15206418,
-    "web": 41212505
+    "web": 41284390
   },
   "largestFile": {
     "file": "mv/media/boring_v2.mp3",
@@ -18,7 +18,7 @@
     "sha256": "d6e99b0176da8186897b6b8a7d37cd99f72a8c677907bcbe9413cac56bcf7059",
     "source": "新版/mv/media/boring_v2.mp3"
   },
-  "webDependencyFiles": 992,
+  "webDependencyFiles": 996,
   "cgNameMap": [
     {
       "file": "cg/ch1/ch1_cg_079.webp",
@@ -4866,10 +4866,38 @@
       "source": "真結局/studio_web/band_engine.mjs"
     },
     {
+      "file": "web/true_end/studio_web/clip_editor.css",
+      "category": "web",
+      "bytes": 13757,
+      "sha256": "1087da350d1a1ee4ae9ee943704c655d9b06017a42714345ba08f4c8b50fb23e",
+      "source": "真結局/studio_web/clip_editor.css"
+    },
+    {
+      "file": "web/true_end/studio_web/clip_editor.mjs",
+      "category": "web",
+      "bytes": 36765,
+      "sha256": "1e53845ea1302d2f6bd97a7ec47503c7b474913b39585f615ded943e698f8aaa",
+      "source": "真結局/studio_web/clip_editor.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/clip_format.mjs",
+      "category": "web",
+      "bytes": 3576,
+      "sha256": "4227002c5b1b7d1b89f59dce8f8e6c460aa9535e8b5bcf40b72fcfac2c3a456f",
+      "source": "真結局/studio_web/clip_format.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/clip_player.mjs",
+      "category": "web",
+      "bytes": 10420,
+      "sha256": "7cc6fcb67996ef219ce50d82ebd0a51abfef137d8d31fed6ebe58da95de6cda1",
+      "source": "真結局/studio_web/clip_player.mjs"
+    },
+    {
       "file": "web/true_end/studio_web/composer_engine.mjs",
       "category": "web",
-      "bytes": 15376,
-      "sha256": "6de0afe8ab58d39637e6c4c5e6ad5ddaabc6c2e98eb70e38318157e72ded48f7",
+      "bytes": 15830,
+      "sha256": "3b9ea0d22a4b932cd7dbda468376b8806d4d8d1af1198e7b15556101a9af423b",
       "source": "真結局/studio_web/composer_engine.mjs"
     },
     {
@@ -4931,8 +4959,8 @@
     {
       "file": "web/true_end/studio_web/fonts/iansui-studio.woff2",
       "category": "web",
-      "bytes": 456508,
-      "sha256": "00e158a13ee187d8d32b58970a95518f6215486533346376dfaed2947beaa458",
+      "bytes": 457432,
+      "sha256": "3e4118ffda0a2fd5869881fdcbfd798878f134f13eaa8a0fd0858dc1e1a9f6e5",
       "source": "真結局/studio_web/fonts/iansui-studio.woff2"
     },
     {
@@ -6352,8 +6380,8 @@
     {
       "file": "web/true_end/studio_web/index.html",
       "category": "web",
-      "bytes": 142041,
-      "sha256": "6aef1efdf89abc571cacdefa3cc7246ccf9a17d537f755160725d5e585dc4779",
+      "bytes": 142088,
+      "sha256": "0f7cfb15d1a6fabba79042076e1f5423d4d977c594adcb1d4d82f0a29b0d1c2b",
       "source": "真結局/studio_web/index.html"
     },
     {
@@ -6541,8 +6569,8 @@
     {
       "file": "web/true_end/studio_web/studio_features.mjs",
       "category": "web",
-      "bytes": 206814,
-      "sha256": "b789f62a753891f700ab576cae243aeeefbf3b957dfc20664ca54a89bbd2295f",
+      "bytes": 211965,
+      "sha256": "1b27a142ace1223098567372e674568f92f53fbc26faaf89531c86ada82a20a4",
       "source": "真結局/studio_web/studio_features.mjs"
     },
     {
@@ -6562,22 +6590,22 @@
     {
       "file": "web/true_end/studio_web/studio_icons.css",
       "category": "web",
-      "bytes": 35430,
-      "sha256": "548455aacfe1eebf70c59980d945235f67f2a2cfda75f20769a3e23fe0dd4e97",
+      "bytes": 35550,
+      "sha256": "93f3fc68450d7843f4a65a36cc19de947e9fac86e411e9286b72e9675b7c4e5e",
       "source": "真結局/studio_web/studio_icons.css"
     },
     {
       "file": "web/true_end/studio_web/studio_icons.mjs",
       "category": "web",
-      "bytes": 25572,
-      "sha256": "e8b4ec1788c4f67113ad89a8491d8bc217078bf0338333d5bbd91ea942b88e9a",
+      "bytes": 25884,
+      "sha256": "d0f94b3d5ec53eb8507ca9f7e8d4a5c15fe9f9a78b82894ecf0dda854dd26d03",
       "source": "真結局/studio_web/studio_icons.mjs"
     },
     {
       "file": "web/true_end/studio_web/studio_lines_group1.mjs",
       "category": "web",
-      "bytes": 1453,
-      "sha256": "b86bab87a6e7d9809cf6e5ac56aea20fec25ab4616f3223d87b2e84baff13ab6",
+      "bytes": 1673,
+      "sha256": "2d02b7643bce9e1d087409ef74bd5048dfbcd051e34bf69dd6d76f6899fa1c59",
       "source": "真結局/studio_web/studio_lines_group1.mjs"
     },
     {
@@ -6590,8 +6618,8 @@
     {
       "file": "web/true_end/studio_web/studio_paper.css",
       "category": "web",
-      "bytes": 51779,
-      "sha256": "23d8a1cb7dd750861e6bc1e89ac5dbf5513aa684d6400ceca3c824d4d6a3ada2",
+      "bytes": 51856,
+      "sha256": "560605d9af36171c747d713b9d047fd2a40584b354dcc365bb30943ab4990eef",
       "source": "真結局/studio_web/studio_paper.css"
     },
     {
@@ -6653,8 +6681,8 @@
     {
       "file": "web/true_end/studio_web/studio_storage.js",
       "category": "web",
-      "bytes": 20289,
-      "sha256": "7f7385d7dee2a78abb9e6e36f29fe507f1be7b691a8fdcad23247fb7b2959aac",
+      "bytes": 20351,
+      "sha256": "eb13314093044184951d08814a03cbfc5c2614dab6384e934380bf0b7a072139",
       "source": "真結局/studio_web/studio_storage.js"
     },
     {

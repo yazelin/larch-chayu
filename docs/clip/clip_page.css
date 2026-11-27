@@ -1,0 +1,108 @@
+@font-face {
+  font-family: Iansui;
+  src: url("./fonts/iansui-clip.woff2") format("woff2");
+  font-display: swap;
+}
+:root {
+  color-scheme: dark;
+  font-family: system-ui, "Noto Sans TC", sans-serif;
+  color: #faf2ec;
+  background: #201b2c;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at 25% 0, #43364c 0, transparent 65%);
+}
+main {
+  width: min(100% - 48px, 1040px);
+  margin: 0 auto;
+  padding: clamp(28px, 5vw, 68px) 0 36px;
+}
+header { margin-bottom: 24px; }
+.work-label {
+  margin: 0 0 8px;
+  color: #f1cca4;
+  letter-spacing: .18em;
+  font-size: .875rem;
+}
+h1 {
+  margin: 0;
+  font: 400 clamp(2rem, 5vw, 3.6rem)/1.16 Iansui, serif;
+  overflow-wrap: anywhere;
+}
+#player {
+  overflow: hidden;
+  border: 1px solid #73627d;
+  border-radius: 16px;
+  background: #171323;
+  box-shadow: 0 16px 40px #100d1c70;
+}
+canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #100d19;
+}
+.transport, .actions, #export {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.transport { padding: 12px 16px; }
+.transport input {
+  flex: 1 1 85px;
+  min-width: 50px;
+  height: 32px;
+  accent-color: #efc8a0;
+}
+output { color: #d8cbdc; font-variant-numeric: tabular-nums; white-space: nowrap; }
+button {
+  border: 1px solid #87738d;
+  border-radius: 8px;
+  padding: 0 14px;
+  min-height: 44px;
+  background: #352a42;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+button:hover:enabled { background: #4a3a59; }
+button:disabled { opacity: .5; cursor: default; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid #ffe0ad; outline-offset: 4px; }
+#download {
+  border-color: transparent;
+  background: #f0cca7;
+  color: #281823;
+  font-weight: 600;
+  min-width: 112px;
+}
+#download:hover:enabled { background: #ffe1bf; }
+.actions { justify-content: space-between; margin-top: 20px; }
+.actions a { color: #f3d5bc; text-underline-offset: 4px; padding: 8px 0; }
+#status, #load { color: #e4cbdc; }
+progress { width: min(30vw, 160px); accent-color: #efc8a0; }
+#player:fullscreen, #player.expanded {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #100d19;
+  border: 0;
+  border-radius: 0;
+}
+#player.expanded { position: fixed; inset: 0; z-index: 1; }
+#player:fullscreen canvas, #player.expanded canvas {
+  flex: 1;
+  min-height: 0;
+  object-fit: contain;
+}
+@media (max-width: 540px) {
+  main { width: calc(100% - 32px); }
+  .transport, .actions, #export { gap: 8px; }
+  .transport { padding: 8px; }
+  .transport button { padding: 0 8px; }
+  output { font-size: .8rem; }
+}
