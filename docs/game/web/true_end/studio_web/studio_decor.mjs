@@ -273,9 +273,31 @@ function boot() {
     document.querySelectorAll('.decor-pet.act-cat').forEach(function (cat) {
       if (cat.classList.contains('strolling') || Math.random() > .35) return;
       cat.classList.add('strolling'); cat.src = cat.dataset.walk;
-      setTimeout(function () { cat.classList.remove('strolling'); cat.src = cat.dataset.rest; }, 5200);
+      stroll(cat).then(function () { cat.classList.remove('strolling'); cat.src = cat.dataset.rest; });
     });
   }, 9000);
+  // 貓走一小段（作者 2026-11-28）：走路圖頭朝右，往左走要翻面；只在坐墊附近走（約 0.35 個身長）；
+  // 走的時候一步一步上下起伏、身體微微擺，停下來就不動，才不像在滑。
+  function stroll(cat) {
+    const dir = Math.random() < .5 ? -1 : 1, reach = 35;   // 單位：貓自己寬度的百分比
+    const face = function (d) { return d < 0 ? ' scaleX(-1)' : ''; };
+    const at = function (x, d) { return 'translateX(calc(-50% + ' + x + '%))' + face(d); };
+    const legs = [];
+    function walk(from, to, ms) {
+      const d = to > from ? 1 : -1;
+      const move = cat.animate([{ transform: at(from, d) }, { transform: at(to, d) }], { duration: ms, easing: 'linear', fill: 'forwards' });
+      const steps = Math.max(2, Math.round(ms / 260));
+      legs.push(cat.animate([{ translate: '0 0', rotate: '0deg' }, { translate: '0 -4%', rotate: (1.6 * d) + 'deg' }, { translate: '0 0', rotate: '0deg' }],
+        { duration: ms / steps, iterations: steps, easing: 'ease-in-out' }));
+      return move.finished;
+    }
+    function rest(x, d, ms) { return cat.animate([{ transform: at(x, d) }, { transform: at(x, d) }], { duration: ms, fill: 'forwards' }).finished; }
+    return walk(0, dir * reach, 1500)
+      .then(function () { return rest(dir * reach, dir, 900); })
+      .then(function () { return walk(dir * reach, 0, 1500); })
+      .then(function () { cat.getAnimations().forEach(function (a) { a.cancel(); }); })
+      .catch(function () {});
+  }
   function pet(node, id) {
     const heart = document.createElement('span'); heart.className = 'decor-heart'; heart.textContent = '♥'; node.appendChild(heart); setTimeout(function () { heart.remove(); }, 1100);
     const pic = node.querySelector('.decor-pet'); if (pic) { pic.classList.remove('petted'); void pic.offsetWidth; pic.classList.add('petted'); }
