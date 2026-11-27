@@ -185,12 +185,22 @@ export function createFocus({ db, el, button, avatar, volume, desktop }) {
     notice = null;
   }
 
+  // 按「知道了」才記成今晚提醒過（2026-11-28：原本一跳出就記，第一次被說明框蓋住，作者沒看到，之後也不再跳）。
+  // 這次開著的頁面裡跳過就不再重跳。預覽可加 lateNight=1 不管紀錄、隨時顯示。
+  const forceNight = new URLSearchParams(location.search).get('lateNight') === '1';
+  let shownDay = null;
+  function markNight(day) {
+    if (nightDays.includes(day)) return;
+    nightDays = [...nightDays, day].slice(-14);
+    db.set(NIGHT_KEY, JSON.stringify({ v: 1, days: nightDays })).catch(() => {});
+  }
+
   function checkNight() {
     const now = new Date();
     const day = localDay(+now);
-    if (now.getHours() >= 5 || nightDays.includes(day)) return;
-    nightDays = [...nightDays, day].slice(-14);
-    db.set(NIGHT_KEY, JSON.stringify({ v: 1, days: nightDays })).catch(() => {});
+    if (shownDay === day) return;
+    if (!forceNight && (now.getHours() >= 5 || nightDays.includes(day))) return;
+    shownDay = day;
     dismissNotice();
     notice = el('aside', 'sf-night-notice');
     notice.setAttribute('aria-label', '明的提醒');
@@ -203,7 +213,7 @@ export function createFocus({ db, el, button, avatar, volume, desktop }) {
     const time = pad(now.getHours()) + ':' + pad(now.getMinutes());
     message.append(el('strong', '', '明'), el('p', '', say('late_night', { time })), el('p', '', say('late_night_2')));
     dialogue.append(portrait, message);
-    notice.append(dialogue, button('知道了', dismissNotice));
+    notice.append(dialogue, button('知道了', () => { markNight(day); dismissNotice(); }));
     placeNotice();
   }
 
