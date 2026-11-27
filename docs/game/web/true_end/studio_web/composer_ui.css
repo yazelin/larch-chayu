@@ -382,7 +382,7 @@
 #panel .cs-keyboard .sp-keys { height: clamp(65px, calc(14dvh - 37px), 130px); }
 #panel .cs-keyboard .sp-keys-scroll { margin-block: 4px 1px; }
 #panel .cs-keyboard .sp-keys .sp-key:not(.black) { min-height: 0; }
-#panel .cs-arrange .cs-record[aria-pressed="true"] { background: #94372e; border-color: #94372e; color: #fff; }
+#panel .cs-arrange .cs-record.cs-recording { background: #94372e; border-color: #94372e; color: #fff; }
 .cs-status { justify-content: flex-end; flex-wrap: wrap; min-height: 21px; padding-top: 3px; color: #735746; font-size: 12px; }
 .cs-message { margin-right: auto; }
 .cs-position { color: #824936; font: 11px/1.4 ui-monospace, monospace; }

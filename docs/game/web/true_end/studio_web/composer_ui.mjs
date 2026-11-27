@@ -348,9 +348,12 @@ export function mountComposer({ host, panel, el, audio, mountGuitar, onClose, on
   shortScreen.addEventListener('change', resetKeyboardLayout, eventOptions);
   resetKeyboardLayout();
   const rec = button('錄音', record, 'cs-record');
+  const cancelRec = button('取消', cancelRecording, 'cs-record-cancel');
+  cancelRec.hidden = true;
+  const recordActions = group(rec, cancelRec);
   const recordMode = select('錄音方式', [['append', '疊加'], ['replace', '錄音前清空這幾小節']], () => {});
   const keyboard = el('div', 'cs-keyboard');
-  const keyboardTools = group(el('strong', '', '旋律鍵盤'), toggleKeys, stepInput, rec, recordMode);
+  const keyboardTools = group(el('strong', '', '旋律鍵盤'), toggleKeys, stepInput, recordActions, recordMode);
   keyboard.append(keyboardTools, instrument);
   heading.append(tabs, titleInput);
   arrange.append(toolbar, trackTabs, score, keyboard, status);
@@ -800,8 +803,10 @@ export function mountComposer({ host, panel, el, audio, mountGuitar, onClose, on
     playButton.setAttribute('aria-pressed', String(playing && !recording));
     playButton.disabled = !!recording;
     stopButton.disabled = !playing;
-    rec.disabled = !!recording;
-    rec.setAttribute('aria-pressed', String(!!recording));
+    const recordLabel = recording ? '停止錄音' : '錄音';
+    if (rec.textContent !== recordLabel) rec.textContent = recordLabel;
+    rec.classList.toggle('cs-recording', !!recording);
+    cancelRec.hidden = !recording;
     undoButton.disabled = !undoStack.length || !!recording;
     redoButton.disabled = !redoStack.length || !!recording;
     more.disabled = !!recording;
@@ -829,6 +834,7 @@ export function mountComposer({ host, panel, el, audio, mountGuitar, onClose, on
   }
 
   function record() {
+    if (recording) { stop(); return; }
     if (!ensureEngine()) return;
     stop();
     closeMenu();
@@ -862,8 +868,26 @@ export function mountComposer({ host, panel, el, audio, mountGuitar, onClose, on
     cancelAnimationFrame(counting);
     if (context.currentTime >= take.start) startTake(take);
     for (const endNote of take.notes) endNote(0, false, true);
+    take.notes.length = 0;
     if (take.started) remember(take.before);
     announce(take.started ? '錄音結束' : '已取消錄音');
+  }
+
+  function cancelRecording() {
+    if (!recording) return;
+    const take = recording;
+    recording = null;
+    cancelAnimationFrame(counting);
+    // Releasing held keys must not write their note lengths back into the score.
+    take.notes.length = 0;
+    resetPiano();
+    const returnFocus = document.activeElement === cancelRec;
+    stop();
+    const before = deserializeSong(take.before.packed);
+    for (let bar = take.startBar; bar <= take.endBar; bar++) song.bars[bar].melody = before.bars[bar].melody;
+    grid.render(song, 'melody');
+    if (returnFocus) rec.focus({ preventScroll: true });
+    announce('已取消錄音，旋律回到錄音前');
   }
 
   function pianoNote(note) {
@@ -930,8 +954,14 @@ export function mountComposer({ host, panel, el, audio, mountGuitar, onClose, on
 
   function beforeClose(event) {
     if (allowClose) { returning = true; return; }
-    if (dialog.open || busy && storageReady) { event.preventDefault(); return; }
     const escape = event.detail?.key === 'Escape';
+    if (escape && !dialog.open && (recording || event.detail.repeat)) {
+      event.detail.preventDefault();
+      event.preventDefault();
+      cancelRecording();
+      return;
+    }
+    if (dialog.open || busy && storageReady) { event.preventDefault(); return; }
     if (escape && grid.cancelNoteDrag()) {
       event.detail.preventDefault();
       event.preventDefault();

@@ -123,7 +123,7 @@ const RULES = [
   { t: '重玩', i: 'play', m: 'icon' },
   { t: /^‹\s*劇情裡的檔案$/, i: 'prev', m: 'icon', tip: '回劇情裡的檔案', aria: '回劇情裡的檔案' },
   { t: '加入', i: 'plus', m: 'label' },
-  { t: '取消', i: 'close', m: 'icon' },
+  { sel: ':not(.cs-record-cancel)', t: '取消', i: 'close', m: 'icon' },
   { t: '請明依劇情排一版', i: 'wand', m: 'label', s: '請明排一版' },
   { t: /^下載完整備份/, i: 'download', m: 'label', s: '下載備份', tip: '下載完整備份（.json 檔）' },
   { t: '套用設定 JSON', i: 'check', m: 'label', s: '套用設定' },
