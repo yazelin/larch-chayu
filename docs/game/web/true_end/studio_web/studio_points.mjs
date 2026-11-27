@@ -289,8 +289,10 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
       clearTimeout(feedbackTimer);
       feedbackTimer = setTimeout(() => feedback.classList.remove('on'), 1200);
     }
-    function strum() {
-      if (!brush(STRINGS, false)) return;
+    // 下刷：低音弦→高音弦；上刷：只刷上面四條細弦、高→低，跟真的吉他一樣比較輕（作者 2026-11-28：要能自由上下刷）
+    const UP_STRINGS = [5, 4, 3, 2];
+    function strum(direction = 'down') {
+      if (!brush(direction === 'up' ? UP_STRINGS : STRINGS, false)) return;
       showStrum();
       if (shape) window.STUDIO_FEATURES?.completeFreeInteraction('shi');
       practice.strum(shape);
@@ -381,7 +383,8 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
     neck.append(strings, grid);
     const tools = el('div', 'sp-gtools');
     tools.append(
-      button('sp-strum', '刷弦（空白鍵）', strum),
+      button('sp-strum', '下刷（空白鍵）', () => strum('down')),
+      button('sp-strum-up', '上刷（Shift＋空白鍵）', () => strum('up')),
       button('sp-clear', '放開', () => {
         selected = null;
         tapHeld.fill(0);
@@ -424,7 +427,7 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
       beforePlay: () => { practice.stop(); audio(); },
     });
     wrap.append(picks, neck, capoLabel, tools, practice.hint,
-      el('p', 'sp-cap', '點格子壓弦，點指板上方的撥片試音，點琴枕可悶弦。也能按住格上的鍵，再按空白鍵刷弦。'));
+      el('p', 'sp-cap', '點格子壓弦，點指板上方的撥片試音，點琴枕可悶弦。也能按住格上的鍵，再按空白鍵下刷、Shift＋空白鍵上刷。'));
     layout.append(wrap, chords, practice.panel);
     if (arranger) layout.append(arranger.panel);
     host.append(layout);
@@ -440,8 +443,8 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
       const k = e.key.toLowerCase();
       if (k === ' ') {
         // 空白鍵仍可操作鍵盤焦點所在的按鈕。滑鼠選卡後可直接用空白鍵刷。
-        if (e.target.matches?.('.sp-mute, button:focus-visible:not(#panel-close, .sp-strum)')) return;
-        e.preventDefault(); e.stopPropagation(); if (!e.repeat) strum();
+        if (e.target.matches?.('.sp-mute, button:focus-visible:not(#panel-close, .sp-strum, .sp-strum-up)')) return;
+        e.preventDefault(); e.stopPropagation(); if (!e.repeat) strum(e.shiftKey ? 'up' : 'down');
         return;
       }
       const hit = bindings.get(k);

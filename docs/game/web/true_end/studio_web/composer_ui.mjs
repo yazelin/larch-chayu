@@ -301,7 +301,7 @@ export function mountComposer({ host, panel, el, audio, mountGuitar, onClose, on
         }));
       }
     }
-    controls.append(trackHeading, mixer, choose);
+    controls.append(trackHeading, choose, mixer);   // 第一行：軌名、清空、選單；第二行：音量、靜音、獨奏（作者 2026-11-28：和弦那排獨奏突出來）
     if (pattern) controls.append(field('預設刷法', pattern));
     function refresh() {
       const track = song.tracks[name];

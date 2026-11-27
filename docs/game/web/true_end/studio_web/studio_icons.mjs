@@ -56,6 +56,8 @@ const RULES = [
   // 圓拱門、吉他
   { t: '出門到島上', i: 'door', m: 'label', s: '出門', tip: '出門到島上' },
   { t: /^刷弦/, i: 'pick', m: 'label', s: '刷弦' },
+  { t: /^下刷/, i: 'pick', m: 'label', s: '↓ 下刷', tip: '下刷（空白鍵）' },
+  { t: /^上刷/, i: 'pick', m: 'label', s: '↑ 上刷', tip: '上刷（Shift＋空白鍵）' },
   { sel: '.sp-mute', i: 'clear', m: 'icon', tipFn: (_, node) => node.getAttribute('aria-label') },
   { sel: '.sp-chord', i: 'pick', m: 'prepend', tipFn: (_, node) => node.getAttribute('aria-label') },
   { sel: '.sp-pick-string', i: 'pick', m: 'icon' },

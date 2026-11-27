@@ -159,7 +159,10 @@
 }
 #panel .cs-arrange .cs-track-controls select { max-width: 100%; padding-right: 18px; }
 #panel .cs-arrange .cs-mixer input[type="range"] { height: 23px; min-height: 23px; }
-.cs-drums .cs-track-heading { flex-basis: 100%; }
+/* 每軌固定分行：軌名＋選單一行、音量＋靜音＋獨奏一行、其餘（刷法、高低）再一行 */
+.cs-track-controls .cs-mixer { flex-basis: 100%; }
+.cs-track-controls .cs-mixer ~ * { flex-basis: auto; }
+.cs-track-controls > label:has(select[aria-label="和弦預設刷法"]) { flex-basis: 100%; }
 .cs-chords .cs-track-controls > .cs-field { min-width: 0; font-size: 11px; white-space: nowrap; }
 #panel .cs-arrange .cs-chords .cs-field select { min-width: 0; padding-right: 17px; }
 .cs-melody .cs-track-controls { gap: 3px 4px; }
@@ -492,12 +495,8 @@
     justify-items: start;
   }
   .cs-track-controls .cs-mixer { grid-column: 1 / -1; grid-row: 2; }
-  .cs-chords .cs-track-controls {
-    grid-template-columns: auto 1fr;
-  }
-  .cs-chords .cs-mixer { grid-column: 2; grid-row: 1; }
-  .cs-chords .cs-track-controls > .cs-field { grid-column: 2; }
-  .cs-chords .cs-track-controls > select { grid-row: 2; }
+  /* 和弦跟其他軌同一套：軌名＋音色一行、音量＋靜音＋獨奏一行、預設刷法第三行（作者 2026-11-28：獨奏突出來） */
+  .cs-chords .cs-track-controls > .cs-field { grid-column: 1 / -1; grid-row: 3; }
   .cs-melody .cs-mixer input { width: 36px; }
 }
 @media (min-width: 621px) and (max-height: 800px) {
