@@ -260,6 +260,7 @@ function boot() {
             pic.style.bottom = seatBottom(plantInAquarium ? 0 : slot.floor != null ? slot.floor : slot.sit, ph);
           }
           node.appendChild(pic);
+          if (o.kind === 'pet' && slot.base === 'aquarium') swimAround(pic, node, o.id, slot.sit);
         }
         node.addEventListener('pointerdown', function (event) { event.stopPropagation(); });
         node.addEventListener('click', function (event) { event.stopPropagation(); openSlot(index, node); });
@@ -297,6 +298,46 @@ function boot() {
       .then(function () { return walk(dir * reach, 0, 1500); })
       .then(function () { cat.getAnimations().forEach(function (a) { a.cancel(); }); })
       .catch(function () {});
+  }
+  // 水族缸裡的寵物（作者 2026-11-28：寄居蟹、小魚群不會轉向，海龜游出缸外）：
+  // 照缸的水域範圍移動（圖寬 12%～90%、離底 30%～74%，量自 base_aquarium.webp），往哪邊走就面向哪邊。
+  // 圖頭朝右的才翻面；螃蟹橫著走、水母對稱，不翻。
+  const AQUA = { left: .12, right: .90, sand: .30, surface: .70 };   // 水面實測 .74，留一點給擺動
+  const AQUA_MOVE = {
+    hermit: { swim: false, flip: true, speed: .16 }, crab: { swim: false, flip: false, speed: .22 },
+    fish: { swim: true, flip: true, speed: .35 }, turtle: { swim: true, flip: true, speed: .14 },
+    jelly: { swim: true, flip: false, speed: .08, drift: true }
+  };
+  function swimAround(pic, node, id, sit) {
+    const how = AQUA_MOVE[id]; if (!how) return;
+    let x = 0, y = 0, facing = 1;
+    const pose = function () { return 'translate(calc(-50% + ' + x.toFixed(1) + 'px), ' + y.toFixed(1) + 'px)' + (how.flip && facing < 0 ? ' scaleX(-1)' : ''); };
+    function next() {
+      if (!pic.isConnected) return;
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) { setTimeout(next, 4000); return; }
+      const W = node.clientWidth, H = node.clientHeight, pw = pic.offsetWidth, ph = pic.offsetHeight;
+      if (!W || !pw) { setTimeout(next, 1000); return; }
+      // 寵物中心可以去的橫向範圍（相對於缸的正中間）；寵物比水域寬就留在中間
+      const half = Math.max(0, ((AQUA.right - AQUA.left) * W - pw) / 2), mid = ((AQUA.left + AQUA.right) / 2 - .5) * W;
+      const tx = mid + (Math.random() * 2 - 1) * half * (how.drift ? .35 : 1);
+      // 縱向：爬的貼著沙；游的在沙面到水面之間（y 往上是負的）
+      const top = Math.max(0, (AQUA.surface - sit) * H - ph * .92);
+      const ty = how.swim ? -Math.random() * top : 0;
+      const dx = tx - x, dy = ty - y, dist = Math.hypot(dx, dy);
+      if (Math.abs(dx) > 2 && how.flip) facing = dx < 0 ? -1 : 1;
+      const from = pose(); x = tx; y = ty; const to = pose();
+      const ms = Math.max(900, dist / (how.speed * W) * 1000);
+      const move = pic.animate([{ transform: from.replace(/ scaleX\(-1\)$/, '') + (how.flip && facing < 0 ? ' scaleX(-1)' : '') }, { transform: to }], { duration: ms, easing: how.swim ? 'ease-in-out' : 'linear', fill: 'forwards' });
+      // 爬的一步一步起伏；游的輕輕擺；水母一縮一放
+      const beat = how.drift ? 900 : how.swim ? 700 : 240, n = Math.max(1, Math.round(ms / beat));
+      const wiggle = how.drift ? [{ scale: '1 1' }, { scale: '1.06 .9' }, { scale: '1 1' }]
+        : how.swim ? [{ rotate: '0deg' }, { rotate: (facing * 3) + 'deg' }, { rotate: '0deg' }, { rotate: (-facing * 3) + 'deg' }, { rotate: '0deg' }]
+        : [{ translate: '0 0' }, { translate: '0 -5%' }, { translate: '0 0' }];
+      pic.animate(wiggle, { duration: ms / n, iterations: n, easing: 'ease-in-out' });
+      move.finished.then(function () { setTimeout(next, 600 + Math.random() * 2200); }).catch(function () {});
+    }
+    pic.style.animation = 'none';
+    setTimeout(next, 300 + Math.random() * 1500);
   }
   function pet(node, id) {
     const heart = document.createElement('span'); heart.className = 'decor-heart'; heart.textContent = '♥'; node.appendChild(heart); setTimeout(function () { heart.remove(); }, 1100);

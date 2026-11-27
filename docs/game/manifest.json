@@ -2,14 +2,14 @@
   "version": 1,
   "pagesBase": "https://yazelin.github.io/larch-chayu/game/",
   "totalFiles": 941,
-  "totalBytes": 92527782,
+  "totalBytes": 92531009,
   "bytesByCategory": {
     "bgm": 25662250,
     "cg": 3081222,
     "img": 203466,
     "minigames": 11052296,
     "mv": 15206418,
-    "web": 37322130
+    "web": 37325357
   },
   "largestFile": {
     "file": "mv/media/boring_v2.mp3",
@@ -6156,8 +6156,8 @@
     {
       "file": "web/true_end/studio_web/studio_decor.mjs",
       "category": "web",
-      "bytes": 32641,
-      "sha256": "d6a1f671052747791c897c92dc1cf3a64c1d0973062380dbfddae45f1ed2c406",
+      "bytes": 35868,
+      "sha256": "4ebbf01c21b97084c9f5afbf58f46cbd7d680a673ff166b4c5d0aacc34429b3f",
       "source": "真結局/studio_web/studio_decor.mjs"
     },
     {
