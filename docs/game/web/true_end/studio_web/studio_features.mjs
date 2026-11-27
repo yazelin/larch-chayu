@@ -1599,7 +1599,7 @@ function pictureButton(image, open) {
   return trigger;
 }
 
-function showImage(work, from = 'gallery', noteText = work.prompt || work.title) {
+function showImage(work, from = 'gallery', noteText = work.prompt || work.title, puzzle = null) {
   disposeMingComputer();
   clearBody();
   panel.dataset.design = 'art';
@@ -1612,8 +1612,14 @@ function showImage(work, from = 'gallery', noteText = work.prompt || work.title)
   const image = el('img', 'sf-hero-img');
   image.alt = work.title;
   image.src = work.blob instanceof Blob ? workSrc(work) : work.src || workSrc(work);
-  const note = el('p', 'sf-context', noteText);
-  panelBody.append(back, image, note);
+  const actions = el('div', 'sf-image-actions');
+  actions.append(back);
+  if (puzzle) {
+    actions.append(button('拼成拼圖', () => openChenPuzzle(work.id), 'sf-cg-puzzle'));
+    if (puzzle.best) actions.append(puzzleBadge(el, puzzle.best));
+  }
+  panelBody.append(actions, image);
+  if (noteText) panelBody.append(el('p', 'sf-context', noteText));
   back.focus({ preventScroll: true });
 }
 
@@ -3016,9 +3022,12 @@ async function renderProgress(root) {
 
 async function renderFavorites(root) {
   await playerId().catch(function () {});   // Larch 版的作品網址要帶玩家編號
-  const images = await savedWorks('image');
-  const songs = await savedWorks('song');
-  const cgs = puzzleEnabled ? await unlockedPuzzleCGs() : [];
+  const [images, songs, cgs, bests] = await Promise.all([
+    savedWorks('image'), savedWorks('song'),
+    puzzleEnabled ? unlockedPuzzleCGs() : [],
+    puzzleEnabled ? readPuzzleBests(StudioDB) : new Map()
+  ]);
+  if (!root.isConnected) return;
   let filter = 'all';
   function draw() {
     root.replaceChildren();
@@ -3035,13 +3044,31 @@ async function renderFavorites(root) {
       }
       grid.appendChild(card);
     });
-    root.appendChild(grid);
+    if (grid.childElementCount) root.appendChild(grid);
     if (cgs.length && filter !== 'song') {
       const section = el('section', 'sf-puzzle-images');
       section.append(el('h3', '', '劇情 CG'));
-      const links = el('div', 'sf-puzzle-tools');
-      cgs.forEach(cg => links.append(button(cg.title + '・拼成拼圖', () => openChenPuzzle(cg.id))));
-      section.append(links);
+      const thumbnails = el('div', 'ming-cg-grid');
+      for (const cg of cgs) {
+        const best = bests.get(cg.id);
+        const image = el('img', 'sf-cover');
+        image.loading = 'lazy';
+        image.decoding = 'async';
+        image.alt = '';
+        image.src = cg.src;
+        const trigger = pictureButton(image, () => showImage(cg, 'favorites', '', { best }));
+        trigger.setAttribute('aria-label', '放大' + cg.title);
+        if (best) {
+          trigger.classList.add('sf-puzzle-badged');
+          trigger.append(puzzleBadge(el, best));
+        }
+        const card = el('article', 'sf-card ming-cg-card');
+        const title = el('h3', '', cg.title);
+        trigger.append(title);
+        card.append(trigger);
+        thumbnails.append(card);
+      }
+      section.append(thumbnails);
       root.append(section);
     }
   }

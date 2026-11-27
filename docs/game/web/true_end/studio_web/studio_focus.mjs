@@ -278,7 +278,8 @@ export function createFocus({ db, el, button, avatar, volume, desktop }) {
         clock.textContent = duration(phase === 'idle' ? state.minutes * 60 : Math.max(0, Math.ceil((end - Date.now()) / 1000)));
         select.value = state.minutes;
         select.disabled = phase !== 'idle';
-        toggle.textContent = phase === 'idle' ? '開始' : '停止';
+        const toggleLabel = phase === 'idle' ? '開始' : '停止';
+        if (toggle.textContent !== toggleLabel) toggle.textContent = toggleLabel;
         skip.hidden = phase !== 'break';
         dialogue.hidden = !lines.length;
         if (spoken !== lines) {

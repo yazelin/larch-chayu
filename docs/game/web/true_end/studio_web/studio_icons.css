@@ -1,5 +1,7 @@
 /* 圖示對照（make_icons_css.py 產生，不要手改這一段） */
 html[data-icon-style="A"] .sp-ic[data-icon="box"]{background-image:url("icons/A/box.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="brush"]{background-image:url("icons/A/brush.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="bucket"]{background-image:url("icons/A/bucket.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="ch1"]{background-image:url("icons/A/ch1.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="ch2"]{background-image:url("icons/A/ch2.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="ch3"]{background-image:url("icons/A/ch3.webp")}
@@ -14,6 +16,7 @@ html[data-icon-style="A"] .sp-ic[data-icon="close"]{background-image:url("icons/
 html[data-icon-style="A"] .sp-ic[data-icon="decor"]{background-image:url("icons/A/decor.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="door"]{background-image:url("icons/A/door.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="download"]{background-image:url("icons/A/download.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="dropper"]{background-image:url("icons/A/dropper.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="easel"]{background-image:url("icons/A/easel.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="eraser"]{background-image:url("icons/A/eraser.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="eye"]{background-image:url("icons/A/eye.webp")}
@@ -44,6 +47,7 @@ html[data-icon-style="A"] .sp-ic[data-icon="reset"]{background-image:url("icons/
 html[data-icon-style="A"] .sp-ic[data-icon="send"]{background-image:url("icons/A/send.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="sketchbook"]{background-image:url("icons/A/sketchbook.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="sprout"]{background-image:url("icons/A/sprout.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="stop"]{background-image:url("icons/A/stop.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="story"]{background-image:url("icons/A/story.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="sun"]{background-image:url("icons/A/sun.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="sunrise"]{background-image:url("icons/A/sunrise.webp")}
@@ -59,6 +63,8 @@ html[data-icon-style="A"] .sp-ic[data-icon="water"]{background-image:url("icons/
 html[data-icon-style="A"] .sp-ic[data-icon="zoom-in"]{background-image:url("icons/A/zoom-in.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="zoom-out"]{background-image:url("icons/A/zoom-out.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="box"]{background-image:url("icons/B/box.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="brush"]{background-image:url("icons/B/brush.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="bucket"]{background-image:url("icons/B/bucket.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="ch1"]{background-image:url("icons/B/ch1.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="ch2"]{background-image:url("icons/B/ch2.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="ch3"]{background-image:url("icons/B/ch3.webp")}
@@ -73,6 +79,7 @@ html[data-icon-style="B"] .sp-ic[data-icon="close"]{background-image:url("icons/
 html[data-icon-style="B"] .sp-ic[data-icon="decor"]{background-image:url("icons/B/decor.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="door"]{background-image:url("icons/B/door.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="download"]{background-image:url("icons/B/download.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="dropper"]{background-image:url("icons/B/dropper.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="easel"]{background-image:url("icons/B/easel.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="eraser"]{background-image:url("icons/B/eraser.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="eye"]{background-image:url("icons/B/eye.webp")}
@@ -103,6 +110,7 @@ html[data-icon-style="B"] .sp-ic[data-icon="reset"]{background-image:url("icons/
 html[data-icon-style="B"] .sp-ic[data-icon="send"]{background-image:url("icons/B/send.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="sketchbook"]{background-image:url("icons/B/sketchbook.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="sprout"]{background-image:url("icons/B/sprout.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="stop"]{background-image:url("icons/B/stop.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="story"]{background-image:url("icons/B/story.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="sun"]{background-image:url("icons/B/sun.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="sunrise"]{background-image:url("icons/B/sunrise.webp")}
@@ -118,6 +126,8 @@ html[data-icon-style="B"] .sp-ic[data-icon="water"]{background-image:url("icons/
 html[data-icon-style="B"] .sp-ic[data-icon="zoom-in"]{background-image:url("icons/B/zoom-in.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="zoom-out"]{background-image:url("icons/B/zoom-out.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="box"]{background-image:url("icons/C/box.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="brush"]{background-image:url("icons/C/brush.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="bucket"]{background-image:url("icons/C/bucket.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="ch1"]{background-image:url("icons/C/ch1.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="ch2"]{background-image:url("icons/C/ch2.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="ch3"]{background-image:url("icons/C/ch3.webp")}
@@ -132,6 +142,7 @@ html[data-icon-style="C"] .sp-ic[data-icon="close"]{background-image:url("icons/
 html[data-icon-style="C"] .sp-ic[data-icon="decor"]{background-image:url("icons/C/decor.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="door"]{background-image:url("icons/C/door.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="download"]{background-image:url("icons/C/download.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="dropper"]{background-image:url("icons/C/dropper.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="easel"]{background-image:url("icons/C/easel.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="eraser"]{background-image:url("icons/C/eraser.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="eye"]{background-image:url("icons/C/eye.webp")}
@@ -162,6 +173,7 @@ html[data-icon-style="C"] .sp-ic[data-icon="reset"]{background-image:url("icons/
 html[data-icon-style="C"] .sp-ic[data-icon="send"]{background-image:url("icons/C/send.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="sketchbook"]{background-image:url("icons/C/sketchbook.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="sprout"]{background-image:url("icons/C/sprout.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="stop"]{background-image:url("icons/C/stop.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="story"]{background-image:url("icons/C/story.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="sun"]{background-image:url("icons/C/sun.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="sunrise"]{background-image:url("icons/C/sunrise.webp")}
@@ -270,6 +282,104 @@ label.sp-with-label input[type="file"] { max-width: 100%; }
 .sp-icon-btn:disabled { cursor: default; }
 .sp-icon-btn:disabled .sp-ic { opacity: .45; filter: grayscale(.5); }
 .sp-icon-btn.sp-with-label:disabled { opacity: .6; }
+.sp-icon-btn[hidden] { display: none !important; }
+
+#panel .cs-room .sp-icon-btn {
+  --ic: 22px;
+  gap: 3px;
+  min-width: 34px !important;
+  min-height: 32px !important;
+}
+#panel .cs-room .sp-with-label {
+  padding: 2px 6px 2px 3px !important;
+  font-size: 13px;
+  white-space: nowrap;
+}
+#panel .cs-room .cs-tabs .sp-with-label { font-size: clamp(13px, 2.2vw, 17px); }
+#panel .cs-room :is(.cs-track-controls, .cs-pitch-controls) .sp-with-label {
+  --ic: 15px;
+  min-height: 24px !important;
+  padding: 1px 4px 1px 2px !important;
+  gap: 2px;
+  font-size: 11px;
+}
+#panel .cs-room .cs-pitch-controls button { width: auto; }
+#panel .cs-room .cs-bar-number { touch-action: pan-y; }
+#panel .cs-room button.cs-bar-more.sp-with-label { font: 600 13px/1.1 system-ui, sans-serif; }
+#panel .cs-room .cs-files button[aria-expanded]::after { content: "▾"; }
+#panel .cs-room .cs-menu .sp-with-label { width: 100%; white-space: normal; }
+@media (max-width: 620px) {
+  #panel .cs-room .cs-bar-more.sp-with-label { min-height: 44px !important; }
+}
+#panel .cs-room .cs-chord-pick.sp-with-label { justify-content: center; }
+#panel .cs-room .cs-bass-note.manual.sp-with-label {
+  --ic: 8px;
+  min-width: 0 !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  display: grid !important;
+  justify-content: center;
+  align-content: center;
+  gap: 0;
+  font-size: 9px;
+}
+@media (min-width: 951px) and (min-height: 511px) {
+  #panel .cs-room .cs-toolbar-more.sp-with-label { display: none !important; }
+}
+@media (min-width: 621px) and (max-height: 500px) {
+  #panel .cs-room .cs-score { --side: 400px; }
+  #panel .cs-room :is(.cs-toolbar, .cs-ruler, .cs-keyboard) .sp-icon-btn {
+    --ic: 19px;
+    min-height: 28px !important;
+  }
+  #panel .cs-room .cs-melody .cs-track-controls { width: auto; padding-inline: 2px; gap: 2px; }
+  #panel .cs-room .cs-melody .cs-track-controls h2 { font-size: 18px; }
+  #panel .cs-room .cs-melody .cs-mixer { gap: 2px; }
+  #panel .cs-room .cs-melody .cs-mixer input { width: 28px; }
+  #panel .cs-room .cs-pitch-controls .sp-with-label { min-width: 30px !important; }
+}
+.sp-icon-btn[data-sp-text="重做"][data-icon="undo"] > .sp-ic { scale: -1 1; }
+.cs-pitch-controls [data-sp-text="↑"] > .sp-ic { rotate: -90deg; }
+.cs-pitch-controls [data-sp-text="↓"] > .sp-ic { rotate: 90deg; }
+
+#panel .sf-draw-size.sp-with-label, #panel .sf-coloring-editor .sp-icon-btn {
+  --ic: 27px;
+  min-height: 36px !important;
+  gap: 4px;
+  font-size: 13px;
+}
+#panel :is(.sf-draw-size, .sf-coloring-editor button).sp-with-label { padding: 2px 7px 2px 3px !important; }
+#panel .sf-coloring-palette-actions .sp-icon-btn { --ic: 20px; }
+@media (orientation: landscape) and (max-height: 480px) {
+  .sf-coloring-controls .sf-coloring-recent { order: 1; }
+}
+#panel .sf-draw-size.sp-with-label::before, #panel .ming-progress-row .cb.sp-with-label::before,
+#panel .ming-progress-row .cb.sp-with-label::after { content: none; }
+#panel .sf-coloring-editor .sp-icon-only { min-width: 36px !important; }
+#panel .ming-progress-row .cb.sp-with-label {
+  --ic: 21px;
+  width: auto;
+  height: auto;
+  min-height: 34px !important;
+  gap: 3px;
+  padding: 2px 5px 2px 3px !important;
+  font-size: 12px;
+}
+#panel .ming-window-titlebar [data-progress-add-toggle].sp-with-label {
+  --ic: 16px;
+  width: auto;
+  min-height: 28px !important;
+  gap: 2px;
+  padding: 0 4px !important;
+  font-size: 12px;
+}
+#panel .sf-puzzle-tools .sp-with-label {
+  --ic: 28px;
+  min-height: 38px !important;
+  gap: 3px;
+  padding: 2px 8px 2px 4px !important;
+  font-size: 14px;
+}
 
 /* hover／鍵盤焦點：輕微上浮放大、陰影加深；按下縮一下，放開時回彈（transition 的曲線超過 1） */
 @media (hover: hover) {

@@ -80,6 +80,51 @@ const RULES = [
   { sel: '.sp-use-shape', i: 'pick', m: 'icon' },
   { sel: '.sp-progression', i: 'list', m: 'label', tipFn: text => '練習 ' + text },
   { sel: '.sp-clear', t: '放開', i: 'hand', m: 'label', tip: '放開（手指離開琴格）' },
+  { sel: '.sp-band-toggle', t: '開啟伴奏', i: 'music', m: 'label' },
+  { sel: '.sp-band-toggle', t: /^(停止|關閉)伴奏$/, i: 'stop', m: 'label' },
+  // 編曲室：保留各控制項的讀屏名稱與鍵盤操作
+  { sel: '#cs-tab-arrange', i: 'music', m: 'label' },
+  { sel: '#cs-tab-guitar', i: 'pick', m: 'label' },
+  { sel: '#cs-tab-practice', i: 'list', m: 'label' },
+  { sel: '.cs-track-tabs button', t: '鼓', i: 'music', m: 'label' },
+  { sel: '.cs-track-tabs button', t: '貝斯', i: 'music', m: 'label' },
+  { sel: '.cs-track-tabs button', t: '和弦', i: 'pick', m: 'label' },
+  { sel: '.cs-track-tabs button', t: '旋律', i: 'music', m: 'label' },
+  { sel: '.cs-toolbar button', t: '▶ 播放', i: 'play', m: 'icon', tip: '播放' },
+  { sel: '.cs-toolbar button', t: '■ 停止', i: 'stop', m: 'icon', tip: '停止' },
+  { sel: '.cs-toolbar button', t: '＋小節', i: 'plus', m: 'label', s: '加小節' },
+  { sel: '.cs-toolbar button', t: '－小節', i: 'trash', m: 'label', s: '減小節' },
+  { sel: '.cs-toolbar button', t: '清空這段', i: 'clear', m: 'label' },
+  { sel: '.cs-toolbar button', t: '取消循環', i: 'close', m: 'label' },
+  { sel: '.cs-toolbar .cs-files button, .cs-dialog button', t: /^存檔( ▾)?$/, i: 'box', m: 'label', s: '存檔' },
+  { sel: '.cs-toolbar .cs-files button, .cs-dialog button', t: /^讀檔( ▾)?$/, i: 'open', m: 'label', s: '讀檔' },
+  { sel: '.cs-history button, .cs-menu button', t: '新曲', i: 'pencil', m: 'label' },
+  { sel: '.cs-history button', t: '復原', i: 'undo', m: 'icon' },
+  { sel: '.cs-history button', t: '重做', i: 'undo', m: 'icon' },
+  { sel: '.cs-menu button', t: '復原', i: 'undo', m: 'label' },
+  { sel: '.cs-menu button', t: '重做', i: 'undo', m: 'label' },
+  { sel: '.cs-toolbar-more', i: 'list', m: 'label', s: '更多' },
+  { sel: '.cs-room .cs-track-heading button, .cs-room .cs-dialog button', t: '清空', i: 'clear', m: 'label' },
+  { sel: '.cs-mixer button', t: '靜音', i: 'clear', m: 'label' },
+  { sel: '.cs-mixer button', t: '獨奏', i: 'music', m: 'label' },
+  { sel: '.cs-pitch-controls button', t: '↑', i: 'next', m: 'label', s: '高', tip: '往高音捲動' },
+  { sel: '.cs-pitch-controls button', t: '↓', i: 'next', m: 'label', s: '低', tip: '往低音捲動' },
+  { sel: '.cs-bar-more', i: 'list', m: 'label', s: '選單', tipFn: (_, node) => node.getAttribute('aria-label') },
+  { sel: '.cs-bar-number', i: 'play', m: 'label', tipFn: (_, node) => node.getAttribute('aria-label') },
+  { sel: '.cs-chord-pick', i: 'pick', m: 'prepend', tipFn: (_, node) => node.getAttribute('aria-label') },
+  { sel: '.cs-bass-note.manual', i: 'pencil', m: 'prepend', tipFn: (_, node) => node.getAttribute('aria-label') },
+  { sel: '.cs-keyboard-toggle', t: '顯示琴鍵', i: 'eye', m: 'label' },
+  { sel: '.cs-keyboard-toggle', t: '收起琴鍵', i: 'clear', m: 'label' },
+  { sel: '.cs-keyboard button', t: '點輸入', i: 'pencil', m: 'label' },
+  { sel: '.cs-record', t: '錄音', i: 'record', m: 'label' },
+  { sel: '.cs-record', t: '停止錄音', i: 'stop', m: 'label' },
+  { sel: '.cs-record-cancel', i: 'close', m: 'label' },
+  { sel: '.cs-menu button', t: '在後面插入空白小節', i: 'plus', m: 'label' },
+  { sel: '.cs-menu button', t: '複製這一小節', i: 'list', m: 'label' },
+  { sel: '.cs-menu button', t: '清空這一小節', i: 'clear', m: 'label' },
+  { sel: '.cs-menu button', t: '刪除這一小節', i: 'trash', m: 'label' },
+  { sel: '.cs-dialog button', t: '不存', i: 'close', m: 'label' },
+  { sel: '.cs-dialog button', t: '套用', i: 'check', m: 'label' },
   // 晨、詩的角落分頁：意思彼此接近（我來畫／請晨畫一張），留短字
   { sel: '.sf-tab', t: /^找(晨|詩|明)$/, i: 'chat', m: 'label' },
   { sel: '.sf-tab', t: '我來畫', i: 'pencil', m: 'label' },
@@ -108,10 +153,41 @@ const RULES = [
   { t: '回到和晨的聊天', i: 'prev', m: 'label', s: '回聊天' },
   { t: '回到收藏資料夾', i: 'prev', m: 'label', s: '回收藏' },
   // 畫圖工具
+  { sel: '[data-coloring-tool="fill"]', i: 'bucket', m: 'label' },
+  { sel: '[data-coloring-tool="brush"]', i: 'brush', m: 'label' },
+  { sel: '[data-coloring-tool="erase"]', i: 'eraser', m: 'label' },
+  { sel: '[data-coloring-tool="pick"]', i: 'dropper', m: 'label' },
+  { sel: '[data-coloring-tool="pan"]', i: 'hand', m: 'label', tip: '移動畫面（兩指拖也可以）' },
+  { sel: '.sf-coloring-now button', t: '自訂色', i: 'palette', m: 'label' },
+  { sel: '.sf-coloring-now button', t: '返回工具', i: 'prev', m: 'label' },
+  { sel: '.sf-coloring-zoom button[aria-label="縮小"]', i: 'zoom-out', m: 'icon', tip: '縮小' },
+  { sel: '.sf-coloring-zoom button[aria-label="放大"]', i: 'zoom-in', m: 'icon', tip: '放大' },
+  { sel: '.sf-coloring-zoom button', t: '整張', i: 'reset', m: 'label' },
+  { sel: '.sf-coloring-editor button', t: '重做', i: 'undo', m: 'icon' },
+  { sel: '.sf-coloring-editor button', t: '清除全部', i: 'clear', m: 'label' },
+  { sel: '.sf-coloring-dialog button', t: '清除', i: 'clear', m: 'label' },
+  { sel: '.sf-coloring-dialog button', t: '回到著色', i: 'prev', m: 'label' },
+  { sel: '.sf-coloring-tray button', t: '看晨的回覆', i: 'chat', m: 'label' },
+  { sel: '.sf-coloring-palette-actions button', t: '加入調色盤', i: 'plus', m: 'label', s: '加入' },
+  { sel: '.sf-coloring-palette-actions .sf-coloring-remove', i: 'trash', m: 'label', tip: '刪除選取的顏色' },
+  { sel: '.sf-draw-size', i: 'brush', m: 'label', tipFn: t => '筆刷：' + t },
   { t: '橡皮擦', i: 'eraser', m: 'icon' },
-  { sel: '[data-coloring-tool="pan"]', t: '移動', i: 'hand', m: 'label', tip: '移動畫面（兩指拖也可以）' },
   { sel: ':not(.cs-room *)', t: '復原', i: 'undo', m: 'icon', tip: '復原（收回上一筆）' },
   { sel: ':not(.cs-room *)', t: '清空', i: 'clear', m: 'icon', tip: '清空畫布' },
+  // 拼圖、陪讀計時器
+  { sel: '.sf-puzzle-tools button', t: /^(9|16|25|36) 片$/, i: 'puzzle', m: 'label' },
+  { sel: '.sf-puzzle-peek', i: 'eye', m: 'label' },
+  { sel: '.sf-puzzle-tools button', t: '提示', i: 'wand', m: 'label' },
+  { sel: '.sf-puzzle-tools button', t: '重新打散', i: 'sync', m: 'label', s: '打散' },
+  { sel: '.sf-puzzle-tools button', t: '放棄', i: 'close', m: 'label' },
+  { sel: '.sf-puzzle button', t: '回到選圖', i: 'prev', m: 'label' },
+  { sel: '.sf-puzzle-tools button', t: '選另一張', i: 'frame', m: 'label' },
+  { sel: '.sf-card button, .sf-cg-puzzle', t: '拼成拼圖', i: 'puzzle', m: 'label' },
+  { sel: '.sf-focus-toggle', t: '開始', i: 'play', m: 'label' },
+  { sel: '.sf-focus-toggle', t: '暫停', i: 'pause', m: 'label' },
+  { sel: '.sf-focus-toggle', t: '停止', i: 'stop', m: 'label' },
+  { sel: '.sf-focus-skip', i: 'next', m: 'label' },
+  { sel: '.sf-night-notice button, .sf-help-layer button', t: '知道了', i: 'check', m: 'label' },
   // 明的電腦裡的按鈕（選單列與下拉選單不換，見檔頭）
   { sel: '.ming-exit', t: '回工作室', i: 'home', m: 'label' },
   { sel: '.ming-website-refresh', t: '重新整理', i: 'reset', m: 'icon' },
@@ -122,6 +198,10 @@ const RULES = [
   { t: '刪掉', i: 'trash', m: 'label' },
   { t: '刪除', i: 'trash', m: 'icon' },
   { t: '請明做一個', i: 'gamepad', m: 'label' },
+  { sel: '.ming-window-content button, .ming-menu-popover .menu-option', t: '請明做新遊戲', i: 'gamepad', m: 'label' },
+  { sel: '.ming-window-titlebar [data-progress-add-toggle]', i: 'plus', m: 'label', s: '新增', tip: '新增待辦' },
+  { sel: '.ming-progress-row button.cb[aria-label="標記完成"]', i: 'check', m: 'label', s: '完成', tip: '標記完成' },
+  { sel: '.ming-progress-row button.cb[aria-label="取消完成"]', i: 'undo', m: 'label', s: '取消完成', tip: '取消完成' },
   { t: '打開', i: 'open', m: 'label' },
   { t: '重玩', i: 'play', m: 'icon' },
   { t: /^‹\s*劇情裡的檔案$/, i: 'prev', m: 'icon', tip: '回劇情裡的檔案', aria: '回劇情裡的檔案' },
@@ -140,9 +220,7 @@ const RULES = [
   { sel: '.decor-action', t: '摸摸牠', i: 'paw', m: 'label' },
   { sel: '.decor-action', t: /^澆水/, i: 'water', m: 'label' },
   { sel: '.decor-action', t: '已經長大了', i: 'sprout', m: 'label' },
-  { sel: '.decor-action', t: '收起來', i: 'box', m: 'label' },
-  // 畫筆粗細：按鈕本身就畫了筆觸，只補 tooltip
-  { sel: '.sf-draw-size', m: 'tip', tipFn: t => '筆刷：' + t }
+  { sel: '.decor-action', t: '收起來', i: 'box', m: 'label' }
 ];
 
 const STYLES = ['A', 'B', 'C'];
@@ -266,7 +344,9 @@ function start() {
   document.addEventListener('scroll', () => { if (tipFor && !tipFor.matches(':hover')) hideTip(); }, true);
   document.addEventListener('pointerdown', e => {
     if (e.pointerType === 'mouse') { hideTip(); return; }
-    const n = tipTarget(e); if (!n) return;
+    const n = tipTarget(e);
+    // 這些按鈕各自有按住或拖曳操作。
+    if (!n || n.matches('.sf-puzzle-peek, .cs-bar-number, .cs-bass-note.filled')) return;
     clearTimeout(longTimer);
     longTimer = setTimeout(() => { swallowClick = true; showTip(n, 1800); }, 480);
   });

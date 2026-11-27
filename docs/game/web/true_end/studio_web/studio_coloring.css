@@ -6,14 +6,21 @@
 
 .sf-coloring-now .sf-button { margin-left: auto; }
 .sf-coloring-now .sf-coloring-sample { flex: 0 0 36px; }
-#panel .sf-coloring-tray [data-coloring-tool].sf-button {
-  padding-inline: 5px;
-  white-space: nowrap;
+.sf-coloring-controls .sf-coloring-row:has(> [data-coloring-tool]) {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
-#panel .sf-coloring-tray [data-coloring-tool="pan"].sp-with-label {
+#panel .sf-coloring-controls .sf-coloring-row [data-coloring-tool].sp-with-label {
   --ic: 28px !important;
-  padding-inline: 3px !important;
-  gap: 2px;
+  height: 50px;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding: 1px !important;
+  font-size: 13px;
+  text-align: center;
+  white-space: nowrap;
 }
 .sf-coloring-custom { display: grid; gap: 12px; align-items: start; }
 .sf-coloring-picker, .sf-coloring-personal { display: grid; min-width: 0; gap: 5px; }

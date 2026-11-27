@@ -104,6 +104,28 @@
 .sf-widget.pos-top,.sf-widget.pos-bottom{grid-column:1 / -1}
 .sf-widget b{display:block;font-size:12px;margin-bottom:3px}
 .sf-hero{display:grid;gap:10px}.sf-hero-img{max-height:66vh;width:100%;object-fit:contain;background:#f3eee7;border-radius:10px}
+.sf-image-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.sf-image-actions .sf-puzzle-badge { position: static; }
+.ming-cg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 100px), 1fr)); gap: 9px; }
+#panel [data-ming-window="favorites"] .ming-cg-card { min-width: 0; padding: 4px; }
+#panel [data-ming-window="favorites"] .ming-cg-card .sf-picture-open {
+  display: block; width: 100%; padding: 0; border: 0; box-shadow: none; background: none; text-align: left;
+}
+.ming-cg-card .sf-cover { display: block; aspect-ratio: 4 / 3; border-radius: 5px; }
+.ming-cg-card h3 { padding: 4px; overflow-wrap: anywhere; }
+.ming-cg-card .sf-puzzle-badge { top: 5px; bottom: auto; }
+@media (max-width: 600px) {
+  .ming-cg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 601px) and (orientation: landscape) and (max-height: 450px) {
+  .ming-group1 [data-ming-window="favorites"]:not(.zoomed) {
+    left: max(12px, calc(50% - 320px)) !important;
+    top: 8px !important;
+    width: min(640px, calc(100% - 24px)) !important;
+    height: calc(100% - 16px) !important;
+  }
+  .sf-image-actions:has(.sf-cg-puzzle) + .sf-hero-img { max-height: calc(100dvh - 198px); }
+}
 .sf-status{min-height:1.5em;margin:6px 1px 0;color:#80624d;font-size:12px}
 .sf-empty{padding:24px 10px;text-align:center;color:#8a796d;font-size:14px}
 .sf-os-bar{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:6px 10px;border-radius:10px;background:#2f3a5a;color:#f3ead9;font-size:13px}
