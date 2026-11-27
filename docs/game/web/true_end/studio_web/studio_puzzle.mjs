@@ -99,6 +99,10 @@ function shuffled(length) {
   return order;
 }
 
+function quarterTurn(x, y, turn) {
+  return [{ x, y }, { x: -y, y: x }, { x: -x, y: -y }, { x: y, y: -x }][turn];
+}
+
 export function renderPuzzle(root, { el, button, avatar, db, sources, initial }) {
   const shell = el('section', 'sf-puzzle');
   const scrollBox = root.closest('#panel-body');
@@ -117,19 +121,23 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
   let image;
   let count;
   let side;
+  let edges;
   let paths;
   let startedAt;
   let board;
-  let tray;
-  let placed;
+  let frame;
+  let guide;
+  let groups;
+  let tiles;
+  let table;
+  let observer;
   let order;
   let drag;
-  let keyboardPiece;
   let flash;
-  let ghost;
-  let scrollFrame;
-  let scrollTarget;
-  let scrollDirection = 0;
+  let hintedTile;
+  let layerOrder;
+  let solved;
+  let rotationEnabled = true;
   let ratio;
   let generation = 0;
 
@@ -164,8 +172,7 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
   }
 
   function returnToImages(line) {
-    stopDrag();
-    clearTimeout(flash);
+    leaveTable();
     panel.dataset.design = 'puzzle';
     panel.classList.add('sf-wide');
     pickImage(line);
@@ -182,7 +189,13 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
     for (const size of PIECES) choices.append(button(size + ' 片', () => loadImage(size)));
     const name = el('h3', '', item.title);
     const back = button('取消', () => pickImage());
-    choices.append(back);
+    const rotateOption = el('label', 'sf-puzzle-rotation');
+    const checkbox = el('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = rotationEnabled;
+    checkbox.addEventListener('change', () => { rotationEnabled = checkbox.checked; });
+    rotateOption.append(checkbox, '碎片會旋轉');
+    choices.append(rotateOption, back);
     content.replaceChildren(name, choices);
 
     function loadImage(size) {
@@ -237,50 +250,40 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
   }
 
   function start(size, previousOrder) {
-    stopDrag();
-    clearTimeout(flash);
+    leaveTable();
     count = size;
     side = Math.sqrt(count);
-    paths = puzzleEdges(image.id, count).map(puzzlePiecePath);
-    placed = new Set();
-    keyboardPiece = null;
+    edges = puzzleEdges(image.id, count);
+    paths = edges.map(puzzlePiecePath);
     order = shuffled(count);
     if (previousOrder && order.every((index, i) => index === previousOrder[i])) order.push(order.shift());
+    groups = new Set();
+    tiles = [];
+    table = null;
+    layerOrder = 0;
+    solved = false;
     startedAt = Date.now();
     if (!previousOrder) speak(say('start'));
     const tools = el('div', 'sf-puzzle-tools');
     const original = button('看原圖', null, 'sf-puzzle-peek');
-    const hint = button('提示', () => {
-      const index = order.find(piece => !placed.has(piece));
-      if (index === undefined) return;
-      clearTimeout(flash);
-      board.querySelector('.hint')?.classList.remove('hint');
-      const spot = board.children[index];
-      spot.classList.add('hint');
-      flash = setTimeout(() => spot.classList.remove('hint'), 850);
-      const x = Math.floor((index % side + 0.5) * 3 / side);
-      const y = Math.floor((Math.floor(index / side) + 0.5) * 3 / side);
-      speak(say('hint', { area: AREAS[y * 3 + x] }));
-    });
+    const hint = button('提示', showHint);
     const again = button('重新打散', () => start(count, order));
     const abandon = button('放棄', giveUp);
     tools.append(original, hint, again, abandon);
-    const layout = el('div', 'sf-puzzle-layout');
-    const trayColumns = Math.ceil(side * 1.5);
-    layout.style.setProperty('--puzzle-side', side);
-    layout.style.setProperty('--puzzle-shape-scale', PIECE_SIZE + '%');
-    layout.style.setProperty('--puzzle-tray-columns', trayColumns);
-    layout.style.setProperty('--puzzle-tray-rows', Math.ceil(count / trayColumns));
-    const boardWrap = el('div', 'sf-puzzle-board-wrap');
     board = el('div', 'sf-puzzle-board');
-    board.setAttribute('aria-label', '拼圖板');
-    tray = el('div', 'sf-puzzle-tray');
-    tray.setAttribute('aria-label', '拼圖片托盤');
+    board.setAttribute('aria-label', '拼圖桌面');
+    board.style.setProperty('--puzzle-shape-scale', PIECE_SIZE / CELL_SIZE);
+    frame = el('div', 'sf-puzzle-frame');
+    frame.setAttribute('aria-hidden', 'true');
+    const pieces = el('div', 'sf-puzzle-pieces');
+    guide = el('div', 'sf-puzzle-hint');
+    guide.hidden = true;
+    guide.append(pieceShape());
     const photo = el('img', 'sf-puzzle-original');
     photo.src = image.src;
     photo.alt = image.title;
     photo.hidden = true;
-    boardWrap.append(board, photo);
+    board.append(frame, pieces, guide, photo);
     const hide = () => { photo.hidden = true; };
     original.addEventListener('pointerdown', event => {
       original.setPointerCapture(event.pointerId);
@@ -292,76 +295,35 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
     });
     original.addEventListener('keyup', hide);
 
-    for (let i = 0; i < count; i++) {
-      const spot = button('', () => { if (keyboardPiece) place(keyboardPiece, i); }, 'sf-puzzle-cell');
-      spot.dataset.puzzleCell = i;
-      spot.setAttribute('aria-label', '第 ' + (Math.floor(i / side) + 1) + ' 列，第 ' + (i % side + 1) + ' 格');
-      const guide = pieceShape();
-      guide.append(svgElement('path', {
-        class: 'sf-puzzle-guide', d: paths[i], 'vector-effect': 'non-scaling-stroke'
-      }));
-      spot.append(guide);
-      board.append(spot);
-    }
     for (const index of order) {
-      const piece = button('', () => {
-        keyboardPiece?.removeAttribute('aria-pressed');
-        keyboardPiece = piece;
-        piece.setAttribute('aria-pressed', 'true');
-      }, 'sf-puzzle-piece');
+      const node = el('div', 'sf-puzzle-group');
+      const group = { node, members: [], turn: rotationEnabled ? Math.floor(Math.random() * 4) : 0 };
+      const piece = button('', event => { if (event.detail === 0) dropGroup(tile.group); }, 'sf-puzzle-piece');
+      const tile = {
+        index, piece, group,
+        col: index % side, row: Math.floor(index / side)
+      };
       piece.dataset.puzzlePiece = index;
-      piece.setAttribute('aria-label', '拼圖片 ' + (index + 1));
+      piece.style.setProperty('--col', tile.col);
+      piece.style.setProperty('--row', tile.row);
       decorate(piece, index);
-      tray.append(piece);
+      tile.neighbors = [-side, 1, side, -1].flatMap((step, edge) => edges[index][edge] ? [index + step] : []);
+      group.members.push(tile);
+      groups.add(group);
+      tiles[index] = tile;
+      node.append(piece);
+      pieces.append(node);
+      piece.addEventListener('pointerdown', event => grab(event, tile));
+      piece.addEventListener('keydown', event => moveWithKeys(event, tile));
     }
+    board.addEventListener('pointermove', moveDrag);
+    board.addEventListener('pointerup', releaseDrag);
+    for (const type of ['pointercancel', 'lostpointercapture']) {
+      board.addEventListener(type, event => { if (drag?.id === event.pointerId) stopDrag(); });
+    }
+    board.addEventListener('contextmenu', event => event.preventDefault());
 
-    tray.addEventListener('pointerdown', event => {
-      if (event.pointerType === 'touch' || event.button !== 0) return;
-      const piece = event.target.closest('.sf-puzzle-piece');
-      if (!piece || drag) return;
-      piece.setPointerCapture(event.pointerId);
-      drag = { piece, id: event.pointerId, x: event.clientX, y: event.clientY };
-      lift();
-    });
-    tray.addEventListener('pointermove', event => {
-      if (drag?.id === event.pointerId && !drag.touch) move(event);
-    });
-    tray.addEventListener('pointerup', event => {
-      if (drag?.id === event.pointerId && !drag.touch) drop(event);
-    });
-    for (const type of ['pointercancel', 'lostpointercapture']) tray.addEventListener(type, event => {
-      if (drag?.id === event.pointerId && !drag.touch) stopDrag();
-    });
-
-    // 先讓原生垂直捲動接手。長按成立後才攔截 touchmove。
-    tray.addEventListener('touchstart', event => {
-      const piece = event.target.closest('.sf-puzzle-piece');
-      if (!piece || drag || event.touches.length !== 1) return;
-      const finger = event.changedTouches[0];
-      drag = { piece, id: finger.identifier, x: finger.clientX, y: finger.clientY, touch: true };
-      drag.timer = setTimeout(lift, 150);
-    }, { passive: true });
-    tray.addEventListener('touchmove', event => {
-      const finger = touch(event);
-      if (!finger) return;
-      if (!ghost) {
-        if (Math.hypot(finger.clientX - drag.x, finger.clientY - drag.y) > 7) stopDrag();
-        return;
-      }
-      if (event.cancelable) event.preventDefault();
-      move(finger);
-    }, { passive: false });
-    tray.addEventListener('touchend', event => {
-      const finger = touch(event);
-      if (!finger) return;
-      if (ghost && event.cancelable) event.preventDefault();
-      drop(finger);
-    });
-    tray.addEventListener('touchcancel', event => { if (touch(event)) stopDrag(); });
-    tray.addEventListener('contextmenu', event => event.preventDefault());
-
-    layout.append(boardWrap, tray);
-    content.replaceChildren(tools, layout);
+    content.replaceChildren(tools, board);
     panel.classList.remove('sf-wide');
     panel.dataset.design = 'puzzle-play';
     root.puzzleBack = returnToImages;
@@ -372,89 +334,258 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
       return true;
     };
     scrollBox.scrollTop = 0;
+    resizeTable();
+    observer = new ResizeObserver(resizeTable);
+    observer.observe(board);
     original.focus({ preventScroll: true });
   }
 
-  function touch(event) {
-    if (drag?.touch) return Array.from(event.changedTouches).find(finger => finger.identifier === drag.id);
+  function resizeTable() {
+    const width = board.clientWidth;
+    const height = board.clientHeight;
+    if (!width || !height || (table?.width === width && table.height === height)) return;
+    const old = table;
+    const columns = Math.min(count, Math.max(1, Math.round(Math.sqrt(count * width / height))));
+    const rows = Math.ceil(count / columns);
+    const slotWidth = width / columns;
+    const slotHeight = height / rows;
+    const unit = Math.min(width, height) * 0.82 / side;
+    const cell = Math.min(unit, slotWidth / 1.38, slotHeight / 1.38);
+    const frameX = (width - cell * (side - 1)) / 2;
+    const frameY = (height - cell * (side - 1)) / 2;
+    table = { width, height, cell, frameX, frameY };
+    board.style.setProperty('--puzzle-unit', cell + 'px');
+    frame.style.left = frameX - cell / 2 + 'px';
+    frame.style.top = frameY - cell / 2 + 'px';
+    frame.style.width = frame.style.height = side * cell + 'px';
+    stopDrag();
+    hideHint();
+
+    const slots = old ? [] : shuffled(columns * rows);
+    for (const [i, group] of [...groups].entries()) {
+      group.animation?.cancel();
+      if (old) {
+        group.x = frameX + (group.x - old.frameX) * cell / old.cell;
+        group.y = frameY + (group.y - old.frameY) * cell / old.cell;
+        position(group, group.x, group.y);
+      } else {
+        const slot = slots[i];
+        const x = (slot % columns + 0.5) * slotWidth + (Math.random() - 0.5) * (slotWidth - cell);
+        const y = (Math.floor(slot / columns) + 0.5) * slotHeight + (Math.random() - 0.5) * (slotHeight - cell);
+        const offset = tileOffset(group.members[0], group.turn);
+        position(group, x - offset.x, y - offset.y);
+      }
+    }
   }
 
-  function lift() {
-    if (!drag || !root.isConnected) { stopDrag(); return; }
-    const size = board.getBoundingClientRect().width / side;
-    ghost = el('div', 'sf-puzzle-ghost');
-    ghost.style.setProperty('--piece-size', size * PIECE_SIZE / CELL_SIZE + 'px');
-    decorate(ghost, Number(drag.piece.dataset.puzzlePiece));
-    drag.piece.classList.add('held');
-    document.body.append(ghost);
-    move({ clientX: drag.x, clientY: drag.y });
+  // All pieces use coordinates relative to the center of the original top-left
+  // piece. A group can use that same origin even if it has yet to find that piece.
+  function tileOffset(tile, turn) {
+    const offset = quarterTurn(tile.col, tile.row, turn);
+    return { x: offset.x * table.cell, y: offset.y * table.cell };
   }
 
-  function move(event) {
-    ghost.style.left = event.clientX + 'px';
-    ghost.style.top = event.clientY + 'px';
-    const trayRect = tray.getBoundingClientRect();
-    const overTray = event.clientX >= trayRect.left && event.clientX <= trayRect.right
-      && event.clientY >= trayRect.top && event.clientY <= trayRect.bottom;
-    scrollTarget = overTray && tray.scrollHeight > tray.clientHeight ? tray : scrollBox;
-    const rect = scrollTarget.getBoundingClientRect();
-    scrollDirection = event.clientY < rect.top + 24 ? -1 : event.clientY > rect.bottom - 24 ? 1 : 0;
-    if (scrollDirection && !scrollFrame) scrollFrame = requestAnimationFrame(scrollDuringDrag);
+  function renderPose(group) {
+    group.node.style.transform = `translate(${group.x}px, ${group.y}px) rotate(${group.turn * 90}deg)`;
+    if (group.node.dataset.turn === String(group.turn)) return;
+    group.node.dataset.turn = group.turn;
+    for (const { index, piece } of group.members) {
+      piece.setAttribute('aria-label', '拼圖片 ' + (index + 1) + '，' + group.turn * 90 + ' 度');
+    }
   }
 
-  function scrollDuringDrag() {
-    scrollFrame = null;
-    if (!ghost || !scrollDirection) return;
-    const before = scrollTarget.scrollTop;
-    scrollTarget.scrollTop += scrollDirection * 7;
-    if (scrollTarget.scrollTop !== before) scrollFrame = requestAnimationFrame(scrollDuringDrag);
+  function limits(group) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const tile of group.members) {
+      const [top, right, bottom, left] = edges[tile.index];
+      const before = edge => 0.5 + (edge > 0 ? 0.22 : 0);
+      const a = quarterTurn(tile.col - before(left), tile.row - before(top), group.turn);
+      const b = quarterTurn(tile.col + before(right), tile.row + before(bottom), group.turn);
+      minX = Math.min(minX, a.x, b.x);
+      minY = Math.min(minY, a.y, b.y);
+      maxX = Math.max(maxX, a.x, b.x);
+      maxY = Math.max(maxY, a.y, b.y);
+    }
+    const { cell, width, height } = table;
+    return { left: 2 - minX * cell, right: width - 2 - maxX * cell,
+      top: 2 - minY * cell, bottom: height - 2 - maxY * cell };
+  }
+
+  function position(group, x, y) {
+    const { left, right, top, bottom } = limits(group);
+    group.x = Math.max(left, Math.min(x, right));
+    group.y = Math.max(top, Math.min(y, bottom));
+    renderPose(group);
+  }
+
+  function raise(group) {
+    group.animation?.cancel();
+    group.node.style.zIndex = ++layerOrder;
+  }
+
+  function grab(event, tile) {
+    if (event.button !== 0 || drag || solved) return;
+    const { piece, group } = tile;
+    piece.focus({ preventScroll: true });
+    raise(group);
+    piece.setPointerCapture(event.pointerId);
+    board.classList.add('held');
+    drag = { tile, id: event.pointerId, x: event.clientX, y: event.clientY,
+      startX: group.x, startY: group.y, moved: false };
+  }
+
+  function moveDrag(event) {
+    if (drag?.id !== event.pointerId) return;
+    const dx = event.clientX - drag.x;
+    const dy = event.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+    drag.moved = true;
+    position(drag.tile.group, drag.startX + dx, drag.startY + dy);
+  }
+
+  function releaseDrag(event) {
+    if (drag?.id !== event.pointerId) return;
+    moveDrag(event);
+    const { tile, moved } = drag;
+    stopDrag();
+    if (moved) dropGroup(tile.group);
+    else rotate(tile);
   }
 
   function stopDrag() {
-    clearTimeout(drag?.timer);
-    cancelAnimationFrame(scrollFrame);
-    scrollFrame = null;
-    scrollTarget = null;
-    scrollDirection = 0;
-    drag?.piece.classList.remove('held');
-    ghost?.remove();
-    ghost = null;
+    if (!drag) return;
+    const { id, tile } = drag;
     drag = null;
+    board.classList.remove('held');
+    if (tile.piece.hasPointerCapture(id)) tile.piece.releasePointerCapture(id);
   }
 
-  function drop(event) {
-    const { piece } = drag;
-    const lifted = !!ghost;
-    stopDrag();
-    if (!lifted) return;
-    const rect = board.getBoundingClientRect();
-    const x = Math.floor((event.clientX - rect.left) / rect.width * side);
-    const y = Math.floor((event.clientY - rect.top) / rect.height * side);
-    const target = x >= 0 && x < side && y >= 0 && y < side ? y * side + x : -1;
-    place(piece, target);
+  function moveWithKeys(event, tile) {
+    if (solved || drag || event.isComposing || event.altKey || event.ctrlKey || event.metaKey) return;
+    const { group } = tile;
+    const steps = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+    const step = steps[event.key];
+    if (step) {
+      raise(group);
+      const distance = event.shiftKey ? table.cell / 2 : table.cell / 8;
+      position(group, group.x + step[0] * distance, group.y + step[1] * distance);
+    } else if (event.key.toLowerCase() === 'r') {
+      if (!event.repeat) rotate(tile);
+    } else if (event.key === 'Enter') {
+      if (!event.repeat) dropGroup(group);
+    } else return;
+    event.preventDefault();
   }
 
-  function place(piece, target) {
-    const index = Number(piece.dataset.puzzlePiece);
-    if (index !== target) {
-      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      piece.getAnimations().forEach(animation => animation.cancel());
-      piece.animate([{ transform: 'scale(.86)' }, { transform: 'scale(1)' }], 180);
+  function rotate(tile) {
+    if (!rotationEnabled) return;
+    const { group } = tile;
+    raise(group);
+    const turn = group.turn;
+    const pivot = tileOffset(tile, turn);
+    const x = group.x + pivot.x;
+    const y = group.y + pivot.y;
+    group.turn = (turn + 1) % 4;
+    const next = tileOffset(tile, group.turn);
+    position(group, x - next.x, y - next.y);
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      dropGroup(group);
       return;
     }
-    const cell = board.children[index];
-    decorate(cell, index);
-    cell.classList.add('placed');
-    cell.disabled = true;
-    if (keyboardPiece === piece) keyboardPiece = null;
-    placed.add(index);
-    piece.remove();
-    if (placed.size === count) finish();
+
+    // Rotate about the selected tile, including any shift needed at the table edge.
+    const local = tileOffset(tile, 0);
+    const pose = (px, py, angle) =>
+      `translate(${px}px, ${py}px) rotate(${angle}deg) translate(${-local.x}px, ${-local.y}px)`;
+    group.animation = group.node.animate([
+      { transform: pose(x, y, turn * 90) },
+      { transform: pose(group.x + next.x, group.y + next.y, (turn + 1) * 90) }
+    ], { duration: 150, easing: 'ease-out' });
+    group.animation.onfinish = () => { if (groups.has(group)) dropGroup(group); };
+  }
+
+  function nearestNeighbor(group) {
+    let nearest;
+    let distance = table.cell * 0.18;
+    const { left, right, top, bottom } = limits(group);
+    // A matching neighbor's group origin is the exact pose needed for the cut.
+    for (const tile of group.members) {
+      for (const index of tile.neighbors) {
+        const other = tiles[index].group;
+        if (other === group || other.turn !== group.turn) continue;
+        if (other.x < left - 0.01 || other.x > right + 0.01 || other.y < top - 0.01 || other.y > bottom + 0.01) continue;
+        const gap = Math.hypot(other.x - group.x, other.y - group.y);
+        if (gap <= distance) {
+          nearest = other;
+          distance = gap;
+        }
+      }
+    }
+    return nearest;
+  }
+
+  function dropGroup(group) {
+    if (solved || !table) return;
+    const { cell, frameX, frameY } = table;
+    let other = nearestNeighbor(group);
+    if (!other && group.turn === 0 && group.members.some(tile => edges[tile.index].includes(0))
+      && Math.hypot(frameX - group.x, frameY - group.y) <= cell * 0.18) {
+      position(group, frameX, frameY);
+      other = nearestNeighbor(group);
+    }
+    while (other) {
+      group.x = other.x;
+      group.y = other.y;
+      for (const tile of other.members) {
+        tile.group = group;
+        group.members.push(tile);
+        group.node.append(tile.piece);
+      }
+      groups.delete(other);
+      other.node.remove();
+      other = nearestNeighbor(group);
+    }
+    renderPose(group);
+    if (groups.size === 1 && group.turn === 0) finish();
+  }
+
+  function hideHint() {
+    clearTimeout(flash);
+    hintedTile?.piece.classList.remove('hint');
+    if (guide) guide.hidden = true;
+  }
+
+  function showHint() {
+    hideHint();
+    const group = [...groups].sort((a, b) => b.members.length - a.members.length)[0];
+    const anchor = group.members.find(tile => tile.neighbors.some(index => tiles[index].group !== group));
+    const tile = anchor ? tiles[anchor.neighbors.find(index => tiles[index].group !== group)] : group.members[0];
+    const turn = anchor ? group.turn : 0;
+    const offset = tileOffset(tile, turn);
+    const x = (anchor ? group.x : table.frameX) + offset.x;
+    const y = (anchor ? group.y : table.frameY) + offset.y;
+    guide.style.transform = `translate(${x}px, ${y}px) rotate(${turn * 90}deg)`;
+    guide.firstElementChild.replaceChildren(svgElement('path', {
+      d: paths[tile.index], 'vector-effect': 'non-scaling-stroke'
+    }));
+    hintedTile = tile;
+    tile.piece.classList.add('hint');
+    guide.hidden = false;
+    flash = setTimeout(hideHint, 850);
+    const col = Math.floor((tile.col + 0.5) * 3 / side);
+    const row = Math.floor((tile.row + 0.5) * 3 / side);
+    speak(say('hint', { area: AREAS[row * 3 + col] }));
+  }
+
+  function leaveTable() {
+    stopDrag();
+    hideHint();
+    observer?.disconnect();
+    for (const group of groups || []) group.animation?.cancel();
   }
 
   function giveUp() {
-    stopDrag();
-    clearTimeout(flash);
+    leaveTable();
     root.puzzleEscape = returnToImages;
     speak(say('give_up'));
     const choose = button('回到選圖', () => returnToImages(), 'primary');
@@ -463,7 +594,9 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
   }
 
   async function finish() {
-    clearTimeout(flash);
+    solved = true;
+    hideHint();
+    for (const { piece } of tiles) piece.disabled = true;
     root.puzzleEscape = () => returnToImages('again');
     const at = Date.now();
     const ms = Math.min(9_999_999_999, Math.max(0, at - startedAt));
@@ -488,8 +621,7 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
 
   root.puzzleDestroy = () => {
     generation++;
-    clearTimeout(flash);
-    stopDrag();
+    leaveTable();
   };
   if (initial) pickPieces(initial);
   else pickImage();
