@@ -213,6 +213,12 @@ export async function mockRequest(path, payload) {
     return { jobId: 'mock-game-' + (Date.now() + MOCK_JOB_MS) + '-' + fail + '-' + Math.random().toString(36).slice(2, 8), status: 'pending' };
   }
   // 讓晨看看玩家的畫：假資料回一句固定的反應與畫名；網址帶 lookFail=1 時模擬 AI 沒回應（晨的預設句、畫不收）。
+  if (path === '/drawing/save') {
+    // 假資料模式（預覽頁）：不連伺服器，圖直接用送來的 data URL，展廳看得到（2026-11-28：原本沒處理，預覽按了顯示存放失敗）
+    if (typeof location !== 'undefined' && new URLSearchParams(location.search).get('saveFail') === '1') return { saved: false };
+    const name = String(body.title || '線稿').slice(0, 8);
+    return { saved: true, title: name + '（著色）', workId: 'draw-mock-' + Date.now().toString(36), workUrl: String(body.image || '') };
+  }
   if (path === '/look') {
     if (typeof location !== 'undefined' && new URLSearchParams(location.search).get('lookFail') === '1') return { reply: '……嗯。我這邊看不太清楚。等一下再給我看一次，好嗎？', fallback: true, saved: false };
     return { reply: 'mock｜嗯。黑色的線畫得很用力。……中間那一團是什麼？', title: 'mock｜中間那一團', mood: 'shy', saved: true };
