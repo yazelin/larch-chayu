@@ -1,5 +1,9 @@
 import { TODO_ITEMS } from './studio_points2_data.mjs';
 import { CHEN_ART, SKY_DIARY } from './studio_collection_data.mjs';
+import { createFocus } from './studio_focus.mjs';
+import { puzzleTime, readPuzzleBests, renderPuzzle } from './studio_puzzle.mjs';
+import { decodeHudSeen } from './hud_seen.mjs';
+import { HUD_SEEN_KEYS } from './hud_seen_keys.mjs';
 import { preparePanel } from './studio_panel.mjs';
 import { affinityChapter, AFFINITY_MAX, createFreeAffinity } from './free_affinity.mjs';
 import { storyDayNote, storyTime, storyProduction } from './story_time.mjs';
@@ -17,6 +21,8 @@ const scrim = $('#scrim');
 const closeButton = $('#panel-close');
 const query = new URLSearchParams(location.search);
 const mockMode = query.get('mock') === '1';
+const focusEnabled = query.get('focus') === '1';
+const puzzleEnabled = query.get('puzzle') === '1';
 const phoneStoryKeys = ['ch2Msg', 'ch3SkyFirst', 'ch4Apology', 'ch4AssetsFirst', 'ch5PassFirst', 'ch7Route', 'trueEndMsg'];
 const realChat = document.documentElement.classList.contains('studio-real-chat');
 // larch:init 常比這支模組早到（index.html 先收）：有的話先用那一份，天數才不會停在預設的第 1 天
@@ -43,6 +49,14 @@ const freeAffinity = createFreeAffinity({
 let returnFocus = null;
 let ephemeralUrls = [];
 let mingComputerState = null;
+const focusApp = focusEnabled ? createFocus({
+  db: StudioDB, el, button, avatar: CHARACTERS.ming.avatar,
+  desktop: () => mingComputerState?.desktop,
+  volume: () => {
+    if (query.get('noAudio') === '1' || studioBgm?.audio.muted) return 0;
+    return studioBgm && !studioBgm.ducked ? studioBgm.audio.volume : BGM_VOLUME;
+  }
+}) : null;
 const activeMingGameJobs = new Map();
 const mingGameRoots = new Set();
 const mingGameFrames = new Set();
@@ -53,6 +67,7 @@ function disposeMingComputer() {
   if (mingComputerState && mingComputerState.resizeHandler) window.removeEventListener('resize', mingComputerState.resizeHandler);
   if (mingComputerState && mingComputerState.windows) mingComputerState.windows.forEach(function (node) { disposeMingGameFrames(node); });
   mingComputerState = null;
+  focusApp?.desktopChanged();
   panel.classList.remove('ming-os-panel');
 }
 
@@ -82,8 +97,17 @@ function panelOpen(title, focus, design, character) {
   (realChat ? panel : closeButton).focus({ preventScroll: true });
 }
 
+function discardPuzzle() {
+  if (puzzleEnabled) activePuzzle()?.puzzleDestroy?.();
+}
+
+function activePuzzle() {
+  return panelBody.querySelector('.sf-puzzle')?.parentElement;
+}
+
 function closeFeature() {
   if (realChat) return;
+  discardPuzzle();
   disposeMingComputer();
   panel.classList.remove('sf-wide');
   if (!panel.classList.contains('studio-feature-panel')) return;
@@ -99,6 +123,21 @@ function exitMingComputer() {
   closeButton.click();
 }
 
+if (focusEnabled || puzzleEnabled) {
+  $('#panel-back')?.addEventListener('click', closeFeature);
+  $('#panel-back')?.addEventListener('click', event => {
+    if (panel.dataset.design !== 'puzzle-play' || !activePuzzle()?.puzzleBack?.()) return;
+    event.stopImmediatePropagation();
+  }, { capture: true });
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || event.isComposing) return;
+    const puzzle = panel.classList.contains('on') && activePuzzle();
+    if (!puzzle?.puzzleEscape?.() && !focusApp?.escape()) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
+}
+
 closeButton.addEventListener('click', closeFeature);
 scrim.addEventListener('click', closeFeature);
 document.addEventListener('keydown', function (event) {
@@ -106,6 +145,7 @@ document.addEventListener('keydown', function (event) {
 });
 
 function clearBody() {
+  discardPuzzle();
   panel.classList.remove('sf-wide');
   ephemeralUrls.forEach(URL.revokeObjectURL);
   ephemeralUrls = [];
@@ -682,10 +722,11 @@ function setupTabs(tabs, render, initialId, label = '工作室活動') {
   const content = el('div', 'sf-stack');
   let current = initialId || tabs[0].id;
   function choose(id) {
+    discardPuzzle();
     current = id;
     panel.dataset.design = id;
     panelBody.scrollTop = 0;
-    panel.classList.toggle('sf-wide', id === 'draw');   // 畫板要大：桌機版這個分頁把面板放寬放高（studio_features.css）
+    panel.classList.toggle('sf-wide', id === 'draw' || id === 'puzzle');   // 畫板要大：桌機版這個分頁把面板放寬放高（studio_features.css）
     nav.querySelectorAll('button').forEach(function (tab) { tab.setAttribute('aria-selected', String(tab.dataset.tab === id)); });
     const view = el('div');
     content.replaceChildren(view);
@@ -721,12 +762,19 @@ function openCharacter(character, focus, initialTab, options) {
   clearBody();
   addContext(panelBody, character);
   const tabs = character === 'chen'
-    ? [{ id: 'chat', label: '找晨' }, { id: 'draw', label: '我來畫' }, { id: 'create', label: '請晨畫一張' }, { id: 'gallery', label: '畫架展廳' }]
+    ? [{ id: 'chat', label: '找晨' }, { id: 'draw', label: '我來畫' }, { id: 'create', label: '請晨畫一張' }, { id: 'gallery', label: '畫架展廳' },
+      ...(puzzleEnabled ? [{ id: 'puzzle', label: '拼圖' }] : [])]
     : [{ id: 'chat', label: '找詩' }, { id: 'create', label: '請詩做歌' }, { id: 'album', label: '詩做給妳的' }];
   setupTabs(tabs, async function (tab, content) {
     panelTitle.textContent = tab === 'gallery' ? '晨的畫架' : tabs.find(item => item.id === tab).label;
     if (tab === 'chat') { await renderChat(character, false, content); return; }
     if (tab === 'gallery') { await renderGallery(content); return; }
+    if (tab === 'puzzle') {
+      const initial = options?.puzzleImage;
+      options = null;
+      await renderPuzzleTab(content, initial);
+      return;
+    }
     if (tab === 'album') { await renderAlbum(content); return; }
     if (tab === 'draw') { await renderDrawTab(content); return; }
     const first = options; options = null;   // 帶進來的題目只用一次
@@ -1541,29 +1589,70 @@ function showImage(work, from = 'gallery', noteText = work.prompt || work.title)
   back.focus({ preventScroll: true });
 }
 
+function puzzleImageId(work) {
+  if (work.puzzleId) return 'art:' + work.puzzleId;
+  const id = work.workId || work.id;
+  if (typeof id !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(id)) return '';
+  return (work.kind === 'drawing' ? 'drawing:' : 'image:') + id;
+}
+
+function openChenPuzzle(id) {
+  openCharacter('chen', returnFocus, 'puzzle', { puzzleImage: id });
+}
+
+async function unlockedPuzzleCGs() {
+  const { STUDIO_PUZZLE_CGS } = await import('./studio_puzzle_cgs.mjs');
+  const seen = decodeHudSeen(larchVariables.hudSeen ?? query.get('hudSeen'), HUD_SEEN_KEYS)?.keys;
+  return STUDIO_PUZZLE_CGS.filter(([id]) => seen?.has(id))
+    .map(([id, title, src]) => ({ id: 'cg:' + id, title: title || id, src }));
+}
+
+function galleryArt() {
+  const story = studioStory();
+  const chapter = story.trueEnd ? 99 : game.chapter;
+  return CHEN_ART.filter(work => chapter >= work.chapter && (story.trueEnd || !work.day || game.day >= work.day));
+}
+
+function chenImage(work) {
+  return work.kind === 'image' && (!work.character || work.character === 'chen');
+}
+
+async function renderPuzzleTab(root, initialId) {
+  await playerId().catch(() => {});
+  const [images, drawings, cgs] = await Promise.all([savedWorks('image'), savedWorks('drawing'), unlockedPuzzleCGs()]);
+  if (!root.isConnected) return;
+  const source = work => ({ id: puzzleImageId(work), title: work.title, src: work.src || workSrc(work) });
+  const ready = work => work.id && work.src;
+  const sources = [
+    ['晨畫的', [...images.filter(chenImage), ...galleryArt()].map(source).filter(ready)],
+    ['我來畫', drawings.filter(work => work.kind === 'drawing').map(source).filter(ready)],
+    ['劇情 CG', cgs]
+  ];
+  const initial = sources.flatMap(([, items]) => items).find(item => item.id === initialId);
+  renderPuzzle(root, { el, button, avatar: CHARACTERS.chen.avatar, db: StudioDB, sources, initial });
+}
+
 async function renderGallery(root) {
   await playerId().catch(function () {});   // Larch 版的作品網址要帶玩家編號
-  const [images, drawings, conversation] = await Promise.all([
-    savedWorks('image'), savedWorks('drawing'), StudioDB.get('chat:chen')
+  const [images, drawings, conversation, bests] = await Promise.all([
+    savedWorks('image'), savedWorks('drawing'), StudioDB.get('chat:chen'),
+    puzzleEnabled ? readPuzzleBests(StudioDB) : null
   ]);
   if (!root.isConnected) return;
   // 舊的 image:* 都是晨接到委託後畫的。舊的 drawing:* 是茶語給晨看的原畫。
-  const works = images.filter(work => work.kind === 'image' && (!work.character || work.character === 'chen'))
-    .concat(drawings.filter(work => work.kind === 'drawing' && work.character === 'chen'))
+  const works = images.filter(chenImage)
+    .concat(drawings.filter(work => work.kind === 'drawing' && (work.character === 'chen' || (puzzleEnabled && work.character === 'tea'))))
     .sort((a, b) => b.createdAt - a.createdAt);
   const replies = new Map();
   (conversation || []).forEach((message, index, messages) => {
     const reply = messages[index + 1];
     if (message.draw && reply?.speaker === 'chen' && reply.role === 'assistant') replies.set(message.draw, reply.content);
   });
-  const story = studioStory();
-  const chapter = story.trueEnd ? 99 : game.chapter;
-  const art = CHEN_ART.filter(work => chapter >= work.chapter && (story.trueEnd || !work.day || game.day >= work.day));
   const cards = works.map(work => ({
     ...work,
     src: workSrc(work),
     note: work.note || replies.get(work.replyTo) || (work.kind === 'drawing' && /^晨[：:]/.test(work.prompt || '') ? work.prompt : '')
-  })).filter(work => work.src).concat(art);
+  })).filter(work => work.src).concat(galleryArt());
   if (!cards.length) { empty(root, '畫架上還沒有作品。可以請晨畫一張。'); return; }
   const grid = el('div', 'sf-grid');
   cards.forEach(function (work) {
@@ -1575,6 +1664,14 @@ async function renderGallery(root) {
     trigger.setAttribute('aria-label', '放大' + work.title);
     card.append(trigger, el('h3', '', work.title));
     if (work.note) card.append(el('p', '', work.note));
+    if (puzzleEnabled) {
+      const id = puzzleImageId(work);
+      if (id) {
+        const best = bests.get(id);
+        if (best) card.append(el('small', 'sf-puzzle-best', '已拼好・最佳 ' + puzzleTime(best[2]) + '（' + best[1] + ' 片）'));
+        card.append(button('拼成拼圖', () => openChenPuzzle(id)));
+      }
+    }
     grid.appendChild(card);
   });
   root.appendChild(grid);
@@ -1682,7 +1779,7 @@ async function openMingComputer(focus, initialTab, showChat = false) {
   pending.remove();
   panel.classList.add('ming-os-panel');
   const settings = sanitizeSettings(savedSettings || DEFAULT_SETTINGS);
-  const shell = el('div', 'ming-computer-shell');
+  const shell = el('div', 'ming-computer-shell' + (focusEnabled ? ' ming-group1' : ''));
   const stage = el('div', 'ming-os-stage');
   const room = el('img', 'imac-room');
   room.src = '../../../cg/ch2/ch2_cg_004.webp';
@@ -1729,6 +1826,7 @@ async function openMingComputer(focus, initialTab, showChat = false) {
   buildMingMenu(state);
   buildMingDesktop(state);
   buildMingDock(state);
+  focusApp?.desktopChanged();
   updateMingDockScrollHint(state);
   updateMingClock(state);
   updateMingGameNotice(state).catch(function () {});
@@ -1763,6 +1861,7 @@ function updateMingWallpaper(state, key) {
 const MING_APPS = [
   { id: 'chat', label: '和明說話', icon: 'message' },
   { id: 'progress', label: '進度表', icon: 'todo' },
+  ...(focusEnabled ? [{ id: 'focus', label: '陪讀計時器', icon: 'focus' }] : []),
   { id: 'calendar', label: '月曆', icon: 'calendar' },
   { id: 'games', label: '請明做新遊戲', icon: 'games' },
   { id: 'timeline', label: '時光記錄', icon: 'timeline' },
@@ -1849,6 +1948,7 @@ function mingIconShape(kind, id) {
     '<path d="M27 37Q46 25 68 34M25 65Q51 76 75 64" fill="none" stroke="#87b8b0" stroke-width="8" opacity=".6" stroke-linecap="round"/>' +
     '<g fill="none" stroke="#fff2d9" stroke-width="3" stroke-linecap="round"><circle cx="50" cy="51" r="28"/><ellipse cx="50" cy="51" rx="12" ry="28"/><path d="M23 51h54M28 36q22 10 44 0M28 66q22-10 44 0"/></g>';
   if (kind === 'message') return '<defs>' + mingIconGradient(id, '#c4b8f6', '#7b84e0') + gloss + mingIconShadow(id, '#3b2f8a', .3) + '<linearGradient id="' + id + 'w" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#e9eafe"/></linearGradient></defs><rect width="100" height="100" fill="url(#' + id + 'bg)"/><g filter="url(#' + id + 'sh)"><ellipse cx="50" cy="47" rx="32" ry="26.5" fill="url(#' + id + 'w)"/><path d="M26 60c-1 8-5 13-10 16 9 1 17-2 23-8z" fill="url(#' + id + 'w)"/></g><rect width="100" height="100" fill="url(#' + id + 'gl)"/>';
+  if (kind === 'focus') return '<defs>' + mingIconGradient(id, '#b6cafd', '#617bbf') + '</defs><rect width="100" height="100" fill="url(#' + id + 'bg)"/><g stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none"><circle cx="50" cy="54" r="26"/><path d="M43 17h14m-7 0v11m0 13v13l11 7"/></g>';
   if (kind === 'todo') {
     let rows = '';
     [['#97bd56', true], ['#45628f', true], ['#9a536a', false]].forEach(function (row, index) {
@@ -1962,6 +2062,7 @@ function showMingMenu(state, name, anchor) {
   if (name === 'file') {
     addAction('和明說話', function () { open('chat'); });
     addAction('進度表', function () { open('progress'); });
+    if (focusEnabled) addAction('陪讀計時器', () => open('focus'));
     addAction('月曆', function () { open('calendar'); });
     addAction('我的手機', function () { open('phone'); });
     addAction('設定', function () { open('settings'); });
@@ -2208,6 +2309,7 @@ function toggleMingZoom(state) {
 const MING_WINDOWS = {
   chat: { x: 716, y: 118, w: 420, h: 450 },
   progress: { x: 90, y: 62, w: 600, h: 500 },
+  focus: { x: 345, y: 92, w: 470, h: 420 },
   calendar: { x: 300, y: 80, w: 520, h: 430 },
   games: { x: 135, y: 44, w: 1010, h: 584 },
   timeline: { x: 160, y: 52, w: 860, h: 560 },
@@ -2319,7 +2421,7 @@ function openMingApp(state, id, options) {
   const searchInput = el('input'); searchInput.type = 'search'; searchInput.tabIndex = -1; searchInput.placeholder = '搜尋'; searchInput.setAttribute('aria-label', '在這個視窗裡搜尋');
   const searchButton = el('button', 'tb ic'); searchButton.type = 'button'; searchButton.dataset.windowSearch = ''; searchButton.setAttribute('aria-label', '搜尋'); searchButton.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
   search.append(searchInput, searchButton);
-  if (id !== 'website') tools.appendChild(search);
+  if (id !== 'website' && id !== 'focus') tools.appendChild(search);
   if (id === 'progress') {
     const add = el('button', 'tb ic', '+'); add.type = 'button'; add.dataset.progressAddToggle = ''; add.setAttribute('aria-label', '新增待辦'); tools.appendChild(add);
   }
@@ -2413,6 +2515,7 @@ function openMingApp(state, id, options) {
 
 async function renderMingApp(id, root) {
   if (id === 'website') { renderMingWebsite(root); return; }
+  if (id === 'focus') { await focusApp.render(root); return; }
   addContext(root, id === 'chat' ? 'ming' : undefined);
   if (id === 'chat') { await renderChat('ming', false, root); return; }
   if (id === 'progress') { await renderProgress(root); return; }
@@ -2775,7 +2878,9 @@ async function renderProgress(root) {
   addForm.append(addInput, addSave, addCancel);
   const ask = button('請明依劇情排一版', null, 'primary');
   const status = el('p', 'sf-status');
-  root.append(heading, count, list, addForm, el('div', 'sf-row'), ask, status);
+  root.append(heading, count);
+  if (focusApp) await focusApp.renderHistory(root);
+  root.append(list, addForm, el('div', 'sf-row'), ask, status);
   const rowContainer = root.querySelector('.sf-row');
   rowContainer.appendChild(el('span', 'sf-context', '明排的項目可以標記進度；自己新增的項目可以刪除。'));
 
@@ -2869,11 +2974,12 @@ async function renderFavorites(root) {
   await playerId().catch(function () {});   // Larch 版的作品網址要帶玩家編號
   const images = await savedWorks('image');
   const songs = await savedWorks('song');
+  const cgs = puzzleEnabled ? await unlockedPuzzleCGs() : [];
   let filter = 'all';
   function draw() {
     root.replaceChildren();
     const works = images.concat(songs).filter(function (work) { return filter === 'all' || work.kind === filter; }).sort(function (a, b) { return b.createdAt - a.createdAt; });
-    if (!works.length) { empty(root, images.length || songs.length ? '這個分類目前沒有項目。' : '收藏資料夾還是空的。晨的畫和詩的歌會自動放進來。'); return; }
+    if (!works.length && !(cgs.length && filter !== 'song')) { empty(root, images.length || songs.length ? '這個分類目前沒有項目。' : '收藏資料夾還是空的。晨的畫和詩的歌會自動放進來。'); return; }
     const grid = el('div', 'sf-grid');
     works.forEach(function (work) {
       const card = el('article', 'sf-card'); card.appendChild(el('h3', '', work.title));
@@ -2886,6 +2992,14 @@ async function renderFavorites(root) {
       grid.appendChild(card);
     });
     root.appendChild(grid);
+    if (cgs.length && filter !== 'song') {
+      const section = el('section', 'sf-puzzle-images');
+      section.append(el('h3', '', '劇情 CG'));
+      const links = el('div', 'sf-puzzle-tools');
+      cgs.forEach(cg => links.append(button(cg.title + '・拼成拼圖', () => openChenPuzzle(cg.id))));
+      section.append(links);
+      root.append(section);
+    }
   }
   root.addEventListener('ming-favorites-filter', function (event) { filter = event.detail || 'all'; draw(); });
   draw();
@@ -3270,6 +3384,7 @@ function studioStory() {
 freeAffinity.refresh();
 resumeJobs();
 window.STUDIO_FEATURES = {
+  ...(focusApp ? { leaveFocus: focusApp.leave } : {}),
   handle: function (id, focus) {
     if (id === 5) { openShelf(focus); return true; }
     if (id === 16) { openCharacter('shi', focus, 'album'); ensureHelpSeen(); return true; }

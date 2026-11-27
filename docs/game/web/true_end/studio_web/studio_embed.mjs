@@ -182,7 +182,7 @@ if (embedded || realChat) {
     if (handled) opened = true;
   }
 
-  continueButton.addEventListener('click', function () {
+  continueButton.addEventListener('click', async function () {
     if (completed) return;
     if (investigation) {
       if (!opened) return;
@@ -199,6 +199,7 @@ if (embedded || realChat) {
     completed = true;
     continueButton.disabled = true;
     continueButton.textContent = tableTrigger ? '到長桌了' : '已返回劇情';
+    if (window.STUDIO_FEATURES?.leaveFocus) await window.STUDIO_FEATURES.leaveFocus();
     Object.entries(completionWrites).forEach(function (entry) {
       window.parent.postMessage({ type: 'larch:set', name: entry[0], value: entry[1] }, '*');
     });

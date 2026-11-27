@@ -104,7 +104,11 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
     else {
       const allowed = !inFrame || query.get('islandDoor') === '1';
       const go = el('button', 'sp-go', '出門到島上'); go.type = 'button'; go.disabled = !allowed; go.dataset.act = 'island';
-      go.addEventListener('click', () => {
+      go.addEventListener('click', async () => {
+        if (window.STUDIO_FEATURES?.leaveFocus) {
+          go.disabled = true;
+          await window.STUDIO_FEATURES.leaveFocus();
+        }
         if (inFrame) { parent.postMessage({ type: 'larch:complete', result: 'go_island', payload: { from: 'studio_door' } }, '*'); return; }
         const url = new URL('../map2d/side/web/island.html', location.href);
         for (const key of ['mock', 'debug']) if (query.has(key)) url.searchParams.set(key, query.get(key));

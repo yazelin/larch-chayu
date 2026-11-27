@@ -79,7 +79,8 @@
   var SHARDS = { studioPlayerId: 1, studioMemC: 1, studioMemM: 1, studioMemS: 1, studioMemG: 1,
     studioChatC: 5, studioChatM: 5, studioChatS: 5, studioChatG: 5,
     studioWorks: 4, studioProgress: 2, studioSettings: 1, studioMisc: 2,
-    studioComposerSlot1: 9, studioComposerSlot2: 9, studioComposerSlot3: 9, studioComposerMigrated: 1 };
+    studioComposerSlot1: 9, studioComposerSlot2: 9, studioComposerSlot3: 9, studioComposerMigrated: 1,
+    studioFocus: 1, studioNight: 1, studioPuzzle: 8 };
   // 島的各頁（真結局/map2d/side/web/island_bridge.js 會設 STUDIO_DB_SCOPE='island'）雜項另外寫 islandSave0／1，
   // 不碰 studioMisc：島卡沒有登記 studioMisc，只寫不讀會把工作室存的換裝、常駐位蓋掉。islandSave 跟著存檔走、不跨週目。
   var ISLAND = window.STUDIO_DB_SCOPE === 'island';
@@ -93,7 +94,7 @@
   };
   function chatVar(conversation) { return 'studioChat' + SHORT[conversation]; }
   function memoryVar(conversation) { return 'studioMem' + SHORT[conversation]; }
-  var COMPOSER_KEY = /^studioComposer(?:Slot[1-3]|Migrated)$/;
+  var DEDICATED_KEY = /^studio(?:Composer(?:Slot[1-3]|Migrated)|Focus|Night|Puzzle)$/;
   var CARD_KEYS = { studioTurnState: true };
 
   function larchBackend(waitForInit) {
@@ -195,7 +196,8 @@
 
     async function get(key) {
       await ready;
-      if (!ISLAND && COMPOSER_KEY.test(key)) return vars[key] || undefined;
+      if (ISLAND && DEDICATED_KEY.test(key)) return;
+      if (DEDICATED_KEY.test(key)) return vars[key] || undefined;
       if (key === 'anonymousPlayerId') return vars[VARS.playerId] || undefined;
       if (key === 'progressTable') return parse(VARS.progress, undefined);
       if (key === 'computerSettings') return parse(VARS.settings, undefined);
@@ -212,8 +214,9 @@
 
     async function set(key, value) {
       await ready;
-      if (!ISLAND && COMPOSER_KEY.test(key)) {
-        if (typeof value !== 'string' || value.length > capacity(key)) throw new RangeError('編曲存檔超出容量');
+      if (ISLAND && DEDICATED_KEY.test(key)) return;
+      if (DEDICATED_KEY.test(key)) {
+        if (typeof value !== 'string' || value.length > capacity(key)) throw new RangeError('工作室存檔超出容量');
         return writeVar(key, value);
       }
       if (key === 'anonymousPlayerId') return writeVar(VARS.playerId, value);
@@ -254,7 +257,8 @@
 
     async function remove(key) {
       await ready;
-      if (!ISLAND && COMPOSER_KEY.test(key)) return writeVar(key, '');
+      if (ISLAND && DEDICATED_KEY.test(key)) return;
+      if (DEDICATED_KEY.test(key)) return writeVar(key, '');
       if (/^(image|song|drawing):/.test(key)) {
         var id = key.slice(key.indexOf(':') + 1);
         return writeWorks(works().filter(function (work) { return work.id !== id; }));
@@ -276,7 +280,7 @@
       await ready;
       var out = [];
       if (!ISLAND) Object.keys(SHARDS).forEach(function (name) {
-        if (COMPOSER_KEY.test(name) && vars[name]) out.push([name, vars[name]]);
+        if (DEDICATED_KEY.test(name) && vars[name]) out.push([name, vars[name]]);
       });
       if (vars[VARS.playerId]) out.push(['anonymousPlayerId', vars[VARS.playerId]]);
       if (vars[VARS.progress]) out.push(['progressTable', parse(VARS.progress, null)]);
@@ -295,7 +299,7 @@
 
     async function replaceAll(items) {
       await ready;
-      Object.keys(SHARDS).forEach(function (name) { if (vars[name] && !(ISLAND && COMPOSER_KEY.test(name))) writeVar(name, ''); });
+      Object.keys(SHARDS).forEach(function (name) { if (vars[name] && !(ISLAND && DEDICATED_KEY.test(name))) writeVar(name, ''); });
       card = {};
       post({ type: 'larch:storage:clear' });
       for (var index = 0; index < items.length; index += 1) {

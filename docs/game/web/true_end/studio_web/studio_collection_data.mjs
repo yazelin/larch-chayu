@@ -91,10 +91,10 @@ export const MUSICAL_TICKET = {
 };
 
 export const CHEN_ART = [
-  { title: '城門的草圖', src: '../../canon/refs/cg_04C-1_gate_sketch.webp', chapter: 1 },
-  { title: '素描本上的側臉', src: '../../canon/refs/cg_1-12_sketch_profile.webp', chapter: 2 },
-  { title: '朝霞丘的速寫', src: '../map2d/side/art/out/dawn/easel_sketch.webp', chapter: 3, day: 8 },
-  { title: '朝霞丘的日出', src: '../map2d/side/art/out/dawn/easel_painting.webp', chapter: 7, day: 25 },
-  { title: '窗邊的四個人', src: '../../新版/canon_new/props/painting_four.webp', chapter: 6, day: 20 },
-  { title: '天燈上的四個人', src: '../../canon/refs/lantern_chen_drawing.webp', chapter: 99 }
+  { puzzleId: 'gate-sketch', title: '城門的草圖', src: '../../canon/refs/cg_04C-1_gate_sketch.webp', chapter: 1 },
+  { puzzleId: 'profile-sketch', title: '素描本上的側臉', src: '../../canon/refs/cg_1-12_sketch_profile.webp', chapter: 2 },
+  { puzzleId: 'dawn-sketch', title: '朝霞丘的速寫', src: '../map2d/side/art/out/dawn/easel_sketch.webp', chapter: 3, day: 8 },
+  { puzzleId: 'dawn-painting', title: '朝霞丘的日出', src: '../map2d/side/art/out/dawn/easel_painting.webp', chapter: 7, day: 25 },
+  { puzzleId: 'window-crew', title: '窗邊的四個人', src: '../../新版/canon_new/props/painting_four.webp', chapter: 6, day: 20 },
+  { puzzleId: 'lantern-crew', title: '天燈上的四個人', src: '../../canon/refs/lantern_chen_drawing.webp', chapter: 99 }
 ];
