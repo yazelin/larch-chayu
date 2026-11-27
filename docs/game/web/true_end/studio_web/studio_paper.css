@@ -601,7 +601,6 @@
 }
 #panel .sf-job { background: #f7ead6; border-style: solid; border-radius: 5px; }
 
-#panel:not([data-paper-off]):not(.ming-os-panel).sf-wide { width: min(1000px, calc(100vw - 32px)); }
 #panel .sf-draw { display: grid; grid-template-columns: minmax(0, 1fr) minmax(206px, 29%); align-items: start; gap: 14px; }
 #panel .sf-draw > .sf-message, #panel .sf-draw-result { grid-column: 1 / -1; }
 .sf-draw-surface, .sf-draw-tray { min-width: 0; }
@@ -623,6 +622,9 @@
   outline-offset: -4px;
 }
 .sf-draw-sheet { position: relative; max-width: 640px; margin-inline: auto; }
+@media (min-width: 601px) {
+  #panel.sf-wide .sf-draw-sheet { max-width: clamp(250px, calc((94dvh - 270px) * 4 / 3), 640px); }
+}
 .sf-draw-keyboard { padding-top: 8px; color: #634e42; font-size: 12px; }
 .sf-brush-cursor {
   display: none;
@@ -807,7 +809,6 @@
 #panel .decor-card.locked img { filter: brightness(0) opacity(.55); }
 
 @media (max-width: 600px) {
-  #panel:not([data-paper-off]):not(.ming-os-panel).sf-wide { width: auto; }
   #panel .sf-draw { grid-template-columns: minmax(0, 1fr); }
   #panel.sf-wide .sf-draw-tray .sf-draw-palette { grid-template-columns: repeat(6, minmax(44px, 1fr)); }
   #panel .sf-draw-tray { padding-inline: 5px; }

@@ -75,7 +75,6 @@
   .sf-night-notice { top: 50px; }
 }
 
-#panel[data-design="puzzle"] .sf-tabs { flex-wrap: wrap; }
 .sf-puzzle { min-width: 0; }
 .sf-puzzle .sf-group1-dialogue { margin-bottom: 8px; }
 .sf-puzzle-images h3, .sf-puzzle-content h3 { margin: 5px 0; overflow-wrap: anywhere; }
@@ -245,8 +244,6 @@
 }
 .sf-puzzle-best { display: block; margin: 6px 0; color: #575c2a; }
 
-#panel.studio-feature-panel[data-design="puzzle"] { max-height: min(94dvh, 850px); }
-#panel[data-design="puzzle"]:not(.ming-os-panel) .panel-head { padding-block: 5px; }
 body > .sf-night-notice {
   position: fixed;
   z-index: 90;   /* 原本 20，被面板（21）和說明框（80）蓋住，作者看不到 */
@@ -360,7 +357,6 @@ body > .sf-night-notice {
 .sf-coloring-card span { padding: 3px 6px; }
 .sf-coloring-gallery { margin-top: 14px; }
 .sf-coloring-picks .sf-empty { grid-column: 1 / -1; }
-#panel.studio-feature-panel[data-design="coloring"] { max-height: min(94dvh, 850px); }
 #panel[data-design="coloring-play"]:not(.ming-os-panel) .panel-head {
   display: flex;
   min-height: 0;
@@ -497,10 +493,6 @@ body > .sf-night-notice {
   .sf-coloring-tray .sf-coloring-palette .sf-button { padding-inline: 0; }
 }
 @media (orientation: landscape) and (max-height: 480px) {
-  #panel[data-design="coloring"]:not(.ming-os-panel) .panel-head { padding-block: 4px; }
-  #panel[data-design="coloring"] #panel-body { padding-block: 6px; }
-  #panel[data-design="coloring"] #panel-body > .sf-context { display: none; }
-  #panel[data-design="coloring"] .sf-tabs { padding-bottom: 5px; margin-bottom: 5px; }
   #panel[data-design="coloring"] .sf-coloring-dialogue { min-height: 34px; margin-bottom: 4px; }
   #panel[data-design="coloring"] .sf-coloring-dialogue img { width: 30px; height: 30px; }
   #panel[data-design="coloring"] .sf-coloring-card :is(img, canvas) { height: min(24dvh, 160px); }

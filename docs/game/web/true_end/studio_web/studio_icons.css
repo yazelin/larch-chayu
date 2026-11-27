@@ -29,6 +29,7 @@ html[data-icon-style="A"] .sp-ic[data-icon="moon"]{background-image:url("icons/A
 html[data-icon-style="A"] .sp-ic[data-icon="music"]{background-image:url("icons/A/music.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="next"]{background-image:url("icons/A/next.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="open"]{background-image:url("icons/A/open.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="palette"]{background-image:url("icons/A/palette.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="pause"]{background-image:url("icons/A/pause.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="paw"]{background-image:url("icons/A/paw.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="pencil"]{background-image:url("icons/A/pencil.webp")}
@@ -37,6 +38,7 @@ html[data-icon-style="A"] .sp-ic[data-icon="play"]{background-image:url("icons/A
 html[data-icon-style="A"] .sp-ic[data-icon="plus"]{background-image:url("icons/A/plus.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="predawn"]{background-image:url("icons/A/predawn.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="prev"]{background-image:url("icons/A/prev.webp")}
+html[data-icon-style="A"] .sp-ic[data-icon="puzzle"]{background-image:url("icons/A/puzzle.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="record"]{background-image:url("icons/A/record.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="reset"]{background-image:url("icons/A/reset.webp")}
 html[data-icon-style="A"] .sp-ic[data-icon="send"]{background-image:url("icons/A/send.webp")}
@@ -86,6 +88,7 @@ html[data-icon-style="B"] .sp-ic[data-icon="moon"]{background-image:url("icons/B
 html[data-icon-style="B"] .sp-ic[data-icon="music"]{background-image:url("icons/B/music.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="next"]{background-image:url("icons/B/next.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="open"]{background-image:url("icons/B/open.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="palette"]{background-image:url("icons/B/palette.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="pause"]{background-image:url("icons/B/pause.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="paw"]{background-image:url("icons/B/paw.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="pencil"]{background-image:url("icons/B/pencil.webp")}
@@ -94,6 +97,7 @@ html[data-icon-style="B"] .sp-ic[data-icon="play"]{background-image:url("icons/B
 html[data-icon-style="B"] .sp-ic[data-icon="plus"]{background-image:url("icons/B/plus.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="predawn"]{background-image:url("icons/B/predawn.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="prev"]{background-image:url("icons/B/prev.webp")}
+html[data-icon-style="B"] .sp-ic[data-icon="puzzle"]{background-image:url("icons/B/puzzle.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="record"]{background-image:url("icons/B/record.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="reset"]{background-image:url("icons/B/reset.webp")}
 html[data-icon-style="B"] .sp-ic[data-icon="send"]{background-image:url("icons/B/send.webp")}
@@ -143,6 +147,7 @@ html[data-icon-style="C"] .sp-ic[data-icon="moon"]{background-image:url("icons/C
 html[data-icon-style="C"] .sp-ic[data-icon="music"]{background-image:url("icons/C/music.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="next"]{background-image:url("icons/C/next.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="open"]{background-image:url("icons/C/open.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="palette"]{background-image:url("icons/C/palette.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="pause"]{background-image:url("icons/C/pause.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="paw"]{background-image:url("icons/C/paw.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="pencil"]{background-image:url("icons/C/pencil.webp")}
@@ -151,6 +156,7 @@ html[data-icon-style="C"] .sp-ic[data-icon="play"]{background-image:url("icons/C
 html[data-icon-style="C"] .sp-ic[data-icon="plus"]{background-image:url("icons/C/plus.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="predawn"]{background-image:url("icons/C/predawn.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="prev"]{background-image:url("icons/C/prev.webp")}
+html[data-icon-style="C"] .sp-ic[data-icon="puzzle"]{background-image:url("icons/C/puzzle.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="record"]{background-image:url("icons/C/record.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="reset"]{background-image:url("icons/C/reset.webp")}
 html[data-icon-style="C"] .sp-ic[data-icon="send"]{background-image:url("icons/C/send.webp")}

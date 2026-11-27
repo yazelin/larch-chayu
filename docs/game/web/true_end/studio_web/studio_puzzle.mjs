@@ -143,8 +143,8 @@ function quarterTurn(x, y, turn) {
 
 export function renderPuzzle(root, { el, button, avatar, db, sources, initial }) {
   const shell = el('section', 'sf-puzzle');
-  const scrollBox = root.closest('#panel-body');
-  const panel = scrollBox.closest('#panel');
+  const scrollBox = root.parentElement;
+  const panel = root.closest('#panel');
   const dialogue = el('div', 'sf-group1-dialogue');
   const portrait = el('img');
   portrait.src = avatar;
@@ -219,7 +219,6 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
   function returnToImages(line) {
     leaveTable();
     panel.dataset.design = 'puzzle';
-    panel.classList.add('sf-wide');
     pickImage(line);
     scrollBox.scrollTop = 0;
     (content.querySelector('.sf-puzzle-source') || panel.querySelector('#panel-close')).focus({ preventScroll: true });
@@ -369,7 +368,6 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
     board.addEventListener('contextmenu', event => event.preventDefault());
 
     content.replaceChildren(tools, board);
-    panel.classList.remove('sf-wide');
     panel.dataset.design = 'puzzle-play';
     root.puzzleBack = returnToImages;
     root.puzzleEscape = () => {

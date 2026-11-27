@@ -85,6 +85,8 @@ const RULES = [
   { sel: '.sf-tab', t: '我來畫', i: 'pencil', m: 'label' },
   { sel: '.sf-tab', t: '請晨畫一張', i: 'easel', m: 'label' },
   { sel: '.sf-tab', t: '畫架展廳', i: 'frame', m: 'label' },
+  { sel: '.sf-tab', t: '拼圖', i: 'puzzle', m: 'label' },
+  { sel: '.sf-tab', t: '著色本', i: 'palette', m: 'label' },
   { sel: '.sf-tab', t: '請詩做歌', i: 'music', m: 'label' },
   { sel: '.sf-tab', t: '詩做給妳的', i: 'music', m: 'label' },
   // 詩的黑膠唱盤（studio_album.mjs）
@@ -107,6 +109,7 @@ const RULES = [
   { t: '回到收藏資料夾', i: 'prev', m: 'label', s: '回收藏' },
   // 畫圖工具
   { t: '橡皮擦', i: 'eraser', m: 'icon' },
+  { sel: '[data-coloring-tool="pan"]', t: '移動', i: 'hand', m: 'label', tip: '移動畫面（兩指拖也可以）' },
   { sel: ':not(.cs-room *)', t: '復原', i: 'undo', m: 'icon', tip: '復原（收回上一筆）' },
   { sel: ':not(.cs-room *)', t: '清空', i: 'clear', m: 'icon', tip: '清空畫布' },
   // 明的電腦裡的按鈕（選單列與下拉選單不換，見檔頭）

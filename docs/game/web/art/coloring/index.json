@@ -1,5 +1,11 @@
 [
   {
+    "id": "ch1_cg_032",
+    "title": "明說能幫多少",
+    "line": "art/coloring/ch1_cg_032.webp",
+    "thumb": "art/coloring/ch1_cg_032_thumb.webp"
+  },
+  {
     "id": "ch1_cg_042",
     "title": "要先問誰",
     "line": "art/coloring/ch1_cg_042.webp",
@@ -16,6 +22,12 @@
     "title": "握著同一支筆",
     "line": "art/coloring/ch3_cg_017.webp",
     "thumb": "art/coloring/ch3_cg_017_thumb.webp"
+  },
+  {
+    "id": "ch3_cg_023",
+    "title": "醒來時蓋著他的外套",
+    "line": "art/coloring/ch3_cg_023.webp",
+    "thumb": "art/coloring/ch3_cg_023_thumb.webp"
   },
   {
     "id": "ch4_cg_015",
@@ -48,10 +60,10 @@
     "thumb": "art/coloring/morning_cg_012_thumb.webp"
   },
   {
-    "id": "bright_cg_014",
-    "title": "新遊戲的兩個角色",
-    "line": "art/coloring/bright_cg_014.webp",
-    "thumb": "art/coloring/bright_cg_014_thumb.webp"
+    "id": "bright_cg_012",
+    "title": "靠得很近",
+    "line": "art/coloring/bright_cg_012.webp",
+    "thumb": "art/coloring/bright_cg_012_thumb.webp"
   },
   {
     "id": "poem_cg_011",

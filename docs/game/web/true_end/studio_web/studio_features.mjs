@@ -725,8 +725,8 @@ async function renderChat(character, group, root) {
   });
 }
 
-function setupTabs(tabs, render, initialId, label = '工作室活動') {
-  const nav = el('nav', 'sf-tabs');
+function setupTabs(tabs, render, initialId, label = '工作室活動', navClass = 'sf-tabs') {
+  const nav = el('nav', navClass);
   nav.setAttribute('aria-label', label);
   const content = el('div', 'sf-stack');
   let current = initialId || tabs[0].id;
@@ -735,7 +735,8 @@ function setupTabs(tabs, render, initialId, label = '工作室活動') {
     current = id;
     panel.dataset.design = id;
     panelBody.scrollTop = 0;
-    panel.classList.toggle('sf-wide', id === 'draw' || id === 'puzzle' || id === 'coloring');   // 畫板要大：桌機版這個分頁把面板放寬放高（studio_features.css）
+    content.scrollTop = 0;
+    panel.classList.toggle('sf-wide', id === 'draw');
     nav.querySelectorAll('button').forEach(function (tab) { tab.setAttribute('aria-selected', String(tab.dataset.tab === id)); });
     const view = el('div');
     content.replaceChildren(view);
@@ -798,7 +799,7 @@ function openCharacter(character, focus, initialTab, options) {
     }
     const first = options; options = null;   // 帶進來的題目只用一次
     await renderCreation(character, content, first);
-  }, initialTab || 'chat');
+  }, initialTab || 'chat', '工作室活動', character === 'chen' ? 'sf-tabs sf-chen-tabs' : 'sf-tabs');
 }
 
 function openDirectChat(character, focus) {

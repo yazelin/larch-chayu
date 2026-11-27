@@ -1,4 +1,10 @@
 import { drawingLook, DRAW_COLORS, unlockedColors, CANVAS_W } from './studio_draw.mjs';
+// 著色本固定多三個膚色（作者 2026-11-28：「現在就沒有膚色」）。「我來畫」照劇情解鎖的 12 色不動。
+const SKIN_COLORS = [
+  { id: 'skin-light', name: '膚色（淺）', hex: '#fbe3d3' },
+  { id: 'skin-mid', name: '膚色', hex: '#f2c9a8' },
+  { id: 'skin-deep', name: '膚色（深）', hex: '#d9a07a' }
+];
 import { group1Line } from './studio_lines_group1.mjs';
 import { coloringFixtures } from './studio_coloring_fixture.mjs';
 import { coloringHistory, coloringRegion, coloringWalls } from './studio_coloring_pixels.mjs';
@@ -6,6 +12,10 @@ import { coloringHistory, coloringRegion, coloringWalls } from './studio_colorin
 const PAPER = '#fffdf6';
 const CARD_KEY = 'coloringDraft';
 const CARD_BUDGET = 85_000;
+const PALETTE_KEY = 'coloringPalette';
+const PALETTE_SIZE = 12;
+const COLORING_CSS = new URL('./studio_coloring.css', import.meta.url);
+let paletteWrites = Promise.resolve();
 // 線稿索引由另一條製作線提供，匯出器會在索引存在時收進這個目錄。
 const ART_INDEX = new URL('../../art/coloring/index.json', import.meta.url);
 const ART_DIRECTORY = new URL('.', ART_INDEX);
@@ -65,10 +75,53 @@ function shade(color, value) {
   return '#' + components.map(c => Math.round(c + (end - c) * f).toString(16).padStart(2, '0')).join('');
 }
 
+function loadStyles() {
+  if (document.querySelector('link[data-studio-coloring]')) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = COLORING_CSS.href;
+  link.dataset.studioColoring = '';
+  document.head.append(link);
+}
+
+function normalizeHex(value) {
+  return typeof value === 'string' && /^#?[\da-f]{6}$/i.test(value)
+    ? '#' + value.replace(/^#/, '').toLowerCase() : null;
+}
+
+async function readPalette(db) {
+  const saved = await db.get(PALETTE_KEY);
+  return Array.from({ length: PALETTE_SIZE }, (_, slot) => normalizeHex(saved?.[slot]));
+}
+
+function hexToHsv(hex, lastHue) {
+  const rgb = parseInt(hex.slice(1), 16);
+  const [r, g, b] = [16, 8, 0].map(shift => ((rgb >> shift) & 255) / 255);
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), chroma = max - min;
+  let h = lastHue;
+  if (chroma) {
+    if (max === r) h = (g - b) / chroma;
+    else if (max === g) h = (b - r) / chroma + 2;
+    else h = (r - g) / chroma + 4;
+    h = (h * 60 + 360) % 360;
+  }
+  return { h, s: max ? chroma / max : 0, v: max };
+}
+
+function hsvToHex({ h, s, v }) {
+  const channel = offset => {
+    const k = (offset + h / 60) % 6;
+    const value = v * (1 - s * Math.max(0, Math.min(k, 4 - k, 1)));
+    return Math.round(value * 255).toString(16).padStart(2, '0');
+  };
+  return '#' + channel(5) + channel(3) + channel(1);
+}
+
 export async function renderColoring(root, deps) {
+  loadStyles();
   const { el, button, db } = deps;
   const panel = root.closest('#panel');
-  const scrollBox = root.closest('#panel-body');
+  const scrollBox = root.parentElement;
   const say = key => group1Line('chen', 'coloring_' + key);
   const wrap = el('div', 'sf-coloring');
   const speech = el('div', 'sf-group1-dialogue sf-coloring-dialogue');
@@ -96,7 +149,7 @@ export async function renderColoring(root, deps) {
   function pick() {
     cleanEditor();
     panel.dataset.design = 'coloring';
-    panel.classList.add('sf-wide');
+    panel.querySelector('#panel-title').textContent = '著色本';
     phrase.textContent = say('enter');
     scrollBox.scrollTop = 0;
     const heading = el('h2', '', '選一張線稿');
@@ -132,13 +185,20 @@ export async function renderColoring(root, deps) {
     try {
       const source = item.fixture ? item.make() : await imageAt(item.src, true);
       await writes;
-      let saved, readFailed = false;
+      let saved, readFailed = false, palette, paletteReadFailed = false;
       try {
         const draft = await db.get(draftKey(db, item));
         if (draft?.id === item.id && !!draft.fixture === !!item.fixture) saved = await imageAt(draft.src);
       } catch (error) { readFailed = true; }
+      try {
+        await paletteWrites;
+        palette = await readPalette(db);
+      } catch (error) {
+        palette = Array(PALETTE_SIZE).fill(null);
+        paletteReadFailed = true;
+      }
       if (token !== generation || !root.isConnected) return;
-      edit(item, source, saved, readFailed);
+      edit(item, source, saved, readFailed, palette, paletteReadFailed);
     } catch (error) {
       if (token !== generation) return;
       loading.textContent = '這張線稿暫時讀不到。';
@@ -146,7 +206,7 @@ export async function renderColoring(root, deps) {
     }
   }
 
-  function edit(item, source, saved, readFailed) {
+  function edit(item, source, saved, readFailed, savedColors, paletteReadFailed) {
     const width = source.naturalWidth || source.width, height = source.naturalHeight || source.height;
     const workspace = el('div', 'sf-coloring-workspace');
     const zoomBar = el('div', 'sf-coloring-zoom');
@@ -202,7 +262,7 @@ export async function renderColoring(root, deps) {
     const toolButtons = new Map();
     const swatches = new Map();
     const press = (node, current) => node.setAttribute('aria-pressed', String(current));
-    for (const [id, text] of [['fill', '填色'], ['brush', '筆刷'], ['erase', '橡皮擦'], ['pick', '滴管']]) {
+    for (const [id, text] of [['fill', '填色'], ['brush', '筆刷'], ['erase', '橡皮擦'], ['pick', '滴管'], ['pan', '移動']]) {
       const control = button(text, () => { tool = id; refresh(); });
       control.dataset.coloringTool = id;
       toolButtons.set(id, control);
@@ -231,9 +291,8 @@ export async function renderColoring(root, deps) {
     function setColor(color) {
       baseColor = color; light = 0;
       shadeInput.value = 0;
-      shadeInput.dispatchEvent(new Event('input'));
       if (tool === 'erase' || tool === 'pick') tool = 'brush';
-      refresh();
+      shadeInput.dispatchEvent(new Event('input'));
     }
     function swatch(color, name, action) {
       const control = button('', action, 'sf-coloring-swatch');
@@ -316,17 +375,182 @@ export async function renderColoring(root, deps) {
     controls.append(actions, palette, recents, settings, operations);
     const footer = el('div', 'sf-coloring-footer');
     footer.append(look.actions, openReply, saveStatus);
-    tray.append(controls, footer);
     const current = el('div', 'sf-coloring-now');
-    current.append(el('span', '', '目前顏色'), sample);
-    settings.prepend(current);
+    const colorPanel = el('div', 'sf-coloring-custom');
+    colorPanel.id = 'sf-coloring-custom';
+    colorPanel.hidden = true;
+    const toggleCustom = button('自訂色', () => showColors(colorPanel.hidden));
+    toggleCustom.setAttribute('aria-controls', colorPanel.id);
+    toggleCustom.setAttribute('aria-expanded', 'false');
+    current.append(el('span', '', '目前顏色'), sample, toggleCustom);
+    tray.append(current, controls, footer, colorPanel);
+
+    function showColors(show) {
+      colorPanel.hidden = !show;
+      controls.hidden = footer.hidden = show;
+      tray.classList.toggle('sf-coloring-tray-custom', show);
+      toggleCustom.textContent = show ? '返回工具' : '自訂色';
+      toggleCustom.setAttribute('aria-expanded', String(show));
+      tray.scrollTop = 0;
+      toggleCustom.focus({ preventScroll: true });
+    }
+
+    const picker = el('div', 'sf-coloring-picker');
+    const square = button('', null, 'sf-coloring-sv');
+    const marker = el('span', 'sf-coloring-marker');
+    square.append(marker);
+    const hue = el('input', 'sf-coloring-hue');
+    hue.type = 'range';
+    hue.min = 0;
+    hue.max = 360;
+    hue.setAttribute('aria-label', '色相');
+    const hexField = el('label', 'sf-coloring-hex');
+    const hex = el('input');
+    hex.type = 'text';
+    hex.maxLength = 7;
+    hex.autocomplete = 'off';
+    hex.spellcheck = false;
+    hex.setAttribute('autocapitalize', 'off');
+    hexField.append(el('span', '', 'HEX'), hex);
+    picker.append(square, hue, hexField);
+
+    let hsv = hexToHsv(paintColor(), 0);
+    function refreshPicker(color) {
+      if (hsvToHex(hsv) !== color) hsv = hexToHsv(color, hsv.h);
+      square.style.setProperty('--hue', hsv.h);
+      marker.style.left = hsv.s * 100 + '%';
+      marker.style.top = (1 - hsv.v) * 100 + '%';
+      marker.style.backgroundColor = color;
+      square.setAttribute('aria-label', '飽和度 ' + Math.round(hsv.s * 100) + '%，明度 ' + Math.round(hsv.v * 100) + '%');
+      hue.value = Math.round(hsv.h);
+      if (document.activeElement !== hex) hex.value = color;
+    }
+    const clamp = n => Math.min(1, Math.max(0, n));
+    function selectSquare(event) {
+      const rect = square.getBoundingClientRect();
+      hsv.s = clamp((event.clientX - rect.left) / rect.width);
+      hsv.v = clamp(1 - (event.clientY - rect.top) / rect.height);
+      setColor(hsvToHex(hsv));
+    }
+    square.addEventListener('pointerdown', event => {
+      if (!event.isPrimary || event.button !== 0) return;
+      event.preventDefault();
+      square.setPointerCapture(event.pointerId);
+      selectSquare(event);
+    });
+    square.addEventListener('pointermove', event => {
+      if (square.hasPointerCapture(event.pointerId)) selectSquare(event);
+    });
+    // The square handles the gesture with pointer events. Suppress the browser's synthetic tap.
+    square.addEventListener('touchstart', event => event.preventDefault(), { passive: false });
+    const colorKeys = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] };
+    square.addEventListener('keydown', event => {
+      const direction = colorKeys[event.key];
+      if (!direction) return;
+      event.preventDefault();
+      const step = event.shiftKey ? 0.1 : 0.01;
+      hsv.s = clamp(hsv.s + direction[0] * step);
+      hsv.v = clamp(hsv.v + direction[1] * step);
+      setColor(hsvToHex(hsv));
+    });
+    hue.addEventListener('input', () => {
+      hsv.h = Number(hue.value);
+      setColor(hsvToHex(hsv));
+    });
+    hex.addEventListener('input', () => {
+      const color = normalizeHex(hex.value);
+      hex.setAttribute('aria-invalid', String(!color));
+      if (color) setColor(color);
+    });
+    hex.addEventListener('blur', () => {
+      hex.value = paintColor();
+      hex.removeAttribute('aria-invalid');
+    });
+    hex.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && normalizeHex(hex.value)) hex.blur();
+    });
+
+    const personal = el('div', 'sf-coloring-personal');
+    const slots = el('div', 'sf-coloring-slots');
+    const paletteTitle = el('strong', '', '我的調色盤');
+    paletteTitle.id = 'sf-coloring-palette-title';
+    slots.setAttribute('role', 'group');
+    slots.setAttribute('aria-labelledby', paletteTitle.id);
+    const paletteActions = el('div', 'sf-coloring-palette-actions');
+    const paletteStatus = el('div', 'sf-coloring-palette-status', paletteReadFailed ? '調色盤讀取失敗' : '');
+    paletteStatus.setAttribute('role', 'status');
+    let activeSlot = null, palettePending = false;
+    const slotButtons = savedColors.map((_, slot) => {
+      const control = swatch('', '', () => {
+        activeSlot = slot;
+        setColor(savedColors[slot]);
+      });
+      slots.append(control);
+      return control;
+    });
+    const addColor = button('加入調色盤', () => changePalette(paintColor()));
+    const removeColor = button('刪除', () => changePalette(null), 'sf-coloring-remove');
+    removeColor.setAttribute('aria-label', '刪除選取的顏色');
+    paletteActions.append(addColor, removeColor);
+    personal.append(paletteTitle, slots, paletteActions, paletteStatus);
+    colorPanel.append(picker, personal);
+
+    function refreshPalette(color) {
+      if (activeSlot !== null && savedColors[activeSlot] !== color) activeSlot = null;
+      slotButtons.forEach((control, slot) => {
+        const stored = savedColors[slot];
+        const label = '第 ' + (slot + 1) + ' 格 ' + (stored || '空白');
+        control.style.setProperty('--paint', stored || '');
+        control.disabled = !stored;
+        control.title = label;
+        control.setAttribute('aria-label', label);
+        press(control, activeSlot === slot);
+      });
+      addColor.disabled = palettePending;
+      removeColor.disabled = palettePending || activeSlot === null;
+    }
+
+    async function changePalette(color) {
+      const selectedSlot = activeSlot;
+      const selectedColor = savedColors[selectedSlot];
+      palettePending = true;
+      refreshPalette(paintColor());
+      const write = paletteWrites.then(async () => {
+        const latest = await readPalette(db);
+        const slot = color === null ? selectedSlot : latest.indexOf(null);
+        if (slot === -1) return { latest, message: '調色盤已滿，請先刪除一格。' };
+        if (color === null && latest[slot] !== selectedColor) {
+          return { latest, message: '調色盤已更新，請重新選取。' };
+        }
+        latest[slot] = color;
+        await db.set(PALETTE_KEY, latest);
+        return { latest, slot: color === null ? null : slot,
+          message: db.mode === 'memory' ? '調色盤只保留到關閉頁面。' : '' };
+      });
+      paletteWrites = write.catch(() => {});
+      try {
+        const result = await write;
+        savedColors = result.latest;
+        if (result.slot !== undefined) activeSlot = result.slot;
+        paletteStatus.textContent = result.message;
+      } catch (error) {
+        paletteStatus.textContent = '調色盤無法儲存。';
+      } finally {
+        palettePending = false;
+        refreshPalette(paintColor());
+      }
+    }
 
     function refresh() {
       for (const [id, control] of toolButtons) press(control, id === tool);
       for (const [hex, control] of swatches) press(control, baseColor === hex);
       viewport.dataset.tool = tool;
-      sample.style.setProperty('--paint', paintColor());
-      sample.setAttribute('aria-label', '目前的顏色 ' + paintColor());
+      viewport.style.cursor = tool === 'pan' ? 'grab' : '';
+      const color = paintColor();
+      sample.style.setProperty('--paint', color);
+      sample.setAttribute('aria-label', '目前的顏色 ' + color);
+      refreshPicker(color);
+      refreshPalette(color);
       tolerance.parentElement.hidden = tool !== 'fill';
       size.parentElement.hidden = opacity.parentElement.hidden = !['brush', 'erase'].includes(tool);
       undo.disabled = !history.canUndo;
@@ -496,7 +720,8 @@ export async function renderColoring(root, deps) {
         pinch = center();
         return;
       }
-      gesture = event.button === 1 ? 'pan' : 'draw';
+      // 「移動」工具：單指／滑鼠拖就是平移（作者 2026-11-28 問手機怎麼平移；兩指拖也可以）
+      gesture = event.button === 1 || tool === 'pan' ? 'pan' : 'draw';
       originalTool = tool;
       startPoint = [event.clientX, event.clientY];
       const point = paperPoint(event);
@@ -535,7 +760,6 @@ export async function renderColoring(root, deps) {
     viewport.addEventListener('contextmenu', event => event.preventDefault());
 
     panel.dataset.design = 'coloring-play';
-    panel.classList.remove('sf-wide');
     panel.querySelector('#panel-title').textContent = '晨的著色本';
     scrollBox.scrollTop = 0;
     content.replaceChildren(editor);
@@ -547,6 +771,7 @@ export async function renderColoring(root, deps) {
     interrupt = () => {
       if (dialog.open) { dialog.close(); return true; }
       if (pointers.size && gesture !== 'canceled') { endStroke(false); gesture = 'canceled'; return true; }
+      if (!colorPanel.hidden) { showColors(false); return true; }
       return false;
     };
     disposeEditor = () => { resize.disconnect(); endStroke(false); dialog.close(); };
@@ -561,7 +786,7 @@ export async function renderColoring(root, deps) {
     if (generation !== token || !root.isConnected) return;
     sources = items.filter(item => deps.all || deps.seen?.has(item.id));
     const open = unlockedColors(progress);
-    colors = DRAW_COLORS.filter(color => open.has(color.id));
+    colors = [...DRAW_COLORS.filter(color => open.has(color.id)), ...SKIN_COLORS];
     pick();
   } catch (error) {
     if (generation === token) content.replaceChildren(el('p', 'sf-status', '線稿清單暫時讀不到，請重新打開著色本。'));
