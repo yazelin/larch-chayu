@@ -324,3 +324,214 @@ body > .sf-night-notice {
 }
 .sf-puzzle-thumb { position: relative; display: block; }
 .sf-puzzle-thumb img { display: block; }
+
+/* 晨的著色本 */
+.sf-coloring {
+  --coloring-green: #58632d;
+  --coloring-edge: #cbb697;
+  --coloring-paper: #fffdf6;
+  color: #3f3025;
+}
+.sf-coloring .sf-coloring-dialogue { margin: 0 0 12px; }
+.sf-coloring-content h2 { display: inline-block; margin: 0 10px 8px 0; font-size: 18px; }
+.sf-coloring-fixture { color: #725945; }
+.sf-coloring-picks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 185px), 1fr));
+  gap: 10px;
+}
+.sf-coloring-picks .sf-coloring-card {
+  padding: 6px;
+  display: grid;
+  gap: 5px;
+  text-align: left;
+  background: #f6eddf;
+  border-radius: 9px;
+  white-space: normal;
+}
+.sf-coloring-card :is(img, canvas) {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: contain;
+  background: var(--coloring-paper);
+  border-radius: 4px;
+}
+.sf-coloring-card span { padding: 3px 6px; }
+.sf-coloring-gallery { margin-top: 14px; }
+.sf-coloring-picks .sf-empty { grid-column: 1 / -1; }
+#panel.studio-feature-panel[data-design="coloring"] { max-height: min(94dvh, 850px); }
+#panel[data-design="coloring-play"]:not(.ming-os-panel) .panel-head {
+  display: flex;
+  min-height: 0;
+  padding: 4px clamp(12px, 22vw, 260px) 4px 12px;
+}
+#panel[data-design="coloring-play"]:not(.ming-os-panel) #panel-body {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: 10px 12px max(12px, env(safe-area-inset-bottom));
+}
+#panel[data-design="coloring-play"] #panel-body > :is(.sf-context, .sf-tabs) { display: none; }
+#panel[data-design="coloring-play"] #panel-body > .sf-stack { display: block; }
+#panel[data-design="coloring-play"] :is(#panel-body > .sf-stack, #panel-body > .sf-stack > div) { height: 100%; }
+#panel[data-design="coloring-play"] .sf-coloring {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+#panel[data-design="coloring-play"] .sf-coloring-dialogue { margin-bottom: 6px; }
+.sf-coloring-editor {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 270px;
+  gap: 10px;
+}
+.sf-coloring-workspace {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 6px;
+}
+.sf-coloring-zoom, .sf-coloring-row, .sf-coloring-tray .sf-draw-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.sf-coloring-name {
+  margin-right: auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sf-coloring-zoom output { min-width: 42px; text-align: center; font-variant-numeric: tabular-nums; }
+.sf-coloring-editor :is(.sf-coloring-zoom, .sf-coloring-tray, .sf-coloring-dialog) .sf-button {
+  min-height: 36px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+.sf-coloring-viewport {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  background: #e4d6c3;
+  box-shadow: inset 0 0 10px #775b3e27;
+  border-radius: 6px;
+  cursor: crosshair;
+}
+.sf-coloring-sheet {
+  position: absolute;
+  background: var(--coloring-paper);
+  box-shadow: 0 1px 6px #6241243d;
+  pointer-events: none;
+}
+.sf-coloring-sheet canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.sf-coloring-tray {
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--coloring-edge);
+  border-radius: 8px;
+  background: #f6eddf;
+  padding: 8px;
+}
+.sf-coloring-controls > * + * { margin-top: 7px; }
+.sf-coloring-palette {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+}
+#panel .sf-coloring-tray .sf-coloring-swatch, .sf-coloring-sample {
+  display: block;
+  min-width: 0;
+  border: 1px solid #8c765e;
+  border-radius: 5px;
+  background: var(--paint);
+}
+#panel .sf-coloring-tray .sf-coloring-swatch:hover { background: var(--paint); filter: brightness(.9); }
+.sf-coloring-tray .sf-coloring-swatch[aria-pressed="true"] {
+  outline: 2px solid var(--coloring-green);
+  outline-offset: -3px;
+  box-shadow: inset 0 0 0 4px var(--coloring-paper);
+}
+.sf-coloring-row .sf-button[aria-pressed="true"] { color: #fffdf6; background: var(--coloring-green); border-color: var(--coloring-green); }
+.sf-coloring-recent { display: flex; gap: 3px; align-items: center; min-height: 30px; }
+.sf-coloring-recent span { margin-right: 4px; font-size: 13px; flex: none; }
+#panel .sf-coloring-tray .sf-coloring-recent .sf-button { width: 30px; min-width: 0; min-height: 30px; padding: 0; }
+.sf-coloring-settings { position: relative; display: grid; gap: 2px; }
+.sf-coloring-now { display: flex; align-items: center; gap: 8px; }
+.sf-coloring-sample { width: 48px; height: 24px; }
+.sf-coloring-slider {
+  min-height: 28px;
+  display: grid;
+  grid-template-columns: 4.6em minmax(42px, 1fr) 4.1em;
+  align-items: center;
+  font-size: 13px;
+  gap: 4px;
+}
+.sf-coloring-slider input { min-width: 0; width: 100%; margin: 0; accent-color: var(--coloring-green); }
+.sf-coloring-slider output { text-align: left; font-variant-numeric: tabular-nums; }
+.sf-coloring-save { color: #725945; font-size: 12px; }
+.sf-coloring-tray .sf-draw-actions { display: flex; flex-wrap: wrap; margin-top: 7px; }
+.sf-coloring-tray :is(.sf-draw-left, .sf-status) { font-size: 12px; }
+.sf-coloring-dialog {
+  color: inherit;
+  background: var(--coloring-paper);
+  border: 1px solid var(--coloring-edge);
+  border-radius: 10px;
+  width: min(430px, calc(100% - 32px));
+  max-height: calc(100dvh - 36px);
+  padding: 12px;
+}
+.sf-coloring-dialog::backdrop { background: #36291e60; }
+.sf-coloring-dialog header { justify-content: space-between; padding-bottom: 8px; }
+.sf-coloring-dialog-content > .sf-coloring-row { justify-content: flex-end; }
+.sf-coloring [hidden] { display: none !important; }
+
+@media (orientation: portrait) and (max-width: 650px) {
+  .sf-coloring-picks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sf-coloring-editor { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(160px, 1fr) auto; gap: 8px; }
+  .sf-coloring-tray { max-height: min(380px, 47dvh); }
+  .sf-coloring-palette { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .sf-coloring-tray .sf-coloring-palette .sf-button { padding-inline: 0; }
+}
+@media (orientation: landscape) and (max-height: 480px) {
+  #panel[data-design="coloring"]:not(.ming-os-panel) .panel-head { padding-block: 4px; }
+  #panel[data-design="coloring"] #panel-body { padding-block: 6px; }
+  #panel[data-design="coloring"] #panel-body > .sf-context { display: none; }
+  #panel[data-design="coloring"] .sf-tabs { padding-bottom: 5px; margin-bottom: 5px; }
+  #panel[data-design="coloring"] .sf-coloring-dialogue { min-height: 34px; margin-bottom: 4px; }
+  #panel[data-design="coloring"] .sf-coloring-dialogue img { width: 30px; height: 30px; }
+  #panel[data-design="coloring"] .sf-coloring-card :is(img, canvas) { height: min(24dvh, 160px); }
+  #panel[data-design="coloring-play"]:not(.ming-os-panel) #panel-body { padding: 4px 7px max(6px, env(safe-area-inset-bottom)); }
+  #panel[data-design="coloring-play"] .sf-coloring-dialogue { min-height: 30px; margin-bottom: 3px; }
+  #panel[data-design="coloring-play"] .sf-coloring-dialogue img { width: 24px; height: 24px; }
+  .sf-coloring-editor { grid-template-columns: minmax(0, 1fr) 295px; gap: 7px; }
+  .sf-coloring-tray {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    padding: 5px;
+    overflow: hidden;
+  }
+  .sf-coloring-controls { display: flex; flex-direction: column; overflow: auto; }
+  .sf-coloring-controls > * { flex: none; }
+  .sf-coloring-settings { order: 1; }
+  .sf-coloring-controls > * + * { margin-top: 3px; }
+  .sf-coloring-footer { border-top: 1px solid var(--coloring-edge); margin-top: 4px; }
+  #panel .sf-coloring-slider input[type="range"] { min-height: 26px; height: 26px; }
+  #panel .sf-coloring-controls .sf-coloring-row .sf-button {
+    min-height: 40px !important;
+    height: 40px;
+    --ic: 34px !important;
+  }
+  #panel .sf-coloring-tray .sf-coloring-palette .sf-button { min-height: 30px; }
+  .sf-coloring-palette { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .sf-coloring-tray .sf-coloring-palette .sf-button { padding-inline: 0; }
+  .sf-coloring-tray .sf-draw-actions { margin-top: 4px; }
+}
+
+/* 窄螢幕全版面板：標題列右邊不必留 260px，不然「返回」會壓到標題（2026-11-28 著色本 390×844 截圖） */
+@media (max-width: 600px) {
+  #panel:is([data-design="puzzle-play"], [data-design="coloring-play"]):not(.ming-os-panel) .panel-head { padding-right: 12px; }
+}

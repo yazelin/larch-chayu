@@ -23,6 +23,7 @@ const query = new URLSearchParams(location.search);
 const mockMode = query.get('mock') === '1';
 const focusEnabled = query.get('focus') === '1';
 const puzzleEnabled = query.get('puzzle') === '1';
+const coloringEnabled = query.get('coloring') === '1';
 const phoneStoryKeys = ['ch2Msg', 'ch3SkyFirst', 'ch4Apology', 'ch4AssetsFirst', 'ch5PassFirst', 'ch7Route', 'trueEndMsg'];
 const realChat = document.documentElement.classList.contains('studio-real-chat');
 // larch:init 常比這支模組早到（index.html 先收）：有的話先用那一份，天數才不會停在預設的第 1 天
@@ -97,17 +98,22 @@ function panelOpen(title, focus, design, character) {
   (realChat ? panel : closeButton).focus({ preventScroll: true });
 }
 
-function discardPuzzle() {
+function discardPanelActivity() {
   if (puzzleEnabled) activePuzzle()?.puzzleDestroy?.();
+  if (coloringEnabled) activeColoring()?.coloringDestroy?.();
 }
 
 function activePuzzle() {
   return panelBody.querySelector('.sf-puzzle')?.parentElement;
 }
 
+function activeColoring() {
+  return panelBody.querySelector('.sf-coloring')?.parentElement;
+}
+
 function closeFeature() {
   if (realChat) return;
-  discardPuzzle();
+  discardPanelActivity();
   disposeMingComputer();
   panel.classList.remove('sf-wide');
   if (!panel.classList.contains('studio-feature-panel')) return;
@@ -123,16 +129,19 @@ function exitMingComputer() {
   closeButton.click();
 }
 
-if (focusEnabled || puzzleEnabled) {
+if (focusEnabled || puzzleEnabled || coloringEnabled) {
   $('#panel-back')?.addEventListener('click', closeFeature);
   $('#panel-back')?.addEventListener('click', event => {
-    if (panel.dataset.design !== 'puzzle-play' || !activePuzzle()?.puzzleBack?.()) return;
+    const returned = panel.dataset.design === 'coloring-play' ? activeColoring()?.coloringBack?.()
+      : panel.dataset.design === 'puzzle-play' && activePuzzle()?.puzzleBack?.();
+    if (!returned) return;
     event.stopImmediatePropagation();
   }, { capture: true });
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape' || event.isComposing) return;
     const puzzle = panel.classList.contains('on') && activePuzzle();
-    if (!puzzle?.puzzleEscape?.() && !focusApp?.escape()) return;
+    const coloring = panel.classList.contains('on') && activeColoring();
+    if (!coloring?.coloringEscape?.() && !puzzle?.puzzleEscape?.() && !focusApp?.escape()) return;
     event.preventDefault();
     event.stopImmediatePropagation();
   }, true);
@@ -145,7 +154,7 @@ document.addEventListener('keydown', function (event) {
 });
 
 function clearBody() {
-  discardPuzzle();
+  discardPanelActivity();
   panel.classList.remove('sf-wide');
   ephemeralUrls.forEach(URL.revokeObjectURL);
   ephemeralUrls = [];
@@ -722,11 +731,11 @@ function setupTabs(tabs, render, initialId, label = '工作室活動') {
   const content = el('div', 'sf-stack');
   let current = initialId || tabs[0].id;
   function choose(id) {
-    discardPuzzle();
+    discardPanelActivity();
     current = id;
     panel.dataset.design = id;
     panelBody.scrollTop = 0;
-    panel.classList.toggle('sf-wide', id === 'draw' || id === 'puzzle');   // 畫板要大：桌機版這個分頁把面板放寬放高（studio_features.css）
+    panel.classList.toggle('sf-wide', id === 'draw' || id === 'puzzle' || id === 'coloring');   // 畫板要大：桌機版這個分頁把面板放寬放高（studio_features.css）
     nav.querySelectorAll('button').forEach(function (tab) { tab.setAttribute('aria-selected', String(tab.dataset.tab === id)); });
     const view = el('div');
     content.replaceChildren(view);
@@ -763,7 +772,8 @@ function openCharacter(character, focus, initialTab, options) {
   addContext(panelBody, character);
   const tabs = character === 'chen'
     ? [{ id: 'chat', label: '找晨' }, { id: 'draw', label: '我來畫' }, { id: 'create', label: '請晨畫一張' }, { id: 'gallery', label: '畫架展廳' },
-      ...(puzzleEnabled ? [{ id: 'puzzle', label: '拼圖' }] : [])]
+      ...(puzzleEnabled ? [{ id: 'puzzle', label: '拼圖' }] : []),
+      ...(coloringEnabled ? [{ id: 'coloring', label: '著色本' }] : [])]
     : [{ id: 'chat', label: '找詩' }, { id: 'create', label: '請詩做歌' }, { id: 'album', label: '詩做給妳的' }];
   setupTabs(tabs, async function (tab, content) {
     panelTitle.textContent = tab === 'gallery' ? '晨的畫架' : tabs.find(item => item.id === tab).label;
@@ -776,7 +786,16 @@ function openCharacter(character, focus, initialTab, options) {
       return;
     }
     if (tab === 'album') { await renderAlbum(content); return; }
-    if (tab === 'draw') { await renderDrawTab(content); return; }
+    if (tab === 'draw') { await renderDraw(content, drawingDeps()); return; }
+    if (tab === 'coloring') {
+      const { renderColoring } = await import('./studio_coloring.mjs');
+      if (!content.isConnected || !panel.classList.contains('on')) return;
+      await renderColoring(content, {
+        ...drawingDeps(), avatar: CHARACTERS.chen.avatar, seen: seenStoryCGs(),
+        all: query.get('unlock') === 'all'
+      });
+      return;
+    }
     const first = options; options = null;   // 帶進來的題目只用一次
     await renderCreation(character, content, first);
   }, initialTab || 'chat');
@@ -1403,18 +1422,26 @@ async function lookRemaining() {
 function chenBubble(text, mood) {
   return renderMessage({ role: 'assistant', speaker: 'chen', content: text, mood: mood });
 }
+let lookingAtDrawing = false;
 async function lookAtDrawing(dataUrl) {
-  const base = await workerContext('chen');
-  const history = await StudioDB.get('chat:chen') || [];
-  let mockCount = null;
-  if (mockMode && !mockTierParam) {
-    mockCount = await mockLookCount();
-    if (mockCount.n >= LOOK_DAILY_LIMIT) { const full = new Error('今天給晨看畫的次數已用完。'); full.code = 'DAILY_LOOK_LIMIT'; full.limit = LOOK_DAILY_LIMIT; throw full; }
+  if (lookingAtDrawing) {
+    const busy = new Error('晨還在看上一張畫。');
+    throw busy;
   }
-  await beginWait('look:chen', 'look', 'chen');
-  let answer = null;
-  try { answer = await lookAtDrawingInner(base, history, dataUrl, mockCount); return answer; }
-  finally { await endWait('look:chen', answer); }
+  lookingAtDrawing = true;
+  try {
+    const base = await workerContext('chen');
+    const history = await StudioDB.get('chat:chen') || [];
+    let mockCount = null;
+    if (mockMode && !mockTierParam) {
+      mockCount = await mockLookCount();
+      if (mockCount.n >= LOOK_DAILY_LIMIT) { const full = new Error('今天給晨看畫的次數已用完。'); full.code = 'DAILY_LOOK_LIMIT'; full.limit = LOOK_DAILY_LIMIT; throw full; }
+    }
+    await beginWait('look:chen', 'look', 'chen');
+    let answer = null;
+    try { answer = await lookAtDrawingInner(base, history, dataUrl, mockCount); return answer; }
+    finally { await endWait('look:chen', answer); }
+  } finally { lookingAtDrawing = false; }
 }
 async function lookAtDrawingInner(base, history, dataUrl, mockCount) {
   const result = await callWorker('/look', Object.assign({}, base, {
@@ -1463,8 +1490,8 @@ async function countDrawingShown() {
   return now;
 }
 
-async function renderDrawTab(root) {
-  await renderDraw(root, {
+function drawingDeps() {
+  return {
     onStroke: () => freeAffinity.award('chen'),
     el: el, button: button, db: StudioDB, progress: drawProgress, waiting: waitingIndicator, lookStages: lookStages, pendingLook: function () { return getWait('look:chen'); }, onLookEnd: function (root, handler) { onWaitEnd(root, 'look:chen', function (answer) { handler(answer); }); }, remaining: lookRemaining, look: lookAtDrawing, chenBubble: chenBubble,
     // 額度用完：試玩是晨講那一句；已購買是每日提示＋「想要更多次數」
@@ -1477,7 +1504,7 @@ async function renderDrawTab(root) {
         replyTo: stored || '', replyNote: answer.reply,
         prefill: stored ? '回給〈' + answer.title + '〉的畫' : '回給〈' + answer.title + '〉的畫。茶語先畫了一張給晨看，晨看了說：「' + answer.reply + '」請晨畫一張回應它的畫，不要重畫一次。' });
     }
-  });
+  };
 }
 
 async function renderCreation(character, root, options) {
@@ -1600,9 +1627,13 @@ function openChenPuzzle(id) {
   openCharacter('chen', returnFocus, 'puzzle', { puzzleImage: id });
 }
 
+function seenStoryCGs() {
+  return decodeHudSeen(larchVariables.hudSeen ?? query.get('hudSeen'), HUD_SEEN_KEYS)?.keys;
+}
+
 async function unlockedPuzzleCGs() {
   const { STUDIO_PUZZLE_CGS } = await import('./studio_puzzle_cgs.mjs');
-  const seen = decodeHudSeen(larchVariables.hudSeen ?? query.get('hudSeen'), HUD_SEEN_KEYS)?.keys;
+  const seen = seenStoryCGs();
   const all = query.get('unlock') === 'all';   // 預覽頁用：全部 CG 都能拼
   return STUDIO_PUZZLE_CGS.filter(([id]) => all || seen?.has(id))
     .map(([id, title, src]) => ({ id: 'cg:' + id, title: title || id, src }));
@@ -1642,7 +1673,7 @@ async function renderGallery(root) {
   if (!root.isConnected) return;
   // 舊的 image:* 都是晨接到委託後畫的。舊的 drawing:* 是茶語給晨看的原畫。
   const works = images.filter(chenImage)
-    .concat(drawings.filter(work => work.kind === 'drawing' && (work.character === 'chen' || (puzzleEnabled && work.character === 'tea'))))
+    .concat(drawings.filter(work => work.kind === 'drawing' && (work.character === 'chen' || ((puzzleEnabled || coloringEnabled) && work.character === 'tea'))))
     .sort((a, b) => b.createdAt - a.createdAt);
   const replies = new Map();
   (conversation || []).forEach((message, index, messages) => {
@@ -1656,6 +1687,7 @@ async function renderGallery(root) {
   })).filter(work => work.src).concat(galleryArt());
   if (!cards.length) { empty(root, '畫架上還沒有作品。可以請晨畫一張。'); return; }
   const grid = el('div', 'sf-grid');
+  const own = coloringEnabled ? el('div', 'sf-grid') : grid;
   cards.forEach(function (work) {
     const card = el('article', 'sf-card');
     card.dataset.artist = 'chen';
@@ -1677,9 +1709,15 @@ async function renderGallery(root) {
         card.append(button('拼成拼圖', () => openChenPuzzle(id)));
       }
     }
-    grid.appendChild(card);
+    const isOwn = work.kind === 'drawing' && work.character === 'tea';
+    (isOwn ? own : grid).appendChild(card);
   });
-  root.appendChild(grid);
+  if (grid.childElementCount) root.appendChild(grid);
+  if (coloringEnabled && own.childElementCount) {
+    const section = el('section', 'sf-coloring-gallery');
+    section.append(el('h2', 'sf-section', '我畫的'), own);
+    root.appendChild(section);
+  }
 }
 
 // 耳機播詩的試唱和委託作品，沿用唱片架的播放控制和歌詞。

@@ -987,8 +987,8 @@
 #panel input[type="file"]::file-selector-button:hover { background: var(--studio-fiber), #f6e2c4; }
 
 /* 全版活動鋪滿工作室。固定頁首讓內容捲動時也避開 Larch 右上的介面。 */
-#panel:not([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"]) #panel-back { display: none !important; }
-#panel:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"]):not(.ming-os-panel):not([data-paper-off]) {
+#panel:not([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"], [data-design="coloring-play"]) #panel-back { display: none !important; }
+#panel:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"], [data-design="coloring-play"]):not(.ming-os-panel):not([data-paper-off]) {
   --instrument-gutter: clamp(12px, 2.5vw, 44px);
   inset: 0;
   width: auto;
@@ -1003,18 +1003,18 @@
   box-shadow: none;
   --field-ink: #865337;
 }
-body:has(#panel.on:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"])) > :is(#scroll-mode, #turn-mode, #studio-unlock-status, .studio-embed-continue) {
+body:has(#panel.on:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"], [data-design="coloring-play"])) > :is(#scroll-mode, #turn-mode, #studio-unlock-status, .studio-embed-continue) {
   visibility: hidden;
 }
-#panel:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"]) #panel-close { display: none !important; }
-#panel:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"]):not(.ming-os-panel) .panel-head {
+#panel:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"], [data-design="coloring-play"]) #panel-close { display: none !important; }
+#panel:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"], [data-design="coloring-play"]):not(.ming-os-panel) .panel-head {
   flex: none;
   box-sizing: border-box;
   min-height: 90px;
   padding: 10px 260px 10px var(--instrument-gutter);
   gap: 12px;
 }
-#panel:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"]) #panel-back {
+#panel:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"], [data-design="coloring-play"]) #panel-back {
   display: inline-flex;
   align-items: center;
   flex: none;
@@ -1026,7 +1026,7 @@ body:has(#panel.on:is([data-design="piano"], [data-design="guitar"], [data-desig
   white-space: nowrap;
   --ic: 26px;
 }
-#panel:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"]):not(.ming-os-panel) #panel-body {
+#panel:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"], [data-design="coloring-play"]):not(.ming-os-panel) #panel-body {
   flex: 1;
   padding: clamp(10px, 2dvh, 22px) var(--instrument-gutter) max(16px, env(safe-area-inset-bottom));
   overflow-x: hidden;
@@ -1040,7 +1040,7 @@ body:has(#panel.on:is([data-design="piano"], [data-design="guitar"], [data-desig
 #panel[data-design="piano"] #panel-body p { margin: 0; text-align: center; }
 .sp-piano-scroll-hint { display: none; }
 @media (max-width: 510px) {
-  #panel:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"]):not(.ming-os-panel) .panel-head {
+  #panel:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"], [data-design="coloring-play"]):not(.ming-os-panel) .panel-head {
     display: grid;
     grid-template-rows: 90px auto;
     justify-items: start;
@@ -1169,5 +1169,5 @@ body:has(#panel.on:is([data-design="piano"], [data-design="guitar"], [data-desig
 /* 調查模式會把「繼續」移進面板（studio_embed.mjs），上面那條「樂器全版時藏起繼續」只管 body 底下的，沒套到面板裡的；
    電子琴、吉他全版時「繼續」固定在右下會蓋住琴鍵（2026-11-27 Larch 實測：新版電子琴 1280×720 蓋 22px，手機橫直式蓋 4 個鍵）。
    照原本的設計一樣藏起來，按「返回」離開樂器後再出現。放標題列不行：手機上 Larch 的好感 HUD 在上方中間。 */
-#panel.on:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"]) > .studio-embed-continue { visibility: hidden; }
-#panel.on[data-design="puzzle-play"] > .studio-embed-continue { display: none !important; }
+#panel.on:is([data-design="piano"], [data-design="guitar"], [data-design="composer"], [data-design="puzzle-play"], [data-design="coloring-play"]) > .studio-embed-continue { visibility: hidden; }
+#panel.on:is([data-design="puzzle-play"], [data-design="coloring-play"]) > .studio-embed-continue { display: none !important; }

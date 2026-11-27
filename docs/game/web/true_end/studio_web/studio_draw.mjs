@@ -169,6 +169,31 @@ export async function renderDraw(root, deps) {
   const clear = button('清空', function () { strokes.length = 0; redraw(); }, 'sf-draw-tool'); clear.dataset.tool = 'clear';
   tools.append(eraser, undo, clear);
 
+  function refresh() {
+    palette.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-checked', String(!erasing && b.dataset.color === color)); });
+    sizeButtons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.size === size.id)); });
+    eraser.setAttribute('aria-pressed', String(erasing));
+    undo.disabled = clear.disabled = !strokes.length;
+  }
+  redraw();
+  const { actions, status, result } = drawingLook(root, deps, {
+    hasPaint: () => strokes.length > 0,
+    image: () => canvas.toDataURL('image/jpeg', 0.85)
+  });
+
+  const surface = el('div', 'sf-draw-surface');
+  surface.append(book, keyboardHelp);
+  const tray = el('aside', 'sf-draw-tray');
+  tray.append(el('h2', 'sf-section', '顏料與畫筆'), palette, tools, actions, status);
+  wrap.append(surface, tray, result);
+  root.appendChild(wrap);
+  // 測試用：直接畫一筆、看目前狀態
+  root.drawApi = { canvas: canvas, strokes: strokes, stroke: function (points, c) { strokes.push({ color: (DRAW_COLORS.find(function (x) { return x.id === c; }) || DRAW_COLORS[0]).hex, px: size.px, points: points }); redraw(); }, open: [...open] };
+}
+
+// 畫板與著色本共用同一套看圖、額度、回覆與等待介面。
+export function drawingLook(root, deps, drawing) {
+  const { el, button } = deps;
   const show = button('讓晨看看', null, 'primary'); show.dataset.draw = 'look';
   const left = el('span', 'sf-draw-left');
   const actions = el('div', 'sf-draw-actions'); actions.append(show, left);
@@ -196,32 +221,30 @@ export async function renderDraw(root, deps) {
   }
   function showLimit(error, append) {
     if (!deps.limitView) return;
+    drawing.onResult?.();
     const view = deps.limitView(error, { textless: error.code === 'DAILY_LOOK_LIMIT' && quota.scope !== 'total' });   // 每日的那句已經寫在按鈕旁邊
     view.dataset.drawLimit = error.code;
     if (append) result.appendChild(view); else result.replaceChildren(view);
   }
   function refresh() {
-    palette.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-checked', String(!erasing && b.dataset.color === color)); });
-    sizeButtons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.size === size.id)); });
-    eraser.setAttribute('aria-pressed', String(erasing));
-    undo.disabled = clear.disabled = !strokes.length;
     left.textContent = leftText();
     show.disabled = remaining === 0 || show.dataset.busy === '1';
   }
-  redraw();
+  refresh();
   deps.remaining().then(function (value) {
     const n = quotaFrom(value);
-    if (typeof n !== 'number') return;
+    if (typeof n !== 'number' || show.dataset.busy === '1') return;
     remaining = n; refresh();
     // 打開畫板時次數就用完了：試玩（總共）由晨先講那一句；已購買（每天）在每日提示旁邊放「想要更多次數」
     if (n === 0) showLimit(usedUp(), false);
   }).catch(function () {});
 
   function appendAnswer(answer) {
-    result.appendChild(deps.chenBubble(answer.reply, answer.mood));
+    drawing.onResult?.();
+    result.replaceChildren(deps.chenBubble(answer.reply, answer.mood));
     if (!answer.fallback) {
       if (answer.title) { const name = el('p', 'sf-draw-title', '晨幫這張畫取的名字：〈' + answer.title + '〉'); result.appendChild(name); }
-      if (answer.work) result.appendChild(el('p', 'sf-context', '這張畫和晨的回覆都留在聊天裡。'));
+      if (answer.work) result.appendChild(el('p', 'sf-context', drawing.savedMessage || '這張畫和晨的回覆都留在聊天裡。'));
       const again = button('請晨也畫一張', function () { deps.askChen(answer); }); again.dataset.draw = 'ask-chen';
       result.appendChild(again);
     }
@@ -235,12 +258,12 @@ export async function renderDraw(root, deps) {
   }
   // 關掉畫板再打開：晨還在看，就接著顯示進度；看完把晨的回應放進來
   if (deps.pendingLook) deps.pendingLook().then(function (pending) {
-    if (!pending || !root.isConnected) return;
+    if (!pending || !root.isConnected || show.dataset.busy === '1') return;
     show.dataset.busy = '1'; refresh();
     const wait = showWait(pending.startedAt);
     deps.onLookEnd(root, function (answer) {
       wait.stop(); status.replaceChildren(); show.dataset.busy = '0';
-      if (answer && answer.reply) { if (typeof answer.remaining === 'number') remaining = answer.remaining; appendAnswer(answer); }
+      if (answer && answer.reply) { if (typeof answer.remaining === 'number') remaining = quotaFrom(answer); appendAnswer(answer); }
       else status.textContent = '晨這次沒看成，等一下再給晨看一次。';
       refresh();
     });
@@ -248,11 +271,12 @@ export async function renderDraw(root, deps) {
 
   show.addEventListener('click', async function () {
     if (show.disabled) return;
-    if (!strokes.length) { status.textContent = '先畫點什麼，再給晨看。'; return; }
+    if (!drawing.hasPaint()) { status.textContent = drawing.emptyMessage || '先畫點什麼，再給晨看。'; return; }
+    drawing.onSubmit?.();
     show.dataset.busy = '1'; refresh(); result.replaceChildren();
     const wait = showWait(Date.now());
     try {
-      const answer = await deps.look(canvas.toDataURL('image/jpeg', 0.85));
+      const answer = await deps.look(drawing.image());
       if (typeof answer.remaining === 'number') { remaining = answer.remaining; quotaFrom(answer); }
       wait.stop(); status.replaceChildren();
       appendAnswer(answer);
@@ -269,12 +293,5 @@ export async function renderDraw(root, deps) {
     } finally { show.dataset.busy = '0'; refresh(); }
   });
 
-  const surface = el('div', 'sf-draw-surface');
-  surface.append(book, keyboardHelp);
-  const tray = el('aside', 'sf-draw-tray');
-  tray.append(el('h2', 'sf-section', '顏料與畫筆'), palette, tools, actions, status);
-  wrap.append(surface, tray, result);
-  root.appendChild(wrap);
-  // 測試用：直接畫一筆、看目前狀態
-  root.drawApi = { canvas: canvas, strokes: strokes, stroke: function (points, c) { strokes.push({ color: (DRAW_COLORS.find(function (x) { return x.id === c; }) || DRAW_COLORS[0]).hex, px: size.px, points: points }); redraw(); }, open: [...open] };
+  return { actions, status, result };
 }

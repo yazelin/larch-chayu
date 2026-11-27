@@ -19,7 +19,10 @@ export const GROUP1_LINES = {
     done: '拼好了。',
     done_best: '比上次快。',
     give_up: '放著吧，下次再拼。',
-    again: '再一張？妳選。'
+    again: '再一張？妳選。',
+    coloring_enter: '線稿在這裡。妳選。',
+    coloring_pick: '慢慢塗。顏色妳選。',
+    coloring_done: '塗好了？我看看。'
   }
 };
 

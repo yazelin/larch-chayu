@@ -95,7 +95,7 @@
   function chatVar(conversation) { return 'studioChat' + SHORT[conversation]; }
   function memoryVar(conversation) { return 'studioMem' + SHORT[conversation]; }
   var DEDICATED_KEY = /^studio(?:Composer(?:Slot[1-3]|Migrated)|Focus|Night|Puzzle)$/;
-  var CARD_KEYS = { studioTurnState: true };
+  var CARD_KEYS = { studioTurnState: true, coloringDraft: true };
 
   function larchBackend(waitForInit) {
     var vars = {};       // 邏輯欄位現值（各格拼回來的字串）
@@ -303,7 +303,8 @@
       card = {};
       post({ type: 'larch:storage:clear' });
       for (var index = 0; index < items.length; index += 1) {
-        if (items[index][1] instanceof Blob) continue;
+        // 網頁每張線稿各有一份草稿，不能塞進 Larch 的共用劇情變數。
+        if (items[index][1] instanceof Blob || String(items[index][0]).startsWith('coloringDraft:')) continue;
         await set(items[index][0], items[index][1]);
       }
     }

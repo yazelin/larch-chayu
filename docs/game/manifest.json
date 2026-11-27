@@ -1,15 +1,15 @@
 {
   "version": 1,
   "pagesBase": "https://yazelin.github.io/larch-chayu/game/",
-  "totalFiles": 941,
-  "totalBytes": 92532730,
+  "totalFiles": 969,
+  "totalBytes": 95530682,
   "bytesByCategory": {
     "bgm": 25662250,
     "cg": 3081222,
     "img": 203466,
     "minigames": 11052296,
     "mv": 15206418,
-    "web": 37327078
+    "web": 40325030
   },
   "largestFile": {
     "file": "mv/media/boring_v2.mp3",
@@ -18,7 +18,7 @@
     "sha256": "d6e99b0176da8186897b6b8a7d37cd99f72a8c677907bcbe9413cac56bcf7059",
     "source": "新版/mv/media/boring_v2.mp3"
   },
-  "webDependencyFiles": 941,
+  "webDependencyFiles": 969,
   "cgNameMap": [
     {
       "file": "cg/ch1/ch1_cg_079.webp",
@@ -1196,6 +1196,181 @@
       "bytes": 180220,
       "sha256": "46acd2c45f03bbcf89367be001a6471fd8e7f2099a1753888e862554dab95510",
       "source": "新版/mv/media/fonts/iansui-mv.woff2"
+    },
+    {
+      "file": "web/art/coloring/bright_cg_014.webp",
+      "category": "web",
+      "bytes": 180346,
+      "sha256": "22e139fe879d31ed949846794d199bb5ad4df547b63d5e06acb61e99a541b6dc",
+      "source": "art/coloring/bright_cg_014.webp"
+    },
+    {
+      "file": "web/art/coloring/bright_cg_014_thumb.webp",
+      "category": "web",
+      "bytes": 49162,
+      "sha256": "af1c22ef4f07ebdd76d3b72a38a94d37e926dc90383f80c9809d2cb46101c214",
+      "source": "art/coloring/bright_cg_014_thumb.webp"
+    },
+    {
+      "file": "web/art/coloring/ch1_cg_042.webp",
+      "category": "web",
+      "bytes": 168628,
+      "sha256": "e8f7797fd6953f62bc501b65fb336417eb4b142d53aa445eddeb3cd5d70c9e7e",
+      "source": "art/coloring/ch1_cg_042.webp"
+    },
+    {
+      "file": "web/art/coloring/ch1_cg_042_thumb.webp",
+      "category": "web",
+      "bytes": 36814,
+      "sha256": "bc894b5c3bb4b4b34cbf2fefefd5f158d5b13b589e118f716b49159c3722525b",
+      "source": "art/coloring/ch1_cg_042_thumb.webp"
+    },
+    {
+      "file": "web/art/coloring/ch2_cg_037.webp",
+      "category": "web",
+      "bytes": 181478,
+      "sha256": "c2d51e5b2e717da7b0e1a94ca1694374cf536fcd9c836e88051e308911a433fb",
+      "source": "art/coloring/ch2_cg_037.webp"
+    },
+    {
+      "file": "web/art/coloring/ch2_cg_037_thumb.webp",
+      "category": "web",
+      "bytes": 40170,
+      "sha256": "6bfee4388a7045a2f4c02e6a25f0ae41d7f388cb2472ae9a314f457a4fecee78",
+      "source": "art/coloring/ch2_cg_037_thumb.webp"
+    },
+    {
+      "file": "web/art/coloring/ch3_cg_017.webp",
+      "category": "web",
+      "bytes": 215766,
+      "sha256": "5692943d3c7f17ecb4bdb580a3df190e244df2a94893e7bb46767709a19a1090",
+      "source": "art/coloring/ch3_cg_017.webp"
+    },
+    {
+      "file": "web/art/coloring/ch3_cg_017_thumb.webp",
+      "category": "web",
+      "bytes": 44060,
+      "sha256": "e6488f9f6709f7ccb7d610a05c0b4bd772f156317345d6885ea538b897905822",
+      "source": "art/coloring/ch3_cg_017_thumb.webp"
+    },
+    {
+      "file": "web/art/coloring/ch4_cg_015.webp",
+      "category": "web",
+      "bytes": 196322,
+      "sha256": "9efa5f4ef2968d139e93c79a18ab72726d1c5ebbc7e20f3759f4e316ccbcc747",
+      "source": "art/coloring/ch4_cg_015.webp"
+    },
+    {
+      "file": "web/art/coloring/ch4_cg_015_thumb.webp",
+      "category": "web",
+      "bytes": 41588,
+      "sha256": "d0ec2de7c26482a0718d00e0d7d331fa2540bf6323b9a8807eda1a028be795d8",
+      "source": "art/coloring/ch4_cg_015_thumb.webp"
+    },
+    {
+      "file": "web/art/coloring/ch5_cg_016.webp",
+      "category": "web",
+      "bytes": 239002,
+      "sha256": "427e6f974d98dad25965b118eb6bd4a964686ecee460a9dacc1782fdc27173f4",
+      "source": "art/coloring/ch5_cg_016.webp"
+    },
+    {
+      "file": "web/art/coloring/ch5_cg_016_thumb.webp",
+      "category": "web",
+      "bytes": 48646,
+      "sha256": "64a4ecb7f25b0316a780054e709cda1f040ea33ea5efac318a582828c7401b45",
+      "source": "art/coloring/ch5_cg_016_thumb.webp"
+    },
+    {
+      "file": "web/art/coloring/ch6_cg_024.webp",
+      "category": "web",
+      "bytes": 192702,
+      "sha256": "4aef898adeda016284671d4e31e67adb829c47792863644d0c86f59b40cbb477",
+      "source": "art/coloring/ch6_cg_024.webp"
+    },
+    {
+      "file": "web/art/coloring/ch6_cg_024_thumb.webp",
+      "category": "web",
+      "bytes": 50132,
+      "sha256": "2dd9c5eee2e32ef0f6e51db7491b4a84c979da67ccff65edb0d7140e0c7dcf19",
+      "source": "art/coloring/ch6_cg_024_thumb.webp"
+    },
+    {
+      "file": "web/art/coloring/ch7_cg_024.webp",
+      "category": "web",
+      "bytes": 189162,
+      "sha256": "93d4d325cbf8571ac4036f968a200ca467c7352abaf473faec1ec741cbe928a6",
+      "source": "art/coloring/ch7_cg_024.webp"
+    },
+    {
+      "file": "web/art/coloring/ch7_cg_024_thumb.webp",
+      "category": "web",
+      "bytes": 50710,
+      "sha256": "322c825af119dd1bbed9b7f73dc26fb7e52f7410bffde937d7f20bd21a0a31e0",
+      "source": "art/coloring/ch7_cg_024_thumb.webp"
+    },
+    {
+      "file": "web/art/coloring/index.json",
+      "category": "web",
+      "bytes": 2010,
+      "sha256": "0af82829d3386270398931e3d597e17a14fae855879275a60ac56c710ff0f5a6",
+      "source": "art/coloring/index.json"
+    },
+    {
+      "file": "web/art/coloring/morning_cg_012.webp",
+      "category": "web",
+      "bytes": 243850,
+      "sha256": "8f40a5a2ce14536340ae22d4bae501dd7bb62069a448fb7f846c30554bfdcd34",
+      "source": "art/coloring/morning_cg_012.webp"
+    },
+    {
+      "file": "web/art/coloring/morning_cg_012_thumb.webp",
+      "category": "web",
+      "bytes": 46128,
+      "sha256": "c9250db73ee61a6e4ff27d078b72f40e24dbcfa9bae988fac9d51b71b85a28f5",
+      "source": "art/coloring/morning_cg_012_thumb.webp"
+    },
+    {
+      "file": "web/art/coloring/partners_cg_019.webp",
+      "category": "web",
+      "bytes": 223830,
+      "sha256": "31f557210590a10391112fa45d903d27c41a6949bf3379f16ad314f4087fc7a8",
+      "source": "art/coloring/partners_cg_019.webp"
+    },
+    {
+      "file": "web/art/coloring/partners_cg_019_thumb.webp",
+      "category": "web",
+      "bytes": 56212,
+      "sha256": "8571696755a5170bdcea84d4d15d2125eac727a6ebf4eea5480e0c91f4de36f7",
+      "source": "art/coloring/partners_cg_019_thumb.webp"
+    },
+    {
+      "file": "web/art/coloring/poem_cg_011.webp",
+      "category": "web",
+      "bytes": 136450,
+      "sha256": "ace95a0baba54b490085f95f34f988d31f1ba3518549cc77ee1cd846c6a45fd4",
+      "source": "art/coloring/poem_cg_011.webp"
+    },
+    {
+      "file": "web/art/coloring/poem_cg_011_thumb.webp",
+      "category": "web",
+      "bytes": 27622,
+      "sha256": "519f9dc5ec56aa478412288263952f655e951575de2b1bc79266e4d21ac15040",
+      "source": "art/coloring/poem_cg_011_thumb.webp"
+    },
+    {
+      "file": "web/art/coloring/true_end_cg_003.webp",
+      "category": "web",
+      "bytes": 242830,
+      "sha256": "379f5d49c96e44cc32bd79fc1ffcb2406a40766d762492297de0654dc6890b3e",
+      "source": "art/coloring/true_end_cg_003.webp"
+    },
+    {
+      "file": "web/art/coloring/true_end_cg_003_thumb.webp",
+      "category": "web",
+      "bytes": 45820,
+      "sha256": "d710c7f98df2650870d4fbba528304aa72565a7e6642524bff91703ccf030f0b",
+      "source": "art/coloring/true_end_cg_003_thumb.webp"
     },
     {
       "file": "web/art/instruments/piano/A2.mp3",
@@ -4728,8 +4903,8 @@
     {
       "file": "web/true_end/studio_web/fonts/iansui-studio.woff2",
       "category": "web",
-      "bytes": 452896,
-      "sha256": "cf9781aff9d3c9ef50212d40025a34955fd5671efa587d8ef6ab88ffeb69f15c",
+      "bytes": 455940,
+      "sha256": "45d20f8a26d6835ebba065c06fa6fa4029245a0861a7ecb52b536eb4e5775c79",
       "source": "真結局/studio_web/fonts/iansui-studio.woff2"
     },
     {
@@ -6133,6 +6308,27 @@
       "source": "真結局/studio_web/studio_collection_data.mjs"
     },
     {
+      "file": "web/true_end/studio_web/studio_coloring.mjs",
+      "category": "web",
+      "bytes": 25487,
+      "sha256": "40d0e940c7a0ff3e7147d71addc11f436802203728be15548b4eb91213af04f4",
+      "source": "真結局/studio_web/studio_coloring.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/studio_coloring_fixture.mjs",
+      "category": "web",
+      "bytes": 2530,
+      "sha256": "4e0299f7545d1ccba0e493a8d47e8b2b0860df8651eaa41a73008cf5e6bcc332",
+      "source": "真結局/studio_web/studio_coloring_fixture.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/studio_coloring_pixels.mjs",
+      "category": "web",
+      "bytes": 6245,
+      "sha256": "bd433943868bad56bd0d4df1c8a6e222cdf9dc2d405b1916ab8caae476a79333",
+      "source": "真結局/studio_web/studio_coloring_pixels.mjs"
+    },
+    {
       "file": "web/true_end/studio_web/studio_computer.css",
       "category": "web",
       "bytes": 45862,
@@ -6163,8 +6359,8 @@
     {
       "file": "web/true_end/studio_web/studio_draw.mjs",
       "category": "web",
-      "bytes": 18029,
-      "sha256": "3ce7b77542501450d606974358d55f9af470350f0769ae6bebf32a234131ffd1",
+      "bytes": 18608,
+      "sha256": "36f5a8a3cc4bf4076a71583e35b309804aec1a8261d79ae54cd3c8aaa91452eb",
       "source": "真結局/studio_web/studio_draw.mjs"
     },
     {
@@ -6184,8 +6380,8 @@
     {
       "file": "web/true_end/studio_web/studio_features.mjs",
       "category": "web",
-      "bytes": 198867,
-      "sha256": "f8b111d63350918a4cbab0da90158c2d17631626aee53e78273aac3c59104d6e",
+      "bytes": 200488,
+      "sha256": "6e8b112b446917229a24090b11adce330979096e1fbc6e2ae0cad211d4d4ab01",
       "source": "真結局/studio_web/studio_features.mjs"
     },
     {
@@ -6198,8 +6394,8 @@
     {
       "file": "web/true_end/studio_web/studio_group1.css",
       "category": "web",
-      "bytes": 9784,
-      "sha256": "75ce1a3ea7544ec22b943db7ff8449942f00fde8527054c0b0274bf35cdee649",
+      "bytes": 18156,
+      "sha256": "16ac9ad03e6817f92f207924ec623d0747448b6a5976c28d5db3f399c36c3310",
       "source": "真結局/studio_web/studio_group1.css"
     },
     {
@@ -6219,8 +6415,8 @@
     {
       "file": "web/true_end/studio_web/studio_lines_group1.mjs",
       "category": "web",
-      "bytes": 1003,
-      "sha256": "c21566f04baa709b842339c185357c19c06e546b782b277f15c34a1e301c0013",
+      "bytes": 1151,
+      "sha256": "7438f40c3f5d56ec76f1d6e27b931495a82954ff505044c5c769ec06f6d3940f",
       "source": "真結局/studio_web/studio_lines_group1.mjs"
     },
     {
@@ -6233,8 +6429,8 @@
     {
       "file": "web/true_end/studio_web/studio_paper.css",
       "category": "web",
-      "bytes": 51512,
-      "sha256": "007ee63173987f5ffbf84442359946ad2cf0f3135ec6522d0a62185ca8a5bffc",
+      "bytes": 51827,
+      "sha256": "619d512dc411688fc22f609c165aa25606f58eee79540b27dc7033b38cb08aec",
       "source": "真結局/studio_web/studio_paper.css"
     },
     {
@@ -6296,8 +6492,8 @@
     {
       "file": "web/true_end/studio_web/studio_storage.js",
       "category": "web",
-      "bytes": 20067,
-      "sha256": "7859dea5f4154539e270ec1a4d98409da465f1a45230b582cdbfff6d4ce57d71",
+      "bytes": 20238,
+      "sha256": "7e42349ddf0c6a6d60fbf9ecadacf65a5cb0e59dbb804f96a7812e7aa8280fa2",
       "source": "真結局/studio_web/studio_storage.js"
     },
     {
