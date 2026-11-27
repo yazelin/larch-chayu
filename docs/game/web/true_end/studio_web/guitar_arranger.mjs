@@ -1,15 +1,9 @@
 import { CHORDS } from './guitar_chords.mjs';
+import { GUITAR_PATTERNS as PATTERNS, guitarRhythm } from './guitar_rhythm.mjs';
 
 const SAVE_KEY = 'guitarArrangement';
 const MIN_BARS = 8;
 const MAX_BARS = 16;
-const MIXED_WALTZ = ['down', 'down', 'up', 'up', 'down', 'up'];
-const PATTERNS = {
-  down: { label: '全下刷', marks: '↓ ↓ ↓ ↓', strokes: ['down', 'down', 'down', 'down'], subdivision: 1 },
-  mixed: { label: '下下上上下上', marks: '↓ ↓↑ ↑↓↑', strokes: ['down', '', 'down', 'up', '', 'up', 'down', 'up'], subdivision: 2 },
-  pima: { label: '分解和弦 Pima', marks: 'P i m a', strokes: ['p', 'i', 'm', 'a', 'p', 'i', 'm', 'a'], subdivision: 2 },
-};
-
 export function makeGuitarArranger({ el, button, playChord, stopNotes, beforePlay, storage }) {
   const panel = el('section', 'sp-arranger');
   const title = el('h2', '', '編曲盒');
@@ -208,9 +202,8 @@ export function makeGuitarArranger({ el, button, playChord, stopNotes, beforePla
 
   function start(firstBar = 0) {
     beforePlay();
-    const { subdivision, strokes: defaultStrokes } = PATTERNS[pattern];
     const beats = Number(meter.value);
-    const strokes = beats === 3 && pattern === 'mixed' ? MIXED_WALTZ : defaultStrokes;
+    const { subdivision, strokes } = guitarRhythm(pattern, beats);
     const steps = beats * subdivision;
     let nextAt = performance.now();
     let step = 0;

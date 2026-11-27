@@ -107,15 +107,15 @@ const RULES = [
   { t: '回到收藏資料夾', i: 'prev', m: 'label', s: '回收藏' },
   // 畫圖工具
   { t: '橡皮擦', i: 'eraser', m: 'icon' },
-  { t: '復原', i: 'undo', m: 'icon', tip: '復原（收回上一筆）' },
-  { t: '清空', i: 'clear', m: 'icon', tip: '清空畫布' },
+  { sel: ':not(.cs-room *)', t: '復原', i: 'undo', m: 'icon', tip: '復原（收回上一筆）' },
+  { sel: ':not(.cs-room *)', t: '清空', i: 'clear', m: 'icon', tip: '清空畫布' },
   // 明的電腦裡的按鈕（選單列與下拉選單不換，見檔頭）
   { sel: '.ming-exit', t: '回工作室', i: 'home', m: 'label' },
   { sel: '.ming-website-refresh', t: '重新整理', i: 'reset', m: 'icon' },
   { sel: '.ming-website-external', t: '在新分頁開啟', i: 'open', m: 'icon' },
   { t: '回明的電腦', i: 'monitor', m: 'label', s: '回電腦' },
   { t: '回到清單', i: 'list', m: 'icon' },
-  { t: '重做', i: 'reset', m: 'label', tip: '重做（請明重新做）' },
+  { sel: ':not(.cs-room *)', t: '重做', i: 'reset', m: 'label', tip: '重做（請明重新做）' },
   { t: '刪掉', i: 'trash', m: 'label' },
   { t: '刪除', i: 'trash', m: 'icon' },
   { t: '請明做一個', i: 'gamepad', m: 'label' },

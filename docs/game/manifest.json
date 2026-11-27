@@ -1,15 +1,15 @@
 {
   "version": 1,
   "pagesBase": "https://yazelin.github.io/larch-chayu/game/",
-  "totalFiles": 926,
-  "totalBytes": 92249207,
+  "totalFiles": 936,
+  "totalBytes": 92391944,
   "bytesByCategory": {
     "bgm": 25662250,
     "cg": 3081222,
     "img": 203466,
     "minigames": 11052296,
     "mv": 15206418,
-    "web": 37043555
+    "web": 37186292
   },
   "largestFile": {
     "file": "mv/media/boring_v2.mp3",
@@ -18,7 +18,7 @@
     "sha256": "d6e99b0176da8186897b6b8a7d37cd99f72a8c677907bcbe9413cac56bcf7059",
     "source": "新版/mv/media/boring_v2.mp3"
   },
-  "webDependencyFiles": 926,
+  "webDependencyFiles": 936,
   "cgNameMap": [
     {
       "file": "cg/ch1/ch1_cg_079.webp",
@@ -4658,9 +4658,58 @@
     {
       "file": "web/true_end/studio_web/band_engine.mjs",
       "category": "web",
-      "bytes": 11080,
-      "sha256": "9e136f07b458594c3e324c5aa09ab745666648cb582765bd3c9e60502310a6e5",
+      "bytes": 12287,
+      "sha256": "65c004fca581dfa41d8ce087149df3fb5c12b87ffac7d21c662dc4aa85f73f9e",
       "source": "真結局/studio_web/band_engine.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/composer_engine.mjs",
+      "category": "web",
+      "bytes": 15376,
+      "sha256": "6de0afe8ab58d39637e6c4c5e6ad5ddaabc6c2e98eb70e38318157e72ded48f7",
+      "source": "真結局/studio_web/composer_engine.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/composer_examples.mjs",
+      "category": "web",
+      "bytes": 20079,
+      "sha256": "58de4af8f6b1fd6a5ada386b49a978f3329922d9381fac468cf1eb6e8f026f23",
+      "source": "真結局/studio_web/composer_examples.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/composer_model.mjs",
+      "category": "web",
+      "bytes": 13982,
+      "sha256": "83df5cc670891a3831ab57901739a068aa263c9e531209fcf27667c07ddbf8d5",
+      "source": "真結局/studio_web/composer_model.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/composer_score.mjs",
+      "category": "web",
+      "bytes": 21544,
+      "sha256": "c62d0a6f1e81b1418ed9816b2dd5453ae583b3f7652c20b5ea96331fe2d34a6d",
+      "source": "真結局/studio_web/composer_score.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/composer_store.mjs",
+      "category": "web",
+      "bytes": 2921,
+      "sha256": "f82e3c3f0bcb62af74f9a9b4e05c024874694343867dc5a45360f22338022e65",
+      "source": "真結局/studio_web/composer_store.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/composer_ui.css",
+      "category": "web",
+      "bytes": 20627,
+      "sha256": "82a60ff486150047889ed7302adcd94ed8899020da3539ea2826b9fedcd2d982",
+      "source": "真結局/studio_web/composer_ui.css"
+    },
+    {
+      "file": "web/true_end/studio_web/composer_ui.mjs",
+      "category": "web",
+      "bytes": 40770,
+      "sha256": "87f94ec975d2d6fac86ee7c52f4d69be7ea038ec72c9e38bc0414dd602bd8e9e",
+      "source": "真結局/studio_web/composer_ui.mjs"
     },
     {
       "file": "web/true_end/studio_web/computer_actions.mjs",
@@ -4679,8 +4728,8 @@
     {
       "file": "web/true_end/studio_web/fonts/iansui-studio.woff2",
       "category": "web",
-      "bytes": 431172,
-      "sha256": "f325de9dd24738e39be2cbac91e35f476c94867074cb9200d8fc3673ea11814d",
+      "bytes": 433268,
+      "sha256": "9a7509b3d25ad7aa37e0e937fb8bd1b0c122c442a5eb18816f3e7ac18be4b516",
       "source": "真結局/studio_web/fonts/iansui-studio.woff2"
     },
     {
@@ -4707,8 +4756,8 @@
     {
       "file": "web/true_end/studio_web/guitar_arranger.mjs",
       "category": "web",
-      "bytes": 9093,
-      "sha256": "ad514f4f50ce54ee6b5eb3ea60add698a3ab474cc3b65e893f46d04a92264daa",
+      "bytes": 8603,
+      "sha256": "c4e82855494780edbb01354ab6b75e8b43740f19dee90347075be7fa423644e5",
       "source": "真結局/studio_web/guitar_arranger.mjs"
     },
     {
@@ -4726,11 +4775,25 @@
       "source": "真結局/studio_web/guitar_practice.mjs"
     },
     {
+      "file": "web/true_end/studio_web/guitar_rhythm.mjs",
+      "category": "web",
+      "bytes": 698,
+      "sha256": "285ee1a046acc9efbbb712b495a02515eaf63037ea29283b561f6556fd647060",
+      "source": "真結局/studio_web/guitar_rhythm.mjs"
+    },
+    {
       "file": "web/true_end/studio_web/guitar_songs_data.mjs",
       "category": "web",
       "bytes": 7769,
       "sha256": "4a9b4a1408313c6d698e8ea6bcaa7c9d5b48195f562e54dd58783b528e8bb9ce",
       "source": "真結局/studio_web/guitar_songs_data.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/guitar_sound.mjs",
+      "category": "web",
+      "bytes": 1525,
+      "sha256": "e9a033045c0e7b7085e5b4402050a4e0b570c3e3f6193bbbd57a7df049395c3e",
+      "source": "真結局/studio_web/guitar_sound.mjs"
     },
     {
       "file": "web/true_end/studio_web/hud_seen.mjs",
@@ -5960,8 +6023,8 @@
     {
       "file": "web/true_end/studio_web/index.html",
       "category": "web",
-      "bytes": 141437,
-      "sha256": "a1b1c4e5340fa11795048dea18fc9ca7892055169b883a884b4cd36dee9dece0",
+      "bytes": 141992,
+      "sha256": "2b467773410eca15bd3ab8a772fcfa255fa0fd90ce5016a0aacfdde5bcd8ae10",
       "source": "真結局/studio_web/index.html"
     },
     {
@@ -5988,8 +6051,8 @@
     {
       "file": "web/true_end/studio_web/piano_voices.mjs",
       "category": "web",
-      "bytes": 12037,
-      "sha256": "8f020a236fc54833ec0cabcc22dc5b67c3003ce31c6552554830f8cf44acd939",
+      "bytes": 12272,
+      "sha256": "94124da3d4abcde1b49cd766b93b7cafbbabcce7f4e66b8001b795c0b8449db1",
       "source": "真結局/studio_web/piano_voices.mjs"
     },
     {
@@ -6107,8 +6170,8 @@
     {
       "file": "web/true_end/studio_web/studio_embed.mjs",
       "category": "web",
-      "bytes": 13351,
-      "sha256": "51517be89fed9f371f9ca2ccbf1d72e498f229c4cd0f2164852999d4d20008ee",
+      "bytes": 13489,
+      "sha256": "45faa7ce80b7832b52d367274cc4ab75441bc3fd815948aa1d42b77af0491581",
       "source": "真結局/studio_web/studio_embed.mjs"
     },
     {
@@ -6135,36 +6198,43 @@
     {
       "file": "web/true_end/studio_web/studio_icons.mjs",
       "category": "web",
-      "bytes": 17677,
-      "sha256": "41cb257baa53df9b8bba61d62709f630c1bb59c81ebb37308db44c7cd92bbfe7",
+      "bytes": 17752,
+      "sha256": "3b184a24025bd0d2c67fbb207992712267fe774653e0f32b0c8ee4725dc8f551",
       "source": "真結局/studio_web/studio_icons.mjs"
     },
     {
       "file": "web/true_end/studio_web/studio_panel.mjs",
       "category": "web",
-      "bytes": 1511,
-      "sha256": "0614824bae980422b3102c6b9d5f551049edb827f9d5975cd13120d05ac5d07f",
+      "bytes": 1583,
+      "sha256": "d3111a34ca8c262c0b86e488d7e820ce04eb06d8be0e10d932c334d1457c3787",
       "source": "真結局/studio_web/studio_panel.mjs"
     },
     {
       "file": "web/true_end/studio_web/studio_paper.css",
       "category": "web",
-      "bytes": 50919,
-      "sha256": "c51adae18bfa92d13024e093c76c1fbdbadf73c1ae9673111141d2fb0da08127",
+      "bytes": 51153,
+      "sha256": "73edb1978f630c1126978dfd8cbd2c2266b0cf065c68d5a65df360d11bd7b1ed",
       "source": "真結局/studio_web/studio_paper.css"
     },
     {
       "file": "web/true_end/studio_web/studio_piano_input.mjs",
       "category": "web",
-      "bytes": 7492,
-      "sha256": "faed89543c8e5e4f1643c4df9e7fca34735e400531ef91e61ca98207aac5ad57",
+      "bytes": 7616,
+      "sha256": "01ba1c9fb6ccb9a543c927bc467e8c55277a4f4fec8128bfe87d1a0e40709a2d",
       "source": "真結局/studio_web/studio_piano_input.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/studio_piano_keyboard.mjs",
+      "category": "web",
+      "bytes": 2349,
+      "sha256": "6e91e9fa5b8e13078151d6a40da621042078bc683354b6a256fcaefb5c360f1f",
+      "source": "真結局/studio_web/studio_piano_keyboard.mjs"
     },
     {
       "file": "web/true_end/studio_web/studio_points.mjs",
       "category": "web",
-      "bytes": 29738,
-      "sha256": "ad56f1fb93b0b813c85683a3257d9e45eff908330ed736add15dc082edad52da",
+      "bytes": 27636,
+      "sha256": "dde739d94746b5a0fba0f2014795139594908a6a48f465344636b5fe36229fc8",
       "source": "真結局/studio_web/studio_points.mjs"
     },
     {
@@ -6191,8 +6261,8 @@
     {
       "file": "web/true_end/studio_web/studio_storage.js",
       "category": "web",
-      "bytes": 19134,
-      "sha256": "0d07dbc2b4faf495edd717ac8327f7bab047e9bad1a539e1519f919321f59af8",
+      "bytes": 19856,
+      "sha256": "f13a6b5477e3010214993f517767a8cdb14e998b302b3b50f9e04459bbc23ebc",
       "source": "真結局/studio_web/studio_storage.js"
     },
     {

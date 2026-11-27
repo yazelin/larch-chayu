@@ -156,6 +156,10 @@ if (embedded || realChat) {
     continueButton.focus({ preventScroll: true });
   }
 
+  if (investigation) {
+    document.getElementById('panel').addEventListener('studio:restore-investigation', showInvestigationLine);
+  }
+
   function openRequestedInteraction() {
     if (opened || !window.STUDIO_FEATURES) return;
     let handled = false;

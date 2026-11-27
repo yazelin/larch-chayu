@@ -82,7 +82,7 @@ export function createPianoMix(context, destination = context.destination) {
   };
 }
 
-export function createPianoVoices(context, mix, getPianoSample = () => null) {
+export function createPianoVoices(context, mix, getPianoSample = () => null, { gateMusicBox = false } = {}) {
   const voices = new Set();
   let hammerNoise;
 
@@ -303,11 +303,17 @@ export function createPianoVoices(context, mix, getPianoSample = () => null) {
     voices.add(voice);
 
     let released = false;
-    return (at = context.currentTime, letDecay = false) => {
+    function noteOff(at = context.currentTime, letDecay = false) {
       const naturalTail = letDecay && Number.isFinite(duration);
-      if (!musicBox && !naturalTail && !released && voices.has(voice)) voice.fade(Math.max(time, at), release);
+      if ((!musicBox || gateMusicBox) && !naturalTail && !released && voices.has(voice)) voice.fade(Math.max(time, at), release);
       released = true;
+    }
+    noteOff.cancel = () => {
+      output.disconnect();
+      voices.delete(voice);
+      for (const source of sources) source.stop(context.currentTime);
     };
+    return noteOff;
   }
 
   return {

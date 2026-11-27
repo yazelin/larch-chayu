@@ -15,11 +15,12 @@ document.addEventListener('keydown', event => {
   if (event.key !== 'Tab') return;
   const help = document.querySelector('.sf-help-layer');
   const replay = document.querySelector('.sf-replay');
-  const dialog = help || replay || (panel.classList.contains('on') ? panel : null);
+  const modal = panel.querySelector('dialog[open]');
+  const dialog = help || replay || modal || (panel.classList.contains('on') ? panel : null);
   if (!dialog) return;
   const selector = 'button, a[href], input, select, textarea, iframe, [tabindex]';
   const candidates = [...dialog.querySelectorAll(selector)];
-  if (!help && !replay) {
+  if (!help && !replay && !modal) {
     const next = document.querySelector('.studio-embed-continue');
     if (next) candidates.push(next);
   }

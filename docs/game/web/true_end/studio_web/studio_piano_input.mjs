@@ -85,7 +85,9 @@ export function bindPianoInput(wrap, keys, byNote, band, play) {
   const keyId = event => event.code || event.key.toLowerCase();
   window.addEventListener('keydown', event => {
     if (!wrap.isConnected || !wrap.closest('#panel.on')) return;
-    if (event.repeat || event.metaKey || event.ctrlKey || event.altKey || band.handleKey(event)) return;
+    if (event.repeat || event.metaKey || event.ctrlKey || event.altKey ||
+        event.target.closest?.('input, select, textarea, [contenteditable], dialog') ||
+        wrap.closest('[hidden]') || band.handleKey(event)) return;
     const id = keyId(event);
     const letter = /^Key[A-Z]$/.test(event.code) ? event.code.slice(3).toLowerCase() : event.key.toLowerCase();
     const base = keys[letter];

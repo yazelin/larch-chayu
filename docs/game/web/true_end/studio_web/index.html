@@ -706,6 +706,7 @@ body.debug .hotspot::before{content:attr(data-mark);position:absolute;top:2px;le
 @media(prefers-reduced-motion:reduce){.wall-layer,#scrim,#panel,.night-veil,.hotspot::after,.person-talk-icon{transition-duration:0s}.ring-person-sprite,.ring-player .character-sprite{animation:idle-breathe-reduced 5s ease-in-out infinite}.player-image.walking{animation:none}.character-facing{transition-duration:0s}.hotspot.nearby{border-color:transparent;background:transparent;box-shadow:none;filter:none}}
 </style>
 <link rel="stylesheet" href="studio_paper.css">
+<link rel="stylesheet" href="composer_ui.css">
 <link rel="stylesheet" href="studio_icons.css">
 <link rel="stylesheet" href="studio_album.css">
 <link rel="stylesheet" href="./free_affinity.css">
@@ -930,7 +931,10 @@ function openInteraction(id,focusBack){
   var item=INTERACTIONS[id];
   showPanel(String(id).padStart(2,'0')+'｜'+item.name,item.text,item.future,focusBack);
 }
-function closePanel(){
+function closePanel(event){
+  var active = document.getElementById('panel');
+  if (active.dataset.design === 'composer' && active.classList.contains('on') &&
+      !active.dispatchEvent(new CustomEvent('studio:before-close', { cancelable: true, detail: event }))) return;
   document.getElementById('panel').inert=true;
   document.getElementById('panel').classList.remove('on');
   document.getElementById('panel').setAttribute('aria-hidden','true');
@@ -1013,7 +1017,7 @@ document.getElementById('panel-close').addEventListener('click',closePanel);
 document.getElementById('panel-back').addEventListener('click',closePanel);
 document.getElementById('scrim').addEventListener('click',closePanel);
 window.addEventListener('keydown',function(event){
-  if(event.key==='Escape'&&!event.isComposing){closePanel();return;}
+  if(event.key==='Escape'&&!event.isComposing){closePanel(event);return;}
   if(document.getElementById('panel').classList.contains('on'))return;
   if(event.key==='ArrowLeft'){event.preventDefault();turn(-1);return;}
   if(event.key==='ArrowRight'){event.preventDefault();turn(1);return;}
@@ -1179,7 +1183,10 @@ function openInteraction(id,focusBack){
   targetX=null;keyDirection=0;pointerDirection=0;
   closeButton.focus({preventScroll:true});
 }
-function closePanel(){
+function closePanel(event){
+  var active = document.getElementById('panel');
+  if (active.dataset.design === 'composer' && active.classList.contains('on') &&
+      !active.dispatchEvent(new CustomEvent('studio:before-close', { cancelable: true, detail: event }))) return;
   if(panel.dataset.design==='story-investigation')return;
   panel.inert=true;panel.classList.remove('on');panel.setAttribute('aria-hidden','true');scrim.classList.remove('on');panelOpen=false;
   var target=lastFocus;
@@ -1386,7 +1393,7 @@ stage.addEventListener('pointercancel',pointerUp);
 stage.addEventListener('lostpointercapture',stopPointer);
 stage.addEventListener('contextmenu',function(event){event.preventDefault();});
 window.addEventListener('keydown',function(event){
-  if(event.key==='Escape'&&!event.isComposing){if(panelOpen)closePanel();return;}
+  if(event.key==='Escape'&&!event.isComposing){if(panelOpen)closePanel(event);return;}
   if(panelOpen)return;
   if(event.key==='ArrowLeft'||event.key==='a'||event.key==='A'){event.preventDefault();startMove(-1);}
   if(event.key==='ArrowRight'||event.key==='d'||event.key==='D'){event.preventDefault();startMove(1);}

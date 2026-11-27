@@ -1,7 +1,9 @@
+import { makePianoKeyboard } from './studio_piano_keyboard.mjs';
 import { playMusicBox } from './piano_music_box.mjs';
 import { studioPointOpen } from './studio_unlock.mjs';
 import { preparePanel } from './studio_panel.mjs';
 import { CHORDS, CHORD_GROUPS, guitarFrequency } from './guitar_chords.mjs';
+import { guitarSample } from './guitar_sound.mjs';
 import { makeGuitarPractice } from './guitar_practice.mjs';
 import { makeGuitarArranger } from './guitar_arranger.mjs';
 // 工作室互動點（真結局/設計.md「工作室互動總表」，2026-11-11 作者同意；2026-11-17 作者：九個佔位面板逐個做成真的互動）。
@@ -11,6 +13,7 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
   const TRIAL_LAST_DAY = 30;   // 跟 studio_features.mjs 的試用期倒數同一個數字
   const query = new URLSearchParams(location.search);
   const bandModule = query.get('band') === '1' ? await import('./studio_band.mjs') : null;
+  const composerEnabled = query.get('composer') === '1';
   const game = () => (window.STUDIO_FEATURES && window.STUDIO_FEATURES.context()) || { chapter: 1, day: 1 };
   const panel = document.getElementById('panel'), panelTitle = document.getElementById('panel-title'), panelBody = document.getElementById('panel-body'), scrim = document.getElementById('scrim');
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
@@ -38,7 +41,7 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
     preparePanel(design, focus);
     panelTitle.textContent = title; panelBody.replaceChildren(); panel.classList.add('on'); panel.setAttribute('aria-hidden', 'false'); scrim.classList.add('on');
     panel.dataset.point = title;
-    const initialFocus = design === 'piano' || design === 'guitar' ? panel : document.getElementById('panel-close');
+    const initialFocus = design === 'composer' ? document.getElementById('panel-back') : design === 'piano' || design === 'guitar' ? panel : document.getElementById('panel-close');
     initialFocus.focus({ preventScroll: true });
   }
 
@@ -46,36 +49,6 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
   let ctx = null;
   function audio(resume = true) { if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ctx = new C(); } if (resume && ctx.state === 'suspended') ctx.resume(); return ctx; }
   const played = [];   // 給測試看：彈過哪些音
-  const pluckBuffers = new Map();
-  function guitarSample(a, freq) {
-    if (pluckBuffers.has(freq)) return pluckBuffers.get(freq);
-    const rate = a.sampleRate;
-    // Karplus–Strong：取相鄰樣本平均會多半個樣本的延遲，用播放速率補回音高。
-    const period = Math.round(rate / freq - 0.5);
-    const playbackRate = freq * (period + 0.5) / rate;
-    const buffer = a.createBuffer(1, Math.ceil(2 * rate * playbackRate), rate);
-    const samples = buffer.getChannelData(0);
-    const pick = Math.round(period * 0.22);
-    let mean = 0;
-    for (let i = 0; i < period; i++) {
-      const displacement = i < pick ? i / pick : (period - i) / (period - pick);
-      samples[i] = 0.65 * displacement + 0.35 * (2 * Math.random() - 1);
-      mean += samples[i] / period;
-    }
-    for (let i = 0; i < period; i++) samples[i] -= mean;
-    const decay = Math.exp(-1.25 * period / rate);
-    samples[period] = decay * (samples[0] + samples[period - 1]) / 2;
-    for (let i = period + 1; i < samples.length; i++) {
-      samples[i] = decay * (samples[i - period] + samples[i - period - 1]) / 2;
-    }
-    for (let i = 0; i < samples.length; i++) {
-      const time = i / (rate * playbackRate);
-      samples[i] *= Math.min(1, time / 0.002) * Math.exp(-2 * time) * Math.min(1, (2 - time) / 0.12);
-    }
-    const sample = { buffer, playbackRate };
-    pluckBuffers.set(freq, sample);
-    return sample;
-  }
   function tone(freq, kind, delay = 0) {
     played.push(Math.round(freq * 10) / 10); const a = audio(); if (!a) return;
     const t = a.currentTime + delay;
@@ -149,13 +122,6 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
   // 畫面由上到下：高音（Q W E R T Y U，最右多一個最高 Do＝I）、中音（A S D F G H J，跟舊版一樣）、低音（Z X C V B N M）。
   // 黑鍵：按住 Shift 再按白鍵＝升半音；畫面上的黑鍵也能直接點。
   const C4 = 261.63, NOTE = n => C4 * Math.pow(2, n / 12);
-  const DEGREES = [[0, 'Do'], [2, 'Re'], [4, 'Mi'], [5, 'Fa'], [7, 'Sol'], [9, 'La'], [11, 'Si']];
-  const SHARPS = [[1, 0], [3, 1], [6, 3], [8, 4], [10, 5]];   // 半音、在第幾個白鍵右邊
-  const PIANO_ROWS = [
-    { name: '高音', base: 12, letters: 'qwertyu', top: 'i' },
-    { name: '中音', base: 0, letters: 'asdfghj' },
-    { name: '低音', base: -12, letters: 'zxcvbnm' }
-  ];
   let keyHandler = null;
   function bindKeys(map) {
     if (keyHandler) removeEventListener('keydown', keyHandler, true);
@@ -170,16 +136,8 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
   }
   function openPiano(focus) {
     openPanel('電子琴', focus, 'piano');
-    // 畫面一排（低音→中音→高音，22 白鍵），鍵盤是 Q／A／Z 三排（作者 2026-11-24：「畫面上應該是一排，只是鍵盤上是 qaz 三排」）。
-    const wrap = el('div', 'sp-keys sp-keys-wide'); const keys = {}; const byNote = new Map();
     const band = bandModule?.makePianoBand(el, audio);
     const playNote = (n, node) => press(node || byNote.get(n) || wrap, NOTE(n), 'key');
-    const whites = [];
-    for (const row of PIANO_ROWS.slice().reverse()) {
-      DEGREES.forEach(([d, name], i) => whites.push({ n: row.base + d, name, k: row.letters[i], row }));
-      if (row.top) whites.push({ n: row.base + 12, name: 'Do', k: row.top, row });
-    }
-    const w = 100 / whites.length;
     // 舊版手機琴鍵可左右捲動，點一下才出聲。滑鼠與筆按下就出聲。
     const bindHit = (b, hit) => {
       let start = null;
@@ -188,30 +146,8 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
       b.addEventListener('pointercancel', () => { start = null; });
       b.addEventListener('click', e => { if (e.detail === 0) hit(); });
     };
-    const keyButton = (cls, label, n, aria) => {
-      const b = el('button', cls, label); b.type = 'button'; b.dataset.note = String(n); b.setAttribute('aria-label', aria);
-      if (!band) bindHit(b, () => playNote(n, b));
-      byNote.set(n, b); return b;
-    };
-    whites.forEach(({ n, name, k, row }, i) => {
-      const b = keyButton('sp-key', name, n, row.name + ' ' + name + '（鍵盤 ' + k.toUpperCase() + '，Shift 升半音）');
-      if (name === 'Do' && n === row.base) { b.dataset.octave = row.name; b.classList.add('octave-start'); }
-      wrap.append(b);
-      keys[k] = band ? n : shift => playNote(shift ? n + 1 : n);
-      const sharp = SHARPS.find(([d]) => row.base + d === n + 1 && n !== row.base + 12);
-      if (sharp) {
-        const bk = keyButton('sp-key black', '', n + 1, row.name + ' 黑鍵（Shift＋' + k.toUpperCase() + '）');
-        bk.style.left = ((i + 1) * w - w * 0.32) + '%'; bk.style.width = (w * 0.64) + '%'; wrap.append(bk);
-      }
-    });
-    const scroller = el('div', 'sp-keys-scroll'); scroller.append(wrap);
-    if (band) scroller.classList.add('sp-keys-scroll--playable');
-    const instrument = el('div', 'sp-piano-case');
-    const deck = el('div', 'sp-piano-deck');
-    deck.append(el('span'), el('span', 'sp-piano-lamp'), el('span'));
-    deck.setAttribute('aria-hidden', 'true');
-    instrument.append(deck, scroller);
-    requestAnimationFrame(() => { const mid = wrap.querySelector('[data-octave="中音"]'); if (mid && scroller.scrollWidth > scroller.clientWidth) scroller.scrollLeft = mid.offsetLeft - 8; });
+    const { instrument, scroller, wrap, keys, byNote } = makePianoKeyboard(el, band ? null :
+      (button, note) => bindHit(button, () => playNote(note, button)));
     panelBody.append(instrument);
     if (!band) panelBody.append(el('p', 'sp-cap sp-piano-scroll-hint', '左右滑動琴鍵，可彈到低音和高音。'));
     panelBody.append(el('p', 'sp-cap sp-piano-keyboard-hint', '高音 Q W E R T Y U I，中音 A S D F G H J，低音 Z X C V B N M。按住 Shift 再按就是升半音（黑鍵）。'));
@@ -225,7 +161,8 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
         return band.noteOn(frequency);
       });
     } else {
-      bindKeys({ wrap, keys });
+      bindKeys({ wrap, keys: Object.fromEntries(Object.entries(keys).map(([key, note]) =>
+        [key, shift => playNote(note + Number(shift))])) });
     }
     // 彈電子琴時配樂也讓開（同吉他，作者 2026-11-22），面板關掉或換內容就淡回。
     window.STUDIO_FEATURES?.bgm?.hold?.('piano', true);
@@ -251,8 +188,12 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
   function openGuitar(focus) {
     closeGuitar?.();
     openPanel('吉他', focus, 'guitar');
+    closeGuitar = mountGuitar(panelBody);
+  }
+
+  function mountGuitar(host, composer = false) {
     // 彈吉他時工作室配樂讓開（作者 2026-11-22：背景音太吵），關掉吉他再淡回。Larch 內嵌版的配樂也是工作室頁自己放（網址 bgm=），同一條路。
-    window.STUDIO_FEATURES?.bgm?.hold?.('guitar', true);
+    if (!composer) window.STUDIO_FEATURES?.bgm?.hold?.('guitar', true);
     const layout = el('div', 'sp-guitar-layout');
     const wrap = el('section', 'sp-guitar');
     wrap.setAttribute('aria-label', '指板');
@@ -454,7 +395,7 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
       for (const [name, frets] of Object.entries(shapes)) {
         const card = button('sp-chord', '', () => {
           applyShape(name);
-          arranger.chooseChord(name);
+          arranger?.chooseChord(name);
         });
         card.dataset.chord = name;
         card.draggable = true;
@@ -472,16 +413,17 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
     }
     const practice = makeGuitarPractice({
       el, button, applyShape, setCapo, cards, playChord, stopNotes,
-      beforePlay: () => { arranger.stop(); audio(); },
+      beforePlay: () => { arranger?.stop(); audio(); },
     });
-    const arranger = makeGuitarArranger({
+    const arranger = composer ? null : makeGuitarArranger({
       el, button, playChord, stopNotes, storage: window.StudioDB,
       beforePlay: () => { practice.stop(); audio(); },
     });
     wrap.append(picks, neck, capoLabel, tools, practice.hint,
       el('p', 'sp-cap', '點格子壓弦，點指板上方的撥片試音，點琴枕可悶弦。也能按住格上的鍵，再按空白鍵刷弦。'));
-    layout.append(wrap, chords, practice.panel, arranger.panel);
-    panelBody.append(layout);
+    layout.append(wrap, chords, practice.panel);
+    if (arranger) layout.append(arranger.panel);
+    host.append(layout);
     refresh();
 
     const bindings = new Map(FRET_ROWS.flatMap((row, fret) =>
@@ -489,7 +431,8 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
     const events = new AbortController();
     const options = { capture: true, signal: events.signal };
     addEventListener('keydown', e => {
-      if (e.metaKey || e.ctrlKey || e.altKey || e.target.closest?.('input, select, textarea')) return;
+      if (!panel.classList.contains('on') || layout.closest('[hidden]') || e.metaKey || e.ctrlKey || e.altKey ||
+          e.target.closest?.('input, select, textarea, dialog')) return;
       const k = e.key.toLowerCase();
       if (k === ' ') {
         // 空白鍵仍可操作鍵盤焦點所在的按鈕。滑鼠選卡後可直接用空白鍵刷。
@@ -515,23 +458,52 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
       refresh();
     }, { signal: events.signal });
     const observer = new MutationObserver(() => {
-      if (!panel.classList.contains('on') || !layout.isConnected) closeGuitar();
+      if (!panel.classList.contains('on') || !layout.isConnected) dispose();
     });
     observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
     observer.observe(panelBody, { childList: true });
-    closeGuitar = () => {
+    function dispose() {
+      if (events.signal.aborted) return;
       events.abort();
       observer.disconnect();
       clearTimeout(feedbackTimer);
       for (const timer of flashes) clearTimeout(timer);
       practice.dispose();
-      arranger.dispose();
-      window.STUDIO_FEATURES?.bgm?.hold?.('guitar', false);
-      closeGuitar = null;
+      arranger?.dispose();
+      if (!composer) {
+        window.STUDIO_FEATURES?.bgm?.hold?.('guitar', false);
+        closeGuitar = null;
+      }
+    }
+    if (!composer) return dispose;
+    return {
+      layout, dispose,
+      show(tab) {
+        practice.stop();
+        for (const frets of keyHeld) frets.clear();
+        refresh();
+        layout.dataset.guitarTab = tab;
+        practice.panel.hidden = practice.hint.hidden = tab !== 'practice';
+      },
     };
   }
 
-  const OPEN = { 10: openClock, 11: openDoor, 6: openPiano, 7: openGuitar };
+  const composerModule = composerEnabled ? await import('./composer_ui.mjs') : null;
+  function openComposer(focus) {
+    const fromInvestigation = panel.classList.contains('on') && panel.dataset.design === 'story-investigation';
+    openPanel('編曲室', focus, 'composer');
+    if (fromInvestigation) {
+      panelBody.removeAttribute('aria-live');
+      panelBody.removeAttribute('aria-atomic');
+    }
+    composerModule.mountComposer({
+      host: panelBody, panel, el, audio, mountGuitar,
+      onClose: () => document.getElementById('panel-back').click(),
+      onReturn: fromInvestigation ? () => panel.dispatchEvent(new Event('studio:restore-investigation')) : null,
+    });
+  }
+
+  const OPEN = { 10: openClock, 11: openDoor, 6: openPiano, 7: composerEnabled ? openComposer : openGuitar };
   function hook() {
     const features = window.STUDIO_FEATURES;
     if (!features || features.__points) return !!features;

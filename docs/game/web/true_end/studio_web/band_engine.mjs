@@ -4,7 +4,7 @@ function slots(size, hits, rest = 0) {
   return Array.from({ length: size }, (_, step) => hits[step] ?? rest);
 }
 
-function pattern(label, { id, voice, mix, beats = 4, shuffle = false }, drumHits, bassHits) {
+function pattern(label, { id, voice, mix, drumLevels, beats = 4, shuffle = false }, drumHits, bassHits) {
   const size = beats * 4;
   const drums = Object.fromEntries(Object.entries(drumHits).map(
     ([voice, hits]) => [voice, slots(size, hits)],
@@ -12,34 +12,39 @@ function pattern(label, { id, voice, mix, beats = 4, shuffle = false }, drumHits
   const [cutoff, saw, bassLevel, drumsLevel] = mix;
   return {
     id, label, voice, beats, shuffle, drums, bass: slots(size, bassHits, null),
-    mix: { cutoff, saw, bassLevel, drumsLevel },
+    mix: { cutoff, saw, bassLevel, drumsLevel, drumLevels },
   };
 }
 
 export const BAND_STYLES = [
-  pattern('流行 8 拍', { id: 'pop', voice: 'piano', mix: [760, .20, .20, .72] }, {
+  pattern('流行 8 拍', { id: 'pop', voice: 'piano', mix: [760, .20, .20, .72],
+    drumLevels: { kick: 1.04, snare: 1.02, closedHat: .92, openHat: .84 } }, {
     kick: { 0: 1, 8: .92, 10: .65 },
     snare: { 4: .8, 12: .95 },
     closedHat: { 0: .55, 2: .34, 4: .46, 6: .38, 8: .55, 10: .34, 12: .46 },
     openHat: { 14: .42 },
   }, { 0: [0, 3], 6: [7, 1.5], 8: [0, 2], 10: [12, 1.5], 14: [7, 1.5] }),
-  pattern('抒情慢板', { id: 'ballad', voice: 'rhodes', mix: [610, .12, .18, .65] }, {
+  pattern('抒情慢板', { id: 'ballad', voice: 'rhodes', mix: [610, .12, .18, .65],
+    drumLevels: { kick: .94, snare: .91, closedHat: .76, openHat: .72 } }, {
     kick: { 0: .72, 8: .58 },
     snare: { 4: .38, 12: .48 },
     closedHat: { 0: .3, 4: .24, 8: .28, 10: .18, 12: .24 },
     openHat: { 14: .28 },
   }, { 0: [0, 4], 8: [7, 3], 12: [12, 3] }),
-  pattern('搖擺（shuffle）', { id: 'shuffle', voice: 'piano', shuffle: true, mix: [720, .18, .19, .68] }, {
+  pattern('搖擺（shuffle）', { id: 'shuffle', voice: 'piano', shuffle: true, mix: [720, .18, .19, .68],
+    drumLevels: { kick: 1.03, snare: 1.05, closedHat: 1.02 } }, {
     kick: { 0: .88, 8: .77 },
     snare: { 4: .75, 10: .26, 12: .88 },
     closedHat: { 0: .54, 2: .28, 4: .52, 6: .3, 8: .54, 10: .28, 12: .52, 14: .32 },
   }, { 0: [0, 2], 2: [12, 1], 4: [7, 2], 8: [0, 2], 10: [12, 1], 12: [7, 2], 14: [5, 1] }),
-  pattern('華爾滋 3/4', { id: 'waltz', voice: 'piano', beats: 3, mix: [670, .15, .18, .67] }, {
+  pattern('華爾滋 3/4', { id: 'waltz', voice: 'piano', beats: 3, mix: [670, .15, .18, .67],
+    drumLevels: { kick: .90, snare: 1.03, closedHat: .79 } }, {
     kick: { 0: .91 },
     snare: { 4: .42, 8: .5 },
     closedHat: { 0: .48, 4: .34, 8: .38, 10: .2 },
   }, { 0: [0, 3], 4: [7, 2], 8: [12, 2] }),
-  pattern('放克 16 拍', { id: 'funk', voice: 'rhodes', mix: [900, .31, .20, .70] }, {
+  pattern('放克 16 拍', { id: 'funk', voice: 'rhodes', mix: [900, .31, .20, .70],
+    drumLevels: { kick: 1.06, snare: .91, closedHat: .82, openHat: .90, clap: .88 } }, {
     kick: { 0: 1, 3: .62, 6: .76, 10: .89, 13: .65 },
     snare: { 4: .88, 7: .26, 12: .92 },
     closedHat: { 0: .58, 1: .27, 2: .37, 3: .25, 4: .48, 5: .23, 7: .31,
@@ -61,11 +66,13 @@ export const BAND_PROGRESSIONS = [
 ].map(names => names.map(name => chords[name]));
 
 const drumVoices = {
-  kick:      { type: 'sine', from: 145, to: 48, pitchDrop: .075, tone: .32, length: .23, noise: .07, filter: 'lowpass', cutoff: 1100, tail: .026 },
-  snare:     { type: 'triangle', from: 195, to: 113, pitchDrop: .05, tone: .105, length: .095, noise: .17, filter: 'bandpass', cutoff: 1750, tail: .15 },
-  closedHat: { type: 'square', from: 3350, tone: .003, length: .03, noise: .055, filter: 'bandpass', cutoff: 4900, tail: .046 },
-  openHat:   { type: 'square', from: 2850, tone: .003, length: .075, noise: .063, filter: 'bandpass', cutoff: 4400, tail: .19 },
-  clap:      { type: 'triangle', from: 760, tone: .04, length: .037, noise: .14, filter: 'bandpass', cutoff: 1450,
+  kick:      { type: 'sine', from: 172, to: 55, pitchDrop: .12, tone: .27, length: .24,
+    overtone: { ratio: 2, tone: .35, length: .067, pitchDrop: .12 },
+    noise: .045, filter: 'bandpass', cutoff: 2800, tail: .009, noiseAttack: .001 },
+  snare:     { type: 'triangle', from: 195, to: 113, pitchDrop: .05, tone: .105, length: .095, noise: .39, filter: 'bandpass', cutoff: 1750, tail: .15 },
+  closedHat: { type: 'square', from: 3350, tone: .003, length: .03, noise: .092, filter: 'bandpass', cutoff: 4900, tail: .046 },
+  openHat:   { type: 'square', from: 2850, tone: .003, length: .075, noise: .101, filter: 'bandpass', cutoff: 4400, tail: .19 },
+  clap:      { type: 'triangle', from: 760, tone: .04, length: .037, noise: .25, filter: 'bandpass', cutoff: 1450,
     bursts: [[0, .016], [.012, .016], [.024, .115]] },
 };
 
@@ -76,7 +83,7 @@ const RESYNC_DELAY = .25;
 const SWING = [4 / 3, 4 / 3, 2 / 3, 2 / 3];
 const stepLength = bpm => 60 / bpm / 4;
 
-function createBandPlayer(context) {
+export function createBandPlayer(context) {
   let noise;
 
   function play({ output, voices }, source, time, length, level, attack = .003, filter) {
@@ -84,6 +91,8 @@ function createBandPlayer(context) {
     source.connect(filter || envelope);
     if (filter) filter.connect(envelope);
     envelope.connect(output);
+    // A source can start a sample before the gain automation at a fractional sample time.
+    envelope.gain.value = .0001;
     envelope.gain.setValueAtTime(.0001, time);
     envelope.gain.exponentialRampToValueAtTime(Math.max(.0001, level), time + attack);
     envelope.gain.exponentialRampToValueAtTime(.0001, time + length);
@@ -108,6 +117,15 @@ function createBandPlayer(context) {
     if (spec.to) oscillator.frequency.exponentialRampToValueAtTime(spec.to, time + spec.pitchDrop);
     play(clock, oscillator, time, spec.length, spec.tone * velocity);
 
+    // The short octave gives the kick some weight on speakers that lose its fundamental.
+    if (spec.overtone) {
+      const { ratio, tone, length, pitchDrop } = spec.overtone;
+      const overtone = context.createOscillator();
+      overtone.frequency.setValueAtTime(spec.from * ratio, time);
+      overtone.frequency.exponentialRampToValueAtTime(spec.to * ratio, time + pitchDrop);
+      play(clock, overtone, time, length, tone * velocity, .0015);
+    }
+
     if (!noise) {
       noise = context.createBuffer(1, Math.ceil(context.sampleRate * .3), context.sampleRate);
       const samples = noise.getChannelData(0);
@@ -120,7 +138,7 @@ function createBandPlayer(context) {
       filter.type = spec.filter;
       filter.frequency.value = spec.cutoff;
       filter.Q.value = .75;
-      play(clock, source, time + offset, length, spec.noise * velocity);
+      play(clock, source, time + offset, length, spec.noise * velocity, spec.noiseAttack ?? .003, filter);
     }
   }
 
@@ -144,6 +162,8 @@ function createBandPlayer(context) {
   }
 
   return {
+    drum,
+    bass,
     count(clock, time, beat) {
       const oscillator = context.createOscillator();
       oscillator.frequency.value = beat === 1 ? 1240 : 930;
@@ -152,7 +172,10 @@ function createBandPlayer(context) {
     slot(clock, time, chord) {
       const { style, step } = clock;
       for (const [voice, track] of Object.entries(style.drums)) {
-        if (track[step]) drum(clock, voice, time, track[step] * style.mix.drumsLevel);
+        if (track[step]) {
+          const level = style.mix.drumLevels?.[voice] ?? 1;
+          drum(clock, voice, time, track[step] * style.mix.drumsLevel * level);
+        }
       }
       const note = style.bass[step];
       if (note) bass(clock, time, chord.root, note);
