@@ -55,7 +55,7 @@
 }
 .sf-night-notice {
   position: absolute;
-  z-index: 75;
+  z-index: 90;   /* 要在「工作室的 AI 功能」說明框（80）之上，第一次進來才看得到（2026-11-28 作者沒看到提醒） */
   top: 34px;
   right: 12px;
   max-width: calc(100% - 24px);
@@ -249,7 +249,7 @@
 #panel[data-design="puzzle"]:not(.ming-os-panel) .panel-head { padding-block: 5px; }
 body > .sf-night-notice {
   position: fixed;
-  z-index: 20;
+  z-index: 90;   /* 原本 20，被面板（21）和說明框（80）蓋住，作者看不到 */
   top: max(var(--hud-clear, 0px), 14px);
 }
 @media (max-width: 680px) and (orientation: portrait) {
