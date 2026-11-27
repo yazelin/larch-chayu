@@ -332,6 +332,16 @@ function start() {
   observer.observe(document.body, { subtree: true, childList: true, characterData: true });
   const panel = document.getElementById('panel');
   if (panel) observer.observe(panel, { attributes: true, attributeFilter: ['data-design'] });
+  // 光暈對準圖示：量圖示中心相對按鈕的位置
+  const aimGlow = e => {
+    const btn = e.target.closest?.('.sp-icon-btn'); const ic = btn?.querySelector(':scope > .sp-ic'); if (!ic) return;
+    const r = btn.getBoundingClientRect(), q = ic.getBoundingClientRect(); if (!r.width || !q.width) return;
+    const sx = btn.offsetWidth ? r.width / btn.offsetWidth : 1, sy = btn.offsetHeight ? r.height / btn.offsetHeight : 1;
+    btn.style.setProperty('--glow-x', ((q.left + q.width / 2 - r.left) / sx) + 'px');
+    btn.style.setProperty('--glow-y', ((q.top + q.height / 2 - r.top) / sy) + 'px');
+  };
+  document.addEventListener('pointerover', aimGlow, true);
+  document.addEventListener('focusin', aimGlow, true);
   document.addEventListener('pointerover', e => { if (e.pointerType === 'mouse') { const n = tipTarget(e); if (n) showTip(n); } });
   document.addEventListener('pointerout', e => { if (e.pointerType === 'mouse' && tipFor && !tipFor.contains(e.relatedTarget)) hideTip(); });
   // 鍵盤焦點才跳提示；開面板時程式把焦點放到關閉鈕，那時不跳

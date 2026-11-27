@@ -395,8 +395,10 @@ html[data-icon-style="A"] .sp-icon-btn::before {
   content: "";
   position: absolute;
   z-index: -1;
-  top: 50%;
-  left: calc(3px + var(--ic) / 2);
+  /* 光暈畫在圖示實際的位置（studio_icons.mjs 在 hover／focus 時量好填 --glow-x/y）；
+     2026-11-28 作者：分頁改成置中排版後，光暈還照「圖示在左」算，跑到按鈕最左邊 */
+  top: var(--glow-y, 50%);
+  left: var(--glow-x, calc(3px + var(--ic) / 2));
   width: calc(var(--ic) + 18px);
   height: calc(var(--ic) + 18px);
   margin: calc(var(--ic) / -2 - 9px) 0 0 calc(var(--ic) / -2 - 9px);
@@ -408,7 +410,7 @@ html[data-icon-style="A"] .sp-icon-btn::before {
   transition: opacity .3s ease, transform .45s cubic-bezier(.2, .8, .3, 1);
   pointer-events: none;
 }
-html[data-icon-style="A"] .sp-icon-only::before { left: 50%; }
+html[data-icon-style="A"] .sp-icon-only::before { left: var(--glow-x, 50%); }
 @media (hover: hover) { html[data-icon-style="A"] .sp-icon-btn:not(:disabled):hover::before { opacity: 1; transform: scale(1.12) rotate(4deg); } }
 html[data-icon-style="A"] .sp-icon-btn:not(:disabled):focus-visible::before { opacity: 1; transform: scale(1.12) rotate(4deg); }
 /* B 紙片貼紙：hover 時像被掀起一角，歪一點、影子拉長 */
