@@ -151,6 +151,7 @@ const RULES = [
   { t: '請詩開始做歌', i: 'music', m: 'label' },
   { t: '請晨也畫一張', i: 'easel', m: 'label' },
   { t: '讓晨看看', i: 'eye', m: 'label' },
+  { t: /^(完成，放進展廳|存放中…|打開畫架展廳)$/, i: 'frame', m: 'label' },
   { t: '回到畫架展廳', i: 'prev', m: 'label', s: '回展廳' },
   { t: '回到和晨的聊天', i: 'prev', m: 'label', s: '回聊天' },
   { t: '回到收藏資料夾', i: 'prev', m: 'label', s: '回收藏' },

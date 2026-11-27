@@ -793,7 +793,8 @@ function openCharacter(character, focus, initialTab, options) {
       if (!content.isConnected || !panel.classList.contains('on')) return;
       await renderColoring(content, {
         ...drawingDeps(), avatar: CHARACTERS.chen.avatar, seen: seenStoryCGs(),
-        all: query.get('unlock') === 'all'
+        all: query.get('unlock') === 'all', saveDrawing,
+        openGallery: () => openCharacter('chen', returnFocus, 'gallery')
       });
       return;
     }
@@ -820,7 +821,16 @@ async function savedWorks(kind) {
     .map(function (entry) { return entry[1]; }).sort(function (a, b) { return b.createdAt - a.createdAt; });
 }
 
-// 作品的來源：網站版有 Blob 就用；Larch 版只存作品編號，從 Worker 的 /work 讀（R2，90 天沒打開會刪）。
+async function saveDrawing(image, title) {
+  const result = await callWorker('/drawing/save', { playerId: await playerId(), image, title });
+  if (!result.saved || !result.workId) throw new Error('展廳暫時存放失敗，請稍後再試。');
+  await StudioDB.set('drawing:' + result.workId, {
+    id: result.workId, kind: 'drawing', character: 'tea', title: result.title,
+    createdAt: Date.now(), workId: result.workId, workUrl: result.workUrl
+  });
+}
+
+// 有本機 Blob 的作品直接用；其餘從 Worker 的 /work 讀（R2，90 天沒打開會刪）。
 function workSrc(work) {
   if (work.blob instanceof Blob) return objectUrl(work.blob);
   if (work.workUrl) return work.workUrl;

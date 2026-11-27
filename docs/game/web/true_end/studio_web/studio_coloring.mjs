@@ -344,9 +344,11 @@ export async function renderColoring(root, deps) {
     const openReply = button('看晨的回覆', showLook);
     openReply.hidden = true;
     const lookRoot = el('div');
+    const drawingImage = () => composite(paint, line);
+    const hasPaint = () => ctx.getImageData(0, 0, width, height).data.some((channel, i) => i % 4 === 3 && channel !== 0);
     const look = drawingLook(lookRoot, deps, {
-      hasPaint: () => ctx.getImageData(0, 0, width, height).data.some((channel, i) => i % 4 === 3 && channel !== 0),
-      image: () => composite(paint, line),
+      hasPaint,
+      image: drawingImage,
       emptyMessage: '先塗點顏色，再給晨看。',
       savedMessage: '這張畫收進畫架展廳的「我畫的」。',
       onSubmit() { phrase.textContent = say('done'); showLook(); },
@@ -371,6 +373,35 @@ export async function renderColoring(root, deps) {
     lookButton.addEventListener('click', () => {
       if (!dialog.open && look.status.textContent) showLook();
     });
+    const saveLabel = '完成，放進展廳';
+    const saveDrawing = button(saveLabel, async () => {
+      if (saveDrawing.disabled) return;
+      if (!hasPaint()) {
+        showSaveResult(el('p', 'sf-status', '先塗點顏色，再放進展廳。'));
+        return;
+      }
+      saveDrawing.disabled = true;
+      saveDrawing.textContent = '存放中…';
+      try {
+        await deps.saveDrawing(drawingImage(), item.title);
+        if (!editor.isConnected) return;
+        showSaveResult(deps.chenBubble(say('saved'), 'smile'), el('p', 'sf-status', '放進畫架展廳了'),
+          button('打開畫架展廳', () => { dialog.close(); deps.openGallery(); }));
+      } catch (error) {
+        if (editor.isConnected) showSaveResult(el('p', 'sf-status',
+          error.code && error.code !== 'NOT_FOUND' ? error.message : '展廳暫時存放失敗，請稍後再試。'));
+      } finally {
+        saveDrawing.textContent = saveLabel;
+        saveDrawing.disabled = false;
+      }
+    });
+    function showSaveResult(...nodes) {
+      dialogTitle.textContent = saveLabel;
+      dismiss.hidden = false;
+      dialogContent.replaceChildren(...nodes);
+      if (!dialog.open) dialog.showModal();
+    }
+    lookButton.after(saveDrawing);
     const controls = el('div', 'sf-coloring-controls');
     controls.append(actions, palette, recents, settings, operations);
     const footer = el('div', 'sf-coloring-footer');
