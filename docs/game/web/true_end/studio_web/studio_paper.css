@@ -1057,3 +1057,111 @@ body:has(#panel.on:is([data-design="piano"], [data-design="guitar"])) > :is(#scr
     .sp-piano-keyboard-hint { display: none; }
   }
 }
+
+#panel[data-design="piano"] #panel-body:has(> .sp-band) { gap: clamp(10px, 2dvh, 20px); }
+#panel .sp-keys-scroll--playable,
+#panel .sp-keys-scroll--playable :is(.sp-keys-wide, .sp-key) { touch-action: none; }
+.sp-piano-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 0 5px;
+  color: #fff4df;
+  font: 600 12px/1 var(--studio-hand);
+  touch-action: none;
+  user-select: none;
+  cursor: ew-resize;
+}
+.sp-piano-range[hidden] { display: none; }
+.sp-piano-deck:has(+ .sp-piano-range:not([hidden])) { display: none; }
+.sp-piano-range:focus-visible { outline: 2px solid #ffcf82; border-radius: 4px; }
+.sp-piano-range-track {
+  position: relative;
+  display: flex;
+  flex: 1;
+  height: 20px;
+  box-shadow: 0 0 0 1px #302731;
+}
+.sp-piano-range-key {
+  flex: 1;
+  min-width: 0;
+  border-right: 1px solid #a8998d;
+  background: #eadfcd;
+}
+.sp-piano-range-key.black { position: absolute; height: 60%; border: 0; background: #46383b; }
+.sp-piano-range-visible {
+  position: absolute;
+  inset-block: -2px;
+  box-sizing: border-box;
+  border: 2px solid #ffbd5e;
+  border-radius: 3px;
+  background: #ffba5529;
+  box-shadow: 0 0 0 1px #664120;
+}
+.sp-band {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) repeat(2, minmax(108px, 1.1fr)) minmax(138px, 1.25fr) repeat(2, minmax(80px, 1fr)) auto;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 8px 12px;
+  border: 1px solid #b89c80;
+  border-radius: 7px 10px 9px 6px;
+  background: var(--studio-fiber), linear-gradient(105deg, #faf0dd, #f4e5ce);
+  color: #654431;
+  font-size: 14px;
+}
+.sp-band-transport { display: grid; justify-items: start; gap: 2px; }
+#panel .sp-band-toggle {
+  padding: 0 9px;
+  min-height: 32px;
+  border: 1px solid #9e795c;
+  border-radius: 5px 8px 7px 5px;
+  background: var(--studio-fiber), #fff8e9;
+  color: #654431;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+#panel .sp-band-toggle:hover { background-color: #f6e2bc; }
+.sp-band-position { min-height: 1.35em; font-weight: 700; }
+.sp-band-field { display: flex; flex-wrap: wrap; min-width: 0; gap: 2px 6px; align-items: baseline; }
+.sp-band-voice { position: relative; min-width: 0; }
+.sp-band-sample-status { position: absolute; top: 0; left: 2.8em; font-size: 10px; line-height: 1.4; }
+#panel .sp-band-field :is(select, input) { width: 100%; min-width: 0; margin: 0; }
+#panel .sp-band-field select {
+  box-sizing: border-box;
+  padding-inline: 8px 29px;
+  border: 1px solid #b89c80;
+  border-radius: 5px 7px 6px 5px;
+  background-color: #fff8e9;
+  color: inherit;
+  font: inherit;
+}
+.sp-band-bpm { font-variant-numeric: tabular-nums; }
+.sp-band-count { display: flex; flex-direction: row-reverse; align-items: center; gap: 5px; }
+
+@media (max-width: 950px) {
+  .sp-band { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sp-band-count { justify-content: flex-end; }
+}
+@media (max-width: 600px) {
+  .sp-band { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #panel .sp-band-toggle { min-height: 40px; }
+}
+@media (orientation: landscape) and (min-width: 640px) and (max-height: 460px) {
+  .sp-band {
+    grid-template-columns: minmax(92px, 1fr) repeat(3, minmax(0, 1.12fr)) repeat(2, minmax(0, .8fr)) auto;
+    gap: 4px 8px;
+    padding-block: 6px;
+  }
+  #panel .sp-band-field select { padding-inline: 5px 20px; }
+}
+@media (orientation: landscape) and (max-height: 460px) {
+  #panel-body:has(> .sp-band) .sp-piano-case { padding-block: 6px 9px; }
+  #panel-body:has(> .sp-band) .sp-piano-deck span:not(.sp-piano-lamp) { height: 12px; }
+  #panel-body:has(> .sp-band) .sp-keys { height: clamp(86px, 23dvh, 116px); }
+}
+@media (orientation: landscape) and (max-height: 460px) and (pointer: coarse) {
+  #panel-body:has(> .sp-band) .sp-piano-keyboard-hint { display: none; }
+}

@@ -1,15 +1,15 @@
 {
   "version": 1,
   "pagesBase": "https://yazelin.github.io/larch-chayu/game/",
-  "totalFiles": 904,
-  "totalBytes": 89744853,
+  "totalFiles": 926,
+  "totalBytes": 92248607,
   "bytesByCategory": {
     "bgm": 25662250,
     "cg": 3081222,
     "img": 203466,
     "minigames": 11052296,
     "mv": 15206418,
-    "web": 34539201
+    "web": 37042955
   },
   "largestFile": {
     "file": "mv/media/boring_v2.mp3",
@@ -18,7 +18,7 @@
     "sha256": "d6e99b0176da8186897b6b8a7d37cd99f72a8c677907bcbe9413cac56bcf7059",
     "source": "新版/mv/media/boring_v2.mp3"
   },
-  "webDependencyFiles": 904,
+  "webDependencyFiles": 926,
   "cgNameMap": [
     {
       "file": "cg/ch1/ch1_cg_079.webp",
@@ -1196,6 +1196,118 @@
       "bytes": 180220,
       "sha256": "46acd2c45f03bbcf89367be001a6471fd8e7f2099a1753888e862554dab95510",
       "source": "新版/mv/media/fonts/iansui-mv.woff2"
+    },
+    {
+      "file": "web/art/instruments/piano/A2.mp3",
+      "category": "web",
+      "bytes": 192201,
+      "sha256": "fc5877570899662e0c5899166f6e1ab4750f59630817551e24f2313b83032084",
+      "source": "art/instruments/piano/A2.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/A3.mp3",
+      "category": "web",
+      "bytes": 188126,
+      "sha256": "6b5867667be79cb3dc6e8046702f9a14006ba493a98bd625d465c90234ae6d85",
+      "source": "art/instruments/piano/A3.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/A4.mp3",
+      "category": "web",
+      "bytes": 160854,
+      "sha256": "9583f8ee25982172bf9193f2030a8cdc07c4c38c60be8ccf57c72ec16ba40a03",
+      "source": "art/instruments/piano/A4.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/A5.mp3",
+      "category": "web",
+      "bytes": 127313,
+      "sha256": "0dea3ea51e4c37acedd2ae051194679a42cba757151211300b2b2bd81d7f0258",
+      "source": "art/instruments/piano/A5.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/C3.mp3",
+      "category": "web",
+      "bytes": 192828,
+      "sha256": "fca8893e1b39acf03947357527fefeaf6301a3bc702fcbaf712199d700b6bd6b",
+      "source": "art/instruments/piano/C3.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/C4.mp3",
+      "category": "web",
+      "bytes": 195023,
+      "sha256": "2ccc442141d869058abc0db29bccbf43562f2bae33e9964adb57394972875fdd",
+      "source": "art/instruments/piano/C4.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/C5.mp3",
+      "category": "web",
+      "bytes": 187499,
+      "sha256": "8c04db3725a196d402be24605159bfe04ef1d7cb18baa0ab3c10a40de0321bc0",
+      "source": "art/instruments/piano/C5.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/C6.mp3",
+      "category": "web",
+      "bytes": 75591,
+      "sha256": "3eb12d3e3737e8a576165c3d0b63bd66bdad5cb7d6abf0a908b0344ae4392297",
+      "source": "art/instruments/piano/C6.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/Ds3.mp3",
+      "category": "web",
+      "bytes": 193769,
+      "sha256": "2c8d467cd7edae0312c55d461be33de06b13e28e0f39d58a02cbb481029d4cc2",
+      "source": "art/instruments/piano/Ds3.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/Ds4.mp3",
+      "category": "web",
+      "bytes": 190634,
+      "sha256": "dd19e26377a3fb991b892facc538035c3a79a50fe543131b8f441caf57d40762",
+      "source": "art/instruments/piano/Ds4.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/Ds5.mp3",
+      "category": "web",
+      "bytes": 156152,
+      "sha256": "830da8867768434eeff49decef014cfd8dbbe59ba4558661621c3e2dc8d21a2f",
+      "source": "art/instruments/piano/Ds5.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/Ds6.mp3",
+      "category": "web",
+      "bytes": 81233,
+      "sha256": "8bd088b7567f0bd7af97868b4579c37c9ab885eec8f2addf1e3bb79563b800c0",
+      "source": "art/instruments/piano/Ds6.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/Fs3.mp3",
+      "category": "web",
+      "bytes": 194396,
+      "sha256": "03c7af20753f4b18db12484f10b1da46b4b709713d5c0f6927930585f20b52e1",
+      "source": "art/instruments/piano/Fs3.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/Fs4.mp3",
+      "category": "web",
+      "bytes": 177155,
+      "sha256": "64f61dcfbbe60bb92669014bb4bb838aad6bb8f58f7df66581bf5a50497eb460",
+      "source": "art/instruments/piano/Fs4.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/Fs5.mp3",
+      "category": "web",
+      "bytes": 143927,
+      "sha256": "c9fc6a055f177662a4196d11ffea347e2cca6a529438e9e77a31a3163c258006",
+      "source": "art/instruments/piano/Fs5.mp3"
+    },
+    {
+      "file": "web/art/instruments/piano/LICENSE.md",
+      "category": "web",
+      "bytes": 876,
+      "sha256": "5704f00326ce9b651b9d5b5fb10e3a0df152cff80f3e1260bae7810050a9a6c0",
+      "source": "art/instruments/piano/LICENSE.md"
     },
     {
       "file": "web/art/web/bg/outside_new_COURT_1.webp",
@@ -4544,6 +4656,13 @@
       "source": "真結局/studio_web/avatars/tea.webp"
     },
     {
+      "file": "web/true_end/studio_web/band_engine.mjs",
+      "category": "web",
+      "bytes": 11080,
+      "sha256": "9e136f07b458594c3e324c5aa09ab745666648cb582765bd3c9e60502310a6e5",
+      "source": "真結局/studio_web/band_engine.mjs"
+    },
+    {
       "file": "web/true_end/studio_web/computer_actions.mjs",
       "category": "web",
       "bytes": 1769,
@@ -4560,8 +4679,8 @@
     {
       "file": "web/true_end/studio_web/fonts/iansui-studio.woff2",
       "category": "web",
-      "bytes": 427940,
-      "sha256": "2b2fb30a4adabc00f54a17a5fe9fa22d7f21bbb52a989c1c9986b67d2b206688",
+      "bytes": 431172,
+      "sha256": "f325de9dd24738e39be2cbac91e35f476c94867074cb9200d8fc3673ea11814d",
       "source": "真結局/studio_web/fonts/iansui-studio.woff2"
     },
     {
@@ -5853,6 +5972,27 @@
       "source": "真結局/studio_web/ming_game_assets.js"
     },
     {
+      "file": "web/true_end/studio_web/piano_music_box.mjs",
+      "category": "web",
+      "bytes": 908,
+      "sha256": "0b2ab596b3c71f1d831e61c46ab6922b8fe57e488d0590039cf5b346eba8ce72",
+      "source": "真結局/studio_web/piano_music_box.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/piano_samples.mjs",
+      "category": "web",
+      "bytes": 1002,
+      "sha256": "4c6149b25fc09f693ae3d591f71cb83604b37492c78f1b12fc271f18b3d354ca",
+      "source": "真結局/studio_web/piano_samples.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/piano_voices.mjs",
+      "category": "web",
+      "bytes": 12037,
+      "sha256": "8f020a236fc54833ec0cabcc22dc5b67c3003ce31c6552554830f8cf44acd939",
+      "source": "真結局/studio_web/piano_voices.mjs"
+    },
+    {
       "file": "web/true_end/studio_web/refs/chen.jpg",
       "category": "web",
       "bytes": 75581,
@@ -5907,6 +6047,13 @@
       "bytes": 16996,
       "sha256": "c1f3b74e198bf6e6a1cdaf41151178bad310c6804351f12aa9188232429649a8",
       "source": "真結局/studio_web/studio_album_data.mjs"
+    },
+    {
+      "file": "web/true_end/studio_web/studio_band.mjs",
+      "category": "web",
+      "bytes": 6326,
+      "sha256": "b71e97cc66a468a315a81437855eb58dfbc8af0b839104ab7e6252258aee045e",
+      "source": "真結局/studio_web/studio_band.mjs"
     },
     {
       "file": "web/true_end/studio_web/studio_character_view.js",
@@ -6002,15 +6149,22 @@
     {
       "file": "web/true_end/studio_web/studio_paper.css",
       "category": "web",
-      "bytes": 46556,
-      "sha256": "6296c62c92ee7c5a472812fae006f6ba999b915a02d562c3af06154ed49b3ba5",
+      "bytes": 50319,
+      "sha256": "2794f61705aa48d91cfb14cc847bdbef92cefaf8818d225a590f60b12fbbb66e",
       "source": "真結局/studio_web/studio_paper.css"
+    },
+    {
+      "file": "web/true_end/studio_web/studio_piano_input.mjs",
+      "category": "web",
+      "bytes": 7492,
+      "sha256": "faed89543c8e5e4f1643c4df9e7fca34735e400531ef91e61ca98207aac5ad57",
+      "source": "真結局/studio_web/studio_piano_input.mjs"
     },
     {
       "file": "web/true_end/studio_web/studio_points.mjs",
       "category": "web",
-      "bytes": 29401,
-      "sha256": "23e69f2eada9c1bd695060c214c51c608b9cc0b6ffec26b36513c74d7a5c11b5",
+      "bytes": 29738,
+      "sha256": "ad56f1fb93b0b813c85683a3257d9e45eff908330ed736add15dc082edad52da",
       "source": "真結局/studio_web/studio_points.mjs"
     },
     {

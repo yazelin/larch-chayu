@@ -1,3 +1,4 @@
+import { playMusicBox } from './piano_music_box.mjs';
 import { studioPointOpen } from './studio_unlock.mjs';
 import { preparePanel } from './studio_panel.mjs';
 import { CHORDS, CHORD_GROUPS, guitarFrequency } from './guitar_chords.mjs';
@@ -9,6 +10,7 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
 {
   const TRIAL_LAST_DAY = 30;   // 跟 studio_features.mjs 的試用期倒數同一個數字
   const query = new URLSearchParams(location.search);
+  const bandModule = query.get('band') === '1' ? await import('./studio_band.mjs') : null;
   const game = () => (window.STUDIO_FEATURES && window.STUDIO_FEATURES.context()) || { chapter: 1, day: 1 };
   const panel = document.getElementById('panel'), panelTitle = document.getElementById('panel-title'), panelBody = document.getElementById('panel-body'), scrim = document.getElementById('scrim');
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
@@ -40,9 +42,9 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
     initialFocus.focus({ preventScroll: true });
   }
 
-  // ── 聲音：電子琴與吉他都用瀏覽器合成，不另外帶音檔 ──
+  // 解碼取樣時可以先準備 AudioContext，實際播放仍從手勢喚醒。
   let ctx = null;
-  function audio() { if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ctx = new C(); } if (ctx.state === 'suspended') ctx.resume(); return ctx; }
+  function audio(resume = true) { if (!ctx) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ctx = new C(); } if (resume && ctx.state === 'suspended') ctx.resume(); return ctx; }
   const played = [];   // 給測試看：彈過哪些音
   const pluckBuffers = new Map();
   function guitarSample(a, freq) {
@@ -76,8 +78,10 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
   }
   function tone(freq, kind, delay = 0) {
     played.push(Math.round(freq * 10) / 10); const a = audio(); if (!a) return;
-    const t = a.currentTime + delay, gain = a.createGain(); gain.connect(a.destination);
+    const t = a.currentTime + delay;
     if (kind === 'pluck') {
+      const gain = a.createGain();
+      gain.connect(a.destination);
       const { buffer, playbackRate } = guitarSample(a, freq);
       const source = a.createBufferSource();
       source.buffer = buffer;
@@ -87,10 +91,7 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
       source.start(t);
       return source;
     } else {
-      const o = a.createOscillator(); o.type = 'sine'; o.frequency.value = freq; const o2 = a.createOscillator(); o2.type = 'triangle'; o2.frequency.value = freq * 2.001;
-      const g2 = a.createGain(); g2.gain.value = 0.18; o.connect(gain); o2.connect(g2); g2.connect(gain);
-      gain.gain.setValueAtTime(0.0001, t); gain.gain.exponentialRampToValueAtTime(0.28, t + 0.012); gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
-      o.start(t); o2.start(t); o.stop(t + 1.2); o2.stop(t + 1.2);
+      playMusicBox(a, a.destination, freq, t);
     }
   }
   function press(node, freq, kind) { tone(freq, kind); node.classList.remove('down'); void node.offsetWidth; node.classList.add('down'); setTimeout(() => node.classList.remove('down'), 260); }
@@ -171,6 +172,7 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
     openPanel('電子琴', focus, 'piano');
     // 畫面一排（低音→中音→高音，22 白鍵），鍵盤是 Q／A／Z 三排（作者 2026-11-24：「畫面上應該是一排，只是鍵盤上是 qaz 三排」）。
     const wrap = el('div', 'sp-keys sp-keys-wide'); const keys = {}; const byNote = new Map();
+    const band = bandModule?.makePianoBand(el, audio);
     const playNote = (n, node) => press(node || byNote.get(n) || wrap, NOTE(n), 'key');
     const whites = [];
     for (const row of PIANO_ROWS.slice().reverse()) {
@@ -178,7 +180,7 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
       if (row.top) whites.push({ n: row.base + 12, name: 'Do', k: row.top, row });
     }
     const w = 100 / whites.length;
-    // 手機上琴鍵可以左右滑：手指移動超過 8 px 算滑動、不出聲；點一下（放開時）才出聲。滑鼠與筆照舊按下就出聲。
+    // 舊版手機琴鍵可左右捲動，點一下才出聲。滑鼠與筆按下就出聲。
     const bindHit = (b, hit) => {
       let start = null;
       b.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { start = [e.clientX, e.clientY]; return; } e.preventDefault(); hit(); });
@@ -188,13 +190,14 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
     };
     const keyButton = (cls, label, n, aria) => {
       const b = el('button', cls, label); b.type = 'button'; b.dataset.note = String(n); b.setAttribute('aria-label', aria);
-      bindHit(b, () => playNote(n, b)); byNote.set(n, b); return b;
+      if (!band) bindHit(b, () => playNote(n, b));
+      byNote.set(n, b); return b;
     };
     whites.forEach(({ n, name, k, row }, i) => {
       const b = keyButton('sp-key', name, n, row.name + ' ' + name + '（鍵盤 ' + k.toUpperCase() + '，Shift 升半音）');
       if (name === 'Do' && n === row.base) { b.dataset.octave = row.name; b.classList.add('octave-start'); }
       wrap.append(b);
-      keys[k] = shift => playNote(shift ? n + 1 : n);
+      keys[k] = band ? n : shift => playNote(shift ? n + 1 : n);
       const sharp = SHARPS.find(([d]) => row.base + d === n + 1 && n !== row.base + 12);
       if (sharp) {
         const bk = keyButton('sp-key black', '', n + 1, row.name + ' 黑鍵（Shift＋' + k.toUpperCase() + '）');
@@ -202,22 +205,38 @@ import { makeGuitarArranger } from './guitar_arranger.mjs';
       }
     });
     const scroller = el('div', 'sp-keys-scroll'); scroller.append(wrap);
+    if (band) scroller.classList.add('sp-keys-scroll--playable');
     const instrument = el('div', 'sp-piano-case');
     const deck = el('div', 'sp-piano-deck');
     deck.append(el('span'), el('span', 'sp-piano-lamp'), el('span'));
     deck.setAttribute('aria-hidden', 'true');
     instrument.append(deck, scroller);
     requestAnimationFrame(() => { const mid = wrap.querySelector('[data-octave="中音"]'); if (mid && scroller.scrollWidth > scroller.clientWidth) scroller.scrollLeft = mid.offsetLeft - 8; });
-    panelBody.append(
-      instrument,
-      el('p', 'sp-cap sp-piano-scroll-hint', '左右滑動琴鍵，可彈到低音和高音。'),
-      el('p', 'sp-cap sp-piano-keyboard-hint', '高音 Q W E R T Y U I，中音 A S D F G H J，低音 Z X C V B N M。按住 Shift 再按就是升半音（黑鍵）。'),
-    );
-    bindKeys({ wrap, keys });
+    panelBody.append(instrument);
+    if (!band) panelBody.append(el('p', 'sp-cap sp-piano-scroll-hint', '左右滑動琴鍵，可彈到低音和高音。'));
+    panelBody.append(el('p', 'sp-cap sp-piano-keyboard-hint', '高音 Q W E R T Y U I，中音 A S D F G H J，低音 Z X C V B N M。按住 Shift 再按就是升半音（黑鍵）。'));
+    let releaseKeys, releaseRange;
+    if (band) {
+      panelBody.prepend(band.controls);
+      releaseRange = bandModule.bindPianoRange(scroller, wrap, el);
+      releaseKeys = bandModule.bindPianoInput(wrap, keys, byNote, band, n => {
+        const frequency = NOTE(n);
+        played.push(Math.round(frequency * 10) / 10);
+        return band.noteOn(frequency);
+      });
+    } else {
+      bindKeys({ wrap, keys });
+    }
     // 彈電子琴時配樂也讓開（同吉他，作者 2026-11-22），面板關掉或換內容就淡回。
     window.STUDIO_FEATURES?.bgm?.hold?.('piano', true);
     const pianoWatch = new MutationObserver(() => {
-      if (!panel.classList.contains('on') || !instrument.isConnected) { pianoWatch.disconnect(); window.STUDIO_FEATURES?.bgm?.hold?.('piano', false); }
+      if (!panel.classList.contains('on') || !instrument.isConnected) {
+        pianoWatch.disconnect();
+        releaseKeys?.();
+        releaseRange?.();
+        band?.dispose();
+        window.STUDIO_FEATURES?.bgm?.hold?.('piano', false);
+      }
     });
     pianoWatch.observe(panel, { attributes: true, attributeFilter: ['class'] });
     pianoWatch.observe(panelBody, { childList: true });
