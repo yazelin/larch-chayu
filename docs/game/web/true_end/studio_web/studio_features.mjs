@@ -1681,6 +1681,17 @@ async function renderPuzzleTab(root, initialId) {
   renderPuzzle(root, { el, button, avatar: CHARACTERS.chen.avatar, db: StudioDB, sources, initial });
 }
 
+async function deleteGalleryWork(work) {
+  if (!mockMode && work.workId) {
+    const player = await playerId();
+    const response = await fetch(apiBase() + '/work?id=' + encodeURIComponent(work.workId) + '&player=' + encodeURIComponent(player), { method: 'DELETE' });
+    const data = await response.json().catch(function () { return {}; });
+    // 伺服器上已經沒有（超過 90 天被清掉）也算刪好，照樣從展廳拿掉
+    if (!response.ok && data.code !== 'WORK_NOT_FOUND') throw new Error(data.message || '刪不掉，等一下再試。');
+  }
+  await StudioDB.remove((work.kind === 'image' ? 'image:' : 'drawing:') + work.id);
+}
+
 async function renderGallery(root) {
   await playerId().catch(function () {});   // Larch 版的作品網址要帶玩家編號
   const [images, drawings, conversation, bests] = await Promise.all([
@@ -1725,6 +1736,23 @@ async function renderGallery(root) {
         }
         card.append(button('拼成拼圖', () => openChenPuzzle(id)));
       }
+    }
+    // 刪除（作者 2026-11-28：展廳裡的圖不能刪？）。晨內建的畫（galleryArt，有 puzzleId）是劇情的一部分，不給刪。
+    // Larch 內嵌框不能跳 confirm，改成按兩次：第一次變「確定刪除？」＋「取消」。
+    if (!work.puzzleId && (work.kind === 'image' || work.kind === 'drawing')) {
+      const actions = el('div', 'sf-delete-row');
+      const remove = button('刪除', function () {
+        if (remove.dataset.armed !== '1') {
+          remove.dataset.armed = '1'; remove.textContent = '確定刪除？'; cancel.hidden = false; return;
+        }
+        remove.disabled = true; remove.textContent = '刪除中…';
+        deleteGalleryWork(work).then(function () { root.replaceChildren(); renderGallery(root); })
+          .catch(function (error) { remove.disabled = false; remove.dataset.armed = ''; remove.textContent = '刪除'; cancel.hidden = true; card.append(el('p', 'sf-status', error.message || '刪不掉，等一下再試。')); });
+      }, 'danger');
+      const cancel = button('取消', function () { remove.dataset.armed = ''; remove.textContent = '刪除'; cancel.hidden = true; });
+      cancel.hidden = true;
+      actions.append(remove, cancel);
+      card.append(actions);
     }
     const isOwn = work.kind === 'drawing' && work.character === 'tea';
     (isOwn ? own : grid).appendChild(card);

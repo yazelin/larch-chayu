@@ -226,3 +226,6 @@ li.sf-job .sf-wait{margin:4px 0 0}
 @keyframes sf-wait-pen{0%{translate:0 0;rotate:0deg}15%{translate:5px -2px;rotate:-8deg}30%{translate:10px 0;rotate:4deg}45%{translate:15px -2px;rotate:-8deg}60%{translate:20px 0;rotate:4deg}75%{translate:24px -1px;rotate:0deg}100%{translate:0 0;rotate:0deg}}
 @keyframes sf-wait-hop{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-4px);opacity:1}}
 @media(prefers-reduced-motion:reduce){.sf-wait-dots,.sf-wait-write{display:none}.sf-wait-still{display:inline}}
+
+/* 展廳作品的刪除列（兩段確認） */
+.sf-delete-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
