@@ -88,12 +88,43 @@ export function puzzleBadge(el, best) {
   return badge;
 }
 
-export async function readPuzzleBests(db) {
+// 拼圖紀錄的存法（2026-11-28 改，作者要看過的 CG 全部都留標記）：
+// v2 是一行字「2;」接每筆「縮寫 id|片數|毫秒(36 進位)」用分號隔開，排在越後面越新。
+// 一筆約 20～30 字；Larch 版存在 studioPuzzle0～7 共 8 格 × 1900 字（studio_storage.js），
+// 裝滿才從最舊的擠掉，393 張劇情 CG 加晨的畫都放得下。舊的 v1（JSON、最多 60 筆）照樣讀得到。
+export const PUZZLE_SAVE_CHARS = 8 * 1900 - 100;
+const ID_SHORT = [['cg:', 'c'], ['art:', 'a'], ['image:', 'i'], ['drawing:', 'd']];
+const shortId = id => { for (const [long, short] of ID_SHORT) if (id.startsWith(long)) return short + id.slice(long.length); return null; };
+const longId = id => { for (const [long, short] of ID_SHORT) if (id.startsWith(short)) return long + id.slice(short.length); return null; };
+
+export function encodePuzzleBests(rows) {
+  const parts = rows.map(([id, pieces, ms]) => shortId(id) && shortId(id) + '|' + pieces + '|' + Math.round(ms).toString(36)).filter(Boolean);
+  let text = '2;' + parts.join(';');
+  while (text.length > PUZZLE_SAVE_CHARS && parts.length) { parts.shift(); text = '2;' + parts.join(';'); }
+  return text;
+}
+
+export function decodePuzzleBests(text) {
+  const map = new Map();
+  if (typeof text !== 'string' || !text) return map;
+  if (text.startsWith('2;')) {
+    text.slice(2).split(';').forEach((part, order) => {
+      const [short, pieces, ms] = part.split('|');
+      const id = short && longId(short);
+      if (id && pieces && ms) map.set(id, [id, Number(pieces), parseInt(ms, 36), order]);
+    });
+    return map;
+  }
   try {
-    const saved = JSON.parse(await db.get(SAVE_KEY) || 'null');
-    if (saved?.v === 1 && Array.isArray(saved.best)) return new Map(saved.best.map(row => [row[0], row]));
-  } catch { /* 空白或無法讀取的紀錄 */ }
-  return new Map();
+    const saved = JSON.parse(text);
+    if (saved?.v === 1 && Array.isArray(saved.best)) [...saved.best].sort((a, b) => a[3] - b[3]).forEach(row => map.set(row[0], row));
+  } catch { /* 無法讀取的紀錄 */ }
+  return map;
+}
+
+export async function readPuzzleBests(db) {
+  try { return decodePuzzleBests(await db.get(SAVE_KEY)); }
+  catch { return new Map(); }
 }
 
 function shuffled(length) {
@@ -667,10 +698,10 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
     // 紀錄先比片數再比時間：拼過 36 片，之後拼 9 片再快也不會蓋掉 36 片（右下角標記顯示最多片數）
     if (!previous || finishedCount > previous[1] || (finishedCount === previous[1] && ms < previous[2])) {
       if (previous && done.isConnected) speak(say('done'), say('done_best'), say('again'));
+      saved.delete(finishedImage.id);   // 刪掉再加，這筆排到最後＝最新
       saved.set(finishedImage.id, [finishedImage.id, finishedCount, ms, at]);
       bests = saved;
-      const best = [...saved.values()].sort((a, b) => b[3] - a[3]).slice(0, 60);
-      try { await db.set(SAVE_KEY, JSON.stringify({ v: 1, best })); }
+      try { await db.set(SAVE_KEY, encodePuzzleBests([...saved.values()])); }
       catch { if (done.isConnected) done.append(el('p', 'sf-status', '暫時無法儲存最佳時間。')); }
     }
   }
