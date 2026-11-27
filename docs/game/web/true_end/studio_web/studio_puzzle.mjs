@@ -4,6 +4,77 @@ const SAVE_KEY = 'studioPuzzle';
 const PIECES = [9, 16, 25, 36];
 const AREAS = ['左上', '上面', '右上', '左邊', '中間', '右邊', '左下', '下面', '右下'];
 const say = (key, values) => group1Line('chen', key, values);
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const CELL_SIZE = 100;
+// The extra space fits the 22-unit tabs, stroke, and shadow.
+const PIECE_PADDING = 27;
+const PIECE_SIZE = CELL_SIZE + 2 * PIECE_PADDING;
+let clipId = 0;
+
+export function puzzleEdges(imageId, count) {
+  let seed = 2166136261;
+  for (const character of JSON.stringify([imageId, count])) {
+    seed = Math.imul(seed ^ character.codePointAt(0), 16777619);
+  }
+  function nextEdge() {
+    seed = (seed + 0x9e3779b9) | 0;
+    let value = Math.imul(seed ^ (seed >>> 16), 0x21f0aaad);
+    value = Math.imul(value ^ (value >>> 15), 0x735a2d97);
+    return (value ^ (value >>> 15)) < 0 ? -1 : 1;
+  }
+
+  const side = Math.sqrt(count);
+  const edges = [];
+  for (let index = 0; index < count; index++) {
+    const row = Math.floor(index / side);
+    const col = index % side;
+    const top = row === 0 ? 0 : -edges[index - side][2];
+    const right = col === side - 1 ? 0 : nextEdge();
+    const bottom = row === side - 1 ? 0 : nextEdge();
+    const left = col === 0 ? 0 : -edges[index - 1][1];
+    edges.push([top, right, bottom, left]);
+  }
+  return edges;
+}
+
+// The profile is symmetric along the edge, so reversing it and changing
+// its sign traces exactly the same cut from the neighboring cell.
+const TAB_CURVES = [
+  [[43, 0], [45, 2], [45, 5]],
+  [[45, 8], [38, 8], [38, 15]],
+  [[38, 19], [43, 22], [50, 22]],
+  [[57, 22], [62, 19], [62, 15]],
+  [[62, 8], [55, 8], [55, 5]],
+  [[55, 2], [57, 0], [64, 0]]
+];
+
+export function puzzlePiecePath(edges) {
+  const mapPoint = [
+    (along, out) => [along, -out],
+    (along, out) => [CELL_SIZE + out, along],
+    (along, out) => [CELL_SIZE - along, CELL_SIZE + out],
+    (along, out) => [-out, CELL_SIZE - along]
+  ];
+  const commands = edges.map((edge, side) => {
+    const point = (along, out) => mapPoint[side](along, out * edge).join(' ');
+    const end = 'L' + point(CELL_SIZE, 0);
+    if (!edge) return end;
+    const curves = TAB_CURVES.map(curve => 'C' + curve.map(([x, y]) => point(x, y)).join(' '));
+    return ['L' + point(36, 0), ...curves, end].join(' ');
+  });
+  return ['M0 0', ...commands, 'Z'].join(' ');
+}
+
+function svgElement(tag, attrs) {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const [name, value] of Object.entries(attrs)) node.setAttribute(name, value);
+  return node;
+}
+
+function pieceShape() {
+  const viewBox = [-PIECE_PADDING, -PIECE_PADDING, PIECE_SIZE, PIECE_SIZE].join(' ');
+  return svgElement('svg', { class: 'sf-puzzle-shape', viewBox, 'aria-hidden': 'true' });
+}
 
 export function puzzleTime(ms) {
   const seconds = Math.floor(ms / 1000);
@@ -46,6 +117,7 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
   let image;
   let count;
   let side;
+  let paths;
   let startedAt;
   let board;
   let tray;
@@ -56,6 +128,7 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
   let flash;
   let ghost;
   let scrollFrame;
+  let scrollTarget;
   let scrollDirection = 0;
   let ratio;
   let generation = 0;
@@ -140,12 +213,27 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
   }
 
   function decorate(tile, index) {
-    const wide = Math.max(1, ratio);
-    const tall = Math.max(1, 1 / ratio);
-    const position = (part, scale) => (side * (scale - 1) / 2 + part) / (side * scale - 1) * 100;
-    tile.style.backgroundImage = 'url(' + JSON.stringify(image.src) + ')';
-    tile.style.backgroundSize = (side * wide * 100) + '% ' + (side * tall * 100) + '%';
-    tile.style.backgroundPosition = position(index % side, wide) + '% ' + position(Math.floor(index / side), tall) + '%';
+    const shape = pieceShape();
+    const id = 'studio-puzzle-cut-' + ++clipId;
+    const clip = svgElement('clipPath', { id });
+    const path = paths[index];
+    clip.append(svgElement('path', { d: path }));
+    const square = side * CELL_SIZE;
+    const width = square * Math.max(1, ratio);
+    const height = square * Math.max(1, 1 / ratio);
+    const photo = svgElement('image', {
+      href: image.src,
+      x: (square - width) / 2 - (index % side) * CELL_SIZE,
+      y: (square - height) / 2 - Math.floor(index / side) * CELL_SIZE,
+      width, height,
+      preserveAspectRatio: 'none',
+      'clip-path': 'url(#' + id + ')'
+    });
+    const outline = svgElement('path', {
+      class: 'sf-puzzle-outline', d: path, 'vector-effect': 'non-scaling-stroke'
+    });
+    shape.append(clip, photo, outline);
+    tile.replaceChildren(shape);
   }
 
   function start(size, previousOrder) {
@@ -153,6 +241,7 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
     clearTimeout(flash);
     count = size;
     side = Math.sqrt(count);
+    paths = puzzleEdges(image.id, count).map(puzzlePiecePath);
     placed = new Set();
     keyboardPiece = null;
     order = shuffled(count);
@@ -179,6 +268,7 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
     const layout = el('div', 'sf-puzzle-layout');
     const trayColumns = Math.ceil(side * 1.5);
     layout.style.setProperty('--puzzle-side', side);
+    layout.style.setProperty('--puzzle-shape-scale', PIECE_SIZE + '%');
     layout.style.setProperty('--puzzle-tray-columns', trayColumns);
     layout.style.setProperty('--puzzle-tray-rows', Math.ceil(count / trayColumns));
     const boardWrap = el('div', 'sf-puzzle-board-wrap');
@@ -206,6 +296,11 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
       const spot = button('', () => { if (keyboardPiece) place(keyboardPiece, i); }, 'sf-puzzle-cell');
       spot.dataset.puzzleCell = i;
       spot.setAttribute('aria-label', '第 ' + (Math.floor(i / side) + 1) + ' 列，第 ' + (i % side + 1) + ' 格');
+      const guide = pieceShape();
+      guide.append(svgElement('path', {
+        class: 'sf-puzzle-guide', d: paths[i], 'vector-effect': 'non-scaling-stroke'
+      }));
+      spot.append(guide);
       board.append(spot);
     }
     for (const index of order) {
@@ -288,7 +383,7 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
     if (!drag || !root.isConnected) { stopDrag(); return; }
     const size = board.getBoundingClientRect().width / side;
     ghost = el('div', 'sf-puzzle-ghost');
-    ghost.style.setProperty('--piece-size', size + 'px');
+    ghost.style.setProperty('--piece-size', size * PIECE_SIZE / CELL_SIZE + 'px');
     decorate(ghost, Number(drag.piece.dataset.puzzlePiece));
     drag.piece.classList.add('held');
     document.body.append(ghost);
@@ -298,7 +393,11 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
   function move(event) {
     ghost.style.left = event.clientX + 'px';
     ghost.style.top = event.clientY + 'px';
-    const rect = scrollBox.getBoundingClientRect();
+    const trayRect = tray.getBoundingClientRect();
+    const overTray = event.clientX >= trayRect.left && event.clientX <= trayRect.right
+      && event.clientY >= trayRect.top && event.clientY <= trayRect.bottom;
+    scrollTarget = overTray && tray.scrollHeight > tray.clientHeight ? tray : scrollBox;
+    const rect = scrollTarget.getBoundingClientRect();
     scrollDirection = event.clientY < rect.top + 24 ? -1 : event.clientY > rect.bottom - 24 ? 1 : 0;
     if (scrollDirection && !scrollFrame) scrollFrame = requestAnimationFrame(scrollDuringDrag);
   }
@@ -306,15 +405,16 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
   function scrollDuringDrag() {
     scrollFrame = null;
     if (!ghost || !scrollDirection) return;
-    const before = scrollBox.scrollTop;
-    scrollBox.scrollTop += scrollDirection * 7;
-    if (scrollBox.scrollTop !== before) scrollFrame = requestAnimationFrame(scrollDuringDrag);
+    const before = scrollTarget.scrollTop;
+    scrollTarget.scrollTop += scrollDirection * 7;
+    if (scrollTarget.scrollTop !== before) scrollFrame = requestAnimationFrame(scrollDuringDrag);
   }
 
   function stopDrag() {
     clearTimeout(drag?.timer);
     cancelAnimationFrame(scrollFrame);
     scrollFrame = null;
+    scrollTarget = null;
     scrollDirection = 0;
     drag?.piece.classList.remove('held');
     ghost?.remove();

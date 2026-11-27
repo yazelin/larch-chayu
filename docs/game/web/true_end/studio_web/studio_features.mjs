@@ -1603,7 +1603,8 @@ function openChenPuzzle(id) {
 async function unlockedPuzzleCGs() {
   const { STUDIO_PUZZLE_CGS } = await import('./studio_puzzle_cgs.mjs');
   const seen = decodeHudSeen(larchVariables.hudSeen ?? query.get('hudSeen'), HUD_SEEN_KEYS)?.keys;
-  return STUDIO_PUZZLE_CGS.filter(([id]) => seen?.has(id))
+  const all = query.get('unlock') === 'all';   // 預覽頁用：全部 CG 都能拼
+  return STUDIO_PUZZLE_CGS.filter(([id]) => all || seen?.has(id))
     .map(([id, title, src]) => ({ id: 'cg:' + id, title: title || id, src }));
 }
 

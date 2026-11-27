@@ -139,7 +139,9 @@
   width: 100%;
   aspect-ratio: 1;
   grid-template-rows: repeat(var(--puzzle-side), minmax(0, 1fr));
-  background: #e9dbc7;
+  isolation: isolate;
+  overflow: clip;
+  background: #f6ecde;
   box-shadow: 0 0 0 1px #caaf90;
 }
 .sf-puzzle-tray {
@@ -158,6 +160,7 @@
 #panel[data-design="puzzle-play"] .sf-puzzle-cell.sf-button,
 #panel[data-design="puzzle-play"] .sf-puzzle-piece.sf-button, .sf-puzzle-ghost {
   display: block;
+  position: relative;
   aspect-ratio: 1;
   min-width: 0;
   min-height: 0;
@@ -165,22 +168,54 @@
   margin: 0;
   border-radius: 0;
   border: 0;
-  background-repeat: no-repeat;
+  background: transparent;
 }
-#panel[data-design="puzzle-play"] .sf-puzzle-cell.sf-button { box-shadow: inset 0 0 0 1px #cbb599; background-color: #f6ecde; }
-#panel[data-design="puzzle-play"] .sf-puzzle-cell.hint {
-  box-shadow: inset 0 0 0 3px #96621e;
-  background-color: #ffdc8b;
+#panel[data-design="puzzle-play"] .sf-puzzle-cell.placed {
+  z-index: 1;
+  opacity: 1;
+  cursor: default;
 }
-#panel[data-design="puzzle-play"] .sf-puzzle-cell.placed { opacity: 1; cursor: default; box-shadow: none; }
+.sf-puzzle-cell:focus-visible { outline-offset: -2px; }
+.sf-puzzle-cell.hint { z-index: 2; }
+.sf-puzzle-guide { fill: none; stroke: #cbb599; stroke-width: 1px; }
+.sf-puzzle-cell.hint .sf-puzzle-guide { fill: #ffdc8b; stroke: #96621e; stroke-width: 2px; }
 #panel[data-design="puzzle-play"] .sf-puzzle-piece.sf-button {
   cursor: grab;
   touch-action: pan-y;
   user-select: none;
-  box-shadow: 0 1px 2px #4e362f66;
+  box-shadow: none;
   -webkit-touch-callout: none;
 }
-.sf-puzzle-piece[aria-pressed="true"] { outline: 2px solid #935b36; outline-offset: 1px; }
+.sf-puzzle-shape {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.sf-puzzle-cell .sf-puzzle-shape {
+  width: var(--puzzle-shape-scale);
+  height: var(--puzzle-shape-scale);
+}
+:is(.sf-puzzle-piece, .sf-puzzle-ghost) .sf-puzzle-shape {
+  filter: drop-shadow(0 1px 1.5px #4e362f66);
+}
+.sf-puzzle-cell.placed .sf-puzzle-shape {
+  filter: drop-shadow(0 1px 1px #4e362f38);
+}
+.sf-puzzle-outline {
+  fill: none;
+  stroke: #402b22;
+  stroke-width: 1px;
+  stroke-linejoin: round;
+}
+.sf-puzzle-cell .sf-puzzle-outline { stroke: #402b2280; }
+.sf-puzzle-piece[aria-pressed="true"] .sf-puzzle-outline {
+  stroke: #ffe4a7;
+  stroke-width: 2px;
+}
 .sf-puzzle-piece.held { opacity: .25; }
 .sf-puzzle-original {
   position: absolute;
@@ -196,7 +231,6 @@
   z-index: 300;
   width: var(--piece-size);
   transform: translate(-50%, -50%);
-  box-shadow: 0 4px 12px #271b1566;
   pointer-events: none;
 }
 .sf-puzzle-best { display: block; margin: 6px 0; color: #575c2a; }
