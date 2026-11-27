@@ -2,14 +2,14 @@
   "version": 1,
   "pagesBase": "https://yazelin.github.io/larch-chayu/game/",
   "totalFiles": 941,
-  "totalBytes": 92521239,
+  "totalBytes": 92525728,
   "bytesByCategory": {
     "bgm": 25662250,
     "cg": 3081222,
     "img": 203466,
     "minigames": 11052296,
     "mv": 15206418,
-    "web": 37315587
+    "web": 37320076
   },
   "largestFile": {
     "file": "mv/media/boring_v2.mp3",
@@ -6184,8 +6184,8 @@
     {
       "file": "web/true_end/studio_web/studio_features.mjs",
       "category": "web",
-      "bytes": 198741,
-      "sha256": "2d867f53413663ab59992c6eea5adb5067d37b638ded62b3fab0fce6b8d21851",
+      "bytes": 198867,
+      "sha256": "f8b111d63350918a4cbab0da90158c2d17631626aee53e78273aac3c59104d6e",
       "source": "真結局/studio_web/studio_features.mjs"
     },
     {
@@ -6198,8 +6198,8 @@
     {
       "file": "web/true_end/studio_web/studio_group1.css",
       "category": "web",
-      "bytes": 8242,
-      "sha256": "93030f7f6023ce83f317fe2d7cecac79d814f0920b336b83efe14879b5882071",
+      "bytes": 9568,
+      "sha256": "1e0612fc10d9fc31a494ef1f04800cf4d3c69ce5a6737e676939fc9fc471c278",
       "source": "真結局/studio_web/studio_group1.css"
     },
     {
@@ -6219,8 +6219,8 @@
     {
       "file": "web/true_end/studio_web/studio_lines_group1.mjs",
       "category": "web",
-      "bytes": 942,
-      "sha256": "bebeb227df41f51586d6d875ac041008bb9ea6a1683158af32d35d59df46c366",
+      "bytes": 1003,
+      "sha256": "c21566f04baa709b842339c185357c19c06e546b782b277f15c34a1e301c0013",
       "source": "真結局/studio_web/studio_lines_group1.mjs"
     },
     {
@@ -6275,8 +6275,8 @@
     {
       "file": "web/true_end/studio_web/studio_puzzle.mjs",
       "category": "web",
-      "bytes": 23183,
-      "sha256": "1a8603ae1334c853645df339b2bf73fba5d53cab3ae8ccc60061203af51ae596",
+      "bytes": 26159,
+      "sha256": "5f1702436089f7b38c438042bd59a1a34bcbff9befa4abe4f12cc7bcf75a4abe",
       "source": "真結局/studio_web/studio_puzzle.mjs"
     },
     {

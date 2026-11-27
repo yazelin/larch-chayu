@@ -81,6 +81,13 @@ export function puzzleTime(ms) {
   return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
 }
 
+// 拼好的標記：圖的右下角寫「36 片」，滑鼠移上去看最佳時間
+export function puzzleBadge(el, best) {
+  const badge = el('span', 'sf-puzzle-badge', best[1] + ' 片');
+  badge.title = '拼好了・' + best[1] + ' 片最快 ' + puzzleTime(best[2]);
+  return badge;
+}
+
 export async function readPuzzleBests(db) {
   try {
     const saved = JSON.parse(await db.get(SAVE_KEY) || 'null');
@@ -134,7 +141,7 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
   let order;
   let drag;
   let flash;
-  let hintedTile;
+  let hintedTiles = [];
   let layerOrder;
   let solved;
   let rotationEnabled = true;
@@ -144,6 +151,9 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
   function speak(...lines) {
     speech.replaceChildren(...lines.map(line => el('p', '', line)));
   }
+
+  let bests = new Map();
+  readPuzzleBests(db).then(map => { bests = map; if (!image) pickImage(); });
 
   function pickImage(line = 'pick_image') {
     generation++;
@@ -162,7 +172,11 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
         photo.src = item.src;
         photo.loading = 'lazy';
         photo.alt = '';
-        card.append(photo, el('span', '', item.title));
+        const thumb = el('span', 'sf-puzzle-thumb');
+        thumb.append(photo);
+        const best = bests.get(item.id);
+        if (best) thumb.append(puzzleBadge(el, best));
+        card.append(thumb, el('span', '', item.title));
         grid.append(card);
       }
       group.append(grid);
@@ -546,32 +560,72 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
       other = nearestNeighbor(group);
     }
     renderPose(group);
+    restack();
     if (groups.size === 1 && group.turn === 0) finish();
+  }
+
+  // 疊層（作者 2026-11-27）：已經合進外框的放最下層，接好的組在中間，散的單片在最上層，
+  // 小片才不會被大塊擋住找不到。同一層裡維持原本的先後。
+  function restack() {
+    const { frameX, frameY } = table;
+    const tier = group => group.turn === 0 && Math.abs(group.x - frameX) < 0.5 && Math.abs(group.y - frameY) < 0.5
+      ? 0 : group.members.length > 1 ? 1 : 2;
+    const sorted = [...groups].sort((a, b) => tier(a) - tier(b) || (Number(a.node.style.zIndex) || 0) - (Number(b.node.style.zIndex) || 0));
+    sorted.forEach((group, i) => { group.node.style.zIndex = i + 1; });
+    layerOrder = sorted.length;
   }
 
   function hideHint() {
     clearTimeout(flash);
-    hintedTile?.piece.classList.remove('hint');
+    for (const { piece } of hintedTiles) piece.classList.remove('hint');
+    hintedTiles = [];
     if (guide) guide.hidden = true;
   }
 
   function showHint() {
     hideHint();
-    const group = [...groups].sort((a, b) => b.members.length - a.members.length)[0];
-    const anchor = group.members.find(tile => tile.neighbors.some(index => tiles[index].group !== group));
-    const tile = anchor ? tiles[anchor.neighbors.find(index => tiles[index].group !== group)] : group.members[0];
-    const turn = anchor ? group.turn : 0;
-    const offset = tileOffset(tile, turn);
-    const x = (anchor ? group.x : table.frameX) + offset.x;
-    const y = (anchor ? group.y : table.frameY) + offset.y;
+    const { cell, width, height, frameX, frameY } = table;
+    // 目標位置要整片都在桌面內才指給玩家看，不然放不上去（2026-11-27 實測：指到桌面右緣外）
+    const inside = (x, y) => x >= cell * 0.75 && y >= cell * 0.75 && x <= width - cell * 0.75 && y <= height - cell * 0.75;
+    let pick;
+    const bySize = [...groups].sort((a, b) => b.members.length - a.members.length);
+    for (const group of bySize) {
+      for (const anchor of group.members) {
+        for (const index of anchor.neighbors) {
+          const tile = tiles[index];
+          if (tile.group === group) continue;
+          const offset = tileOffset(tile, group.turn);
+          // 要接上去的是那片所在的整組，整組放到位都要在桌面內
+          const room = limits({ members: tile.group.members, turn: group.turn });
+          const fits = group.x >= room.left && group.x <= room.right && group.y >= room.top && group.y <= room.bottom;
+          if (fits && inside(group.x + offset.x, group.y + offset.y)) { pick = { tile, turn: group.turn, x: group.x + offset.x, y: group.y + offset.y }; break; }
+        }
+        if (pick) break;
+      }
+      if (pick) break;
+    }
+    if (!pick && bySize.length > 1) {
+      // 每個可接的位置都在桌面外：把最大那塊閃一下，請玩家先拖回中間
+      hintedTiles = bySize[0].members;
+      bySize[0].node.style.zIndex = ++layerOrder;
+      for (const { piece } of hintedTiles) { piece.classList.remove('hint'); void piece.offsetWidth; piece.classList.add('hint'); }
+      flash = setTimeout(hideHint, 3500);
+      speak(say('hint_move'));
+      return;
+    }
+    if (!pick) return;
+    const { tile, turn, x, y } = pick;
     guide.style.transform = `translate(${x}px, ${y}px) rotate(${turn * 90}deg)`;
     guide.firstElementChild.replaceChildren(svgElement('path', {
       d: paths[tile.index], 'vector-effect': 'non-scaling-stroke'
     }));
-    hintedTile = tile;
+    hintedTiles = [tile];
+    tile.group.node.style.zIndex = ++layerOrder;   // 提示的那片放最上層，不被別片蓋住
+    tile.piece.classList.remove('hint');
+    void tile.piece.offsetWidth;                  // 連按提示時動畫重播
     tile.piece.classList.add('hint');
     guide.hidden = false;
-    flash = setTimeout(hideHint, 850);
+    flash = setTimeout(hideHint, 3500);
     const col = Math.floor((tile.col + 0.5) * 3 / side);
     const row = Math.floor((tile.row + 0.5) * 3 / side);
     speak(say('hint', { area: AREAS[row * 3 + col] }));
@@ -608,12 +662,14 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
     content.firstElementChild.replaceWith(done);
     speak(say('done'), say('again'));
     newImage.focus();
-    const bests = await readPuzzleBests(db);
-    const previous = bests.get(finishedImage.id);
-    if (!previous || ms < previous[2]) {
+    const saved = await readPuzzleBests(db);
+    const previous = saved.get(finishedImage.id);
+    // 紀錄先比片數再比時間：拼過 36 片，之後拼 9 片再快也不會蓋掉 36 片（右下角標記顯示最多片數）
+    if (!previous || finishedCount > previous[1] || (finishedCount === previous[1] && ms < previous[2])) {
       if (previous && done.isConnected) speak(say('done'), say('done_best'), say('again'));
-      bests.set(finishedImage.id, [finishedImage.id, finishedCount, ms, at]);
-      const best = [...bests.values()].sort((a, b) => b[3] - a[3]).slice(0, 60);
+      saved.set(finishedImage.id, [finishedImage.id, finishedCount, ms, at]);
+      bests = saved;
+      const best = [...saved.values()].sort((a, b) => b[3] - a[3]).slice(0, 60);
       try { await db.set(SAVE_KEY, JSON.stringify({ v: 1, best })); }
       catch { if (done.isConnected) done.append(el('p', 'sf-status', '暫時無法儲存最佳時間。')); }
     }

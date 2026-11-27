@@ -15,6 +15,7 @@ export const GROUP1_LINES = {
     pick_pieces: '幾片？妳選。',
     start: '慢慢拼。',
     hint: '這片在{area}。',
+    hint_move: '這一塊太靠邊了。先拖回中間。',
     done: '拼好了。',
     done_best: '比上次快。',
     give_up: '放著吧，下次再拼。',

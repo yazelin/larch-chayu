@@ -196,20 +196,43 @@
 }
 .sf-puzzle-board.held .sf-puzzle-outline { cursor: grabbing; }
 .sf-puzzle-group:has(button + button) .sf-puzzle-outline { stroke: #402b2280; }
-.sf-puzzle-piece:is(.hint, :focus-visible) .sf-puzzle-outline {
+.sf-puzzle-piece:focus-visible .sf-puzzle-outline {
   stroke: #ffdd90;
   stroke-width: 2px;
+}
+/* 提示：那片放大縮小兩下，加粗黃框；目標位置的框也加粗並閃動（作者 2026-11-27：原本太不明顯） */
+.sf-puzzle-piece.hint .sf-puzzle-outline {
+  stroke: #ffc63d;
+  stroke-width: 5px;
+}
+.sf-puzzle-piece.hint .sf-puzzle-shape {
+  filter: drop-shadow(0 0 6px #ffb800) drop-shadow(0 2px 4px #4e362f80);
+  animation: sf-puzzle-hint-pop 0.55s ease-in-out 2;
+}
+@keyframes sf-puzzle-hint-pop {
+  0%, 100% { scale: 1; }
+  45% { scale: 1.28; }
 }
 .sf-puzzle-hint {
   position: absolute;
   top: 0;
   left: 0;
   pointer-events: none;
+  z-index: 1000000;   /* 目標位置的框不能被碎片蓋住 */
 }
 .sf-puzzle-hint path {
-  fill: #ffdc8b66;
-  stroke: #96621e;
-  stroke-width: 2px;
+  fill: #ffdc8b88;
+  stroke: #e09a12;
+  stroke-width: 5px;
+  stroke-dasharray: 10 6;
+  animation: sf-puzzle-hint-glow 0.9s ease-in-out infinite alternate;
+}
+@keyframes sf-puzzle-hint-glow {
+  from { fill: #ffdc8b44; }
+  to { fill: #ffdc8bcc; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sf-puzzle-piece.hint .sf-puzzle-shape, .sf-puzzle-hint path { animation: none; }
 }
 .sf-puzzle-original {
   position: absolute;
@@ -282,3 +305,22 @@ body > .sf-night-notice {
   #panel .ming-group1 .ming-window-content .sf-focus-clock { font-size: 54px !important; }
   .ming-group1 .sf-focus .sf-button { min-height: 44px; }
 }
+
+/* 拼好的標記：圖的右下角（作者 2026-11-27） */
+.sf-puzzle-badged { position: relative; }
+.sf-puzzle-badge {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #5b6b2ee6;
+  color: #fffbea;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.5;
+  box-shadow: 0 1px 3px #0000004d;
+  pointer-events: none;
+}
+.sf-puzzle-thumb { position: relative; display: block; }
+.sf-puzzle-thumb img { display: block; }

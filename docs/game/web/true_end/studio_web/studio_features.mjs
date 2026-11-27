@@ -1,7 +1,7 @@
 import { TODO_ITEMS } from './studio_points2_data.mjs';
 import { CHEN_ART, SKY_DIARY } from './studio_collection_data.mjs';
 import { createFocus } from './studio_focus.mjs';
-import { puzzleTime, readPuzzleBests, renderPuzzle } from './studio_puzzle.mjs';
+import { puzzleBadge, puzzleTime, readPuzzleBests, renderPuzzle } from './studio_puzzle.mjs';
 import { decodeHudSeen } from './hud_seen.mjs';
 import { HUD_SEEN_KEYS } from './hud_seen_keys.mjs';
 import { preparePanel } from './studio_panel.mjs';
@@ -1669,7 +1669,11 @@ async function renderGallery(root) {
       const id = puzzleImageId(work);
       if (id) {
         const best = bests.get(id);
-        if (best) card.append(el('small', 'sf-puzzle-best', '已拼好・最佳 ' + puzzleTime(best[2]) + '（' + best[1] + ' 片）'));
+        if (best) {
+          trigger.classList.add('sf-puzzle-badged');
+          trigger.append(puzzleBadge(el, best));
+          card.append(el('small', 'sf-puzzle-best', '已拼好・' + best[1] + ' 片最快 ' + puzzleTime(best[2])));
+        }
         card.append(button('拼成拼圖', () => openChenPuzzle(id)));
       }
     }
