@@ -1165,3 +1165,8 @@ body:has(#panel.on:is([data-design="piano"], [data-design="guitar"])) > :is(#scr
 @media (orientation: landscape) and (max-height: 460px) and (pointer: coarse) {
   #panel-body:has(> .sp-band) .sp-piano-keyboard-hint { display: none; }
 }
+
+/* 調查模式會把「繼續」移進面板（studio_embed.mjs），上面那條「樂器全版時藏起繼續」只管 body 底下的，沒套到面板裡的；
+   電子琴、吉他全版時「繼續」固定在右下會蓋住琴鍵（2026-11-27 Larch 實測：新版電子琴 1280×720 蓋 22px，手機橫直式蓋 4 個鍵）。
+   照原本的設計一樣藏起來，按「返回」離開樂器後再出現。放標題列不行：手機上 Larch 的好感 HUD 在上方中間。 */
+#panel.on:is([data-design="piano"], [data-design="guitar"]) > .studio-embed-continue { visibility: hidden; }
