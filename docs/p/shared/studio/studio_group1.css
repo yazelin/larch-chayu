@@ -1,0 +1,529 @@
+.sf-group1-dialogue {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  color: #44342c;
+}
+.sf-group1-dialogue[hidden] { display: none; }
+.sf-group1-dialogue img {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 50%;
+  background: #f0e4d5;
+}
+#panel-body .sf-group1-dialogue p, #panel-body .sf-night-notice p, .sf-night-notice p { margin: 0; }
+.sf-group1-dialogue > div:empty { display: none; }
+.sf-focus {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: clamp(8px, 2vh, 22px) 8px;
+  color: #263b60;
+}
+#panel-body .sf-focus-stats { margin: 0; }
+#panel .ming-window-content .sf-focus-clock {
+  font-size: clamp(48px, 8vw, 76px) !important;
+  line-height: 1;
+  font-weight: 650;
+  letter-spacing: -.055em;
+  font-variant-numeric: tabular-nums;
+}
+.sf-focus-choice, .sf-focus-actions, .sf-puzzle-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sf-focus-choice select { width: auto; }
+.sf-focus .primary { background: #405787; border-color: #405787; }
+.sf-focus .sf-status:empty, .sf-focus-skip[hidden] { display: none; }
+.sf-focus-toggle { min-width: 90px; }
+.sf-focus-history {
+  border-top: 1px solid #dddbe5;
+  padding-top: 8px;
+}
+.sf-focus-history h3 { margin: 0 0 4px; }
+.sf-focus-history ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 2px 10px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+.sf-night-notice {
+  position: absolute;
+  z-index: 90;   /* 要在「工作室的 AI 功能」說明框（80）之上，第一次進來才看得到（2026-11-28 作者沒看到提醒） */
+  top: 34px;
+  right: 12px;
+  max-width: calc(100% - 24px);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: #faf8ff;
+  color: #273752;
+  border: 1px solid #ded8ed;
+  border-radius: 12px;
+  box-shadow: 0 4px 18px #24213742;
+}
+.sf-night-notice .sf-group1-dialogue { min-width: 0; color: inherit; }
+.sf-night-notice .sf-button { flex: none; }
+@media (max-width: 600px), (orientation: portrait) {
+  .sf-night-notice { top: 50px; }
+}
+
+.sf-puzzle { min-width: 0; }
+.sf-puzzle .sf-group1-dialogue { margin-bottom: 8px; }
+.sf-puzzle-images h3, .sf-puzzle-content h3 { margin: 5px 0; overflow-wrap: anywhere; }
+.sf-puzzle-images + .sf-puzzle-images { margin-top: 14px; }
+.sf-puzzle-images .sf-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 120px), 1fr)); }
+.sf-puzzle-source {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 6px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  border-radius: 10px;
+}
+.sf-puzzle-source img {
+  width: 100%;
+  aspect-ratio: 1.45;
+  object-fit: cover;
+  background: #eee2d3;
+  border-radius: 5px;
+}
+.sf-puzzle-tools { justify-content: center; margin-bottom: 8px; }
+.sf-puzzle-tools .sf-button { white-space: normal; }
+.sf-puzzle-rotation {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.sf-puzzle-rotation input { accent-color: #895c39; }
+.sf-puzzle-peek { touch-action: none; user-select: none; }
+#panel[data-design="puzzle-play"] #panel-body > :is(.sf-context, .sf-tabs) { display: none; }
+#panel[data-design="puzzle-play"] #panel-body > .sf-stack,
+#panel[data-design="puzzle-play"] #panel-body > .sf-stack > div { height: 100%; }
+#panel[data-design="puzzle-play"] .sf-puzzle {
+  min-height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px 16px;
+}
+#panel[data-design="puzzle-play"] .sf-puzzle:has(.sf-puzzle-board) { height: 100%; }
+#panel[data-design="puzzle-play"] .sf-puzzle-content { display: contents; }
+#panel[data-design="puzzle-play"] .sf-group1-dialogue,
+#panel[data-design="puzzle-play"] .sf-puzzle-tools { margin: 0; }
+.sf-puzzle-board {
+  position: relative;
+  grid-column: 1 / -1;
+  align-self: stretch;
+  overflow: clip;
+  isolation: isolate;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  background: radial-gradient(ellipse at 48% 36%, #f4ebdf, #e7d7c2);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px #b6957680, inset 0 2px 9px #6b4b3014;
+}
+.sf-puzzle-frame {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px dashed #88613d65;
+  background: #fff9ef26;
+  pointer-events: none;
+}
+.sf-puzzle-pieces {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+}
+.sf-puzzle-group {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+#panel[data-design="puzzle-play"] .sf-puzzle-piece.sf-button {
+  position: absolute;
+  left: calc(var(--col) * var(--puzzle-unit));
+  top: calc(var(--row) * var(--puzzle-unit));
+  width: var(--puzzle-unit);
+  max-width: none;
+  height: var(--puzzle-unit);
+  transform: translate(-50%, -50%);
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+.sf-puzzle-piece.sf-button:disabled { opacity: 1; }
+.sf-puzzle-shape {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--puzzle-unit) * var(--puzzle-shape-scale));
+  height: calc(var(--puzzle-unit) * var(--puzzle-shape-scale));
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.sf-puzzle-piece .sf-puzzle-shape {
+  filter: drop-shadow(0 1px 1.5px #4e362f66);
+}
+.sf-puzzle-outline {
+  fill: none;
+  stroke: #402b22;
+  stroke-width: 1px;
+  stroke-linejoin: round;
+}
+.sf-puzzle-piece:not(:disabled) .sf-puzzle-outline {
+  pointer-events: fill;
+  cursor: grab;
+}
+.sf-puzzle-board.held .sf-puzzle-outline { cursor: grabbing; }
+.sf-puzzle-group:has(button + button) .sf-puzzle-outline { stroke: #402b2280; }
+.sf-puzzle-piece:focus-visible .sf-puzzle-outline {
+  stroke: #ffdd90;
+  stroke-width: 2px;
+}
+/* 提示：那片放大縮小兩下，加粗黃框；目標位置的框也加粗並閃動（作者 2026-11-27：原本太不明顯） */
+.sf-puzzle-piece.hint .sf-puzzle-outline {
+  stroke: #ffc63d;
+  stroke-width: 5px;
+}
+.sf-puzzle-piece.hint .sf-puzzle-shape {
+  filter: drop-shadow(0 0 6px #ffb800) drop-shadow(0 2px 4px #4e362f80);
+  animation: sf-puzzle-hint-pop 0.55s ease-in-out 2;
+}
+@keyframes sf-puzzle-hint-pop {
+  0%, 100% { scale: 1; }
+  45% { scale: 1.28; }
+}
+.sf-puzzle-hint {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 1000000;   /* 目標位置的框不能被碎片蓋住 */
+}
+.sf-puzzle-hint path {
+  fill: #ffdc8b88;
+  stroke: #e09a12;
+  stroke-width: 5px;
+  stroke-dasharray: 10 6;
+  animation: sf-puzzle-hint-glow 0.9s ease-in-out infinite alternate;
+}
+@keyframes sf-puzzle-hint-glow {
+  from { fill: #ffdc8b44; }
+  to { fill: #ffdc8bcc; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sf-puzzle-piece.hint .sf-puzzle-shape, .sf-puzzle-hint path { animation: none; }
+}
+.sf-puzzle-original {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #42392f;
+  pointer-events: none;
+}
+.sf-puzzle-best { display: block; margin: 6px 0; color: #575c2a; }
+
+body > .sf-night-notice {
+  position: fixed;
+  z-index: 90;   /* 原本 20，被面板（21）和說明框（80）蓋住，作者看不到 */
+  top: max(var(--hud-clear, 0px), 14px);
+}
+@media (max-width: 680px) and (orientation: portrait) {
+  #panel[data-design="puzzle-play"] .sf-puzzle {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+}
+@media (orientation: landscape) and (max-height: 450px) {
+  #panel[data-design="puzzle-play"]:not(.ming-os-panel) .panel-head {
+    min-height: 0;
+    padding-block: 5px;
+  }
+  #panel[data-design="puzzle-play"]:not(.ming-os-panel) #panel-body { padding-block: 6px; }
+}
+
+@media (min-width: 601px) and (orientation: landscape) {
+  .ming-group1 .ming-os-stage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(var(--ming-scale, 1));
+  }
+}
+@media (min-width: 601px) and (orientation: landscape) and (max-height: 450px) {
+  .ming-group1 .ming-os-stage,
+  .ming-group1 .imac,
+  .ming-group1 .imac-bezel,
+  .ming-group1 .imac-screen,
+  .ming-group1 .imac-screen > .mac {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    transform: none;
+  }
+  .ming-group1 :is(.imac-room, .imac-cam, .imac-neck, .imac-chin) { display: none; }
+  .ming-group1 .ming-window-layer { inset: 44px 0 66px; }
+  .ming-group1 [data-ming-window="focus"]:not(.zoomed) {
+    left: max(12px, calc(50% - 220px)) !important;
+    top: 8px !important;
+    width: min(440px, calc(100% - 24px)) !important;
+    height: calc(100% - 16px) !important;
+  }
+  .ming-group1 [data-ming-window="focus"] .ming-window-content { padding: 8px 10px; }
+  .ming-group1 .sf-focus {
+    grid-template-columns: auto auto;
+    justify-content: center;
+    padding-block: 2px;
+    gap: 8px 12px;
+  }
+  .ming-group1 .sf-focus > :is(.sf-focus-stats, .sf-focus-clock, .sf-group1-dialogue, .sf-status) { grid-column: 1 / -1; }
+  #panel .ming-group1 .ming-window-content .sf-focus-clock { font-size: 54px !important; }
+  .ming-group1 .sf-focus .sf-button { min-height: 44px; }
+}
+
+/* 拼好的標記：圖的右下角（作者 2026-11-27） */
+.sf-puzzle-badged { position: relative; }
+.sf-puzzle-badge {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #5b6b2ee6;
+  color: #fffbea;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.5;
+  box-shadow: 0 1px 3px #0000004d;
+  pointer-events: none;
+}
+.sf-puzzle-thumb { position: relative; display: block; }
+.sf-puzzle-thumb img { display: block; }
+
+/* 晨的著色本 */
+.sf-coloring {
+  --coloring-green: #58632d;
+  --coloring-edge: #cbb697;
+  --coloring-paper: #fffdf6;
+  color: #3f3025;
+}
+.sf-coloring .sf-coloring-dialogue { margin: 0 0 12px; }
+.sf-coloring-content h2 { display: inline-block; margin: 0 10px 8px 0; font-size: 18px; }
+.sf-coloring-fixture { color: #725945; }
+.sf-coloring-picks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 185px), 1fr));
+  gap: 10px;
+}
+.sf-coloring-picks .sf-coloring-card {
+  padding: 6px;
+  display: grid;
+  gap: 5px;
+  text-align: left;
+  background: #f6eddf;
+  border-radius: 9px;
+  white-space: normal;
+}
+.sf-coloring-card :is(img, canvas) {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: contain;
+  background: var(--coloring-paper);
+  border-radius: 4px;
+}
+.sf-coloring-card span { padding: 3px 6px; }
+.sf-coloring-gallery { margin-top: 14px; }
+.sf-coloring-picks .sf-empty { grid-column: 1 / -1; }
+#panel[data-design="coloring-play"]:not(.ming-os-panel) .panel-head {
+  display: flex;
+  min-height: 0;
+  padding: 4px clamp(12px, 22vw, 260px) 4px 12px;
+}
+#panel[data-design="coloring-play"]:not(.ming-os-panel) #panel-body {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: 10px 12px max(12px, env(safe-area-inset-bottom));
+}
+#panel[data-design="coloring-play"] #panel-body > :is(.sf-context, .sf-tabs) { display: none; }
+#panel[data-design="coloring-play"] #panel-body > .sf-stack { display: block; }
+#panel[data-design="coloring-play"] :is(#panel-body > .sf-stack, #panel-body > .sf-stack > div) { height: 100%; }
+#panel[data-design="coloring-play"] .sf-coloring {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+#panel[data-design="coloring-play"] .sf-coloring-dialogue { margin-bottom: 6px; }
+.sf-coloring-editor {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 270px;
+  gap: 10px;
+}
+.sf-coloring-workspace {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 6px;
+}
+.sf-coloring-zoom, .sf-coloring-row, .sf-coloring-tray .sf-draw-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.sf-coloring-name {
+  margin-right: auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sf-coloring-zoom output { min-width: 42px; text-align: center; font-variant-numeric: tabular-nums; }
+.sf-coloring-editor :is(.sf-coloring-zoom, .sf-coloring-tray, .sf-coloring-dialog) .sf-button {
+  min-height: 36px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+.sf-coloring-viewport {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  background: #e4d6c3;
+  box-shadow: inset 0 0 10px #775b3e27;
+  border-radius: 6px;
+  cursor: crosshair;
+}
+.sf-coloring-sheet {
+  position: absolute;
+  background: var(--coloring-paper);
+  box-shadow: 0 1px 6px #6241243d;
+  pointer-events: none;
+}
+.sf-coloring-sheet canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.sf-coloring-tray {
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--coloring-edge);
+  border-radius: 8px;
+  background: #f6eddf;
+  padding: 8px;
+}
+.sf-coloring-controls > * + * { margin-top: 7px; }
+.sf-coloring-palette {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px;
+}
+#panel .sf-coloring-tray .sf-coloring-swatch, .sf-coloring-sample {
+  display: block;
+  min-width: 0;
+  border: 1px solid #8c765e;
+  border-radius: 5px;
+  background: var(--paint);
+}
+#panel .sf-coloring-tray .sf-coloring-swatch:hover { background: var(--paint); filter: brightness(.9); }
+.sf-coloring-tray .sf-coloring-swatch[aria-pressed="true"] {
+  outline: 2px solid var(--coloring-green);
+  outline-offset: -3px;
+  box-shadow: inset 0 0 0 4px var(--coloring-paper);
+}
+.sf-coloring-row .sf-button[aria-pressed="true"] { color: #fffdf6; background: var(--coloring-green); border-color: var(--coloring-green); }
+.sf-coloring-recent { display: flex; gap: 3px; align-items: center; min-height: 30px; }
+.sf-coloring-recent span { margin-right: 4px; font-size: 13px; flex: none; }
+#panel .sf-coloring-tray .sf-coloring-recent .sf-button { width: 30px; min-width: 0; min-height: 30px; padding: 0; }
+.sf-coloring-settings { position: relative; display: grid; gap: 2px; }
+.sf-coloring-now { display: flex; align-items: center; gap: 8px; }
+.sf-coloring-sample { width: 48px; height: 24px; }
+.sf-coloring-slider {
+  min-height: 28px;
+  display: grid;
+  grid-template-columns: 4.6em minmax(42px, 1fr) 4.1em;
+  align-items: center;
+  font-size: 13px;
+  gap: 4px;
+}
+.sf-coloring-slider input { min-width: 0; width: 100%; margin: 0; accent-color: var(--coloring-green); }
+.sf-coloring-slider output { text-align: left; font-variant-numeric: tabular-nums; }
+.sf-coloring-save { color: #725945; font-size: 12px; }
+.sf-coloring-tray .sf-draw-actions { display: flex; flex-wrap: wrap; margin-top: 7px; }
+.sf-coloring-tray :is(.sf-draw-left, .sf-status) { font-size: 12px; }
+.sf-coloring-dialog {
+  color: inherit;
+  background: var(--coloring-paper);
+  border: 1px solid var(--coloring-edge);
+  border-radius: 10px;
+  width: min(430px, calc(100% - 32px));
+  max-height: calc(100dvh - 36px);
+  padding: 12px;
+}
+.sf-coloring-dialog::backdrop { background: #36291e60; }
+.sf-coloring-dialog header { justify-content: space-between; padding-bottom: 8px; }
+.sf-coloring-dialog-content > .sf-coloring-row { justify-content: flex-end; }
+.sf-coloring [hidden] { display: none !important; }
+
+@media (orientation: portrait) and (max-width: 650px) {
+  .sf-coloring-picks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sf-coloring-editor { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(160px, 1fr) auto; gap: 8px; }
+  .sf-coloring-tray { max-height: min(380px, 47dvh); }
+  .sf-coloring-palette { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .sf-coloring-tray .sf-coloring-palette .sf-button { padding-inline: 0; }
+}
+@media (orientation: landscape) and (max-height: 480px) {
+  #panel[data-design="coloring"] .sf-coloring-dialogue { min-height: 34px; margin-bottom: 4px; }
+  #panel[data-design="coloring"] .sf-coloring-dialogue img { width: 30px; height: 30px; }
+  #panel[data-design="coloring"] .sf-coloring-card :is(img, canvas) { height: min(24dvh, 160px); }
+  #panel[data-design="coloring-play"]:not(.ming-os-panel) #panel-body { padding: 4px 7px max(6px, env(safe-area-inset-bottom)); }
+  #panel[data-design="coloring-play"] .sf-coloring-dialogue { min-height: 30px; margin-bottom: 3px; }
+  #panel[data-design="coloring-play"] .sf-coloring-dialogue img { width: 24px; height: 24px; }
+  .sf-coloring-editor { grid-template-columns: minmax(0, 1fr) 295px; gap: 7px; }
+  .sf-coloring-tray {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    padding: 5px;
+    overflow: hidden;
+  }
+  .sf-coloring-controls { display: flex; flex-direction: column; overflow: auto; }
+  .sf-coloring-controls > * { flex: none; }
+  .sf-coloring-settings { order: 1; }
+  .sf-coloring-controls > * + * { margin-top: 3px; }
+  .sf-coloring-footer { border-top: 1px solid var(--coloring-edge); margin-top: 4px; }
+  #panel .sf-coloring-slider input[type="range"] { min-height: 26px; height: 26px; }
+  #panel .sf-coloring-controls .sf-coloring-row .sf-button {
+    min-height: 40px !important;
+    height: 40px;
+    --ic: 34px !important;
+  }
+  #panel .sf-coloring-tray .sf-coloring-palette .sf-button { min-height: 30px; }
+  .sf-coloring-palette { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .sf-coloring-tray .sf-coloring-palette .sf-button { padding-inline: 0; }
+  .sf-coloring-tray .sf-draw-actions { margin-top: 4px; }
+}
+
+/* 窄螢幕全版面板：標題列右邊不必留 260px，不然「返回」會壓到標題（2026-11-28 著色本 390×844 截圖） */
+@media (max-width: 600px) {
+  #panel:is([data-design="puzzle-play"], [data-design="coloring-play"]):not(.ming-os-panel) .panel-head { padding-right: 12px; }
+}

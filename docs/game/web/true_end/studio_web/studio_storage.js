@@ -331,7 +331,7 @@
     && new URLSearchParams(location.search).get('embed') === '1';
   var baseDB = studioShell ? larchBackend(true) : indexedDbUsable() ? idbBackend()
     : inLarchFrame ? larchBackend(false) : memoryBackend();
-  function syncRelevantKey(key) { return key === 'anonymousPlayerId' || key === 'progressTable' || key === 'progressUserTasks' || /^chat:(chen|ming|shi|group)$/.test(String(key)) || /^(image|song|drawing):/.test(String(key)); }
+  function syncRelevantKey(key) { return key === 'studioFocus' || key === 'studioPuzzle' || key === 'anonymousPlayerId' || key === 'progressTable' || key === 'progressUserTasks' || /^chat:(chen|ming|shi|group)$/.test(String(key)) || /^(image|song|drawing):/.test(String(key)); }
   function notifySyncChange(key) { if (syncRelevantKey(key)) window.dispatchEvent(new CustomEvent('studio:db-change', { detail: { key: String(key) } })); }
   window.StudioDB = Object.assign({}, baseDB, {
     set: async function (key, value) { var result = await baseDB.set(key, value); notifySyncChange(key); return result; },

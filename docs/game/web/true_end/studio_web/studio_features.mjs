@@ -1,7 +1,8 @@
 import { TODO_ITEMS } from './studio_points2_data.mjs';
 import { CHEN_ART, SKY_DIARY } from './studio_collection_data.mjs';
-import { createFocus } from './studio_focus.mjs';
-import { puzzleBadge, puzzleTime, readPuzzleBests, renderPuzzle } from './studio_puzzle.mjs';
+import { createFocus, focusSnapshot, mergePhoneFocus } from './studio_focus.mjs';
+import { decodePuzzleBests, encodePuzzleBests, puzzleBadge, puzzleTime, readPuzzleBests, renderPuzzle, updatePuzzleBests } from './studio_puzzle.mjs';
+import { group1Line } from './studio_lines_group1.mjs';
 import { decodeHudSeen } from './hud_seen.mjs';
 import { HUD_SEEN_KEYS } from './hud_seen_keys.mjs';
 import { preparePanel } from './studio_panel.mjs';
@@ -438,6 +439,7 @@ function phoneConversation(list) {
 async function phoneSnapshot() {
   const entries = await StudioDB.entries();
   const saved = new Map(entries);
+  const [focus, puzzle] = await Promise.all([StudioDB.get('studioFocus'), StudioDB.get('studioPuzzle')]);
   const chats = {};
   ['chen', 'ming', 'shi', 'group'].forEach(function (who) { chats[who] = phoneConversation(saved.get('chat:' + who)); });
   const works = entries.filter(function (entry) { return /^(image|song|drawing):/.test(String(entry[0])); }).map(function (entry) {
@@ -455,6 +457,9 @@ async function phoneSnapshot() {
     playerId: String(larchVariables.studioPlayerId || await playerId()), day: game.day, chapter: game.chapter,
     trialKnown: game.trialKnown, tier: studioTier(), affection: game.affinity, plotSummary: game.summary,
     works: works, chats: chats, progress: progress, todos: todos,
+    seen: larchMode() ? String(larchVariables.hudSeen ?? '') : '',
+    focus: focusSnapshot(focus),
+    puzzle: encodePuzzleBests([...decodePuzzleBests(puzzle).values()]),
     newContent: { chen: false, ming: false, shi: false },
     subscriptions: { chen: ended && (route === 'ALL' || route === 'C'), ming: ended && (route === 'ALL' || route === 'M'), shi: ended && (route === 'ALL' || route === 'S') },
     collections: { zukan: truthy(larchVariables.zukan_complete) ? ['complete'] : [], plants: String(larchVariables.plants || '').split(',').filter(Boolean) }
@@ -495,6 +500,60 @@ async function revokePhoneDevice(deviceId) {
   if (!auth) throw new Error('找不到這份遊戲存檔的配對資料，請先在遊戲手機設定裡產生配對碼。');
   return phoneRequest('/pair/revoke', Object.assign({}, auth, { deviceId: deviceId }));
 }
+let phoneInboxPull;
+
+function pullPhoneInbox() {
+  if (mockMode) return Promise.resolve(false);
+  if (!phoneInboxPull) {
+    phoneInboxPull = mergePhoneInbox().catch(() => false).finally(() => { phoneInboxPull = null; });
+  }
+  return phoneInboxPull;
+}
+
+async function mergePhoneInbox() {
+  const auth = await phonePairAuth();
+  if (!auth) return false;
+  const credentials = { saveId: auth.saveId, saveSecret: auth.saveSecret };
+  const { items } = await phoneRequest('/pair/inbox', credentials);
+  if (!Array.isArray(items) || !items.length) return false;
+
+  const groups = { focus: [], puzzle: [], drawing: [] };
+  for (const item of items) {
+    if (Object.hasOwn(groups, item.kind)) groups[item.kind].push(item);
+  }
+  const ids = [];
+  let minutes = 0;
+  if (groups.focus.length) {
+    minutes = focusApp ? await focusApp.mergePhone(groups.focus) : await mergePhoneFocus(StudioDB, groups.focus);
+    ids.push(...groups.focus.map(({ id }) => id));
+  }
+  let puzzleChanged = false;
+  if (groups.puzzle.length) {
+    const rows = groups.puzzle.map(({ payload: { imageId, pieces, ms } }) => [imageId, pieces, ms]);
+    ({ changed: puzzleChanged } = await updatePuzzleBests(StudioDB, rows));
+    ids.push(...groups.puzzle.map(({ id }) => id));
+  }
+
+  let drawingsAdded = false;
+  for (const { id, payload: { workId, title, createdAt } } of groups.drawing) {
+    const key = 'drawing:' + workId;
+    if (!await StudioDB.get(key)) {
+      await StudioDB.set(key, { id: workId, kind: 'drawing', character: 'tea', title, createdAt, workId });
+      drawingsAdded = true;
+    }
+    ids.push(id);
+  }
+  if (drawingsAdded) toast('晨：' + group1Line('chen', 'phone_drawing'));
+  else if (minutes) toast('明：' + group1Line('ming', 'phone_focus', { minutes }));
+  else if (puzzleChanged) toast('晨：' + group1Line('chen', 'phone_puzzle'));
+  if (minutes || puzzleChanged || drawingsAdded) schedulePhoneSync();
+  for (let i = 0; i < ids.length; i += 100) {
+    // 最長的 100 個編號也放得進 20 KB 請求。
+    await phoneRequest('/pair/inbox/ack', { ...credentials, ids: ids.slice(i, i + 100) }).catch(() => {});
+  }
+  return puzzleChanged || drawingsAdded;
+}
+
 window.addEventListener('studio:db-change', function () { schedulePhoneSync(); });
 setTimeout(function () { schedulePhoneSync(5000); }, 5000);
 
@@ -767,6 +826,7 @@ function openRealChat(focus, initialTab = 'group') {
 }
 
 function openCharacter(character, focus, initialTab, options) {
+  const inbox = character === 'chen' ? pullPhoneInbox() : null;
   const person = CHARACTERS[character];
   panelOpen(person.name + '的角落', focus, initialTab || 'chat', character);
   clearBody();
@@ -779,7 +839,14 @@ function openCharacter(character, focus, initialTab, options) {
   setupTabs(tabs, async function (tab, content) {
     panelTitle.textContent = tab === 'gallery' ? '晨的畫架' : tabs.find(item => item.id === tab).label;
     if (tab === 'chat') { await renderChat(character, false, content); return; }
-    if (tab === 'gallery') { await renderGallery(content); return; }
+    if (tab === 'gallery') {
+      await renderGallery(content);
+      if (await inbox && content.isConnected) {
+        content.replaceChildren();
+        await renderGallery(content);
+      }
+      return;
+    }
     if (tab === 'puzzle') {
       const initial = options?.puzzleImage;
       options = null;
@@ -1858,6 +1925,7 @@ function osBar() {
 }
 
 async function openMingComputer(focus, initialTab, showChat = false) {
+  pullPhoneInbox();
   panelOpen('明的電腦', focus, 'computer');
   clearBody();
   const pending = el('div');
@@ -3330,6 +3398,7 @@ window.addEventListener('message', function (event) {
   freeAffinity.refresh();
   window.STUDIO_POINTS2?.refresh();
   schedulePhoneSync(1200);
+  pullPhoneInbox();
   if (mingComputerState) {
     const websiteAvailable = Boolean(mingApp('website'));
     if (websiteWasAvailable !== websiteAvailable) {
@@ -3492,6 +3561,7 @@ function studioStory() {
 
 freeAffinity.refresh();
 resumeJobs();
+pullPhoneInbox();
 window.STUDIO_FEATURES = {
   ...(focusApp ? { leaveFocus: focusApp.leave } : {}),
   handle: function (id, focus) {

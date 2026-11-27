@@ -2,14 +2,14 @@
   "version": 1,
   "pagesBase": "https://yazelin.github.io/larch-chayu/game/",
   "totalFiles": 992,
-  "totalBytes": 96409907,
+  "totalBytes": 96418157,
   "bytesByCategory": {
     "bgm": 25662250,
     "cg": 3081222,
     "img": 203466,
     "minigames": 11052296,
     "mv": 15206418,
-    "web": 41204255
+    "web": 41212505
   },
   "largestFile": {
     "file": "mv/media/boring_v2.mp3",
@@ -6471,8 +6471,8 @@
     {
       "file": "web/true_end/studio_web/studio_coloring.mjs",
       "category": "web",
-      "bytes": 37921,
-      "sha256": "3e0dc12a5230ca386fec889ee88f2a630253e4c48a2488443291811938890a33",
+      "bytes": 38826,
+      "sha256": "0cab11d7c5f6e70c4024a6878271ae089176fbae3a54f56647bc9aeb71982ee3",
       "source": "真結局/studio_web/studio_coloring.mjs"
     },
     {
@@ -6541,15 +6541,15 @@
     {
       "file": "web/true_end/studio_web/studio_features.mjs",
       "category": "web",
-      "bytes": 203956,
-      "sha256": "8b085906a77176a74ce0e8c6e271c71e5ca59b8c9983e9448864a00ad97a95d3",
+      "bytes": 206814,
+      "sha256": "b789f62a753891f700ab576cae243aeeefbf3b957dfc20664ca54a89bbd2295f",
       "source": "真結局/studio_web/studio_features.mjs"
     },
     {
       "file": "web/true_end/studio_web/studio_focus.mjs",
       "category": "web",
-      "bytes": 11610,
-      "sha256": "523f6bab84a2c4c7647e1875b438316c888ed9f1fe4a62c72ca4fe1cbc50d997",
+      "bytes": 15157,
+      "sha256": "f0850e58eb50a54b01cb40e5083ac27481f071607a72070c22312f5420e387d2",
       "source": "真結局/studio_web/studio_focus.mjs"
     },
     {
@@ -6576,8 +6576,8 @@
     {
       "file": "web/true_end/studio_web/studio_lines_group1.mjs",
       "category": "web",
-      "bytes": 1268,
-      "sha256": "d053d2640cda2034a3ff1c66a3b494e9186ef683419acad2f1371c8cd2ce8264",
+      "bytes": 1453,
+      "sha256": "b86bab87a6e7d9809cf6e5ac56aea20fec25ab4616f3223d87b2e84baff13ab6",
       "source": "真結局/studio_web/studio_lines_group1.mjs"
     },
     {
@@ -6632,8 +6632,8 @@
     {
       "file": "web/true_end/studio_web/studio_puzzle.mjs",
       "category": "web",
-      "bytes": 27791,
-      "sha256": "a3c11b489301ae6c5dd59456059d223f4b3789c261e64a40e83066e8c86f4d72",
+      "bytes": 28495,
+      "sha256": "febcfbb3881fa3ddf1e1ff0fb3a3df2efefd3bba0c5f78a337ec214d16a49bcd",
       "source": "真結局/studio_web/studio_puzzle.mjs"
     },
     {
@@ -6653,8 +6653,8 @@
     {
       "file": "web/true_end/studio_web/studio_storage.js",
       "category": "web",
-      "bytes": 20238,
-      "sha256": "7e42349ddf0c6a6d60fbf9ecadacf65a5cb0e59dbb804f96a7812e7aa8280fa2",
+      "bytes": 20289,
+      "sha256": "7f7385d7dee2a78abb9e6e36f29fe507f1be7b691a8fdcad23247fb7b2959aac",
       "source": "真結局/studio_web/studio_storage.js"
     },
     {

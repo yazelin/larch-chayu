@@ -1012,3 +1012,125 @@ img { display: block; max-width: 100%; }
   .person-card { min-height: 68px; }
   .person-icon { width: 47px; height: 47px; border-radius: 15px; }
 }
+
+/* 陪讀計時器及工作室共用控制項 */
+.activity-icon { display: block; width: 24px; height: 24px; flex: none; object-fit: contain; }
+.activity-redo { transform: scaleX(-1); }
+.phone-demo { align-self: center; margin-top: 10px; }
+.phone-activity-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+.phone-activity-links button { background: #fbfcf5; color: #4b603d; }
+.phone-focus { text-align: center; }
+.phone-focus h2 { margin: 0; font-size: 17px; }
+.phone-focus-total { margin: 4px 0 8px; color: var(--muted); font-size: 13px; }
+.phone-focus-time { display: block; color: #405780; font: 600 clamp(42px, 12vw, 62px)/1.08 system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+.phone-focus-phase { margin: 3px 0 14px; color: #535e79; font-size: 13px; }
+.phone-focus-options, .phone-focus-actions { display: grid; grid-auto-columns: 1fr; grid-auto-flow: column; gap: 5px; }
+.phone-focus-actions { margin-top: 9px; }
+.phone-focus .sf-group1-dialogue { margin-top: 12px; text-align: left; }
+.phone-focus .sf-button { padding-inline: 4px; }
+.phone-focus-options .activity-icon { width: 19px; height: 19px; }
+
+.sf-button {
+  display: inline-flex;
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  color: #4b4358;
+  background: #fffdfb;
+  cursor: pointer;
+  font-size: 13px;
+  touch-action: manipulation;
+}
+.sf-button:focus-visible { outline: 2px solid #8171ad; outline-offset: 2px; }
+.sf-button[aria-pressed="true"] { color: #334b75; border-color: #7d91b8; background: #e6edf9; }
+.sf-button.primary { color: #fff; background: #465d87; border-color: transparent; }
+.sf-button:disabled { opacity: .55; cursor: default; }
+.sf-button[hidden] { display: none; }
+
+.phone-night {
+  width: min(100% - 32px, 330px);
+  padding: 20px;
+  border: 1px solid #faf5ff;
+  border-radius: 23px;
+  color: var(--ink);
+  background: #f5f1f9;
+  box-shadow: 0 16px 36px #30244440;
+}
+.phone-night::backdrop { background: #2a223a69; backdrop-filter: blur(5px); }
+.phone-night .sf-group1-dialogue { margin-bottom: 16px; }
+.phone-night p { margin: 4px 0; }
+.phone-night .sf-button { width: 100%; }
+
+.phone-studio .panel-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 7px max(10px, env(safe-area-inset-left));
+}
+.phone-studio .panel-head .back-button { margin-left: 0; }
+.phone-studio .panel-head h1 { margin: 0; font-size: 18px; }
+.phone-studio #panel-body {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 6px max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+}
+.phone-studio:is([data-design="puzzle-play"], [data-design="coloring-play"]) [data-chen-activity] { height: 100%; }
+.phone-studio[data-design="puzzle-play"] #panel-body { overflow: hidden; }
+.phone-studio .sf-grid { display: grid; gap: 7px; }
+.phone-studio :is(.sf-coloring-card, .sf-puzzle-source) { display: grid; }
+.phone-studio .sf-group1-dialogue img { width: 36px; height: 36px; }
+.phone-studio .sf-coloring-row { flex-wrap: wrap; }
+.phone-studio .sf-puzzle-tools { flex-wrap: wrap; }
+.phone-studio .sf-puzzle-original[hidden] { display: none; }
+.phone-studio[data-design="puzzle-play"] .sf-puzzle-piece { touch-action: none; }
+.phone-studio .sf-coloring-controls [data-coloring-tool] {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.phone-studio .sf-coloring-zoom .sf-button { min-height: 40px; }
+.phone-studio .sf-coloring-footer .sf-button { width: 100%; }
+.phone-studio .sf-coloring-footer .primary { background: #58632d; }
+.phone-studio .sf-coloring-tray .sf-coloring-swatch { touch-action: manipulation; }
+.phone-studio .sf-coloring-dialog .sf-button { flex: none; }
+.phone-studio .sf-coloring-tray .activity-icon { width: 22px; height: 22px; }
+
+@media (min-width: 600px) {
+  #app.activity-open { width: min(1000px, calc(100vw - 32px)); }
+}
+@media (orientation: landscape) and (max-height: 480px) {
+  body:has(#app.activity-open) { padding: 0; }
+  #app.activity-open { width: 100%; height: 100%; }
+  .phone-studio.app-shell { border-radius: 0; }
+  .phone-studio .panel-head .back-button { width: 36px; height: 32px; }
+  #panel .sf-coloring-tray { grid-template-rows: auto minmax(0, 1fr) auto; }
+  #panel .sf-coloring-tray-custom { grid-template-rows: auto minmax(0, 1fr); }
+}
+.phone-studio .sf-coloring-zoom .activity-label {
+  display: block;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+@media (orientation: landscape) and (max-height: 480px) {
+  #app:has(.phone-focus) { width: min(540px, calc(100vw - 32px)); }
+  .phone-focus { display: grid; grid-template-columns: minmax(100px, .85fr) minmax(0, 2fr); align-items: center; gap: 4px 10px; padding: 12px; }
+  .phone-focus h2, .phone-focus-total, .phone-focus .sf-group1-dialogue { grid-column: 1 / -1; }
+  .phone-focus-time { grid-area: 3 / 1; font-size: 46px; }
+  .phone-focus-phase { grid-area: 4 / 1; margin: 0; }
+  .phone-focus-options { grid-area: 3 / 2; }
+  .phone-focus-actions { grid-area: 4 / 2; margin-top: 0; }
+  .phone-focus .sf-group1-dialogue { margin-top: 3px; }
+}

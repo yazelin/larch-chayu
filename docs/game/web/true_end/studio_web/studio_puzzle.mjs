@@ -127,6 +127,31 @@ export async function readPuzzleBests(db) {
   catch { return new Map(); }
 }
 
+const puzzleWrites = new WeakMap();
+
+export function updatePuzzleBests(db, rows) {
+  const write = (puzzleWrites.get(db) || Promise.resolve()).catch(() => {}).then(async () => {
+    const bests = decodePuzzleBests(await db.get(SAVE_KEY));
+    let changed = false, improved = false;
+    for (const [id, pieces, ms] of rows) {
+      const previous = bests.get(id);
+      if (previous && (pieces < previous[1] || (pieces === previous[1] && ms >= previous[2]))) continue;
+      bests.delete(id);
+      bests.set(id, [id, pieces, ms, Date.now()]);
+      changed = true;
+      improved ||= Boolean(previous);
+    }
+    if (changed) {
+      const encoded = encodePuzzleBests([...bests.values()]);
+      await db.set(SAVE_KEY, encoded);
+      return { bests: decodePuzzleBests(encoded), changed, improved };
+    }
+    return { bests, changed, improved };
+  });
+  puzzleWrites.set(db, write);
+  return write;
+}
+
 function shuffled(length) {
   const order = Array.from({ length }, (_, index) => index);
   for (let i = length - 1; i > 0; i--) {
@@ -141,7 +166,7 @@ function quarterTurn(x, y, turn) {
   return [{ x, y }, { x: -y, y: x }, { x: -x, y: -y }, { x: y, y: -x }][turn];
 }
 
-export function renderPuzzle(root, { el, button, avatar, db, sources, initial }) {
+export function renderPuzzle(root, { el, button, avatar, db, sources, initial, onFinish }) {
   const shell = el('section', 'sf-puzzle');
   const scrollBox = root.parentElement;
   const panel = root.closest('#panel');
@@ -691,16 +716,18 @@ export function renderPuzzle(root, { el, button, avatar, db, sources, initial })
     content.firstElementChild.replaceWith(done);
     speak(say('done'), say('again'));
     newImage.focus();
-    const saved = await readPuzzleBests(db);
-    const previous = saved.get(finishedImage.id);
-    // 紀錄先比片數再比時間：拼過 36 片，之後拼 9 片再快也不會蓋掉 36 片（右下角標記顯示最多片數）
-    if (!previous || finishedCount > previous[1] || (finishedCount === previous[1] && ms < previous[2])) {
-      if (previous && done.isConnected) speak(say('done'), say('done_best'), say('again'));
-      saved.delete(finishedImage.id);   // 刪掉再加，這筆排到最後＝最新
-      saved.set(finishedImage.id, [finishedImage.id, finishedCount, ms, at]);
-      bests = saved;
-      try { await db.set(SAVE_KEY, encodePuzzleBests([...saved.values()])); }
-      catch { if (done.isConnected) done.append(el('p', 'sf-status', '暫時無法儲存最佳時間。')); }
+    if (onFinish) {
+      Promise.resolve(onFinish({ imageId: finishedImage.id, pieces: finishedCount, ms }))
+        .catch(() => {
+          if (done.isConnected) done.append(el('p', 'sf-status', '暫時無法送出拼圖紀錄。'));
+        });
+    }
+    try {
+      const result = await updatePuzzleBests(db, [[finishedImage.id, finishedCount, ms]]);
+      bests = result.bests;
+      if (result.improved && done.isConnected) speak(say('done'), say('done_best'), say('again'));
+    } catch {
+      if (done.isConnected) done.append(el('p', 'sf-status', '暫時無法儲存最佳時間。'));
     }
   }
 

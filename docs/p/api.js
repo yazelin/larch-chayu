@@ -200,9 +200,10 @@
       const result = await workerRequest("/pair/claim", jsonOptions("POST", { code }));
       return { key: result.deviceKey, deviceId: result.deviceId, pairedAt: Date.now() };
     },
-    async fetch(key) {
+    async fetch(key, { hydrate = true } = {}) {
       const result = await workerRequest("/phone/data", { method: "GET", headers: { authorization: "Bearer " + key }, cache: "no-store" });
-      return hydrateWorks(result.data || result, key);
+      const data = { updatedAt: result.updatedAt, ...(result.data || result) };
+      return hydrate ? hydrateWorks(data, key) : data;
     },
     async unpair(key) {
       const result = await workerRequest("/phone/unpair", jsonOptions("POST", {}, key));
@@ -213,6 +214,17 @@
     }
   };
   const mock = { pair: mockPair, fetch: mockFetch, unpair: mockUnpair, chat: mockChat };
+  async function activity(kind, key, body) {
+    if (config.mode === "mock") {
+      if (kind === "focus") return { ok: true, stored: body.sessions.length };
+      if (kind === "coloring") return { ok: true, workId: "mock-" + body.id, title: body.title };
+      return { ok: true };
+    }
+    if (!key) throw new Error("請先配對這支手機。");
+    const options = jsonOptions("POST", body, key);
+    options.signal = AbortSignal.timeout(12_000);
+    return workerRequest("/phone/" + kind, options);
+  }
   function api() { return config.mode === "worker" ? formal : mock; }
   function setConfig(value) {
     const mode = value && value.mode === "worker" ? "worker" : "mock";
@@ -241,8 +253,12 @@
         return result;
       });
     },
-    fetch: function (key) { return api().fetch(key); },
+    fetch: function (key, options) { return api().fetch(key, options); },
+    demo: function () { return clone(SEED); },
     unpair: function (key) { return api().unpair(key); },
-    chat: function (key, who, text) { return api().chat(key, who, text); }
+    chat: function (key, who, text) { return api().chat(key, who, text); },
+    focus: function (key, body) { return activity("focus", key, body); },
+    puzzle: function (key, body) { return activity("puzzle", key, body); },
+    coloring: function (key, body) { return activity("coloring", key, body); }
   });
 })();

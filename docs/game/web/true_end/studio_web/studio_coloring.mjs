@@ -120,6 +120,8 @@ function hsvToHex({ h, s, v }) {
 export async function renderColoring(root, deps) {
   loadStyles();
   const { el, button, db } = deps;
+  const setButtonLabel = deps.setButtonLabel || ((control, text) => { control.textContent = text; });
+  const phone = deps.phone;
   const panel = root.closest('#panel');
   const scrollBox = root.parentElement;
   const say = key => group1Line('chen', 'coloring_' + key);
@@ -232,7 +234,7 @@ export async function renderColoring(root, deps) {
     } catch (error) {
       if (token !== generation) return;
       loading.textContent = '這張線稿暫時讀不到。';
-      cancel.textContent = '返回選圖';
+      setButtonLabel(cancel, '返回選圖');
     }
   }
 
@@ -370,41 +372,51 @@ export async function renderColoring(root, deps) {
     });
     operations.append(undo, redo, clear);
 
-    const lookBox = el('div', 'sf-coloring-look');
-    const openReply = button('看晨的回覆', showLook);
-    openReply.hidden = true;
-    const lookRoot = el('div');
     const drawingImage = () => composite(paint, line);
     const hasPaint = () => ctx.getImageData(0, 0, width, height).data.some((channel, i) => i % 4 === 3 && channel !== 0);
-    const look = drawingLook(lookRoot, deps, {
-      hasPaint,
-      image: drawingImage,
-      emptyMessage: '先塗點顏色，再給晨看。',
-      savedMessage: '這張畫收進畫架展廳的「我畫的」。',
-      onSubmit() { phrase.textContent = say('done'); showLook(); },
-      onResult() { openReply.hidden = false; },
-      onSaved() { markShelved(item); }
-    });
-    lookBox.append(look.status, look.result);
-    lookRoot.append(lookBox);
-    editor.append(lookRoot);
-    lookRoot.hidden = true;
-    function showLook() {
-      openReply.hidden = false;
-      dialogTitle.textContent = '讓晨看看';
-      dismiss.hidden = false;
-      dialogContent.replaceChildren(lookBox);
-      if (!dialog.open) dialog.showModal();
+    let addSave;
+    const footer = el('div', 'sf-coloring-footer');
+    if (!phone) {
+      const lookBox = el('div', 'sf-coloring-look');
+      const openReply = button('看晨的回覆', showLook);
+      openReply.hidden = true;
+      const lookRoot = el('div');
+      const look = drawingLook(lookRoot, deps, {
+        hasPaint,
+        image: drawingImage,
+        emptyMessage: '先塗點顏色，再給晨看。',
+        savedMessage: '這張畫收進畫架展廳的「我畫的」。',
+        onSubmit() { phrase.textContent = say('done'); showLook(); },
+        onResult() { openReply.hidden = false; },
+        onSaved() { markShelved(item); }
+      });
+      lookBox.append(look.status, look.result);
+      lookRoot.append(lookBox);
+      editor.append(lookRoot);
+      lookRoot.hidden = true;
+      function showLook() {
+        openReply.hidden = false;
+        dialogTitle.textContent = '讓晨看看';
+        dismiss.hidden = false;
+        dialogContent.replaceChildren(lookBox);
+        if (!dialog.open) dialog.showModal();
+      }
+      dialog.addEventListener('close', () => {
+        if (!dialog.open && dialogContent.contains(lookBox)) lookRoot.append(lookBox);
+      });
+      // 點空白草稿的提示也要看得到。
+      const lookButton = look.actions.querySelector('button');
+      lookButton.addEventListener('click', () => {
+        if (!dialog.open && look.status.textContent) showLook();
+      });
+      footer.append(look.actions, openReply);
+      addSave = control => lookButton.after(control);
+    } else {
+      const actions = el('div', 'sf-draw-actions');
+      footer.append(actions);
+      addSave = control => actions.append(control);
     }
-    dialog.addEventListener('close', () => {
-      if (!dialog.open && dialogContent.contains(lookBox)) lookRoot.append(lookBox);
-    });
-    // 點空白草稿的提示也要看得到。
-    const lookButton = look.actions.querySelector('button');
-    lookButton.addEventListener('click', () => {
-      if (!dialog.open && look.status.textContent) showLook();
-    });
-    const saveLabel = '完成，放進展廳';
+    const saveLabel = phone ? '完成，傳回遊戲展廳' : '完成，放進展廳';
     const saveDrawing = button(saveLabel, async () => {
       if (saveDrawing.disabled) return;
       if (!hasPaint()) {
@@ -412,32 +424,36 @@ export async function renderColoring(root, deps) {
         return;
       }
       saveDrawing.disabled = true;
-      saveDrawing.textContent = '存放中…';
+      setButtonLabel(saveDrawing, '存放中…');
       try {
-        await deps.saveDrawing(drawingImage(), item.title);
+        const result = await deps.saveDrawing(drawingImage(), item.title, ...(phone ? [item.id] : []));
         markShelved(item);
         if (!editor.isConnected) return;
-        showSaveResult(deps.chenBubble(say('saved'), 'smile'), el('p', 'sf-status', '放進畫架展廳了'),
-          button('打開畫架展廳', () => { dialog.close(); deps.openGallery(); }));
+        if (phone) {
+          const message = result.queued ? '已存到手機，連線後會傳回遊戲展廳。' : '已送出。回到遊戲打開畫架就能看到。';
+          showSaveResult(...(result.queued ? [] : [deps.chenBubble(say('saved'), 'smile')]), el('p', 'sf-status', message));
+        } else {
+          showSaveResult(deps.chenBubble(say('saved'), 'smile'), el('p', 'sf-status', '放進畫架展廳了'),
+            button('打開畫架展廳', () => { dialog.close(); deps.openGallery(); }));
+        }
       } catch (error) {
         if (editor.isConnected) showSaveResult(el('p', 'sf-status',
           error.code && error.code !== 'NOT_FOUND' ? error.message : '展廳暫時存放失敗，請稍後再試。'));
       } finally {
-        saveDrawing.textContent = saveLabel;
+        setButtonLabel(saveDrawing, saveLabel);
         saveDrawing.disabled = false;
       }
-    });
+    }, phone ? 'primary' : undefined);
     function showSaveResult(...nodes) {
       dialogTitle.textContent = saveLabel;
       dismiss.hidden = false;
       dialogContent.replaceChildren(...nodes);
       if (!dialog.open) dialog.showModal();
     }
-    lookButton.after(saveDrawing);
+    addSave(saveDrawing);
     const controls = el('div', 'sf-coloring-controls');
     controls.append(actions, palette, recents, settings, operations);
-    const footer = el('div', 'sf-coloring-footer');
-    footer.append(look.actions, openReply, saveStatus);
+    footer.append(saveStatus);
     const current = el('div', 'sf-coloring-now');
     const colorPanel = el('div', 'sf-coloring-custom');
     colorPanel.id = 'sf-coloring-custom';
@@ -452,7 +468,7 @@ export async function renderColoring(root, deps) {
       colorPanel.hidden = !show;
       controls.hidden = footer.hidden = show;
       tray.classList.toggle('sf-coloring-tray-custom', show);
-      toggleCustom.textContent = show ? '返回工具' : '自訂色';
+      setButtonLabel(toggleCustom, show ? '返回工具' : '自訂色');
       toggleCustom.setAttribute('aria-expanded', String(show));
       tray.scrollTop = 0;
       toggleCustom.focus({ preventScroll: true });

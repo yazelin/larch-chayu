@@ -6,7 +6,7 @@
   "start_url": "./?source=installed",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "theme_color": "#ece7f3",
   "background_color": "#f2eef6",
   "icons": [

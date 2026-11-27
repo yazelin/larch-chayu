@@ -19,8 +19,95 @@ function duration(seconds) {
   return Math.floor(seconds / 60) + ':' + pad(seconds % 60);
 }
 
+const DAY = 86400_000;
+const taipeiDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit' });
+const newFocus = () => ({ v: 1, minutes: 25, days: {}, lastStop: null, active: null });
+
+function readFocus(text) {
+  try {
+    const state = JSON.parse(text || 'null');
+    if (state?.v === 1 && state.days && typeof state.days === 'object') return state;
+    if (state?.v === 1 && typeof state.days === 'string') {
+      state.days = Object.fromEntries(state.days.split(';').filter(Boolean).map(row => {
+        const [day, rounds, seconds] = row.split(',').map(part => parseInt(part, 36));
+        return [new Date(day * DAY).toISOString().slice(0, 10), [rounds, seconds]];
+      }));
+      return state;
+    }
+  } catch { /* 舊紀錄或空值 */ }
+  return newFocus();
+}
+
+function writeFocus(state, db) {
+  const text = JSON.stringify(state);
+  if (db.mode !== 'larch' || text.length <= 1900) return text;
+  const days = Object.entries(state.days).map(([day, [rounds, seconds]]) =>
+    [Date.parse(day) / DAY, rounds, seconds].map(value => value.toString(36)).join(',')).join(';');
+  return JSON.stringify({ ...state, days });
+}
+
+function keepFocusDays(days) {
+  return Object.fromEntries(Object.keys(days).sort().slice(-60).map(day => [day, days[day]]));
+}
+
+// 每個 SHA-256 摘要取 56 位元，用四個無須 JSON 跳脫的字元存放。200 筆佔 800 字。
+export async function focusReceipt(id) {
+  const digest = new DataView(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(id)));
+  let bits = digest.getBigUint64(0) >> 8n;
+  const chars = [];
+  for (let i = 0; i < 4; i++) {
+    chars.push(0x4e00 + Number(bits & 0x3fffn));
+    bits >>= 14n;
+  }
+  return String.fromCharCode(...chars);
+}
+
+async function phoneFocusRows(items) {
+  return Promise.all(items.map(async ({ id, payload }) => ({
+    receipt: await focusReceipt(id), day: taipeiDate.format(payload.endedAt), minutes: payload.minutes
+  })));
+}
+
+function applyPhoneFocus(state, rows) {
+  const receipts = state.phoneIds?.match(/.{4}/gu) || [];
+  const seen = new Set(receipts);
+  let added = 0;
+  for (const { receipt, day, minutes } of rows) {
+    if (seen.has(receipt)) continue;
+    seen.add(receipt);
+    receipts.push(receipt);
+    const record = state.days[day] ||= [0, 0];
+    record[0] = Math.min(9_999, record[0] + 1);
+    record[1] = Math.min(99_999, record[1] + minutes * 60);
+    added += minutes;
+  }
+  if (added) {
+    state.days = keepFocusDays(state.days);
+    state.phoneIds = receipts.slice(-200).join('');
+  }
+  return added;
+}
+
+export function focusSnapshot(text) {
+  const parsed = readFocus(text);
+  const days = parsed.days;
+  const today = taipeiDate.format(Date.now());
+  const cutoff = new Date(Date.parse(today) - 59 * DAY).toISOString().slice(0, 10);
+  return { days: Object.keys(days).sort().filter(d => d >= cutoff && d <= today).map(d => ({
+    d, m: Math.max(0, Math.min(1440, Math.floor(days[d][1] / 60)))
+  })), merged: String(parsed.phoneIds || '').slice(-800) };   // 已收回遊戲的手機紀錄收據（每筆 4 字），手機照這個判斷哪幾段已經算進來
+}
+
+export async function mergePhoneFocus(db, items) {
+  const rows = await phoneFocusRows(items);
+  const state = readFocus(await db.get(FOCUS_KEY));
+  const added = applyPhoneFocus(state, rows);
+  if (added) await db.set(FOCUS_KEY, writeFocus(state, db));
+  return added;
+}
+
 export function createFocus({ db, el, button, avatar, volume, desktop }) {
-  let state = { v: 1, minutes: 25, days: {}, lastStop: null, active: null };
+  let state = newFocus();
   let phase = 'idle';
   let end = 0;
   let streak = 0;
@@ -35,14 +122,15 @@ export function createFocus({ db, el, button, avatar, volume, desktop }) {
 
   // 每次寫入用當下的快照。開始、停止及換段的寫入照順序完成。
   function save() {
-    const snapshot = JSON.stringify(state);
-    pendingWrite = pendingWrite.then(() => db.set(FOCUS_KEY, snapshot)).then(() => {
+    const snapshot = writeFocus(state, db);
+    const write = pendingWrite.then(() => db.set(FOCUS_KEY, snapshot));
+    pendingWrite = write.then(() => {
       storageError = false;
     }, () => {
       storageError = true;
       refresh();
     });
-    return pendingWrite;
+    return write;
   }
 
   function credit(start, seconds, completedAt) {
@@ -57,25 +145,22 @@ export function createFocus({ db, el, button, avatar, volume, desktop }) {
       const record = state.days[localDay(completedAt)] ||= [0, 0];
       record[0] = Math.min(9_999, record[0] + 1);
     }
-    const keep = Object.keys(state.days).sort().slice(-40);
-    state.days = Object.fromEntries(keep.map(day => [day, state.days[day]]));
+    state.days = keepFocusDays(state.days);
   }
 
   const ready = Promise.all([db.get(FOCUS_KEY), db.get(NIGHT_KEY)]).then(async ([focus, night]) => {
-    for (const [type, saved] of [['focus', focus], ['night', night]]) {
-      try {
-        const value = JSON.parse(saved || 'null');
-        if (value?.v !== 1) continue;
-        if (type === 'focus') state = value;
-        else if (Array.isArray(value.days)) nightDays = value.days;
-      } catch { /* 舊紀錄或空值 */ }
-    }
+    state = readFocus(focus);
+    try {
+      const saved = JSON.parse(night || 'null');
+      if (saved?.v === 1 && Array.isArray(saved.days)) nightDays = saved.days;
+    } catch { /* 舊紀錄或空值 */ }
     if (state.active) {
       const { kind, startedAt, elapsedSeconds } = state.active;
       if (kind === 'focus') credit(startedAt, elapsedSeconds);
       state.lastStop = Math.floor(elapsedSeconds / 60);
       state.active = null;
-      await save();
+      save();
+      await pendingWrite;
     }
     if (state.lastStop !== null) lines = [say('resume_note', { minutes: state.lastStop })];
   }).catch(() => { storageError = true; });
@@ -225,6 +310,16 @@ export function createFocus({ db, el, button, avatar, volume, desktop }) {
   });
 
   return {
+    async mergePhone(items) {
+      await ready;
+      const rows = await phoneFocusRows(items);
+      const minutes = applyPhoneFocus(state, rows);
+      if (minutes || storageError) await save();
+      else await pendingWrite;
+      if (storageError) throw new Error('暫時無法儲存陪讀紀錄。');
+      refresh();
+      return minutes;
+    },
     async desktopChanged() { await ready; checkNight(); placeNotice(); },
     async leave() { await ready; tick(); await stop(true); },
     escape() {

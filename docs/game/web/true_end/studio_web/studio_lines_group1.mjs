@@ -8,7 +8,8 @@ export const GROUP1_LINES = {
     long_break: '{n} 輪了。休息 {rest} 分鐘。',
     resume_note: '上次停在第 {minutes} 分鐘。',
     late_night: '{time} 了。去睡。',
-    late_night_2: '進度明天再趕。'
+    late_night_2: '進度明天再趕。',
+    phone_focus: '手機那邊專心了 {minutes} 分鐘。記上了。'
   },
   chen: {
     pick_image: '哪一張？妳選。',
@@ -24,7 +25,9 @@ export const GROUP1_LINES = {
     coloring_pick: '慢慢塗。顏色妳選。',
     coloring_done: '塗好了？我看看。',
     coloring_saved: '收好了。下一張，妳選。',
-    coloring_switch_warn: '那張還沒收好。妳選。'
+    coloring_switch_warn: '那張還沒收好。妳選。',
+    phone_puzzle: '手機上的拼圖，記好了。',
+    phone_drawing: '手機上塗的，收進來了。'
   }
 };
 

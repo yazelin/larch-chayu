@@ -1,3 +1,6 @@
+import { activityIcon, checkNight, createPhoneFocus, mountChenActivity } from './features.mjs';
+import { activityScope, createActivityStore, focusDay } from './activity_store.mjs';
+
 (function () {
   "use strict";
 
@@ -33,6 +36,7 @@
   const state = {
     key: "",
     data: null,
+    demo: false,
     view: "home",
     chatWho: "chen",
     filter: "全部",
@@ -47,6 +51,59 @@
     read: loadReadState(),
     installPrompt: null
   };
+
+  const api = window.PhoneAPI;
+  let activities, activeScope, lastFocusDay;
+  let saveSnapshot = Promise.resolve();
+  const focus = createPhoneFocus({
+    getActivities: () => activities,
+    getSnapshot: () => state.data,
+    report: error => toast(error.message || "暫時無法儲存陪讀紀錄。")
+  });
+
+  function activitySession() {
+    const scope = activityScope(api, state.key);
+    if (activeScope === scope) return activities;
+    activeScope = scope;
+    focus.reset();
+    activities = createActivityStore({
+      api, key: state.key,
+      onChange(message) { focus.updateTotal(); if (message) toast(message); },
+      onRejected(kind) {
+        const label = { focus: "陪讀紀錄", puzzle: "拼圖紀錄", coloring: "上色作品" }[kind];
+        toast(label + "傳送失敗，請確認遊戲配對或再試一次。");
+      }
+    });
+    return activities;
+  }
+
+  function acceptSnapshot() {
+    const data = state.data;
+    if (!data) return;
+    const session = activitySession();
+    saveSnapshot = saveSnapshot.then(async () => {
+      await session.receive(data);
+      const collections = (data.collections || []).map(({ imageUrl, audioUrl, ...item }) => item);
+      if (api.mode === "worker") await session.storage.set("snapshot", { ...data, collections });
+    }).catch(() => {}).finally(() => focus.updateTotal());
+  }
+
+  let syncing;
+  function syncActivities() {
+    if (!activities || !state.data || !navigator.onLine || (!state.key && !state.demo)) return;
+    if (syncing) return syncing;
+    const session = activities, key = state.key;
+    syncing = (async () => {
+      await session.flush();
+      if (!key || api.mode !== "worker" || session !== activities) return;
+      const latest = await api.fetch(key, { hydrate: false });
+      if (session !== activities || key !== state.key || !state.data || latest.updatedAt < state.data.updatedAt) return;
+      const { seen, focus: focusData, puzzle, updatedAt, day, chapter } = latest;
+      state.data = { ...state.data, seen, focus: focusData, puzzle, updatedAt, day, chapter };
+      acceptSnapshot();
+    })().catch(() => {}).finally(() => { syncing = null; });
+    return syncing;
+  }
 
   function loadReadState() {
     try { return JSON.parse(localStorage.getItem(READ_SLOT) || "{}"); } catch (_) { return {}; }
@@ -97,6 +154,7 @@
       '<input class="code-input" id="pair-code" name="code" type="text" inputmode="text" autocomplete="one-time-code" autocapitalize="characters" maxlength="8" placeholder="ABCD2345" value="' + escapeHTML(queryCode.toUpperCase()) + '" aria-label="8 碼配對碼">' +
       '<button class="primary-button" type="submit" ' + (state.busy ? "disabled" : "") + '>' + (state.busy ? "正在配對…" : "配對這支手機") + '</button>' +
       '<p class="pair-error" data-pair-error>' + escapeHTML(message) + '</p></form>' +
+      (api.mode === "mock" ? '<button type="button" class="secondary-button phone-demo" data-demo>' + activityIcon("open") + '使用示意資料</button>' : "") +
       '<p class="pair-footer">配對成功後，可以查看收藏、聊天紀錄與好感。<br><b>不需要 email，也不會要求個人資料。</b></p>' + apiConfigPanel() +
       '<p class="pair-bottom">' + (window.PhoneAPI.mode === "mock" ? "本機假資料模式" : "作品伺服器連線模式") + '</p></section>';
   }
@@ -159,7 +217,10 @@
     const rows = items.map(function (item) {
       return '<button class="content-row" data-photo="' + escapeHTML(item.id) + '" style="width:100%;border:0;border-top:1px solid var(--line);text-align:left;background:transparent;cursor:pointer"><span class="row-mark" style="--tone:#698643;--tone-bg:#edf3df">畫</span><span class="row-copy"><strong>' + escapeHTML(item.title) + '</strong><small>' + escapeHTML(item.note) + '・點開看收藏</small></span><span class="chevron">›</span></button>';
     }).join("");
-    const content = personHero("chen") + humanInterface("chen") + '<div class="panel"><div class="panel-title"><h2>晨的畫</h2><small>' + items.length + ' 張收藏</small></div>' + rows + '</div>';
+    const tools = '<div class="phone-activity-links">' +
+      '<button class="secondary-button" data-open="puzzle">' + activityIcon("puzzle") + '拼圖</button>' +
+      '<button class="secondary-button" data-open="coloring">' + activityIcon("sketchbook") + '著色本</button></div>';
+    const content = personHero("chen") + tools + humanInterface("chen") + '<div class="panel"><div class="panel-title"><h2>晨的畫</h2><small>' + items.length + ' 張收藏</small></div>' + rows + '</div>';
     return shell("晨的 App", "畫圖", content, false);
   }
   function mingApp() {
@@ -172,7 +233,7 @@
       state.game.map(function (position, index) {
         return '<button class="gear-button ' + (state.gameWon ? "solved" : "") + '" data-gear="' + index + '" aria-label="轉動' + gearNames[index] + '"><span class="gear-wheel">' + ["日", "月", "星"][position] + '</span><small>' + gearNames[index] + '</small></button>';
       }).join("") + '</div><p class="game-status" data-game-status>' + (state.gameWon ? "門開了。鐘又開始走了。" : "轉動齒輪，找到相同的月亮。") + '</p></div>';
-    const content = personHero("ming") + humanInterface("ming") +
+    const content = personHero("ming") + '<section class="panel phone-focus" data-phone-focus></section>' + humanInterface("ming") +
       '<div class="panel"><div class="panel-title"><h2>進度表</h2><small>明排的項目不能刪</small></div>' + todoRows + '</div>' + game +
       '<div class="panel"><div class="panel-title"><h2>今天的時光記錄</h2><small>第 ' + trialDay() + ' 天</small></div>' +
       '<div class="content-row"><span class="row-mark" style="--tone:#49628d;--tone-bg:#e8edf6">◷</span><span class="row-copy"><strong>和三人聊了 ' + Math.max(0, 2 + Number(state.data.quota.used || 0)) + ' 句</strong><small>一起把齒輪關卡往前推了一點</small></span></div></div>';
@@ -323,6 +384,10 @@
     return shell(p.name, "今天還可以傳 " + remaining + " 則", content, false);
   }
   function settings() {
+    if (state.demo) {
+      return shell("設定", "配對與資料", '<div class="panel"><p>目前使用示意資料。</p>' +
+        '<button class="secondary-button" data-leave-demo>' + activityIcon("unlink") + '回到配對</button></div>', false);
+    }
     const pairedAt = state.data.pairedAt ? new Date(state.data.pairedAt).toLocaleString("zh-TW", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }) : "本機假配對";
     const keyTail = state.key.slice(-6).toUpperCase();
     const content = '<div class="panel"><div class="panel-title"><h2>配對資訊</h2><span class="paired-label">已配對</span></div>' +
@@ -353,11 +418,19 @@
     return '<div class="modal-backdrop" data-close-modal><div class="photo-modal" role="dialog" aria-modal="true" aria-label="' + escapeHTML(photo.title) + '" data-modal-body>' +
       '<button class="modal-close" data-close-modal aria-label="關閉">×</button><img src="' + escapeHTML(photo.imageUrl || p.portrait) + '" alt=""><strong>' + escapeHTML(photo.title) + '</strong><small>' + p.name + '・' + escapeHTML(photo.note) + '</small></div></div>';
   }
+  function chenActivityPage(kind) {
+    const title = kind === "puzzle" ? "拼圖" : "著色本";
+    return '<div class="app-shell phone-studio" id="panel" data-design="' + kind + '">' +
+      '<header class="panel-head"><button class="back-button" id="panel-close" data-back aria-label="返回">' +
+      appIcon("chevron-left", "") + '</button><h1 id="panel-title">' + title + '</h1></header>' +
+      '<section id="panel-body" data-scroll><div data-chen-activity></div></section></div>';
+  }
   function currentPage() {
     switch (state.view) {
       case "home": return home();
       case "chen": return chenApp();
       case "ming": return mingApp();
+      case "puzzle": case "coloring": return chenActivityPage(state.view);
       case "shi": return shiApp();
       case "album": return photos();
       case "music": return music();
@@ -372,8 +445,24 @@
   }
   function render() {
     app.querySelectorAll("audio").forEach(function (audio) { audio.pause(); });
-    app.innerHTML = state.key && state.data ? currentPage() + photoModal() : pairScreen();
+    const previous = app.querySelector("[data-chen-activity]");
+    previous?.puzzleDestroy?.();
+    previous?.coloringDestroy?.();
+    const studio = state.data && ["puzzle", "coloring"].includes(state.view);
+    app.classList.toggle("activity-open", Boolean(studio));
+    app.innerHTML = (state.key || state.demo) && state.data ? currentPage() + photoModal() : pairScreen();
     bindDynamic();
+    const focusRoot = app.querySelector("[data-phone-focus]");
+    if (focusRoot) {
+      focus.mount(focusRoot);
+      if (matchMedia("(orientation: landscape) and (max-height: 480px)").matches) focusRoot.scrollIntoView({ block: "start" });
+    }
+    const art = app.querySelector("[data-chen-activity]");
+    if (art) {
+      const options = { mock: api.mode === "mock", activities: activitySession() };
+      mountChenActivity(art, state.view, state.data, options);
+      app.querySelector("#panel-close").focus({ preventScroll: true });
+    }
     if (state.view === "thread") {
       const thread = document.querySelector("[data-thread]");
       if (thread) thread.scrollTop = thread.scrollHeight;
@@ -399,6 +488,8 @@
   }
   async function pair(code) {
     state.busy = true;
+    state.demo = false;
+    sessionStorage.removeItem("nyhm-phone-demo");
     state.error = "";
     render();
     try {
@@ -406,6 +497,8 @@
       state.key = result.key;
       localStorage.setItem(KEY_SLOT, state.key);
       state.data = await window.PhoneAPI.fetch(state.key);
+      acceptSnapshot();
+      syncActivities();
       state.busy = false;
       state.view = "home";
       state.pendingCode = "";
@@ -420,6 +513,7 @@
   }
   async function refreshData() {
     state.data = await window.PhoneAPI.fetch(state.key);
+    acceptSnapshot();
   }
   function bindDynamic() {
     const audio = app.querySelector("[data-player]");
@@ -450,7 +544,16 @@
     const configSave = document.querySelector("[data-api-save]");
     if (configSave) configSave.addEventListener("click", function () {
       try {
+        const scope = activityScope(api, state.key);
         window.PhoneAPI.configure({ mode: document.querySelector("[data-api-mode]").value, base: document.querySelector("[data-api-base]").value });
+        if (scope !== activityScope(api, state.key)) {
+          localStorage.removeItem(KEY_SLOT);
+          state.key = "";
+          state.data = null;
+          state.view = "home";
+          activities = activeScope = null;
+          focus.reset();
+        }
         state.error = "連線設定已儲存。";
         render();
       } catch (error) { state.error = error.message; render(); }
@@ -489,9 +592,14 @@
     }
   }
   async function unpair() {
-    if (!window.confirm("要解除這支手機的配對嗎？其他手機不會受影響。")) return;
+    if (!window.confirm("要解除這支手機的配對嗎？這支手機的著色草稿和待送紀錄會清除。其他手機不會受影響。")) return;
     try {
-      await window.PhoneAPI.unpair(state.key);
+      if (!state.demo) await window.PhoneAPI.unpair(state.key);
+      await saveSnapshot;
+      await activities?.clear().catch(() => {});
+      activeScope = activities = null;
+      focus.reset();
+      state.demo = false;
       localStorage.removeItem(KEY_SLOT);
       state.key = "";
       state.data = null;
@@ -515,6 +623,20 @@
     }
     render();
   }
+  function backFromActivity(escape) {
+    const root = app.querySelector("[data-chen-activity]");
+    if (!root) return false;
+    if (escape && (root.puzzleEscape?.() || root.coloringEscape?.())) return true;
+    if (!escape) {
+      const playingPuzzle = root.closest("#panel").dataset.design === "puzzle-play";
+      if (root.coloringBack?.() || (playingPuzzle && root.puzzleBack?.())) return true;
+      if (root.coloringEscape?.() || root.puzzleEscape?.()) return true;
+    }
+    const activity = state.view;
+    openPage("chen");
+    app.querySelector('[data-open="' + activity + '"]').focus();
+    return true;
+  }
   function bindClicks() {
     app.addEventListener("play", function (event) {
       app.querySelectorAll("audio").forEach(function (audio) {
@@ -528,7 +650,28 @@
         if (event.target.closest("[data-modal-body]") && !target.matches("button")) return;
         state.modalPhoto = null; render(); return;
       }
-      if (target.hasAttribute("data-back")) { state.view = "home"; state.modalPhoto = null; render(); return; }
+      if (target.hasAttribute("data-demo")) {
+        sessionStorage.setItem("nyhm-phone-demo", "1");
+        state.demo = true;
+        state.key = "";
+        state.data = api.demo();
+        activitySession();
+        openPage("home");
+        return;
+      }
+      if (target.hasAttribute("data-leave-demo")) {
+        sessionStorage.removeItem("nyhm-phone-demo");
+        state.demo = false;
+        state.data = null;
+        activities = activeScope = null;
+        focus.reset();
+        openPage("home");
+        return;
+      }
+      if (target.hasAttribute("data-back")) {
+        if (!backFromActivity(false)) openPage("home");
+        return;
+      }
       if (target.dataset.open) {
         openPage(target.dataset.open); return;
       }
@@ -571,16 +714,38 @@
         target.classList.remove("visible");
       }
     });
-    app.addEventListener("keydown", function (event) {
-      if (event.key === "Escape") {
-        if (state.modalPhoto) { state.modalPhoto = null; render(); }
-        else if (state.view !== "home") { state.view = "home"; render(); }
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape" || event.defaultPrevented || document.querySelector(".phone-night[open]")) return;
+      if (backFromActivity(true) || (state.view === "ming" && focus.stop())) {
+        event.preventDefault();
+      } else if (state.modalPhoto) {
+        state.modalPhoto = null;
+        render();
+      } else if (state.view !== "home") {
+        openPage("home");
       }
     });
   }
-  function startClock() { setInterval(function () {
-    document.querySelectorAll("[data-clock]").forEach(function (clock) { clock.textContent = timeNow(); });
-  }, 15000); }
+  function startClock() {
+    checkNight();
+    let lastMinute;
+    setInterval(function () {
+      checkNight();
+      const now = Date.now();
+      focus.tick(now);
+      const minute = Math.floor(now / 60_000);
+      if (minute === lastMinute) return;
+      lastMinute = minute;
+      document.querySelectorAll("[data-clock]").forEach(clock => { clock.textContent = timeNow(); });
+      const day = focusDay(now);
+      if (day !== lastFocusDay) { lastFocusDay = day; focus.updateTotal(); }
+    }, 250);
+    setInterval(() => { if (!document.hidden) syncActivities(); }, 60000);
+    window.addEventListener("online", syncActivities);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) { checkNight(); focus.tick(); syncActivities(); }
+    });
+  }
   function registerWorker() {
     if (!("serviceWorker" in navigator)) return;
     const hadController = Boolean(navigator.serviceWorker.controller);
@@ -596,6 +761,7 @@
   }
   async function start() {
     bindClicks();
+    startClock();
     window.addEventListener("beforeinstallprompt", function (event) {
       event.preventDefault();
       state.installPrompt = event;
@@ -611,28 +777,38 @@
       render();
       await pair(queryCode);
       registerWorker();
-      startClock();
       return;
     }
     if (queryCode) state.pendingCode = queryCode;
     const key = localStorage.getItem(KEY_SLOT);
     if (key) {
+      state.key = key;
+      const session = activitySession();
       try {
-        state.key = key;
-        state.data = await window.PhoneAPI.fetch(key);
-        const shortcut = query.get("app");
-        if (shortcut && ["chen", "ming", "shi"].includes(shortcut)) {
-          state.view = shortcut;
-          saveRead(shortcut);
+        state.data = await api.fetch(key);
+        acceptSnapshot();
+      } catch (error) {
+        if (api.mode === "worker" && error.status !== 401) {
+          state.data = await session.storage.get("snapshot").catch(() => null);
+          if (!state.data) state.error = error.message;
+        } else {
+          localStorage.removeItem(KEY_SLOT);
+          state.key = "";
+          activities = activeScope = null;
         }
-      } catch (_) {
-        localStorage.removeItem(KEY_SLOT);
-        state.key = "";
-        state.data = null;
       }
+      const shortcut = query.get("app");
+      if (state.data && ["chen", "ming", "shi"].includes(shortcut)) {
+        state.view = shortcut;
+        saveRead(shortcut);
+      }
+    } else if (api.mode === "mock" && sessionStorage.getItem("nyhm-phone-demo") === "1") {
+      state.demo = true;
+      state.data = api.demo();
+      activitySession();
     }
     render();
-    startClock();
+    syncActivities();
     registerWorker();
   }
   start();
